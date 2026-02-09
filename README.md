@@ -1,73 +1,105 @@
-# React + TypeScript + Vite
+# Roster 📋
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Roster** is the atomic UI component library powering the **MegaSquad** ecosystem.
 
-Currently, two official plugins are available:
+It is built with **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Vite**, offering a set of high-quality, accessible, and theme-aware components.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+- **Atomic Design:** Components organized by atoms, molecules, and organisms.
+- **TypeScript First:** Fully typed for excellent developer experience (DX).
+- **Themable:** Built on Tailwind CSS v4 with semantic color tokens.
+- **Headless UI:** Accessible interactive components powered by `@headlessui/react`.
+- **Tree-Shakeable:** Import only what you need.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📦 Installation
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install roster
+# or
+yarn add roster
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Peer Dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Roster relies on a few peer dependencies that must be installed in your host application:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```json
+"peerDependencies": {
+  "react": "^19.0.0",
+  "react-dom": "^19.0.0"
+}
 ```
+
+## 💻 Usage
+
+### 1. Import Styles
+
+You **must** import the CSS file at the root of your application (e.g., in `main.tsx` or `App.tsx`) to load the Tailwind styles and theme variables.
+
+```tsx
+import "roster/style.css";
+```
+
+### 2. Import Components
+
+Now you can use the components anywhere in your app.
+
+```tsx
+import { Button, Spinner } from "roster";
+
+function App() {
+  return (
+    <div className="p-4 flex flex-col gap-4">
+      {/* Primary Button */}
+      <Button colorScheme="primary" onClick={() => alert("Clicked!")}>
+        Save Changes
+      </Button>
+
+      {/* Destructive Variant */}
+      <Button colorScheme="destructive" variant="outline">
+        Delete Account
+      </Button>
+
+      {/* Loading State */}
+      <Button isLoading>Processing...</Button>
+
+      {/* Standalone Spinner */}
+      <Spinner size="lg" className="text-accent-500" />
+    </div>
+  );
+}
+```
+
+## 🎨 Development
+
+We use **Storybook** to develop and document components in isolation.
+
+```bash
+# Install dependencies
+npm install
+
+# Start Storybook
+npm run storybook
+```
+
+This will open the component playground at http://localhost:6006.
+
+## 🛠️ Building
+
+To build the library for production (outputs to `dist/`):
+
+```bash
+npm run build
+```
+
+This generates:
+
+- `dist/roster.es.js` (ES Modules)
+- `dist/roster.umd.js` (Universal Module Definition)
+- `dist/style.css` (Compiled Tailwind styles)
+- `dist/index.d.ts` (Type definitions)
+
+## 📄 License
+
+MIT © Blake Ball

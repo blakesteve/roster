@@ -35,9 +35,6 @@ const meta = {
     disabled: {
       control: "boolean",
     },
-    asChild: {
-      table: { disable: true },
-    },
   },
   // Use `fn` to log clicks to the Actions panel
   args: { onClick: fn() },
