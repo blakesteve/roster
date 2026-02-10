@@ -12,7 +12,8 @@
     ".": {
       "import": "./dist/roster.es.js",
       "require": "./dist/roster.umd.js"
-    }
+    },
+    "./style.css": "./dist/roster.css"
   },
   "scripts": {
     "dev": "vite",
@@ -30,13 +31,12 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^5.0.0",
+    "@chromatic-com/storybook": "^5.0.1",
     "@eslint/js": "^9.39.1",
-    "@storybook/addon-a11y": "^10.2.7",
-    "@storybook/addon-docs": "^10.2.7",
-    "@storybook/addon-vitest": "^10.2.7",
-    "@storybook/react-vite": "^10.2.7",
-    "@storybook/test": "^8.6.15",
+    "@storybook/addon-a11y": "^10.2.8",
+    "@storybook/addon-docs": "^10.2.8",
+    "@storybook/addon-vitest": "^10.2.8",
+    "@storybook/react-vite": "^10.2.8",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/vite": "^4.1.18",
     "@testing-library/dom": "^10.4.1",
@@ -49,18 +49,19 @@
     "@vitejs/plugin-react": "^5.1.1",
     "@vitest/browser-playwright": "^4.0.18",
     "@vitest/coverage-v8": "^4.0.18",
+    "ajv": "^8.17.1",
     "autoprefixer": "^10.4.24",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
-    "eslint-plugin-storybook": "^10.2.7",
+    "eslint-plugin-storybook": "^10.2.8",
     "globals": "^16.5.0",
     "jsdom": "^28.0.0",
     "playwright": "^1.58.2",
     "postcss": "^8.5.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "storybook": "^10.2.7",
+    "storybook": "^10.2.8",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
