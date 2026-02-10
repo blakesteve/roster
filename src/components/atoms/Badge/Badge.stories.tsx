@@ -29,10 +29,10 @@ const meta: Meta<typeof Badge> = {
       control: "select",
       options: [
         "primary",
-        "accent",
-        "accent2",
-        "accent3",
-        "accent4",
+        "orange",
+        "teal",
+        "purple",
+        "amber",
         "success",
         "error",
         "neutral",
@@ -101,7 +101,7 @@ export const ErrorOutline: Story = {
 export const UserBadge: Story = {
   args: {
     children: "Admin",
-    variant: "accent",
+    variant: "orange",
     fill: "soft",
     leftIcon: "User",
   },

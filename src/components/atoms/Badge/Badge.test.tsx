@@ -17,7 +17,7 @@ describe("Badge Component", () => {
     );
     const badge = getByText("Critical");
 
-    expect(badge).toHaveClass("bg-error-600");
+    expect(badge).toHaveClass("bg-error-500");
     expect(badge).toHaveClass("text-white");
   });
 
@@ -30,7 +30,7 @@ describe("Badge Component", () => {
     const badge = getByText("Ghost");
 
     expect(badge).toHaveClass("bg-transparent");
-    expect(badge).toHaveClass("border-slate-200");
+    expect(badge).toHaveClass("border-gray-200");
   });
 
   it("renders icons when provided", () => {
@@ -40,12 +40,11 @@ describe("Badge Component", () => {
     expect(getByTestId("icon")).toBeInTheDocument();
   });
 
-  it("renders as a status badge (circle shape)", () => {
+  it("renders as a status badge (pill shape)", () => {
     const { getByText } = render(<Badge statusBadge>99</Badge>);
     const badge = getByText("99");
 
     expect(badge).toHaveClass("rounded-full");
-    expect(badge).toHaveClass("aspect-square");
-    expect(badge).toHaveClass("p-0");
+    expect(badge).toHaveClass("justify-center");
   });
 });
