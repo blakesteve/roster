@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "@storybook/test"; // Used to log actions in the UI
+import { vi } from "vitest";
 import { Button } from "./Button";
 
 const meta = {
@@ -37,7 +37,7 @@ const meta = {
     },
   },
   // Use `fn` to log clicks to the Actions panel
-  args: { onClick: fn() },
+  args: { onClick: vi.fn() },
 } satisfies Meta<typeof Button>;
 
 export default meta;

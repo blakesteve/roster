@@ -1,0 +1,109 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Introduction" />
+
+# Roster 📋
+
+**Roster** is the atomic UI component library powering the **MegaSquad** ecosystem.
+
+It is built with **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Vite**, offering a set of high-quality, accessible, and theme-aware components.
+
+## 🚀 Features
+
+- **Atomic Design:** Components organized by atoms, molecules, and organisms.
+- **TypeScript First:** Fully typed for excellent developer experience (DX).
+- **Themable:** Built on Tailwind CSS v4 with semantic color tokens.
+- **Headless UI:** Accessible interactive components powered by `@headlessui/react`.
+- **Tree-Shakeable:** Import only what you need.
+
+## 📦 Installation
+
+```bash
+npm install roster
+# or
+yarn add roster
+```
+
+### Peer Dependencies
+
+Roster relies on a few peer dependencies that must be installed in your host application:
+
+```json
+"peerDependencies": {
+  "react": "^19.0.0",
+  "react-dom": "^19.0.0"
+}
+```
+
+## 💻 Usage
+
+### 1. Import Styles
+
+You **must** import the CSS file at the root of your application (e.g., in `main.tsx` or `App.tsx`) to load the Tailwind styles and theme variables.
+
+```tsx
+import "roster/style.css";
+```
+
+### 2. Import Components
+
+Now you can use the components anywhere in your app.
+
+```tsx
+import { Button, Spinner } from "roster";
+
+function App() {
+  return (
+    <div className="p-4 flex flex-col gap-4">
+      {/* Primary Button */}
+      <Button colorScheme="primary" onClick={() => alert("Clicked!")}>
+        Save Changes
+      </Button>
+
+      {/* Destructive Variant */}
+      <Button colorScheme="destructive" variant="outline">
+        Delete Account
+      </Button>
+
+      {/* Loading State */}
+      <Button isLoading>Processing...</Button>
+
+      {/* Standalone Spinner */}
+      <Spinner size="lg" className="text-accent-500" />
+    </div>
+  );
+}
+```
+
+## 🎨 Development
+
+We use **Storybook** to develop and document components in isolation.
+
+```bash
+# Install dependencies
+npm install
+
+# Start Storybook
+npm run storybook
+```
+
+This will open the component playground at http://localhost:6006.
+
+## 🛠️ Building
+
+To build the library for production (outputs to `dist/`):
+
+```bash
+npm run build
+```
+
+This generates:
+
+- `dist/roster.es.js` (ES Modules)
+- `dist/roster.umd.js` (Universal Module Definition)
+- `dist/style.css` (Compiled Tailwind styles)
+- `dist/index.d.ts` (Type definitions)
+
+## 📄 License
+
+MIT © Blake Ball
