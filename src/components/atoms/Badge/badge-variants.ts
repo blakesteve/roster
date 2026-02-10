@@ -4,20 +4,18 @@ export const badgeVariants = cva(
   "inline-flex items-center justify-center font-medium transition-colors focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 border",
   {
     variants: {
-      // 1. COLORS only (The "What")
       variant: {
         primary: "border-primary-200 text-primary-700",
         accent: "border-accent-200 text-accent-700",
         accent2: "border-accent2-200 text-accent2-700",
         success: "border-success-200 text-success-700",
         error: "border-error-200 text-error-700",
-        neutral: "border-slate-200 text-slate-700", // Renamed 'outline' to 'neutral'
+        neutral: "border-slate-200 text-slate-700",
       },
-      // 2. STYLES (The "How")
       fill: {
-        soft: "bg-opacity-100", // Uses the colors defined above
-        solid: "border-transparent text-white", // Overrides text color for contrast
-        outline: "bg-transparent", // Removes background
+        soft: "bg-opacity-100",
+        solid: "border-transparent text-white",
+        outline: "bg-transparent",
       },
       statusBadge: {
         true: "rounded-full aspect-square p-0 flex items-center justify-center",
@@ -31,7 +29,7 @@ export const badgeVariants = cva(
     },
     compoundVariants: [
       // --- SOFT (Default) ---
-      // Adds the subtle background color
+      // subtle background color
       { fill: "soft", variant: "primary", className: "bg-primary-50" },
       { fill: "soft", variant: "accent", className: "bg-accent-50" },
       { fill: "soft", variant: "accent2", className: "bg-accent2-50" },
@@ -48,10 +46,6 @@ export const badgeVariants = cva(
       { fill: "solid", variant: "error", className: "bg-error-600 hover:bg-error-700" },
       { fill: "solid", variant: "neutral", className: "bg-slate-600 hover:bg-slate-700 text-white" },
 
-      // --- OUTLINE ---
-      // Background is already transparent (from fill definition), 
-      // just ensuring borders are visible (from variant definition).
-      // No extra overrides needed here unless you want thicker borders.
 
       // --- STATUS PILL SIZES ---
       { statusBadge: true, size: "xs", className: "w-5 h-5" },
@@ -60,7 +54,7 @@ export const badgeVariants = cva(
     ],
     defaultVariants: {
       variant: "primary",
-      fill: "soft", // New default
+      fill: "soft",
       size: "sm",
       statusBadge: false,
     },
