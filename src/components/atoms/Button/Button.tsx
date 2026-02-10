@@ -2,7 +2,7 @@ import React from "react";
 import { type VariantProps } from "class-variance-authority";
 import { Button as HeadlessButton } from "@headlessui/react";
 import { cn } from "../../../lib/utils";
-import { Spinner } from "../Spinner/Spinner";
+import { Spinner } from "../Spinner/Spinner"; // Adjust path if needed
 
 import { buttonVariants } from "./button-variants";
 
@@ -21,18 +21,21 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant,
       size,
       isLoading = false,
+      disabled,
       children,
       ...props
     },
     ref,
   ) => {
+    const isDisabled = disabled || isLoading;
+
     return (
       <HeadlessButton
         className={cn(
           buttonVariants({ colorScheme, variant, size, className }),
         )}
         ref={ref}
-        disabled={isLoading}
+        disabled={isDisabled}
         {...props}
       >
         {isLoading ? <Spinner size="sm" className="text-current" /> : children}

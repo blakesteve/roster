@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
@@ -8,56 +8,62 @@ import "@testing-library/jest-dom";
 
 describe("Button Component", () => {
   it("renders children correctly", () => {
-    // We get 'getByRole' directly from the render result
-    const { getByRole } = render(<Button>Click Me</Button>);
-
-    expect(getByRole("button", { name: /click me/i })).toBeInTheDocument();
+    render(<Button>Click Me</Button>);
+    expect(
+      screen.getByRole("button", { name: /click me/i }),
+    ).toBeInTheDocument();
   });
 
   it("handles onClick events", async () => {
     const handleClick = vi.fn();
     const user = userEvent.setup();
 
-    const { getByRole } = render(
-      <Button onClick={handleClick}>Click Me</Button>,
-    );
+    render(<Button onClick={handleClick}>Click Me</Button>);
 
-    const button = getByRole("button", { name: /click me/i });
+    const button = screen.getByRole("button", { name: /click me/i });
     await user.click(button);
 
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it("shows spinner and disables button when isLoading is true", () => {
-    const { getByRole, queryByText } = render(
-      <Button isLoading>Submit</Button>,
+  it("shows spinner and disables button when isLoading is true", async () => {
+    const handleClick = vi.fn();
+
+    render(
+      <Button isLoading onClick={handleClick}>
+        Submit
+      </Button>,
     );
 
-    const button = getByRole("button");
+    const button = screen.getByRole("button");
 
     expect(button).toBeDisabled();
+    expect(screen.queryByText(/submit/i)).not.toBeInTheDocument();
 
-    // queryByText returns null if not found (instead of throwing error)
-    expect(queryByText(/submit/i)).not.toBeInTheDocument();
+    fireEvent.click(button);
 
-    expect(button).not.toBeEmptyDOMElement();
+    expect(handleClick).not.toHaveBeenCalled();
   });
 
   it("respects the disabled prop", () => {
-    const { getByRole } = render(<Button disabled>Can't Click</Button>);
-
-    const button = getByRole("button", { name: /can't click/i });
+    render(<Button disabled>Can't Click</Button>);
+    const button = screen.getByRole("button", { name: /can't click/i });
     expect(button).toBeDisabled();
   });
 
-  it("applies variant classes correctly", () => {
-    const { getByRole } = render(
-      <Button variant="outline">Outline Button</Button>,
+  it("applies variant and color scheme classes correctly", () => {
+    render(
+      <Button variant="outline" colorScheme="error">
+        Error Button
+      </Button>,
     );
 
-    const button = getByRole("button");
+    const button = screen.getByRole("button", { name: /error button/i });
+
     expect(button).toHaveClass("border");
     expect(button).toHaveClass("bg-transparent");
+    expect(button).toHaveClass("border-error-500");
+    expect(button).toHaveClass("text-error-600");
   });
 
   it("forwards refs to the HTML element", () => {
