@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { vi } from "vitest";
 import { Button } from "./Button";
 
 const meta = {
@@ -36,8 +35,7 @@ const meta = {
       control: "boolean",
     },
   },
-  // Use `fn` to log clicks to the Actions panel
-  args: { onClick: vi.fn() },
+  args: { onClick: () => console.log("Button Clicked!") },
 } satisfies Meta<typeof Button>;
 
 export default meta;
