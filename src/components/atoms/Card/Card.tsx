@@ -41,7 +41,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           <div
             className={cn(
               "absolute top-0 left-0 right-0 h-1 z-10",
-              !brandColorTop && "bg-orange-500", // Default Theme Color
+              !brandColorTop && "bg-orange-500",
             )}
             style={
               brandColorTop ? { backgroundColor: brandColorTop } : undefined
@@ -57,7 +57,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           <div
             className={cn(
               "absolute bottom-0 left-0 right-0 h-1 z-10",
-              !brandColorBottom && "bg-primary-500", // Default Theme Color
+              !brandColorBottom && "bg-primary-500",
             )}
             style={
               brandColorBottom
