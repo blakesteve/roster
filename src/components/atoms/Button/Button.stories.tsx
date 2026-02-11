@@ -6,6 +6,12 @@ const meta = {
   component: Button,
   parameters: {
     layout: "centered",
+    docs: {
+      description: {
+        component:
+          "The **Button** is the primary interactive element for triggering actions. It supports multiple **visual hierarchies** (Solid, Outline, Ghost, Link) and a comprehensive **semantic color palette**. It also features built-in support for **loading states** (swapping text for a spinner) and **disabled states** to prevent user interaction during processing.",
+      },
+    },
   },
   tags: ["autodocs"],
   argTypes: {
@@ -21,25 +27,34 @@ const meta = {
         "error",
         "neutral",
       ],
-      description: "The semantic color palette",
+      description: "The semantic color theme of the button.",
       table: { defaultValue: { summary: "primary" } },
     },
     variant: {
       control: "select",
       options: ["solid", "outline", "ghost", "link"],
-      description: "The visual style",
+      description: "The visual style determining the button's prominence.",
       table: { defaultValue: { summary: "solid" } },
     },
     size: {
       control: "inline-radio",
       options: ["sm", "default", "lg"],
+      description: "The dimension of the button.",
       table: { defaultValue: { summary: "default" } },
     },
     isLoading: {
       control: "boolean",
+      description:
+        "Replaces the button text with a spinner and prevents interaction.",
+      table: { defaultValue: { summary: "false" } },
     },
     disabled: {
       control: "boolean",
+      description: "Dims the button and prevents all user interaction.",
+      table: { defaultValue: { summary: "false" } },
+    },
+    onClick: {
+      description: "Callback function fired when the button is clicked.",
     },
   },
   args: {
@@ -75,5 +90,20 @@ export const OutlinePrimary: Story = {
     variant: "outline",
     colorScheme: "primary",
     children: "Cancel",
+  },
+};
+
+export const Ghost: Story = {
+  args: {
+    variant: "ghost",
+    colorScheme: "neutral",
+    children: "Back",
+  },
+};
+
+export const Loading: Story = {
+  args: {
+    isLoading: true,
+    children: "Click me",
   },
 };

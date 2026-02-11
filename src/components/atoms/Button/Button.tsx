@@ -2,7 +2,7 @@ import React from "react";
 import { type VariantProps } from "class-variance-authority";
 import { Button as HeadlessButton } from "@headlessui/react";
 import { cn } from "../../../lib/utils";
-import { Spinner } from "../Spinner/Spinner"; // Adjust path if needed
+import { Spinner } from "../Spinner/Spinner";
 
 import { buttonVariants } from "./button-variants";
 
