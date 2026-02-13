@@ -26,7 +26,6 @@ const Accordion = ({
   showDividers = false,
   defaultOpenIds = [],
 }: AccordionProps) => {
-  // We track open items by their ID
   const [openItems, setOpenItems] = useState<Set<string | number>>(
     new Set(defaultOpenIds),
   );
