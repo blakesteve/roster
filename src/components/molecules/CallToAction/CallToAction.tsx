@@ -12,11 +12,8 @@ export interface CallToActionProps
     VariantProps<typeof ctaVariants> {
   title: string;
   description?: string;
-  /** The primary button/link to display */
   action?: React.ReactNode;
-  /** Optional icon to display on the left */
   icon?: React.ReactNode;
-  /** If provided, renders an X button in the corner */
   onDismiss?: () => void;
 }
 
@@ -32,7 +29,6 @@ const CallToAction = ({
 }: CallToActionProps) => {
   return (
     <div className={cn(ctaVariants({ variant }), className)} {...props}>
-      {/* Content Section */}
       <div className="flex items-start gap-4">
         {icon && <div className="mt-1 shrink-0 opacity-80">{icon}</div>}
         <div className="flex flex-col gap-1.5">
@@ -47,10 +43,8 @@ const CallToAction = ({
         </div>
       </div>
 
-      {/* Action Section (Pushed to right on desktop) */}
       {action && <div className="shrink-0 pt-2 md:pt-0">{action}</div>}
 
-      {/* Dismiss Button (Absolute positioned) */}
       {onDismiss && (
         <div className="absolute right-2 top-2">
           <Button

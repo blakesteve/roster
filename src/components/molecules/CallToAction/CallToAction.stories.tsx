@@ -24,7 +24,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof CallToAction>;
 
-// 1. Primary: The "Call to Arms" for the week
 export const PicksOpen: Story = {
   args: {
     title: "Week 1 Picks are LIVE!",
@@ -40,7 +39,6 @@ export const PicksOpen: Story = {
   },
 };
 
-// 2. Persistent Logic Pattern
 const PersistentBannerDemo = () => {
   const [isVisible, setIsVisible] = useState(false);
   const CTA_ID = "banner-intro-v2";
@@ -107,7 +105,6 @@ export const WithPersistenceLogic: Story = {
   },
 };
 
-// 3. System Alert (Warning)
 export const LockWarning: Story = {
   args: {
     title: "Picks Locking Soon",
@@ -126,7 +123,6 @@ export const LockWarning: Story = {
   },
 };
 
-// 4. Simple Error (No Icon, No Action)
 export const ScoreSyncError: Story = {
   args: {
     title: "Live Scoring Delayed",
