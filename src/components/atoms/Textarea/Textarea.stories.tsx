@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Textarea } from "./Textarea";
-import { Button } from "../Button/Button"; // Assuming we have this from earlier
+import { Button } from "../Button/Button";
 
 const meta = {
   title: "Atoms/Textarea",
