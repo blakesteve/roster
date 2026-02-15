@@ -2,9 +2,10 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Link } from "./Link";
 
-// --- Mock Component ---
-// This simulates 'react-router-dom' behavior for the stories.
-// In your real app, you would import { Link as RouterLink } from 'react-router-dom'.
+// --- Mock Components for Storybook ---
+// These simulate the behavior of real frameworks so we can render them here.
+// In a real app, you would import these from 'react-router' or 'next/link'.
+
 const MockRouterLink = ({
   to,
   children,
@@ -20,7 +21,30 @@ const MockRouterLink = ({
     className={className}
     onClick={(e) => {
       e.preventDefault();
-      alert(`Navigating internally to: ${to}`);
+      alert(`[React Router] Navigating internally to: ${to}`);
+    }}
+    {...props}
+  >
+    {children}
+  </a>
+);
+
+const MockNextLink = ({
+  href,
+  children,
+  className,
+  ...props
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <a
+    href={href}
+    className={className}
+    onClick={(e) => {
+      e.preventDefault();
+      alert(`[Next.js] Prefetching route: ${href}...`);
     }}
     {...props}
   >
@@ -35,8 +59,13 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component:
-          "A polymorphic **Link** component. By default, it renders a standard HTML `<a>` tag. \n\n**Polymorphism:** To use it with client-side routing (like `react-router-dom` or `next/link`), pass your router's Link component to the `as` prop. The component will inherit the styling of the Roster system while using the logic of your router.",
+        component: `
+### The Polymorphic Link
+
+The \`<Link>\` component is **framework agnostic**. It defaults to a standard HTML \`<a>\` tag, but can morph into any routing component (React Router, Next.js, TanStack, etc.) using the \`as\` prop.
+
+It preserves Roster's accessibility and styling (focus rings, hover states) while delegating navigation logic to your framework.
+`,
       },
     },
   },
@@ -44,32 +73,34 @@ const meta = {
     variant: {
       control: "select",
       options: ["primary", "neutral", "danger", "white"],
-      description: "Visual style of the link.",
+      description: "The visual style of the link.",
       table: { defaultValue: { summary: "primary" } },
     },
     underline: {
       control: "select",
       options: ["always", "hover", "none"],
-      description: "Underline behavior.",
+      description: "Controls when the underline appears.",
       table: { defaultValue: { summary: "hover" } },
     },
     size: {
       control: "inline-radio",
       options: ["sm", "md", "lg"],
-      description: "Text size.",
+      description: "The size of the text.",
       table: { defaultValue: { summary: "md" } },
     },
     external: {
       control: "boolean",
-      description: "Forces `target='_blank'` and `rel='noopener'`.",
+      description: "Forces `target='_blank'` behavior even for relative paths.",
     },
     showExternalIcon: {
       control: "boolean",
-      description: "Appends a small external link icon.",
+      description:
+        "Controls the external link icon. Defaults to `true` if the link is external, `false` otherwise.",
     },
     as: {
-      description: "The component to render as (e.g., `RouterLink`).",
-      control: false, // Disable control because passing components via UI is buggy
+      control: false,
+      description:
+        "The component to render as (e.g., \`RouterLink\`, \`NextLink\`).",
     },
   },
 } satisfies Meta<typeof Link>;
@@ -77,73 +108,119 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof Link>;
 
-// 1. Default (Standard Anchor)
-export const Default: Story = {
+// --- 1. React Router Integration ---
+export const WithReactRouter: Story = {
   args: {
-    href: "#",
-    children: "Standard Link",
-  },
-};
-
-// 2. React Router Integration (Polymorphic)
-export const AsRouterLink: Story = {
-  args: {
-    as: MockRouterLink, // 👈 The Magic
-    to: "/dashboard/settings", // Prop passed to MockRouterLink
-    children: "Go to Settings (Client-Side)",
+    as: MockRouterLink,
+    to: "/app/dashboard", // This prop is passed through to the Router Link
+    children: "Go to Dashboard",
   },
   parameters: {
     docs: {
       description: {
         story:
-          "This story uses the `as` prop to render a `MockRouterLink`. Notice how it accepts the `to` prop instead of `href`.",
+          "To use with **React Router**, import their `Link` and pass it to the `as` prop. You can then use the `to` prop as usual.",
+      },
+      source: {
+        language: "tsx",
+        code: `
+import { Link } from "@roster/ui";
+import { Link as RouterLink } from "react-router";
+
+export const NavBar = () => (
+  <nav>
+    <Link as={RouterLink} to="/dashboard">
+      Dashboard
+    </Link>
+  </nav>
+);
+        `,
       },
     },
   },
 };
 
-// 3. External Link (Auto-Detection)
+// --- 2. Next.js Integration ---
+export const WithNextJS: Story = {
+  args: {
+    as: MockNextLink,
+    href: "/blog/latest", // Next.js uses 'href', so we pass that
+    children: "Read Latest Post",
+    variant: "neutral",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "For **Next.js (App Router)**, simply pass `next/link` to the `as` prop. Since Next.js uses `href` just like a standard anchor, the API feels native.",
+      },
+      source: {
+        language: "tsx",
+        code: `
+import { Link } from "@roster/ui";
+import NextLink from "next/link";
+
+export const Footer = () => (
+  <footer>
+    <Link as={NextLink} href="/privacy" variant="neutral">
+      Privacy Policy
+    </Link>
+  </footer>
+);
+        `,
+      },
+    },
+  },
+};
+
+// --- 3. External Links ---
 export const External: Story = {
   args: {
-    href: "https://google.com",
-    children: "Visit Google",
-    showExternalIcon: true,
+    href: "https://github.com",
+    children: "View Source on GitHub",
+    // Note: showExternalIcon is NOT needed here; it is automatic for https://
   },
   parameters: {
     docs: {
       description: {
         story:
-          "Links starting with `http` are automatically treated as external (opens in new tab) unless specified otherwise.",
+          "Links starting with `http` are automatically treated as external. They get `target='_blank'`, `rel='noopener'`, and **automatically display the external icon**.",
       },
     },
   },
 };
 
-// 4. Danger Variant
-export const Danger: Story = {
+// --- 4. External (Clean) ---
+export const ExternalClean: Story = {
   args: {
-    variant: "danger",
-    children: "Delete Account",
-    href: "#delete",
+    href: "https://google.com",
+    children: "External (Icon Suppressed)",
+    showExternalIcon: false,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "You can suppress the automatic icon by explicitly setting `showExternalIcon={false}`.",
+      },
+    },
   },
 };
 
-// 5. Inline Composition (The "Auth Footer" Pattern)
-export const InlineComposition: Story = {
+// --- 5. Composition Example ---
+export const InlineParagraph: Story = {
   render: () => (
-    <div className="p-6 bg-gray-50 rounded-lg border border-gray-200 text-center">
-      <p className="text-sm text-gray-600">
-        Don't have an account yet?{" "}
-        <Link
-          as={MockRouterLink}
-          to="/register"
-          variant="primary"
-          underline="always"
-        >
-          Sign up now
-        </Link>
-      </p>
-    </div>
+    <p className="text-gray-600 max-w-md leading-relaxed border p-4 rounded bg-gray-50">
+      By clicking "Agree", you accept our{" "}
+      <Link href="/terms" size="md" underline="always">
+        Terms of Service
+      </Link>{" "}
+      and acknowledge that you have read our{" "}
+      <Link href="/privacy" size="md" underline="always">
+        Privacy Policy
+      </Link>
+      .
+    </p>
   ),
   parameters: {
     docs: {
@@ -155,19 +232,11 @@ export const InlineComposition: Story = {
   },
 };
 
-// 6. Sizes Comparison
-export const Sizes: Story = {
-  render: () => (
-    <div className="flex flex-col gap-4 items-start">
-      <Link href="#" size="sm">
-        Small Link (Legal text)
-      </Link>
-      <Link href="#" size="md">
-        Medium Link (Default)
-      </Link>
-      <Link href="#" size="lg">
-        Large Link (Headlines)
-      </Link>
-    </div>
-  ),
+// --- 6. Danger Variant ---
+export const Danger: Story = {
+  args: {
+    variant: "danger",
+    children: "Delete Account",
+    href: "#delete",
+  },
 };

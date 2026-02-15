@@ -33,6 +33,10 @@ export const Link = <C extends React.ElementType = "a">({
   const isExternal =
     external || (typeof href === "string" && href.startsWith("http"));
 
+  // If showExternalIcon is explicitly defined (true/false), use it.
+  // Otherwise, default to showing it only if the link is external.
+  const shouldShowIcon = showExternalIcon ?? isExternal;
+
   const commonClasses = cn(
     linkVariants({ variant, underline, size }),
     className,
@@ -48,10 +52,11 @@ export const Link = <C extends React.ElementType = "a">({
         {...props}
       >
         {children}
-        {showExternalIcon && (
+        {shouldShowIcon && (
           <FontAwesomeIcon
             icon={faExternalLinkAlt}
-            className="ml-1 h-3 w-3 opacity-70"
+            className="ml-0.5 h-3 w-3"
+            data-testid="external-icon"
           />
         )}
       </a>
@@ -61,6 +66,14 @@ export const Link = <C extends React.ElementType = "a">({
   return (
     <Component className={commonClasses} {...props}>
       {children}
+      {/* We allow showing the icon even on internal links if explicitly requested */}
+      {shouldShowIcon && (
+        <FontAwesomeIcon
+          icon={faExternalLinkAlt}
+          className="ml-1 h-3 w-3 opacity-70"
+          data-testid="external-icon"
+        />
+      )}
     </Component>
   );
 };
