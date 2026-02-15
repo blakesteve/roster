@@ -41,14 +41,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <Field className={cn("w-full space-y-1.5", className)}>
-        {/* LABEL */}
         {label && (
           <Label className="block text-sm font-medium leading-none text-gray-900 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             {label}
           </Label>
         )}
 
-        {/* INPUT WRAPPER (For positioning icons) */}
         <div className="relative">
           {startIcon && (
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
