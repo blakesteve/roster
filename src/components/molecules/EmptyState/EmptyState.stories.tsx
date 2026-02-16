@@ -14,10 +14,46 @@ const meta = {
   title: "Molecules/EmptyState",
   component: EmptyState,
   tags: ["autodocs"],
+  parameters: {
+    docs: {
+      description: {
+        component: `
+### The "Zero Data" Placeholder
+
+The **EmptyState** component is used to fill the void when a list, table, or container has no content to display.
+
+**UX Best Practices:**
+* **Explain Why:** Briefly state why there is no content (e.g., "No search results found").
+* **Offer a Way Out:** Always provide a clear call-to-action (CTA) to help the user populate the empty space (e.g., "Create League" or "Clear Filters").
+* **Use Visuals:** An icon helps users quickly recognize the context before reading the text.
+
+**Variants:**
+* **Dashed (Default):** High visibility. Use this for main content areas (e.g., an empty dashboard).
+* **Simple:** Minimalist. Use this for smaller widgets, dropdowns, or narrow sidebars where a border would add too much noise.
+`,
+      },
+    },
+  },
   argTypes: {
     variant: {
       control: "select",
       options: ["dashed", "simple"],
+      description: "The visual style of the container.",
+      table: { defaultValue: { summary: "dashed" } },
+    },
+    title: {
+      description: "The primary headline text.",
+    },
+    description: {
+      description: "Secondary text explaining the empty state.",
+    },
+    icon: {
+      control: false,
+      description: "An optional icon element displayed at the top.",
+    },
+    action: {
+      control: false,
+      description: "The primary call-to-action (Button, Link, etc.).",
     },
   },
 } satisfies Meta<typeof EmptyState>;
@@ -42,6 +78,14 @@ export const NoLeagues: Story = {
       </div>
     ),
   },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The **Standard** use case. A dashed border indicates that content *should* be here, encouraging the user to fill it.",
+      },
+    },
+  },
 };
 
 // 2. Search Context: No Results
@@ -57,6 +101,14 @@ export const NoSearchResults: Story = {
         Clear Filters
       </Link>
     ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Use the **Simple** variant for transient states like search results. It avoids visual clutter inside dropdowns or lists.",
+      },
+    },
   },
 };
 
@@ -78,6 +130,14 @@ export const NoPicks: Story = {
       </Button>
     ),
   },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "An example of using the **Soft** button variant for a secondary action that guides the user to a different page.",
+      },
+    },
+  },
 };
 
 // 4. Minimal (Just Text)
@@ -86,5 +146,13 @@ export const Minimal: Story = {
     title: "No History",
     description: "Past game results will appear here.",
     variant: "simple",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Sometimes you don't need an action or an icon. Just text is enough for passive empty states.",
+      },
+    },
   },
 };
