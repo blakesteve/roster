@@ -6,9 +6,10 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        solid: "border border-transparent", 
-        outline: "border bg-transparent",   
-        ghost: "border border-transparent bg-transparent", 
+        solid: "border border-transparent shadow-sm",
+        soft: "border-transparent shadow-none",
+        outline: "border bg-transparent shadow-sm",
+        ghost: "border border-transparent bg-transparent",
         link: "bg-transparent underline-offset-4 hover:underline",
       },
       colorScheme: {
@@ -35,18 +36,29 @@ export const buttonVariants = cva(
       { variant: "solid", colorScheme: "orange",  className: "bg-orange-500 text-white hover:bg-orange-600" },
       { variant: "solid", colorScheme: "teal",    className: "bg-teal-500 text-white hover:bg-teal-600" },
       { variant: "solid", colorScheme: "purple",  className: "bg-purple-500 text-white hover:bg-purple-600" },
-      { variant: "solid", colorScheme: "amber",   className: "bg-amber-400 text-black hover:bg-amber-500" }, // Amber-400 is brighter/better for black text
+      { variant: "solid", colorScheme: "amber",   className: "bg-amber-400 text-black hover:bg-amber-500" },
       { variant: "solid", colorScheme: "success", className: "bg-success-600 text-white hover:bg-success-700" },
       { variant: "solid", colorScheme: "error",   className: "bg-error-600 text-white hover:bg-error-700" },
       { variant: "solid", colorScheme: "neutral", className: "bg-gray-600 text-white hover:bg-gray-700" },
+
+      // --- SOFT VARIANTS (Light Background + Dark Text) ---
+      // Perfect for secondary actions that need more weight than ghost but less than solid
+      { variant: "soft", colorScheme: "primary", className: "bg-primary-100 text-primary-700 hover:bg-primary-200" },
+      { variant: "soft", colorScheme: "orange",  className: "bg-orange-100 text-orange-700 hover:bg-orange-200" },
+      { variant: "soft", colorScheme: "teal",    className: "bg-teal-100 text-teal-700 hover:bg-teal-200" },
+      { variant: "soft", colorScheme: "purple",  className: "bg-purple-100 text-purple-700 hover:bg-purple-200" },
+      { variant: "soft", colorScheme: "amber",   className: "bg-amber-100 text-amber-800 hover:bg-amber-200" },
+      { variant: "soft", colorScheme: "success", className: "bg-success-100 text-success-800 hover:bg-success-200" },
+      { variant: "soft", colorScheme: "error",   className: "bg-error-100 text-error-800 hover:bg-error-200" },
+      { variant: "soft", colorScheme: "neutral", className: "bg-gray-100 text-gray-800 hover:bg-gray-200" },
 
       // --- OUTLINE VARIANTS (Borders + Colored Text) ---
       { variant: "outline", colorScheme: "primary", className: "border-primary-500 text-primary-500 hover:bg-primary-50" },
       { variant: "outline", colorScheme: "orange",  className: "border-orange-500 text-orange-500 hover:bg-orange-50" },
       { variant: "outline", colorScheme: "teal",    className: "border-teal-500 text-teal-500 hover:bg-teal-50" },
       { variant: "outline", colorScheme: "purple",  className: "border-purple-500 text-purple-500 hover:bg-purple-50" },
-      { variant: "outline", colorScheme: "amber",   className: "border-amber-500 text-amber-600 hover:bg-amber-50" }, // Amber text needs to be slightly darker (600) to read on white
-      { variant: "outline", colorScheme: "success", className: "border-success-500 text-success-600 hover:bg-success-50" }, // Green text also benefits from being slightly darker
+      { variant: "outline", colorScheme: "amber",   className: "border-amber-500 text-amber-600 hover:bg-amber-50" },
+      { variant: "outline", colorScheme: "success", className: "border-success-500 text-success-600 hover:bg-success-50" },
       { variant: "outline", colorScheme: "error",   className: "border-error-500 text-error-600 hover:bg-error-50" },
       { variant: "outline", colorScheme: "neutral", className: "border-gray-300 text-gray-700 hover:bg-gray-100" },
 
