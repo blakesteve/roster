@@ -76,6 +76,7 @@
     "@headlessui/react": "^2.2.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "tailwind-merge": "^3.4.0"
   }
 }
