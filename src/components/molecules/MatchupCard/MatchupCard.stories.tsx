@@ -1,4 +1,3 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { MatchupCard, type TeamMatchupData } from "./MatchupCard";
 
@@ -47,7 +46,7 @@ The **MatchupCard** is a highly flexible molecule designed to display head-to-he
   },
   decorators: [
     (Story) => (
-      <div className="p-8 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 min-w-[350px] flex justify-center">
+      <div className="p-8 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 min-w-87.5 flex justify-center">
         <Story />
       </div>
     ),
