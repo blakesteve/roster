@@ -18,6 +18,23 @@ The **Countdown** component provides a highly visual, animated timer for upcomin
 * **Theme Aware:** Fully supports both \`light\` and \`dark\` mode environments via the \`themeMode\` prop, automatically adjusting gradients, shadows, and text contrast to ensure WCAG accessibility.
 * **Fluid Typography:** Scales harmoniously using the \`size\` prop, making it suitable for anything from a small sidebar widget to a massive full-screen hero section.
 * **Graceful Degradation:** Automatically handles expired dates by unmounting the timer or replacing it with customized \`completionText\`.
+
+---
+
+#### 🧠 Headless Hook Option: \`useCountdown\`
+If you need the precision date-math but want to build a completely custom UI, import the underlying hook directly!
+
+\`\`\`tsx
+import { useCountdown } from 'roster'; // Adjust import to match your library path
+
+const CustomTimer = () => {
+  const { days, hours, minutes, seconds, isFinished } = useCountdown(new Date('2026-12-31'));
+
+  if (isFinished) return <span>Time is up!</span>;
+  
+  return <span>{days}d {hours}h {minutes}m {seconds}s remaining</span>;
+};
+\`\`\`
 `,
       },
     },

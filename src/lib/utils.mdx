@@ -1,0 +1,29 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Docs/Utilities" />
+
+# Roster Utilities
+
+Alongside React components, Roster exports a few essential utility functions to help you build custom UIs that seamlessly integrate with our Tailwind setup.
+
+## The `cn` Function
+
+The `cn` function is our standard utility for merging Tailwind CSS classes. It resolves conflicts intuitively (e.g., overriding a base `p-4` with a conditional `p-8`) without breaking your layout.
+
+### Usage
+
+```tsx
+import { cn } from "roster";
+
+// ... inside your custom component ...
+
+<div
+  className={cn(
+    "base-class px-4 py-2 rounded-md",
+    isError && "bg-red-500 text-white", // Conditionally applied
+    customPropClassName, // Merged safely from parent overrides
+  )}
+>
+  Content
+</div>;
+```
