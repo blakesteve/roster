@@ -34,10 +34,28 @@ The **ActionBar** provides a persistent, floating area for page-level actions an
     },
   },
   argTypes: {
-    title: { control: "text", description: "Primary heading or status." },
+    title: {
+      control: "text",
+      description: "Primary heading or status.",
+    },
     subtitle: {
       control: "text",
       description: "Secondary text below the heading.",
+    },
+    badge: {
+      control: false,
+      description:
+        "A slot for a status indicator next to the title. **Recommended:** Roster `Badge` component, but accepts any ReactNode.",
+    },
+    actions: {
+      control: false,
+      description:
+        "A slot for interactive elements aligned to the right. **Recommended:** Roster `Button` components, but accepts any ReactNode.",
+    },
+    children: {
+      control: false,
+      description:
+        "The bottom tray slot. Used for dynamic data display, lists, or complex filters. Mounts conditionally.",
     },
     position: {
       control: "select",
@@ -47,6 +65,7 @@ The **ActionBar** provides a persistent, floating area for page-level actions an
     themeMode: {
       control: "radio",
       options: ["light", "dark"],
+      description: "Overrides the OS-level theme preference.",
     },
   },
 } satisfies Meta<typeof ActionBar>;
