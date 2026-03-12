@@ -31,7 +31,6 @@ export const badgeVariants = cva(
     },
     compoundVariants: [
       // --- SOFT ---
-      // Changed text to 600 to guarantee it renders using the known palette values
       { fill: "soft", variant: "primary", className: "bg-primary-500/15 border-primary-500/20 text-primary-600 dark:text-primary-300" },
       { fill: "soft", variant: "orange",  className: "bg-orange-500/15 border-orange-500/20 text-orange-600 dark:text-orange-300" },
       { fill: "soft", variant: "teal",    className: "bg-teal-500/15 border-teal-500/20 text-teal-600 dark:text-teal-300" },
@@ -42,7 +41,6 @@ export const badgeVariants = cva(
       { fill: "soft", variant: "neutral", className: "bg-gray-500/15 border-gray-500/20 text-gray-700 dark:text-gray-300" },
 
       // --- OUTLINE ---
-      // Synced text AND border to the 600 level to match the intensity of the Solid variants
       { fill: "outline", variant: "primary", className: "border-primary-600 text-primary-600 dark:text-primary-400 dark:border-primary-400" },
       { fill: "outline", variant: "orange",  className: "border-orange-600 text-orange-600 dark:text-orange-400 dark:border-orange-400" },
       { fill: "outline", variant: "teal",    className: "border-teal-600 text-teal-600 dark:text-teal-400 dark:border-teal-400" },
