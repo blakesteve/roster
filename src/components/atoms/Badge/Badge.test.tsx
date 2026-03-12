@@ -9,6 +9,29 @@ describe("Badge Component", () => {
     expect(getByText("New Feature")).toBeInTheDocument();
   });
 
+  it("applies the default solid variant classes", () => {
+    const { getByText } = render(<Badge variant="primary">Default</Badge>);
+    const badge = getByText("Default");
+
+    // Testing default fill: solid
+    expect(badge).toHaveClass("bg-primary-500");
+    expect(badge).toHaveClass("text-white");
+  });
+
+  it("applies light variant classes", () => {
+    const { getByText } = render(
+      <Badge fill="light" variant="success">
+        Light Mode
+      </Badge>,
+    );
+    const badge = getByText("Light Mode");
+
+    // Testing the light middle-ground variant
+    expect(badge).toHaveClass("bg-success-500/30");
+    expect(badge).toHaveClass("border-success-400");
+    expect(badge).toHaveClass("text-success-800");
+  });
+
   it("applies solid variant classes", () => {
     const { getByText } = render(
       <Badge fill="solid" variant="error">
