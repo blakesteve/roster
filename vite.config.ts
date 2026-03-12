@@ -15,7 +15,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
     dts({
-      insertTypesEntry: true
+      insertTypesEntry: true,
+      tsconfigPath: './tsconfig.app.json', 
+      exclude: ['**/*.stories.tsx', '**/*.test.tsx', '**/*.test.ts', 'src/test/**/*']
     })
   ],
   build: {
