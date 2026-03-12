@@ -54,9 +54,9 @@ const meta: Meta<typeof Badge> = {
     },
     fill: {
       control: "radio",
-      options: ["soft", "light", "solid", "outline"], // Added light here
+      options: ["soft", "light", "solid", "outline"],
       description: "The visual style (background opacity and border).",
-      table: { defaultValue: { summary: "solid" } }, // Reflected your new default
+      table: { defaultValue: { summary: "solid" } },
     },
     size: {
       control: "radio",
@@ -107,7 +107,6 @@ export const SuccessSolid: Story = {
   },
 };
 
-// Testing the brand new middle-ground variant!
 export const TealLight: Story = {
   args: {
     children: "Subtle Hint",
