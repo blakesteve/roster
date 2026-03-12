@@ -31,7 +31,6 @@ export const buttonVariants = cva(
     },
     compoundVariants: [
       // --- SOLID VARIANTS (Bold Backgrounds) ---
-      // We use 600 for background to ensure white text is readable
       { variant: "solid", colorScheme: "primary", className: "bg-primary-600 text-white hover:bg-primary-700" },
       { variant: "solid", colorScheme: "orange",  className: "bg-orange-500 text-white hover:bg-orange-600" },
       { variant: "solid", colorScheme: "teal",    className: "bg-teal-500 text-white hover:bg-teal-600" },
@@ -41,46 +40,45 @@ export const buttonVariants = cva(
       { variant: "solid", colorScheme: "error",   className: "bg-error-600 text-white hover:bg-error-700" },
       { variant: "solid", colorScheme: "neutral", className: "bg-gray-600 text-white hover:bg-gray-700" },
 
-      // --- SOFT VARIANTS (Light Background + Dark Text) ---
-      // Perfect for secondary actions that need more weight than ghost but less than solid
-      { variant: "soft", colorScheme: "primary", className: "bg-primary-100 text-primary-700 hover:bg-primary-200" },
-      { variant: "soft", colorScheme: "orange",  className: "bg-orange-100 text-orange-700 hover:bg-orange-200" },
-      { variant: "soft", colorScheme: "teal",    className: "bg-teal-100 text-teal-700 hover:bg-teal-200" },
-      { variant: "soft", colorScheme: "purple",  className: "bg-purple-100 text-purple-700 hover:bg-purple-200" },
-      { variant: "soft", colorScheme: "amber",   className: "bg-amber-100 text-amber-800 hover:bg-amber-200" },
-      { variant: "soft", colorScheme: "success", className: "bg-success-100 text-success-800 hover:bg-success-200" },
-      { variant: "soft", colorScheme: "error",   className: "bg-error-100 text-error-800 hover:bg-error-200" },
-      { variant: "soft", colorScheme: "neutral", className: "bg-gray-100 text-gray-800 hover:bg-gray-200" },
+      // --- SOFT VARIANTS (Transparent Background Tints + Adaptive Text) ---
+      { variant: "soft", colorScheme: "primary", className: "bg-primary-500/15 text-primary-700 dark:text-primary-300 hover:bg-primary-500/25" },
+      { variant: "soft", colorScheme: "orange",  className: "bg-orange-500/15 text-orange-700 dark:text-orange-300 hover:bg-orange-500/25" },
+      { variant: "soft", colorScheme: "teal",    className: "bg-teal-500/15 text-teal-700 dark:text-teal-300 hover:bg-teal-500/25" },
+      { variant: "soft", colorScheme: "purple",  className: "bg-purple-500/15 text-purple-700 dark:text-purple-300 hover:bg-purple-500/25" },
+      { variant: "soft", colorScheme: "amber",   className: "bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500/25" },
+      { variant: "soft", colorScheme: "success", className: "bg-success-500/15 text-success-700 dark:text-success-300 hover:bg-success-500/25" },
+      { variant: "soft", colorScheme: "error",   className: "bg-error-500/15 text-error-700 dark:text-error-300 hover:bg-error-500/25" },
+      { variant: "soft", colorScheme: "neutral", className: "bg-gray-500/15 text-gray-700 dark:text-gray-300 hover:bg-gray-500/25" },
 
-      // --- OUTLINE VARIANTS (Borders + Colored Text) ---
-      { variant: "outline", colorScheme: "primary", className: "border-primary-500 text-primary-500 hover:bg-primary-50" },
-      { variant: "outline", colorScheme: "orange",  className: "border-orange-500 text-orange-500 hover:bg-orange-50" },
-      { variant: "outline", colorScheme: "teal",    className: "border-teal-500 text-teal-500 hover:bg-teal-50" },
-      { variant: "outline", colorScheme: "purple",  className: "border-purple-500 text-purple-500 hover:bg-purple-50" },
-      { variant: "outline", colorScheme: "amber",   className: "border-amber-500 text-amber-600 hover:bg-amber-50" },
-      { variant: "outline", colorScheme: "success", className: "border-success-500 text-success-600 hover:bg-success-50" },
-      { variant: "outline", colorScheme: "error",   className: "border-error-500 text-error-600 hover:bg-error-50" },
-      { variant: "outline", colorScheme: "neutral", className: "border-gray-300 text-gray-700 hover:bg-gray-100" },
+      // --- OUTLINE VARIANTS (Borders + Colored Adaptive Text + Transparent Hover) ---
+      { variant: "outline", colorScheme: "primary", className: "border-primary-500 text-primary-600 dark:text-primary-400 hover:bg-primary-500/10" },
+      { variant: "outline", colorScheme: "orange",  className: "border-orange-500 text-orange-600 dark:text-orange-400 hover:bg-orange-500/10" },
+      { variant: "outline", colorScheme: "teal",    className: "border-teal-500 text-teal-600 dark:text-teal-400 hover:bg-teal-500/10" },
+      { variant: "outline", colorScheme: "purple",  className: "border-purple-500 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10" },
+      { variant: "outline", colorScheme: "amber",   className: "border-amber-500 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10" },
+      { variant: "outline", colorScheme: "success", className: "border-success-500 text-success-600 dark:text-success-400 hover:bg-success-500/10" },
+      { variant: "outline", colorScheme: "error",   className: "border-error-500 text-error-600 dark:text-error-400 hover:bg-error-500/10" },
+      { variant: "outline", colorScheme: "neutral", className: "border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-500/10" },
 
-      // --- GHOST VARIANTS (Soft Text + Soft Hover) ---
-      { variant: "ghost", colorScheme: "primary", className: "text-primary-500 hover:bg-primary-50 hover:text-primary-600" },
-      { variant: "ghost", colorScheme: "orange",  className: "text-orange-500 hover:bg-orange-50 hover:text-orange-600" },
-      { variant: "ghost", colorScheme: "teal",    className: "text-teal-500 hover:bg-teal-50 hover:text-teal-600" },
-      { variant: "ghost", colorScheme: "purple",  className: "text-purple-500 hover:bg-purple-50 hover:text-purple-600" },
-      { variant: "ghost", colorScheme: "amber",   className: "text-amber-600 hover:bg-amber-50 hover:text-amber-700" },
-      { variant: "ghost", colorScheme: "success", className: "text-success-600 hover:bg-success-50 hover:text-success-700" },
-      { variant: "ghost", colorScheme: "error",   className: "text-error-600 hover:bg-error-50 hover:text-error-700" },
-      { variant: "ghost", colorScheme: "neutral", className: "text-gray-600 hover:bg-gray-100 hover:text-gray-900" },
+      // --- GHOST VARIANTS (Adaptive Text + Transparent Hover) ---
+      { variant: "ghost", colorScheme: "primary", className: "text-primary-600 dark:text-primary-400 hover:bg-primary-500/10" },
+      { variant: "ghost", colorScheme: "orange",  className: "text-orange-600 dark:text-orange-400 hover:bg-orange-500/10" },
+      { variant: "ghost", colorScheme: "teal",    className: "text-teal-600 dark:text-teal-400 hover:bg-teal-500/10" },
+      { variant: "ghost", colorScheme: "purple",  className: "text-purple-600 dark:text-purple-400 hover:bg-purple-500/10" },
+      { variant: "ghost", colorScheme: "amber",   className: "text-amber-600 dark:text-amber-400 hover:bg-amber-500/10" },
+      { variant: "ghost", colorScheme: "success", className: "text-success-600 dark:text-success-400 hover:bg-success-500/10" },
+      { variant: "ghost", colorScheme: "error",   className: "text-error-600 dark:text-error-400 hover:bg-error-500/10" },
+      { variant: "ghost", colorScheme: "neutral", className: "text-gray-600 dark:text-gray-400 hover:bg-gray-500/10" },
 
-      // --- LINK VARIANTS (Text Only + Underline) ---
-      { variant: "link", colorScheme: "primary", className: "text-primary-500 hover:text-primary-700" },
-      { variant: "link", colorScheme: "orange",  className: "text-orange-500 hover:text-orange-700" },
-      { variant: "link", colorScheme: "teal",    className: "text-teal-500 hover:text-teal-700" },
-      { variant: "link", colorScheme: "purple",  className: "text-purple-500 hover:text-purple-700" },
-      { variant: "link", colorScheme: "amber",   className: "text-amber-600 hover:text-amber-800" },
-      { variant: "link", colorScheme: "success", className: "text-success-600 hover:text-success-800" },
-      { variant: "link", colorScheme: "error",   className: "text-error-600 hover:text-error-800" },
-      { variant: "link", colorScheme: "neutral", className: "text-gray-500 hover:text-gray-900" },
+      // --- LINK VARIANTS (Adaptive Text Only + Underline) ---
+      { variant: "link", colorScheme: "primary", className: "text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300" },
+      { variant: "link", colorScheme: "orange",  className: "text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300" },
+      { variant: "link", colorScheme: "teal",    className: "text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300" },
+      { variant: "link", colorScheme: "purple",  className: "text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300" },
+      { variant: "link", colorScheme: "amber",   className: "text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300" },
+      { variant: "link", colorScheme: "success", className: "text-success-600 dark:text-success-400 hover:text-success-700 dark:hover:text-success-300" },
+      { variant: "link", colorScheme: "error",   className: "text-error-600 dark:text-error-400 hover:text-error-700 dark:hover:text-error-300" },
+      { variant: "link", colorScheme: "neutral", className: "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" },
     ],
     defaultVariants: {
       colorScheme: "primary",

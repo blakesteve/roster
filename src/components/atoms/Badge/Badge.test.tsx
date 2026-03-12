@@ -30,7 +30,7 @@ describe("Badge Component", () => {
     const badge = getByText("Ghost");
 
     expect(badge).toHaveClass("bg-transparent");
-    expect(badge).toHaveClass("border-gray-200");
+    expect(badge).toHaveClass("border-gray-500");
   });
 
   it("renders icons when provided", () => {

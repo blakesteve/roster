@@ -8,6 +8,7 @@ import {
   faTimes,
   faExclamationCircle,
   faShieldAlt,
+  faBolt,
 } from "@fortawesome/free-solid-svg-icons";
 
 const iconMap = {
@@ -18,6 +19,7 @@ const iconMap = {
   Close: <FontAwesomeIcon icon={faTimes} />,
   Warning: <FontAwesomeIcon icon={faExclamationCircle} />,
   Shield: <FontAwesomeIcon icon={faShieldAlt} />,
+  Lightning: <FontAwesomeIcon icon={faBolt} />,
 };
 
 const meta: Meta<typeof Badge> = {
@@ -28,7 +30,7 @@ const meta: Meta<typeof Badge> = {
     docs: {
       description: {
         component:
-          "A versatile **Badge** component used to label content, display status, or indicate counts. It supports a wide range of **semantic colors** and **visual styles** (soft, solid, outline). It also features a **smart 'status pill' mode** that automatically adapts its shape—rendering as a perfect circle for single digits or a rounded pill for text.",
+          "A versatile **Badge** component used to label content, display status, or indicate counts. \n\n✨ **New:** Badges now use an **opacity-based scaling system** for backgrounds and adaptive text colors, meaning they will automatically look perfect on both Light Mode and Dark Mode backgrounds without requiring manual overrides! It also features a smart 'status pill' mode that automatically adapts its shape.",
       },
     },
   },
@@ -88,7 +90,7 @@ export const Default: Story = {
   args: {
     children: "Badge",
     variant: "primary",
-    fill: "soft",
+    fill: "solid",
     size: "sm",
     leftIcon: "None",
   },
@@ -128,5 +130,15 @@ export const NotificationCount: Story = {
     variant: "error",
     fill: "solid",
     size: "sm",
+  },
+};
+
+export const AmberSolidTest: Story = {
+  args: {
+    children: "New Feature",
+    variant: "amber",
+    fill: "solid",
+    size: "sm",
+    leftIcon: "Lightning",
   },
 };
