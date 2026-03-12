@@ -16,6 +16,7 @@ export const badgeVariants = cva(
       },
       fill: {
         soft: "",
+        light: "",
         solid: "",
         outline: "bg-transparent",
       },
@@ -39,6 +40,16 @@ export const badgeVariants = cva(
       { fill: "soft", variant: "success", className: "bg-success-500/15 border-success-500/20 text-success-600 dark:text-success-300" },
       { fill: "soft", variant: "error",   className: "bg-error-500/15 border-error-500/20 text-error-600 dark:text-error-300" },
       { fill: "soft", variant: "neutral", className: "bg-gray-500/15 border-gray-500/20 text-gray-700 dark:text-gray-300" },
+
+      // --- LIGHT (The New Middle Ground) ---
+      { fill: "light", variant: "primary", className: "bg-primary-500/30 border-primary-400 text-primary-800 dark:text-primary-200" },
+      { fill: "light", variant: "orange",  className: "bg-orange-500/30 border-orange-400 text-orange-800 dark:text-orange-200" },
+      { fill: "light", variant: "teal",    className: "bg-teal-500/30 border-teal-400 text-teal-800 dark:text-teal-200" },
+      { fill: "light", variant: "purple",  className: "bg-purple-500/30 border-purple-400 text-purple-800 dark:text-purple-200" },
+      { fill: "light", variant: "amber",   className: "bg-amber-500/30 border-amber-400 text-amber-800 dark:text-amber-200" },
+      { fill: "light", variant: "success", className: "bg-success-500/30 border-success-400 text-success-800 dark:text-success-200" },
+      { fill: "light", variant: "error",   className: "bg-error-500/30 border-error-400 text-error-800 dark:text-error-200" },
+      { fill: "light", variant: "neutral", className: "bg-gray-500/30 border-gray-400 text-gray-800 dark:text-gray-200" },
 
       // --- OUTLINE ---
       { fill: "outline", variant: "primary", className: "border-primary-600 text-primary-600 dark:text-primary-400 dark:border-primary-400" },
@@ -67,7 +78,7 @@ export const badgeVariants = cva(
     ],
     defaultVariants: {
       variant: "primary",
-      fill: "soft",
+      fill: "solid",
       size: "sm",
       statusBadge: false,
     },

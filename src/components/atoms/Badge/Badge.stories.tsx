@@ -9,6 +9,7 @@ import {
   faExclamationCircle,
   faShieldAlt,
   faBolt,
+  faLightbulb,
 } from "@fortawesome/free-solid-svg-icons";
 
 const iconMap = {
@@ -20,6 +21,7 @@ const iconMap = {
   Warning: <FontAwesomeIcon icon={faExclamationCircle} />,
   Shield: <FontAwesomeIcon icon={faShieldAlt} />,
   Lightning: <FontAwesomeIcon icon={faBolt} />,
+  Idea: <FontAwesomeIcon icon={faLightbulb} />,
 };
 
 const meta: Meta<typeof Badge> = {
@@ -30,7 +32,7 @@ const meta: Meta<typeof Badge> = {
     docs: {
       description: {
         component:
-          "A versatile **Badge** component used to label content, display status, or indicate counts. \n\n✨ **New:** Badges now use an **opacity-based scaling system** for backgrounds and adaptive text colors, meaning they will automatically look perfect on both Light Mode and Dark Mode backgrounds without requiring manual overrides! It also features a smart 'status pill' mode that automatically adapts its shape.",
+          "A versatile **Badge** component used to label content, display status, or indicate counts. \n\n✨ **New:** Badges now use an **opacity-based scaling system** for backgrounds and adaptive text colors. \n\n💡 **Light Variant:** We've added a 'light' fill variant that provides a middle ground between 'soft' and 'solid'—perfect for categorized labels that need structure without being overwhelming.",
       },
     },
   },
@@ -52,9 +54,9 @@ const meta: Meta<typeof Badge> = {
     },
     fill: {
       control: "radio",
-      options: ["soft", "solid", "outline"],
+      options: ["soft", "light", "solid", "outline"], // Added light here
       description: "The visual style (background opacity and border).",
-      table: { defaultValue: { summary: "soft" } },
+      table: { defaultValue: { summary: "solid" } }, // Reflected your new default
     },
     size: {
       control: "radio",
@@ -102,6 +104,16 @@ export const SuccessSolid: Story = {
     variant: "success",
     fill: "solid",
     leftIcon: "Shield",
+  },
+};
+
+// Testing the brand new middle-ground variant!
+export const TealLight: Story = {
+  args: {
+    children: "Subtle Hint",
+    variant: "teal",
+    fill: "light",
+    leftIcon: "Idea",
   },
 };
 
