@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "../../../lib/utils";
+import { cn } from "../../../lib/utils"; // Adjusted to your correct path!
 import { type VariantProps } from "class-variance-authority";
 import { tableVariants } from "./table-variants";
 
@@ -27,8 +27,9 @@ const TableHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <thead
     ref={ref}
+    // Light mode: gray-50. Dark mode: gray-900 (darker than rows)
     className={cn(
-      "bg-gray-50 dark:bg-gray-800/50 [&_tr]:border-b border-gray-200 dark:border-gray-700",
+      "bg-gray-50 dark:bg-gray-900 [&_tr]:border-b border-gray-200 dark:border-gray-700",
       className,
     )}
     {...props}
@@ -54,8 +55,9 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
+    // Matches the header's darker framing
     className={cn(
-      "border-t border-gray-200 dark:border-gray-700 bg-gray-100/50 dark:bg-gray-800/50 font-medium [&>tr]:last:border-b-0",
+      "border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 font-medium [&>tr]:last:border-b-0",
       className,
     )}
     {...props}
@@ -69,8 +71,9 @@ const TableRow = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tr
     ref={ref}
+    // Light mode: white rows. Dark mode: gray-800 (lighter than header/footer)
     className={cn(
-      "border-b border-gray-200 dark:border-gray-700 transition-colors hover:bg-gray-100/50 dark:hover:bg-gray-800/50 data-[state=selected]:bg-gray-100 dark:data-[state=selected]:bg-gray-800",
+      "border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-colors hover:bg-gray-100/50 dark:hover:bg-gray-700/80 data-[state=selected]:bg-gray-100 dark:data-[state=selected]:bg-gray-700",
       className,
     )}
     {...props}
@@ -84,8 +87,9 @@ const TableHead = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <th
     ref={ref}
+    // Lighter text in dark mode for readability
     className={cn(
-      "h-12 px-4 text-left align-middle font-medium text-gray-600 dark:text-gray-400 [&:has([role=checkbox])]:pr-0",
+      "h-12 px-4 text-left align-middle font-medium text-gray-600 dark:text-gray-300 [&:has([role=checkbox])]:pr-0",
       className,
     )}
     {...props}

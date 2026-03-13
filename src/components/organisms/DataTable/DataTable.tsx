@@ -33,12 +33,16 @@ export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   className?: string;
+  tableClassName?: string;
+  paginationClassName?: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   className,
+  tableClassName,
+  paginationClassName,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -60,8 +64,8 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className={cn("space-y-4", className)}>
-      <Table>
+    <div className={cn("flex flex-col", className)}>
+      <Table className={tableClassName}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -73,7 +77,7 @@ export function DataTable<TData, TValue>({
                         className={cn(
                           "flex items-center gap-2",
                           header.column.getCanSort() &&
-                            "cursor-pointer select-none hover:text-gray-900 dark:hover:text-gray-100 transition-colors",
+                            "cursor-pointer select-none hover:text-gray-900 dark:hover:text-white transition-colors",
                         )}
                         onClick={header.column.getToggleSortingHandler()}
                       >
@@ -116,7 +120,7 @@ export function DataTable<TData, TValue>({
             <TableRow>
               <TableCell
                 colSpan={columns.length}
-                className="h-24 text-center text-gray-500"
+                className="h-24 text-center text-gray-500 dark:text-gray-400"
               >
                 No results found.
               </TableCell>
@@ -125,9 +129,14 @@ export function DataTable<TData, TValue>({
         </TableBody>
       </Table>
 
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-between px-2">
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+      {/* Pagination Controls - Dark mode matching the Header framing */}
+      <div
+        className={cn(
+          "flex items-center justify-between p-4 pb-6 bg-gray-50 dark:bg-gray-900 rounded-b-md border-x border-b border-gray-200 dark:border-gray-700",
+          paginationClassName,
+        )}
+      >
+        <div className="text-sm text-gray-800 dark:text-gray-300">
           Page <strong>{table.getState().pagination.pageIndex + 1}</strong> of{" "}
           <strong>{table.getPageCount()}</strong>
         </div>
