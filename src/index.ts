@@ -43,6 +43,9 @@ export * from './components/organisms/Dialog/Dialog';
 export * from './components/organisms/Footer/Footer';
 export * from './components/organisms/Navbar/Navbar';
 export * from './components/organisms/Navbar/navbar-variants';
+export * from './components/organisms/Table/Table';
+export * from './components/organisms/Table/table-variants';
+export * from './components/organisms/DataTable/DataTable';
 
 // --- HOOKS ---
 export * from './hooks/useCountdown';
