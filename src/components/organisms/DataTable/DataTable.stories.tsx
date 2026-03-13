@@ -32,7 +32,6 @@ const columns: ColumnDef<PickRecord>[] = [
   {
     accessorKey: "player",
     header: "Player",
-    // TanStack allows sorting by default, clicking this header will trigger it!
   },
   {
     accessorKey: "team",
@@ -41,8 +40,6 @@ const columns: ColumnDef<PickRecord>[] = [
   {
     accessorKey: "status",
     header: "Status",
-    // 🎨 TANSTACK FEATURE: Custom Cell Rendering
-    // We can inject Roster components directly into the grid cells
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       if (status === "Won") {
@@ -68,11 +65,9 @@ const columns: ColumnDef<PickRecord>[] = [
   },
   {
     accessorKey: "points",
-    // 🎨 TANSTACK FEATURE: Custom Header Alignment
     header: () => <div className="text-right">Points Earned</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("points"));
-      // Formatting the number cell to be bold and right-aligned
       return (
         <div className="text-right font-medium text-black dark:text-white">
           {amount}
@@ -97,7 +92,7 @@ The **DataTable** is a smart, fully-featured data grid powered by \`@tanstack/re
 - **Sorting:** Click on column headers to sort ascending/descending.
 - **Pagination:** Automatically paginates data (default pageSize is 10).
 - **Custom Rendering:** Easily inject Badges, Buttons, or complex layouts into cells via the TanStack \`cell\` property.
-- **Adaptive Theming:** Inherits all the beautiful Light/Dark mode transitions from Roster's core \`<Table>\` primitives.
+- **Section Customization:** Use \`className\`, \`tableClassName\`, and \`paginationClassName\` to inject targeted styles into specific areas of the component without forking the logic.
         `,
       },
     },
@@ -109,23 +104,41 @@ type Story = StoryObj<typeof DataTable>;
 
 export const Default: Story = {
   args: {
-    columns: columns as any, // Type coercion here avoids strict Storybook generic inference issues
+    columns: columns as any,
     data: mockData,
   },
 };
 
-export const CustomContainerStyling: Story = {
+export const DarkMode: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Because `DataTable` delegates layout to its wrapper, you can easily pass custom `className` props to add shadows, max-widths, or margin without breaking the table logic.",
+          "Because DataTable relies on the underlying Table primitives, it inherits the explicit `.dark` class styling. Notice the seamless framing between the header, data rows, and the pagination footer.",
+      },
+    },
+  },
+  render: (args) => (
+    <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800">
+      <DataTable {...args} columns={columns as any} data={mockData} />
+    </div>
+  ),
+};
+
+export const CustomSectionStyling: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Need to match a specific brand identity? You can pass `className` to target the outer wrapper, `tableClassName` for the grid, and `paginationClassName` for the footer.",
       },
     },
   },
   args: {
     columns: columns as any,
     data: mockData,
-    className: "max-w-3xl shadow-xl rounded-xl border-primary-500/20",
+    className: "border-teal-500/30 shadow-lg rounded-lg overflow-hidden",
+    tableClassName: "[&_thead]:bg-teal-50 [&_tbody_tr]:bg-white",
+    paginationClassName: "bg-teal-50 border-t-teal-500/20",
   },
 };
