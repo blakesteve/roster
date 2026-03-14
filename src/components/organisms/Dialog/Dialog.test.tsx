@@ -47,39 +47,50 @@ describe("Dialog Component", () => {
     expect(onCloseMock).toHaveBeenCalledTimes(1);
   });
 
-  it("applies the correct default classes (Light + Default Variant)", async () => {
+  it("applies the correct default classes (White Variant + Default Status)", async () => {
     render(<Dialog {...defaultProps} />);
 
     const title = await screen.findByText("Test Dialog");
     const panel = title.closest(".rounded-2xl"); // Find the DialogPanel wrapper
 
-    expect(panel).toHaveClass("bg-white");
-    expect(panel).toHaveClass("border-gray-200");
-    expect(title).toHaveClass("text-gray-900");
+    // Checks base light mode and native dark mode classes
+    expect(panel).toHaveClass("bg-white", "dark:bg-gray-800");
+
+    // Checks that typography correctly uses inheritance now instead of hardcoded colors
+    expect(title).toHaveClass("text-inherit");
   });
 
-  it("applies the correct compound classes for Dark + Destructive Variant", async () => {
-    render(<Dialog {...defaultProps} variant="destructive" themeMode="dark" />);
+  it("applies the correct classes for the Destructive Status", async () => {
+    // Note: We don't need themeMode="dark" anymore!
+    render(<Dialog {...defaultProps} status="destructive" />);
 
     const title = await screen.findByText("Test Dialog");
     const panel = title.closest(".rounded-2xl");
 
-    // Check panel compound classes
-    expect(panel).toHaveClass("bg-slate-800");
+    // Check for the semantic top border
     expect(panel).toHaveClass("border-t-error-500");
 
-    // Check title text color for dark mode
-    expect(title).toHaveClass("text-white");
+    // Typography should still inherit from the base variant
+    expect(title).toHaveClass("text-inherit");
   });
 
-  it("applies the correct compound classes for the Glass Variant", async () => {
-    render(<Dialog {...defaultProps} variant="glass" themeMode="light" />);
+  it("applies the correct classes for the Slate Variant", async () => {
+    render(<Dialog {...defaultProps} variant="slate" />);
 
     const title = await screen.findByText("Test Dialog");
     const panel = title.closest(".rounded-2xl");
 
-    // The panel should have the blur and semi-transparent background
+    expect(panel).toHaveClass("bg-gray-700", "dark:bg-gray-900");
+  });
+
+  it("applies the correct classes for the Glass Variant", async () => {
+    render(<Dialog {...defaultProps} variant="glass" />);
+
+    const title = await screen.findByText("Test Dialog");
+    const panel = title.closest(".rounded-2xl");
+
+    // The panel should have the blur and semi-transparent backgrounds for both themes
     expect(panel).toHaveClass("backdrop-blur-xl");
-    expect(panel).toHaveClass("bg-white/80");
+    expect(panel).toHaveClass("bg-white/80", "dark:bg-slate-900/80");
   });
 });
