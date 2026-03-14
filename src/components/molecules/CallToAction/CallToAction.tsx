@@ -34,11 +34,11 @@ const CallToAction = ({
           <div className="mt-1 shrink-0 opacity-80 text-current">{icon}</div>
         )}
         <div className="flex flex-col gap-1.5">
-          <h3 className="text-lg font-bold leading-tight tracking-tight">
+          <h3 className="text-lg font-bold leading-tight tracking-tight text-current">
             {title}
           </h3>
           {description && (
-            <p className="max-w-prose text-sm leading-relaxed opacity-80 dark:opacity-70">
+            <p className="max-w-prose text-sm leading-relaxed text-current opacity-80 dark:opacity-70">
               {description}
             </p>
           )}
