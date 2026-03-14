@@ -113,7 +113,6 @@ const Feature = () => {
 export default meta;
 type Story = StoryObj<typeof Dialog>;
 
-// Strictly typed wrapper that omits the state props since it handles them internally
 const DialogWrapper = (args: Omit<DialogProps, "isOpen" | "onClose">) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -228,7 +227,7 @@ export const DestructiveAction: Story = {
       "Are you sure you want to delete this league? All data will be permanently removed. This action cannot be undone.",
     size: "md",
     variant: "white",
-    status: "destructive", // Composing variant + status!
+    status: "destructive",
     children: (
       <div className="mt-6 flex justify-end gap-3">
         <Button variant="outline" colorScheme="neutral">
@@ -257,7 +256,7 @@ export const SuccessSlate: Story = {
     description: "Your subscription has been renewed for another year.",
     size: "sm",
     variant: "slate",
-    status: "success", // Success border on a dark slate background!
+    status: "success",
     children: (
       <div className="mt-6 flex justify-end gap-3">
         <Button

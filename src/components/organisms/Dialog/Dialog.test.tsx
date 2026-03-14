@@ -51,7 +51,7 @@ describe("Dialog Component", () => {
     render(<Dialog {...defaultProps} />);
 
     const title = await screen.findByText("Test Dialog");
-    const panel = title.closest(".rounded-2xl"); // Find the DialogPanel wrapper
+    const panel = title.closest(".rounded-2xl");
 
     // Checks base light mode and native dark mode classes
     expect(panel).toHaveClass("bg-white", "dark:bg-gray-800");
@@ -61,7 +61,6 @@ describe("Dialog Component", () => {
   });
 
   it("applies the correct classes for the Destructive Status", async () => {
-    // Note: We don't need themeMode="dark" anymore!
     render(<Dialog {...defaultProps} status="destructive" />);
 
     const title = await screen.findByText("Test Dialog");

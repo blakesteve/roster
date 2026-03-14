@@ -111,7 +111,6 @@ const Dialog = ({
               leaveTo="opacity-0 scale-95"
             >
               <DialogPanel
-                // Pass status to the cva compiler
                 className={cn(
                   dialogVariants({ size, variant, status }),
                   className,
