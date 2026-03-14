@@ -31,6 +31,7 @@ describe("CallToAction Molecule", () => {
 
     render(<CallToAction title="Dismiss Me" onDismiss={handleDismiss} />);
 
+    // LabelText check for accessibility compliance
     const closeBtn = screen.getByLabelText("Dismiss");
     fireEvent.click(closeBtn);
 
@@ -53,13 +54,59 @@ describe("CallToAction Molecule", () => {
     );
 
     expect(screen.getByTestId("test-icon")).toBeInTheDocument();
+    // Verify icon container has the expected opacity/utility classes
+    expect(screen.getByTestId("test-icon").parentElement).toHaveClass(
+      "opacity-80",
+    );
   });
 
-  it("applies warning styles correctly", () => {
+  it("applies variant-specific styling including dark mode support", () => {
+    const { container, rerender } = render(
+      <CallToAction title="Primary Test" variant="primary" />,
+    );
+
+    // Light mode check
+    expect(container.firstChild).toHaveClass(
+      "bg-primary-50",
+      "text-primary-900",
+    );
+    // Dark mode check
+    expect(container.firstChild).toHaveClass(
+      "dark:bg-primary-900/10",
+      "dark:text-primary-100",
+    );
+
+    rerender(<CallToAction title="Error Test" variant="error" />);
+    expect(container.firstChild).toHaveClass("bg-red-50", "dark:bg-red-900/10");
+  });
+
+  it("applies the warning variant properly", () => {
     const { container } = render(
       <CallToAction title="Warning" variant="warning" />,
     );
 
-    expect(container.firstChild).toHaveClass("bg-amber-50");
+    expect(container.firstChild).toHaveClass(
+      "bg-amber-50",
+      "dark:bg-amber-900/10",
+    );
+  });
+
+  it("passes additional HTML attributes through", () => {
+    render(
+      <CallToAction title="Attrs" data-testid="cta-wrapper" id="custom-id" />,
+    );
+
+    const wrapper = screen.getByTestId("cta-wrapper");
+    expect(wrapper).toHaveAttribute("id", "custom-id");
+  });
+
+  it("merges custom classNames with variants", () => {
+    const { container } = render(
+      <CallToAction title="Custom" className="my-custom-class" />,
+    );
+
+    expect(container.firstChild).toHaveClass("my-custom-class");
+    // Should still have base variants
+    expect(container.firstChild).toHaveClass("relative", "flex", "rounded-lg");
   });
 });

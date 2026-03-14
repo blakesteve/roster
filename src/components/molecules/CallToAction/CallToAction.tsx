@@ -30,13 +30,15 @@ const CallToAction = ({
   return (
     <div className={cn(ctaVariants({ variant }), className)} {...props}>
       <div className="flex items-start gap-4">
-        {icon && <div className="mt-1 shrink-0 opacity-80">{icon}</div>}
+        {icon && (
+          <div className="mt-1 shrink-0 opacity-80 text-current">{icon}</div>
+        )}
         <div className="flex flex-col gap-1.5">
           <h3 className="text-lg font-bold leading-tight tracking-tight">
             {title}
           </h3>
           {description && (
-            <p className="max-w-prose text-sm leading-relaxed opacity-90">
+            <p className="max-w-prose text-sm leading-relaxed opacity-80 dark:opacity-70">
               {description}
             </p>
           )}
@@ -50,7 +52,7 @@ const CallToAction = ({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 rounded-full p-0 opacity-60 hover:opacity-100"
+            className="h-8 w-8 rounded-full p-0 opacity-60 hover:opacity-100 dark:hover:bg-black/20"
             onClick={onDismiss}
             aria-label="Dismiss"
           >
