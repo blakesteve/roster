@@ -44,7 +44,6 @@ describe("Navbar Component", () => {
     const activeLink = screen.getByText("Leagues");
     const linkElement = activeLink.closest("a");
 
-    // Updated to match the new dark surface contrast color logic
     expect(linkElement).toHaveClass("text-primary-300");
     expect(linkElement).toHaveClass("font-semibold");
   });
@@ -63,7 +62,6 @@ describe("Navbar Component", () => {
     const userButton = screen.getByRole("button", { name: /user menu/i });
     fireEvent.click(userButton);
 
-    // Updated to match the new standardized "Log Out" text
     const logoutButton = screen.getByText(/log out/i);
     fireEvent.click(logoutButton);
 
@@ -86,8 +84,6 @@ describe("Navbar Component", () => {
     });
     expect(closeButton).toBeInTheDocument();
   });
-
-  // --- NEW THEME TOGGLE TESTS ---
 
   it("does not render the theme toggle if onThemeToggle is undefined", () => {
     render(<Navbar {...defaultProps} user={mockUser} />);

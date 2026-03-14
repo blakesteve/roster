@@ -2,8 +2,6 @@ import { useState, type ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Navbar } from "./Navbar";
 
-// --- Interactive Story Wrapper ---
-// This handles the .dark class and the switch state for all stories!
 const InteractiveWrapper = ({
   args,
   className = "bg-gray-50 dark:bg-gray-900 min-h-75",
@@ -73,7 +71,7 @@ The component supports multiple visual variants to suit different contexts. Addi
       control: "select",
       options: ["slate", "primary", "white", "transparent"],
       description: "The visual theme of the navbar.",
-      table: { defaultValue: { summary: "slate" } }, // Explicitly stating default
+      table: { defaultValue: { summary: "slate" } },
     },
     themeMode: {
       control: "radio",
@@ -89,7 +87,7 @@ The component supports multiple visual variants to suit different contexts. Addi
       control: "select",
       options: ["fixed", "sticky", "static"],
       description: "CSS positioning behavior.",
-      table: { defaultValue: { summary: "sticky" } }, // Explicitly stating default
+      table: { defaultValue: { summary: "sticky" } },
     },
     activePath: {
       control: "text",
@@ -105,16 +103,14 @@ The component supports multiple visual variants to suit different contexts. Addi
     onThemeToggle: { action: "theme toggled" },
   },
   args: {
-    position: "sticky", // Let Storybook use the actual default
+    position: "sticky",
   },
-  // Automatically apply the interactive wrapper to all stories by default
   render: (args) => <InteractiveWrapper args={args} />,
 } satisfies Meta<typeof Navbar>;
 
 export default meta;
 type Story = StoryObj<typeof Navbar>;
 
-// --- Mock Data ---
 const mockLogo = "https://placehold.co/40x40/4F46E5/FFF?text=M";
 const defaultItems = [
   { label: "Schedule", path: "/schedule" },
@@ -127,7 +123,6 @@ const mockUser = {
   avatarSrc: "https://i.pravatar.cc/150?u=ms",
 };
 
-// 1. Slate (Default)
 export const SlateTheme: Story = {
   args: {
     logoSrc: mockLogo,
@@ -147,7 +142,6 @@ export const SlateTheme: Story = {
   },
 };
 
-// 2. Primary
 export const PrimaryTheme: Story = {
   args: {
     logoSrc: mockLogo,
@@ -167,7 +161,6 @@ export const PrimaryTheme: Story = {
   },
 };
 
-// 3. Fallback Initials
 export const FallbackInitials: Story = {
   args: {
     logoSrc: mockLogo,
@@ -191,7 +184,6 @@ export const FallbackInitials: Story = {
   },
 };
 
-// 4. White (Light)
 export const WhiteTheme: Story = {
   args: {
     logoSrc: mockLogo,
@@ -211,17 +203,15 @@ export const WhiteTheme: Story = {
   },
 };
 
-// 5. Transparent
 export const Transparent: Story = {
   args: {
     logoSrc: mockLogo,
     brandName: "MegaSquad",
     items: defaultItems,
     variant: "transparent",
-    position: "fixed", // Explicitly use fixed here so it floats over the hero image!
+    position: "fixed",
     user: mockUser,
   },
-  // Custom render override to inject the specific background and children
   render: (args) => (
     <InteractiveWrapper
       args={args}
@@ -244,7 +234,6 @@ export const Transparent: Story = {
   },
 };
 
-// 6. With Notifications
 export const WithNotifications: Story = {
   args: {
     logoSrc: mockLogo,
@@ -269,7 +258,6 @@ export const WithNotifications: Story = {
   },
 };
 
-// 7. Mobile View
 export const MobileView: Story = {
   args: {
     logoSrc: mockLogo,
