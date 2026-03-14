@@ -15,9 +15,7 @@ It is built with **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Vite**
 ## 📦 Installation
 
 ```bash
-npm install roster
-# or
-yarn add roster
+npm install @blakesteve/roster
 ```
 
 ### Peer Dependencies
