@@ -83,6 +83,16 @@ describe("Button Component", () => {
     expect(button).toHaveClass("text-error-600");
   });
 
+  it("applies the correct scale classes for the xs size", () => {
+    render(<Button size="xs">Tiny Button</Button>);
+
+    const button = screen.getByRole("button", { name: /tiny button/i });
+
+    expect(button).toHaveClass("h-7");
+    expect(button).toHaveClass("px-2");
+    expect(button).toHaveClass("text-xs");
+  });
+
   it("forwards refs to the HTML element", () => {
     const ref = React.createRef<HTMLButtonElement>();
     render(<Button ref={ref}>Ref Test</Button>);

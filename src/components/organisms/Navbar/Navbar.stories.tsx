@@ -1,5 +1,39 @@
+import { useState, type ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Navbar } from "./Navbar";
+
+// --- Interactive Story Wrapper ---
+// This handles the .dark class and the switch state for all stories!
+const InteractiveWrapper = ({
+  args,
+  className = "bg-gray-50 dark:bg-gray-900 min-h-75",
+  children,
+}: {
+  args: any;
+  className?: string;
+  children?: ReactNode;
+}) => {
+  const [isDark, setIsDark] = useState(true);
+
+  return (
+    <div className={isDark ? "dark" : ""}>
+      <div
+        className={`relative w-full transition-colors duration-300 ${className}`}
+      >
+        <Navbar
+          {...args}
+          themeMode={isDark ? "dark" : "light"}
+          onThemeToggle={() => setIsDark(!isDark)}
+        />
+        {children || (
+          <div className="p-12 text-center opacity-30 font-bold text-3xl text-gray-500 dark:text-gray-400">
+            Page Content Area
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const meta = {
   title: "Organisms/Navbar",
@@ -23,32 +57,23 @@ import { NavLink } from "react-router-dom";
 <Navbar routerElement={NavLink} ... />
 \`\`\`
 
-**2. Responsiveness**
-The Navbar automatically collapses into a hamburger menu on mobile viewports. The breakout point is defined by the standard \`md\` breakpoint.
+**2. Layout & Positioning (Defaults)**
+By default, the Navbar renders with \`variant="slate"\` and \`position="sticky"\`. 
+* Using \`sticky\` ensures the Navbar stays at the top of the viewport when scrolling, without pulling it out of the document flow (meaning you don't need to add top padding to your page content). 
+* Use \`fixed\` only when you want the Navbar to float *over* elements like large hero images.
 
-**3. Theming**
-The component supports multiple visual variants to suit different contexts (e.g., Dashboards, Marketing pages, Hero sections).
+**3. Theming & Dark Mode**
+The component supports multiple visual variants to suit different contexts. Additionally, if you pass a function to the \`onThemeToggle\` prop, the Navbar will automatically inject a Dark/Light mode toggle button into both the desktop dropdown and the mobile slide-out menu.
 `,
       },
     },
   },
-  // Default decorator to give context and ensure visibility
-  decorators: [
-    (Story) => (
-      <div className="min-h-75 w-full bg-gray-50">
-        <Story />
-        <div className="p-12 text-center opacity-30 font-bold text-3xl text-gray-400">
-          Page Content Area
-        </div>
-      </div>
-    ),
-  ],
   argTypes: {
     variant: {
       control: "select",
       options: ["slate", "primary", "white", "transparent"],
       description: "The visual theme of the navbar.",
-      table: { defaultValue: { summary: "slate" } },
+      table: { defaultValue: { summary: "slate" } }, // Explicitly stating default
     },
     themeMode: {
       control: "radio",
@@ -64,6 +89,7 @@ The component supports multiple visual variants to suit different contexts (e.g.
       control: "select",
       options: ["fixed", "sticky", "static"],
       description: "CSS positioning behavior.",
+      table: { defaultValue: { summary: "sticky" } }, // Explicitly stating default
     },
     activePath: {
       control: "text",
@@ -76,10 +102,13 @@ The component supports multiple visual variants to suit different contexts (e.g.
     },
     onLogout: { action: "logout clicked" },
     onInboxClick: { action: "inbox clicked" },
+    onThemeToggle: { action: "theme toggled" },
   },
   args: {
-    position: "static", // Default to static in Storybook for visibility
+    position: "sticky", // Let Storybook use the actual default
   },
+  // Automatically apply the interactive wrapper to all stories by default
+  render: (args) => <InteractiveWrapper args={args} />,
 } satisfies Meta<typeof Navbar>;
 
 export default meta;
@@ -112,7 +141,7 @@ export const SlateTheme: Story = {
     docs: {
       description: {
         story:
-          "The **Slate** variant is the standard dark theme used for the main application interface.",
+          "The **Slate** variant is the standard dark theme. **Click the user avatar in this interactive story** to test the fully functional Switch component and watch the background respond.",
       },
     },
   },
@@ -189,26 +218,27 @@ export const Transparent: Story = {
     brandName: "MegaSquad",
     items: defaultItems,
     variant: "transparent",
-    position: "fixed",
+    position: "fixed", // Explicitly use fixed here so it floats over the hero image!
     user: mockUser,
   },
-  decorators: [
-    (Story) => (
-      <div className="relative min-h-125 w-full bg-linear-to-br from-indigo-900 via-purple-900 to-black">
-        <Story />
-        <div className="pt-32 px-8 text-white text-center">
-          <h1 className="text-5xl font-extrabold tracking-tight">
-            Enter the Arena
-          </h1>
-        </div>
+  // Custom render override to inject the specific background and children
+  render: (args) => (
+    <InteractiveWrapper
+      args={args}
+      className="bg-linear-to-br from-indigo-900 via-purple-900 to-black min-h-125"
+    >
+      <div className="pt-32 px-8 text-white text-center">
+        <h1 className="text-5xl font-extrabold tracking-tight">
+          Enter the Arena
+        </h1>
       </div>
-    ),
-  ],
+    </InteractiveWrapper>
+  ),
   parameters: {
     docs: {
       description: {
         story:
-          "The **Transparent** variant removes borders and backgrounds, allowing it to overlay hero images or gradients seamlessly.",
+          "The **Transparent** variant removes borders and backgrounds, allowing it to overlay hero images or gradients seamlessly. Notice how `position: fixed` is used here to allow the hero image to slide up underneath it.",
       },
     },
   },
@@ -259,7 +289,7 @@ export const MobileView: Story = {
     docs: {
       description: {
         story:
-          "Demonstrates the responsive hamburger menu behavior on constrained viewports (requires Canvas view to simulate).",
+          "Demonstrates the responsive hamburger menu behavior on constrained viewports. The interactive theme toggle is injected directly into the slide-out menu.",
       },
     },
   },

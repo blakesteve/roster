@@ -46,7 +46,7 @@ const meta = {
     },
     size: {
       control: "inline-radio",
-      options: ["sm", "default", "lg", "icon"],
+      options: ["xs", "sm", "default", "lg", "icon"], // <-- Added xs here!
       description: "The dimension of the button.",
       table: { defaultValue: { summary: "default" } },
     },
@@ -139,7 +139,30 @@ export const Ghost: Story = {
   },
 };
 
-// --- 3. Icon Integrations ---
+// --- 3. Sizes & Scale ---
+export const Sizes: Story = {
+  render: () => (
+    <div className="flex items-center gap-4">
+      <Button size="xs">Extra Small</Button>
+      <Button size="sm">Small</Button>
+      <Button size="default">Default</Button>
+      <Button size="lg">Large</Button>
+      <Button size="icon" aria-label="Icon Size Example">
+        <FontAwesomeIcon icon={faCheck} />
+      </Button>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Buttons come in multiple sizes to fit various contexts, from tiny inline actions (`xs`) like dropdown items, to large primary calls to action (`lg`).",
+      },
+    },
+  },
+};
+
+// --- 4. Icon Integrations ---
 export const WithIcons: Story = {
   render: () => (
     <div className="flex gap-4">
@@ -188,7 +211,7 @@ export const IconOnly: Story = {
   },
 };
 
-// --- 4. States ---
+// --- 5. States ---
 export const Loading: Story = {
   args: {
     isLoading: true,

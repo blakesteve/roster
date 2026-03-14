@@ -44,7 +44,8 @@ describe("Navbar Component", () => {
     const activeLink = screen.getByText("Leagues");
     const linkElement = activeLink.closest("a");
 
-    expect(linkElement).toHaveClass("text-primary-400");
+    // Updated to match the new dark surface contrast color logic
+    expect(linkElement).toHaveClass("text-primary-300");
     expect(linkElement).toHaveClass("font-semibold");
   });
 
@@ -62,7 +63,8 @@ describe("Navbar Component", () => {
     const userButton = screen.getByRole("button", { name: /user menu/i });
     fireEvent.click(userButton);
 
-    const logoutButton = screen.getByText(/sign out/i);
+    // Updated to match the new standardized "Log Out" text
+    const logoutButton = screen.getByText(/log out/i);
     fireEvent.click(logoutButton);
 
     expect(onLogout).toHaveBeenCalledTimes(1);
@@ -76,11 +78,68 @@ describe("Navbar Component", () => {
     expect(
       screen.queryByRole("button", { name: /close menu/i }),
     ).not.toBeInTheDocument();
+
     fireEvent.click(hamburger);
 
     const closeButton = await screen.findByRole("button", {
       name: /close menu/i,
     });
     expect(closeButton).toBeInTheDocument();
+  });
+
+  // --- NEW THEME TOGGLE TESTS ---
+
+  it("does not render the theme toggle if onThemeToggle is undefined", () => {
+    render(<Navbar {...defaultProps} user={mockUser} />);
+
+    const userButton = screen.getByRole("button", { name: /user menu/i });
+    fireEvent.click(userButton);
+
+    expect(screen.queryByText(/dark mode/i)).not.toBeInTheDocument();
+  });
+
+  it("renders and triggers the theme toggle in the desktop menu", () => {
+    const onThemeToggle = vi.fn();
+    render(
+      <Navbar
+        {...defaultProps}
+        user={mockUser}
+        onThemeToggle={onThemeToggle}
+      />,
+    );
+
+    const userButton = screen.getByRole("button", { name: /user menu/i });
+    fireEvent.click(userButton);
+
+    const themeToggleText = screen.getByText(/dark mode/i);
+    expect(themeToggleText).toBeInTheDocument();
+
+    const toggleButton = themeToggleText.closest("button");
+    fireEvent.click(toggleButton!);
+
+    expect(onThemeToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders and triggers the theme toggle in the mobile menu", async () => {
+    const onThemeToggle = vi.fn();
+    render(
+      <Navbar
+        {...defaultProps}
+        user={mockUser}
+        onThemeToggle={onThemeToggle}
+      />,
+    );
+
+    const hamburger = screen.getByRole("button", { name: /open main menu/i });
+    fireEvent.click(hamburger);
+
+    // Wait for the mobile menu PopoverPanel to render
+    const themeToggleText = await screen.findByText(/dark mode/i);
+    expect(themeToggleText).toBeInTheDocument();
+
+    const toggleButton = themeToggleText.closest("button");
+    fireEvent.click(toggleButton!);
+
+    expect(onThemeToggle).toHaveBeenCalledTimes(1);
   });
 });

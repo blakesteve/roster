@@ -30,7 +30,7 @@ The **Switch** component is used to toggle a single setting on or off **immediat
     },
     size: {
       control: "inline-radio",
-      options: ["sm", "md", "lg"],
+      options: ["xs", "sm", "md", "lg"], // <-- Added xs here!
       description: "The size of the track and thumb.",
       table: { defaultValue: { summary: "md" } },
     },
@@ -96,21 +96,28 @@ export const DangerZone: Story = {
 // 4. Sizes Showcase
 export const Sizes: Story = {
   render: () => (
-    <div className="flex flex-col gap-6 p-4 border rounded-lg bg-gray-50">
+    <div className="flex flex-col gap-6 p-4 border border-gray-200 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-gray-900 transition-colors">
+      <SwitchWithState
+        label="Extra Small Switch"
+        description="Designed specifically for dense dropdowns and inline text."
+        size="xs"
+        checked={true}
+      />
+      <hr className="border-gray-200 dark:border-gray-800" />
       <SwitchWithState
         label="Small Switch"
         description="Fits in dense toolbars."
         size="sm"
         checked={true}
       />
-      <hr className="border-gray-200" />
+      <hr className="border-gray-200 dark:border-gray-800" />
       <SwitchWithState
         label="Medium Switch"
         description="The default size for forms."
         size="md"
         checked={true}
       />
-      <hr className="border-gray-200" />
+      <hr className="border-gray-200 dark:border-gray-800" />
       <SwitchWithState
         label="Large Switch"
         description="High visibility for mobile touch targets."
@@ -124,7 +131,7 @@ export const Sizes: Story = {
     docs: {
       description: {
         story:
-          "Available in three sizes: `sm`, `md` (default), and `lg`. Use `lg` for mobile-first interfaces where touch targets need to be larger.",
+          "Available in four sizes: `xs`, `sm`, `md` (default), and `lg`. Use `xs` for dense menus and `lg` for mobile-first interfaces where touch targets need to be larger.",
       },
     },
   },
