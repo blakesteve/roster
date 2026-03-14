@@ -40,7 +40,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {branded && (
           <div
             className={cn(
-              "absolute top-0 left-0 right-0 h-1 z-10",
+              "absolute top-0 inset-x-0 h-1 z-10",
               !brandColorTop && "bg-orange-500",
             )}
             style={
@@ -50,13 +50,13 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         )}
 
         {/* --- Content --- */}
-        {children}
+        <div className="relative z-0">{children}</div>
 
         {/* --- Bottom Brand Stripe --- */}
         {branded && (
           <div
             className={cn(
-              "absolute bottom-0 left-0 right-0 h-1 z-10",
+              "absolute bottom-0 inset-x-0 h-1 z-10",
               !brandColorBottom && "bg-primary-500",
             )}
             style={

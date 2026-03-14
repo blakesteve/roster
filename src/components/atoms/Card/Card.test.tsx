@@ -20,10 +20,15 @@ describe("Card Component", () => {
     const bottomStripe = container.querySelector(".bg-primary-500");
 
     expect(topStripe).toBeInTheDocument();
-    expect(topStripe).toHaveClass("absolute", "top-0", "h-1");
+    expect(topStripe).toHaveClass("absolute", "top-0", "inset-x-0", "h-1");
 
     expect(bottomStripe).toBeInTheDocument();
-    expect(bottomStripe).toHaveClass("absolute", "bottom-0", "h-1");
+    expect(bottomStripe).toHaveClass(
+      "absolute",
+      "bottom-0",
+      "inset-x-0",
+      "h-1",
+    );
   });
 
   it("applies custom hex colors to brand stripes", () => {
@@ -43,9 +48,30 @@ describe("Card Component", () => {
     expect(bottomStripe).toHaveStyle({ backgroundColor: customBottom });
   });
 
-  it("applies filled variant classes", () => {
-    const { container } = render(<Card variant="filled">Content</Card>);
-    expect(container.firstChild).toHaveClass("bg-gray-300");
+  it("applies white (default) variant classes including native dark mode", () => {
+    const { container } = render(<Card>Content</Card>);
+    expect(container.firstChild).toHaveClass(
+      "bg-white",
+      "dark:bg-gray-800",
+      "text-gray-900",
+    );
+  });
+
+  it("applies soft variant classes (replacing filled)", () => {
+    const { container } = render(<Card variant="soft">Content</Card>);
+    expect(container.firstChild).toHaveClass(
+      "bg-gray-100",
+      "dark:bg-gray-900/50",
+    );
+  });
+
+  it("applies slate variant classes", () => {
+    const { container } = render(<Card variant="slate">Content</Card>);
+    expect(container.firstChild).toHaveClass(
+      "bg-gray-700",
+      "dark:bg-gray-900",
+      "text-gray-100",
+    );
   });
 
   it("applies padding classes correctly", () => {
