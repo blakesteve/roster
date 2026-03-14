@@ -1,9 +1,8 @@
 import { useState } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
-import { Dialog } from "./Dialog";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Dialog, type DialogProps } from "./Dialog";
 import { Button } from "../../atoms/Button/Button";
 import { Input } from "../../atoms/Input/Input";
-import { Select } from "../../atoms/Select/Select";
 
 const meta = {
   title: "Organisms/Dialog",
@@ -18,13 +17,20 @@ const meta = {
 
 The **Dialog** component interrupts the user's workflow to demand a response or convey critical information. Built on top of \`@headlessui/react\`, it handles focus trapping, escape-key closing, and screen-reader announcements automatically.
 
+#### 🌙 Native Dark Mode
+This component relies on Tailwind's native \`dark:\` classes. It automatically listens to the \`.dark\` class on your document's root. The typography uses \`text-inherit\` and opacity utilities to guarantee perfect contrast across wildly different background colors without manual text-color prop drilling.
+
 #### 🚀 Implementation Instructions
 
 Because the Dialog is a controlled component, its visibility is managed by the parent using standard React state. 
 
+The API leverages two dimensions of styling:
+1. **\`variant\`**: Defines the base background and text color (e.g., \`white\`, \`slate\`, \`primary\`).
+2. **\`status\`**: Overlays semantic accents on top of the base variant (e.g., \`destructive\`, \`success\`).
+
 \`\`\`tsx
 import { useState } from 'react';
-import { Dialog, Button } from 'roster';
+import { Dialog, Button } from '@blakesteve/roster';
 
 const Feature = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,7 +44,8 @@ const Feature = () => {
         onClose={() => setIsOpen(false)}
         title="Confirm Deletion"
         description="This action cannot be undone."
-        variant="destructive"
+        variant="white"
+        status="destructive" // Applies the red error border
       >
         <div className="flex justify-end gap-3 mt-6">
           <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
@@ -84,17 +91,16 @@ const Feature = () => {
     },
     variant: {
       control: "select",
-      options: ["default", "destructive", "success", "glass"],
+      options: ["white", "slate", "primary", "glass"],
       description:
-        "Applies contextual semantic styling. Uses top-border accents for status, or backdrop blurring for the glass effect.",
-      table: { defaultValue: { summary: "default" } },
+        "The base visual style and background color of the dialog. Adapts automatically to dark mode.",
+      table: { defaultValue: { summary: "white" } },
     },
-    themeMode: {
-      control: "radio",
-      options: ["light", "dark"],
-      description:
-        "Overrides the OS-level theme preference to force the dialog into a specific color context.",
-      table: { defaultValue: { summary: "light" } },
+    status: {
+      control: "select",
+      options: ["default", "destructive", "success"],
+      description: "Applies semantic top-border accents over the base variant.",
+      table: { defaultValue: { summary: "default" } },
     },
     children: {
       description:
@@ -107,7 +113,7 @@ const Feature = () => {
 export default meta;
 type Story = StoryObj<typeof Dialog>;
 
-const DialogWrapper = (args: any) => {
+const DialogWrapper = (args: Omit<DialogProps, "isOpen" | "onClose">) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -120,19 +126,21 @@ const DialogWrapper = (args: any) => {
   );
 };
 
-export const DefaultLight: Story = {
+export const WhiteStandard: Story = {
   render: (args) => <DialogWrapper {...args} />,
   args: {
     title: "Invite Teammates",
     description: "Send invitations to join your roster.",
     size: "md",
-    variant: "default",
-    themeMode: "light",
+    variant: "white",
+    status: "default",
     children: (
       <div className="mt-4 flex flex-col gap-4 text-left">
         <Input placeholder="Enter email address..." />
         <div className="flex justify-end gap-3 pt-2">
-          <Button variant="outline">Cancel</Button>
+          <Button variant="outline" colorScheme="neutral">
+            Cancel
+          </Button>
           <Button variant="solid" colorScheme="primary">
             Send Invite
           </Button>
@@ -144,63 +152,85 @@ export const DefaultLight: Story = {
     docs: {
       description: {
         story:
-          "The standard `md` size with `default` styling. Ideal for quick, single-input actions or standard confirmations.",
+          "The standard `white` variant. Crisp white in light mode, dropping to a sophisticated dark gray in dark mode. Ideal for standard forms.",
       },
     },
   },
 };
 
-export const LargeForm: Story = {
+export const SlateMoody: Story = {
   render: (args) => <DialogWrapper {...args} />,
   args: {
-    title: "Create New Squad",
-    description: "Fill out the details below to start a new season.",
-    size: "xl",
-    variant: "default",
-    themeMode: "light",
+    title: "System Update Available",
+    description: "Version 2.4.0 is ready to install.",
+    size: "sm",
+    variant: "slate",
+    status: "default",
     children: (
-      <form className="space-y-5 mt-4 text-left">
-        <Input label="Squad Name" placeholder="e.g. The Recruits" required />
-        <Select
-          label="Privacy Setting"
-          value="public"
-          onChange={() => {}}
-          options={[
-            { label: "Public - Anyone can join", value: "public" },
-            { label: "Invite Only - Require approval", value: "private" },
-          ]}
-        />
-        <div className="pt-6 flex justify-end gap-3 border-t border-gray-200">
-          <Button variant="outline">Cancel</Button>
-          <Button variant="solid" colorScheme="primary">
-            Create Squad
-          </Button>
-        </div>
-      </form>
+      <div className="mt-6 flex justify-end gap-3">
+        <Button
+          variant="outline"
+          className="text-white border-gray-500 hover:bg-gray-600"
+        >
+          Remind Me Later
+        </Button>
+        <Button variant="solid" colorScheme="primary">
+          Install Now
+        </Button>
+      </div>
     ),
   },
   parameters: {
     docs: {
       description: {
         story:
-          "Demonstrates the `xl` size variant utilized to house a complex data entry form, integrating multiple atomic input components like `Select` and `Input`.",
+          "The `slate` variant provides a solid mid-dark gray in light mode, dropping to a deep, moody gray in dark mode. Great for technical prompts or terminal-style interfaces.",
       },
     },
   },
 };
 
-export const DestructiveDark: Story = {
+export const PrimaryBrand: Story = {
+  render: (args) => <DialogWrapper {...args} />,
+  args: {
+    title: "Welcome to MegaSquad!",
+    description: "You're almost ready to make your first pick.",
+    size: "md",
+    variant: "primary",
+    status: "default",
+    children: (
+      <div className="mt-6 flex justify-end gap-3">
+        <Button
+          variant="solid"
+          className="bg-white text-primary-700 hover:bg-gray-100"
+        >
+          Let's Go!
+        </Button>
+      </div>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The `primary` variant drenches the dialog in your brand color. The typography automatically inherits the color to ensure it remains perfectly readable.",
+      },
+    },
+  },
+};
+
+export const DestructiveAction: Story = {
   render: (args) => <DialogWrapper {...args} />,
   args: {
     title: "Delete League",
     description:
       "Are you sure you want to delete this league? All data will be permanently removed. This action cannot be undone.",
     size: "md",
-    variant: "destructive",
-    themeMode: "dark",
+    variant: "white",
+    status: "destructive",
     children: (
       <div className="mt-6 flex justify-end gap-3">
-        <Button variant="outline" className="text-gray-300 border-gray-600">
+        <Button variant="outline" colorScheme="neutral">
           Cancel
         </Button>
         <Button variant="solid" colorScheme="error">
@@ -213,20 +243,50 @@ export const DestructiveDark: Story = {
     docs: {
       description: {
         story:
-          'The `destructive` variant forces a thick, semantic error border at the top of the dialog. Shown here paired with `themeMode="dark"` for high contrast.',
+          'Demonstrates the composability of the new API. The `status="destructive"` prop applies a semantic error border on top of the `variant="white"` base style.',
       },
     },
   },
 };
 
-export const GlassDark: Story = {
+export const SuccessSlate: Story = {
+  render: (args) => <DialogWrapper {...args} />,
+  args: {
+    title: "Payment Successful",
+    description: "Your subscription has been renewed for another year.",
+    size: "sm",
+    variant: "slate",
+    status: "success",
+    children: (
+      <div className="mt-6 flex justify-end gap-3">
+        <Button
+          variant="solid"
+          colorScheme="success"
+          className="w-full justify-center"
+        >
+          View Receipt
+        </Button>
+      </div>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Another example of composability: a `status="success"` border applied to a `variant="slate"` dialog.',
+      },
+    },
+  },
+};
+
+export const GlassEffect: Story = {
   render: (args) => <DialogWrapper {...args} />,
   args: {
     title: "Pro Feature",
     description: "Upgrade your account to access advanced analytics.",
     size: "sm",
     variant: "glass",
-    themeMode: "dark",
+    status: "default",
     children: (
       <div className="mt-6 flex flex-col gap-3">
         <Button
@@ -243,13 +303,13 @@ export const GlassDark: Story = {
     docs: {
       description: {
         story:
-          "The `glass` variant removes the heavy backdrop blur and applies it directly to the dialog panel. This creates a stunning frosted glass effect when triggered over image-heavy or vibrant backgrounds.",
+          "The `glass` variant utilizes `backdrop-blur` directly on the panel. This creates a stunning frosted effect when triggered over image-heavy backgrounds.",
       },
     },
   },
   decorators: [
     (Story) => (
-      <div className="p-24 bg-linear-to-br from-indigo-900 via-purple-900 to-slate-900 rounded-xl flex justify-center">
+      <div className="p-24 bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-900 dark:via-purple-900 dark:to-slate-900 rounded-xl flex justify-center transition-colors">
         <Story />
       </div>
     ),
