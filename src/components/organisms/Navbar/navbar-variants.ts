@@ -5,10 +5,21 @@ export const navbarVariants = cva(
   {
     variants: {
       variant: {
-        slate: "bg-gray-700 border-gray-600 text-gray-100", 
-        primary: "bg-primary-900 border-primary-800 text-white", 
-        white: "bg-white border-gray-200 text-gray-900",
-        transparent: "bg-transparent border-transparent text-white",
+        // Slate: A solid mid-dark gray in light mode, drops to a deep, moody gray in dark mode
+        slate: 
+          "bg-gray-700 border-gray-600 text-gray-100 dark:bg-gray-900 dark:border-gray-800", 
+        
+        // Primary: Bold brand color in light mode, deep rich brand color in dark mode
+        primary: 
+          "bg-primary-700 border-primary-600 text-white dark:bg-primary-950 dark:border-primary-900", 
+        
+        // White: Crisp white in light mode, elevated surface gray in dark mode
+        white: 
+          "bg-white border-gray-200 text-gray-900 dark:bg-gray-600 dark:border-gray-700 dark:text-gray-100",
+        
+        // Transparent: Stays invisible, adapts text for standard readability if no image is behind it
+        transparent: 
+          "bg-transparent border-transparent text-gray-900 dark:text-white",
       },
       position: {
         fixed: "fixed top-0 left-0 right-0",
@@ -18,7 +29,7 @@ export const navbarVariants = cva(
     },
     defaultVariants: {
       variant: "slate",
-      position: "fixed",
+      position: "sticky",
     },
   }
 );

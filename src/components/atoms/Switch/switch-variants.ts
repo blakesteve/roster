@@ -5,12 +5,13 @@ export const switchTrackVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-gray-200 data-[checked]:bg-primary-500 focus-visible:ring-primary-500",
-        success: "bg-gray-200 data-[checked]:bg-green-500 focus-visible:ring-green-500",
-        danger:  "bg-gray-200 data-[checked]:bg-error-500 focus-visible:ring-error-500",
-        neutral: "bg-gray-200 data-[checked]:bg-gray-600 focus-visible:ring-gray-600",
+        primary: "bg-gray-200 dark:bg-gray-700 data-[checked]:bg-primary-500 focus-visible:ring-primary-500",
+        success: "bg-gray-200 dark:bg-gray-700 data-[checked]:bg-green-500 focus-visible:ring-green-500",
+        danger:  "bg-gray-200 dark:bg-gray-700 data-[checked]:bg-error-500 focus-visible:ring-error-500",
+        neutral: "bg-gray-200 dark:bg-gray-700 data-[checked]:bg-gray-600 dark:data-[checked]:bg-gray-500 focus-visible:ring-gray-600",
       },
       size: {
+        xs: "h-4 w-7",
         sm: "h-5 w-9",
         md: "h-6 w-11",
         lg: "h-7 w-14",
@@ -28,6 +29,7 @@ export const switchThumbVariants = cva(
   {
     variants: {
       size: {
+        xs: "h-3 w-3 translate-x-0 group-data-[checked]:translate-x-3",
         sm: "h-4 w-4 translate-x-0 group-data-[checked]:translate-x-4",
         md: "h-5 w-5 translate-x-0 group-data-[checked]:translate-x-5",
         lg: "h-6 w-6 translate-x-0 group-data-[checked]:translate-x-7",

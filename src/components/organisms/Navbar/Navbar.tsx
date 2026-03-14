@@ -15,6 +15,7 @@ import {
   faXmark,
   faInbox,
   faRightFromBracket,
+  faMoon,
 } from "@fortawesome/free-solid-svg-icons";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
@@ -22,6 +23,7 @@ import { Button } from "../../atoms/Button/Button";
 import { Link } from "../../atoms/Link/Link";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Avatar } from "../../atoms/Avatar/Avatar";
+import { Switch } from "../../atoms/Switch/Switch";
 import { navbarVariants } from "./navbar-variants";
 
 export interface NavItem {
@@ -45,6 +47,7 @@ export interface NavbarProps
   };
   onLogout: () => void;
   onInboxClick: () => void;
+  onThemeToggle?: () => void;
   themeMode?: "light" | "dark";
   notificationVariant?:
     | "primary"
@@ -66,9 +69,10 @@ const Navbar = ({
   user,
   onLogout,
   onInboxClick,
+  onThemeToggle,
   className,
-  variant,
-  position,
+  variant = "slate",
+  position = "sticky",
   themeMode,
   notificationVariant = "error",
   ...props
@@ -78,27 +82,30 @@ const Navbar = ({
   const computedMode = themeMode ?? (variant === "white" ? "light" : "dark");
   const isDarkMode = computedMode === "dark";
 
-  const textColors = {
-    brand: isDarkMode
-      ? "text-white hover:text-white/80"
+  // Determines if the main navbar strip is currently a dark surface
+  const isDarkSurface =
+    variant === "slate" ||
+    variant === "primary" ||
+    (variant === "white" && isDarkMode) ||
+    (variant === "transparent" && isDarkMode);
+
+  // Surface colors strictly apply to the main Navbar strip
+  const surfaceColors = {
+    brand: isDarkSurface
+      ? "text-white hover:text-gray-200"
       : "text-gray-900 hover:text-gray-600",
 
-    linkBase: isDarkMode
+    linkBase: isDarkSurface
       ? "text-gray-300 hover:text-white"
-      : "text-gray-500 hover:text-gray-900",
+      : "text-gray-600 hover:text-gray-900",
 
-    linkActive: isDarkMode
-      ? "text-primary-400 font-semibold hover:text-primary-300"
+    linkActive: isDarkSurface
+      ? "text-primary-300 font-semibold hover:text-primary-200"
       : "text-primary-600 font-semibold hover:text-primary-700",
 
-    mobileBg: isDarkMode ? "bg-gray-700" : "bg-white",
-    mobileText: isDarkMode ? "text-white" : "text-gray-900",
-    mobileHover: isDarkMode ? "hover:bg-gray-600" : "hover:bg-gray-50",
-    mobileActiveBg: isDarkMode ? "bg-gray-600" : "bg-gray-100",
-
-    hamburger: isDarkMode
-      ? "text-gray-400 hover:bg-white/10 hover:text-white"
-      : "text-gray-400 hover:bg-gray-100 hover:text-gray-500",
+    hamburger: isDarkSurface
+      ? "text-gray-300 hover:bg-white/10 hover:text-white"
+      : "text-gray-500 hover:bg-gray-100 hover:text-gray-700",
   };
 
   return (
@@ -118,7 +125,7 @@ const Navbar = ({
               variant="neutral"
               className={cn(
                 "flex items-center gap-3 transition-opacity no-underline",
-                textColors.brand,
+                surfaceColors.brand,
               )}
             >
               <img
@@ -145,7 +152,9 @@ const Navbar = ({
                       variant="neutral"
                       className={cn(
                         "text-sm font-medium transition-colors duration-200 no-underline",
-                        isActive ? textColors.linkActive : textColors.linkBase,
+                        isActive
+                          ? surfaceColors.linkActive
+                          : surfaceColors.linkBase,
                       )}
                     >
                       {item.label}
@@ -191,43 +200,96 @@ const Navbar = ({
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      {hasNotifications && (
+                    <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black/5 dark:ring-white/10 focus:outline-none divide-y divide-gray-100 dark:divide-gray-700">
+                      <div className="py-1">
+                        {hasNotifications && (
+                          <MenuItem>
+                            {({ focus }) => (
+                              <Button
+                                variant="ghost"
+                                colorScheme="neutral"
+                                size="sm"
+                                onClick={onInboxClick}
+                                className={cn(
+                                  "w-full justify-start rounded-none px-4",
+                                  focus && "bg-gray-50 dark:bg-gray-700",
+                                )}
+                                startIcon={
+                                  <FontAwesomeIcon
+                                    icon={faInbox}
+                                    className="text-primary-500 w-4"
+                                  />
+                                }
+                              >
+                                Inbox ({user.notificationCount})
+                              </Button>
+                            )}
+                          </MenuItem>
+                        )}
+
+                        {/* THEME TOGGLE (DESKTOP) */}
+                        {onThemeToggle && (
+                          <MenuItem>
+                            {({ focus }) => (
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault(); // Keeps menu open
+                                  onThemeToggle();
+                                }}
+                                className={cn(
+                                  "flex w-full items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-200 cursor-pointer transition-colors",
+                                  focus && "bg-gray-50 dark:bg-gray-700",
+                                )}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <FontAwesomeIcon
+                                    icon={faMoon}
+                                    className={cn(
+                                      "w-4 transition-colors",
+                                      isDarkMode
+                                        ? "text-amber-500"
+                                        : "text-gray-400",
+                                    )}
+                                  />
+                                  <span className="font-medium">Dark Mode</span>
+                                </div>
+                                <Switch
+                                  checked={isDarkMode}
+                                  onChange={() => {}} // Controlled by the parent button click
+                                  size="xs"
+                                  variant="neutral"
+                                  className="pointer-events-none m-0"
+                                />
+                              </button>
+                            )}
+                          </MenuItem>
+                        )}
+                      </div>
+
+                      <div className="py-1">
                         <MenuItem>
                           {({ focus }) => (
-                            <button
-                              onClick={onInboxClick}
+                            <Button
+                              variant="ghost"
+                              colorScheme="neutral"
+                              size="sm"
+                              onClick={onLogout}
                               className={cn(
-                                focus ? "bg-gray-100" : "",
-                                "flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 border-b border-gray-100",
+                                "w-full justify-start rounded-none px-4",
+                                focus && "bg-gray-50 dark:bg-gray-700",
                               )}
+                              startIcon={
+                                <FontAwesomeIcon
+                                  icon={faRightFromBracket}
+                                  className="text-gray-400 dark:text-gray-500 w-4"
+                                />
+                              }
                             >
-                              <FontAwesomeIcon
-                                icon={faInbox}
-                                className="text-primary-500"
-                              />
-                              <span>Inbox ({user.notificationCount})</span>
-                            </button>
+                              Log Out
+                            </Button>
                           )}
                         </MenuItem>
-                      )}
-                      <MenuItem>
-                        {({ focus }) => (
-                          <button
-                            onClick={onLogout}
-                            className={cn(
-                              focus ? "bg-gray-100" : "",
-                              "flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700",
-                            )}
-                          >
-                            <FontAwesomeIcon
-                              icon={faRightFromBracket}
-                              className="text-gray-400"
-                            />
-                            Sign out
-                          </button>
-                        )}
-                      </MenuItem>
+                      </div>
                     </MenuItems>
                   </Transition>
                 </Menu>
@@ -243,7 +305,7 @@ const Navbar = ({
               <PopoverButton
                 className={cn(
                   "inline-flex items-center justify-center rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500",
-                  textColors.hamburger,
+                  surfaceColors.hamburger,
                 )}
               >
                 <span className="sr-only">Open main menu</span>
@@ -283,27 +345,21 @@ const Navbar = ({
               focus
               className="absolute top-0 inset-x-0 z-30 origin-top-right transform p-2 transition md:hidden"
             >
-              <div
-                className={cn(
-                  "rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 divide-y divide-gray-700",
-                  textColors.mobileBg,
-                )}
-              >
+              <div className="rounded-lg shadow-lg ring-1 ring-black/5 dark:ring-white/10 divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
                 <div className="px-5 pt-5 pb-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <img src={logoSrc} alt={brandName} className="h-8 w-8" />
-                      <span className={cn("font-bold", textColors.mobileText)}>
+                      <img
+                        src={logoSrc}
+                        alt={brandName}
+                        className="h-8 w-8 rounded-md"
+                      />
+                      <span className="font-bold text-gray-900 dark:text-white">
                         {brandName}
                       </span>
                     </div>
                     <div className="-mr-2">
-                      <PopoverButton
-                        className={cn(
-                          "inline-flex items-center justify-center rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500",
-                          textColors.hamburger,
-                        )}
-                      >
+                      <PopoverButton className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-500 dark:hover:text-white focus:outline-none">
                         <span className="sr-only">Close menu</span>
                         <FontAwesomeIcon
                           icon={faXmark}
@@ -326,19 +382,19 @@ const Navbar = ({
                             onClick={() => close()}
                             variant="neutral"
                             className={cn(
-                              "-m-3 flex items-center rounded-md p-3 no-underline",
-                              textColors.mobileHover,
+                              "-m-3 flex items-center rounded-md p-3 no-underline transition-colors",
+                              "hover:bg-gray-50 dark:hover:bg-gray-700",
                               isActive
-                                ? textColors.mobileActiveBg
-                                : textColors.mobileText,
+                                ? "bg-gray-50 dark:bg-gray-700"
+                                : "text-gray-900 dark:text-gray-100",
                             )}
                           >
                             <span
                               className={cn(
                                 "ml-3 text-base font-medium",
                                 isActive
-                                  ? "text-primary-400 font-bold"
-                                  : textColors.mobileText,
+                                  ? "text-primary-600 dark:text-primary-400 font-bold"
+                                  : "text-gray-900 dark:text-gray-100",
                               )}
                             >
                               {item.label}
@@ -353,28 +409,58 @@ const Navbar = ({
                 {user && (
                   <div className="py-6 px-5 space-y-4">
                     {hasNotifications && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        colorScheme="neutral"
                         onClick={() => {
                           onInboxClick();
                           close();
                         }}
-                        className={cn(
-                          "flex w-full items-center justify-between rounded-md px-4 py-2 text-base font-medium transition-colors",
-                          textColors.mobileHover,
-                          textColors.mobileText,
-                        )}
+                        className="w-full justify-between px-4 text-base font-medium hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        endIcon={
+                          <Badge
+                            fill="solid"
+                            size="xs"
+                            statusBadge
+                            variant={notificationVariant}
+                          >
+                            {user.notificationCount}
+                          </Badge>
+                        }
                       >
-                        <span>Pending Invitations</span>
-                        <Badge
-                          fill="solid"
-                          size="xs"
-                          statusBadge
-                          variant={notificationVariant}
-                        >
-                          {user.notificationCount}
-                        </Badge>
+                        Pending Invitations
+                      </Button>
+                    )}
+
+                    {/* THEME TOGGLE (MOBILE) */}
+                    {onThemeToggle && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault(); // Keeps mobile slide-out open
+                          onThemeToggle();
+                        }}
+                        className="flex w-full items-center justify-between rounded-md px-4 py-2 text-base transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      >
+                        <div className="flex items-center gap-3 font-medium">
+                          <FontAwesomeIcon
+                            icon={faMoon}
+                            className={cn(
+                              "w-5 transition-colors",
+                              isDarkMode ? "text-amber-500" : "text-gray-400",
+                            )}
+                          />
+                          <span>Dark Mode</span>
+                        </div>
+                        <Switch
+                          checked={isDarkMode}
+                          onChange={() => {}} // Controlled by parent button click
+                          size="sm"
+                          variant="neutral"
+                          className="pointer-events-none m-0"
+                        />
                       </button>
                     )}
+
                     <Button
                       variant="outline"
                       colorScheme="error"

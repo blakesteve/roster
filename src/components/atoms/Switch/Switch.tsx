@@ -29,6 +29,8 @@ const Switch = ({
   className,
   ariaLabel,
 }: SwitchProps) => {
+  const computedAriaLabel = !label ? ariaLabel || "Toggle setting" : undefined;
+
   return (
     <Field
       as="div"
@@ -40,7 +42,7 @@ const Switch = ({
             <Label
               passive
               className={cn(
-                "text-sm font-medium text-gray-900",
+                "text-sm font-medium text-gray-900 dark:text-gray-100",
                 disabled && "opacity-50",
               )}
             >
@@ -49,7 +51,10 @@ const Switch = ({
           )}
           {description && (
             <Description
-              className={cn("text-xs text-gray-500", disabled && "opacity-50")}
+              className={cn(
+                "text-xs text-gray-500 dark:text-gray-400",
+                disabled && "opacity-50",
+              )}
             >
               {description}
             </Description>
@@ -61,12 +66,9 @@ const Switch = ({
         checked={checked}
         onChange={onChange}
         disabled={disabled}
-        aria-label={ariaLabel}
+        aria-label={computedAriaLabel}
         className={cn(switchTrackVariants({ variant, size }))}
       >
-        <span className="sr-only">
-          {label || ariaLabel || "Toggle setting"}
-        </span>
         <span
           aria-hidden="true"
           className={cn(switchThumbVariants({ size }))}
