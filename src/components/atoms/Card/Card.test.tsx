@@ -60,7 +60,7 @@ describe("Card Component", () => {
   it("applies soft variant classes (replacing filled)", () => {
     const { container } = render(<Card variant="soft">Content</Card>);
     expect(container.firstChild).toHaveClass(
-      "bg-gray-100",
+      "bg-gray-200",
       "dark:bg-gray-900/50",
     );
   });

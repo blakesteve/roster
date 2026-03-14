@@ -12,7 +12,7 @@ export const cardVariants = cva(
         
         // A subtle gray background without a heavy border.
         soft:  
-          "bg-gray-100 border border-transparent text-gray-900 dark:bg-gray-900/50 dark:border-gray-800 dark:text-gray-100",
+          "bg-gray-200 border border-transparent text-gray-900 dark:bg-gray-900/50 dark:border-gray-800 dark:text-gray-100",
         
         // Moody slate, baby.
         slate: 
