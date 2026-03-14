@@ -10,10 +10,28 @@ const meta = {
     docs: {
       description: {
         component:
-          "A fundamental interactive atom that toggles the visibility of content. It can be used standalone or stacked to create an Accordion.",
+          "A fundamental interactive atom that toggles the visibility of content. Fully responsive and theme-aware (supports dark mode). It can be used standalone or stacked to create an Accordion.",
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <div className="p-8 space-y-12">
+        <div className="light bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+            Light Mode Preview
+          </p>
+          <Story />
+        </div>
+        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
+          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+            Dark Mode Preview
+          </p>
+          <Story />
+        </div>
+      </div>
+    ),
+  ],
   argTypes: {
     variant: {
       control: "select",
@@ -22,6 +40,7 @@ const meta = {
     },
     defaultOpen: {
       control: "boolean",
+      description: "Whether the disclosure is open by default.",
     },
   },
 } satisfies Meta<typeof Disclosure>;
@@ -29,7 +48,9 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// 1. Soft (Default)
+/**
+ * The standard subtle appearance. Great for FAQs or secondary settings.
+ */
 export const Soft: Story = {
   args: {
     variant: "soft",
@@ -39,7 +60,9 @@ export const Soft: Story = {
   },
 };
 
-// 2. Filled (MegaSquad Style)
+/**
+ * A heavier visual weight, providing strong contrast against page backgrounds.
+ */
 export const Filled: Story = {
   args: {
     variant: "filled",
@@ -47,14 +70,18 @@ export const Filled: Story = {
     defaultOpen: true,
     children: (
       <div className="space-y-2">
-        <p className="font-semibold">Pick Timer: 60s</p>
-        <p className="text-gray-600">Auto-pick enabled</p>
+        <p className="font-semibold text-gray-900 dark:text-gray-100">
+          Pick Timer: 60s
+        </p>
+        <p className="text-gray-600 dark:text-gray-400">Auto-pick enabled</p>
       </div>
     ),
   },
 };
 
-// 3. Outline
+/**
+ * A clean, bordered look. Best used when placed against a solid white or very dark background to establish clear boundaries.
+ */
 export const Outline: Story = {
   args: {
     variant: "outline",
@@ -67,5 +94,16 @@ export const Outline: Story = {
       </div>
     ),
     children: "Next billing date: Feb 28, 2026.",
+  },
+};
+
+/**
+ * A minimalist approach that blends directly into the background until hovered.
+ */
+export const Ghost: Story = {
+  args: {
+    variant: "ghost",
+    title: "Advanced Options",
+    children: "Only show this to power users who want to break things.",
   },
 };

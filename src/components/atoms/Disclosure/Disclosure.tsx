@@ -58,10 +58,10 @@ const Disclosure = ({
           isOpen ? "rounded-t-md rounded-b-none" : "rounded-md",
         )}
       >
-        <span className="flex-1 text-left">{title}</span>
+        <span className="flex-1 text-left text-current">{title}</span>
         <span
           className={cn(
-            "ml-2 flex items-center transition-transform duration-200",
+            "ml-2 flex items-center transition-transform duration-200 text-current",
             isOpen ? "rotate-180" : "",
           )}
         >
