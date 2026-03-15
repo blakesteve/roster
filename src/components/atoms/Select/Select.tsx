@@ -1,8 +1,9 @@
 import { Fragment } from "react";
 import {
+  Field,
+  Label,
   Listbox,
   ListboxButton,
-  Label,
   ListboxOption,
   ListboxOptions,
   Transition,
@@ -46,14 +47,18 @@ const Select = ({
   const selectedOption = options.find((opt) => opt.value === value);
 
   return (
-    <Listbox value={value ?? undefined} onChange={onChange} disabled={disabled}>
-      <div className={cn("flex flex-col gap-1.5", className)}>
-        {label && (
-          <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
-            {label}
-          </Label>
-        )}
+    <Field className={cn("flex flex-col gap-1.5", className)}>
+      {label && (
+        <Label className="block text-sm font-medium text-inherit text-left">
+          {label}
+        </Label>
+      )}
 
+      <Listbox
+        value={value ?? undefined}
+        onChange={onChange}
+        disabled={disabled}
+      >
         <div className="relative">
           <ListboxButton
             className={cn(selectTriggerVariants({ variant, error }))}
@@ -94,24 +99,18 @@ const Select = ({
                   value={option.value}
                   disabled={option.disabled}
                   className={cn(
-                    // Added 'group' so children can react to the selected/focus states
                     "group relative cursor-default select-none py-2.5 pl-4 pr-9 transition-colors",
                     "text-gray-900 dark:text-gray-100",
-                    // Focus (Hover) State
                     "data-focus:bg-primary-100 data-focus:text-primary-900",
                     "dark:data-focus:bg-primary-900/30 dark:data-focus:text-primary-100",
-                    // Selected State
                     "data-selected:bg-gray-50 dark:data-selected:bg-gray-700/50",
-                    // Disabled State
                     "data-disabled:opacity-50 data-disabled:cursor-not-allowed",
                   )}
                 >
-                  {/* Replaced render props with group-data-[*] modifiers! */}
                   <span className="block truncate font-normal group-data-selected:font-semibold">
                     {option.label}
                   </span>
 
-                  {/* The checkmark is hidden by default, and visible when the option is selected */}
                   <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary-600 dark:text-primary-400 group-data-selected:flex">
                     <FontAwesomeIcon icon={faCheck} className="h-3.5 w-3.5" />
                   </span>
@@ -120,8 +119,8 @@ const Select = ({
             </ListboxOptions>
           </Transition>
         </div>
-      </div>
-    </Listbox>
+      </Listbox>
+    </Field>
   );
 };
 
