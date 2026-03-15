@@ -8,7 +8,7 @@ export const selectTriggerVariants = cva(
         white:
           "bg-white text-gray-900 ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-700 dark:hover:bg-gray-700",
         soft:
-          "bg-gray-100 text-gray-900 ring-transparent hover:bg-gray-200 dark:bg-gray-900/50 dark:text-gray-100 dark:hover:bg-gray-800",
+          "bg-gray-100 text-gray-900 ring-transparent hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700",
         slate:
           "bg-gray-700 text-gray-100 ring-transparent hover:bg-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800",
         outline:
