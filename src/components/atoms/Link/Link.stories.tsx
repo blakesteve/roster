@@ -1,11 +1,8 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Link } from "./Link";
 
 // --- Mock Components for Storybook ---
-// These simulate the behavior of real frameworks so we can render them here.
-// In a real app, you would import these from 'react-router' or 'next/link'.
-
 const MockRouterLink = ({
   to,
   children,
@@ -64,11 +61,33 @@ const meta = {
 
 The \`<Link>\` component is **framework agnostic**. It defaults to a standard HTML \`<a>\` tag, but can morph into any routing component (React Router, Next.js, TanStack, etc.) using the \`as\` prop.
 
-It preserves Roster's accessibility and styling (focus rings, hover states) while delegating navigation logic to your framework.
+It preserves Roster's accessibility and styling (focus rings, hover states, dark mode) while delegating navigation logic to your framework.
 `,
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <div className="p-8 space-y-12">
+        <div className="light bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+            Light Mode Preview
+          </p>
+          <div className="max-w-md">
+            <Story />
+          </div>
+        </div>
+        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
+          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+            Dark Mode Preview
+          </p>
+          <div className="max-w-md">
+            <Story />
+          </div>
+        </div>
+      </div>
+    ),
+  ],
   argTypes: {
     variant: {
       control: "select",
@@ -100,7 +119,7 @@ It preserves Roster's accessibility and styling (focus rings, hover states) whil
     as: {
       control: false,
       description:
-        "The component to render as (e.g., \`RouterLink\`, \`NextLink\`).",
+        "The component to render as (e.g., `RouterLink`, `NextLink`).",
     },
   },
 } satisfies Meta<typeof Link>;
@@ -108,109 +127,51 @@ It preserves Roster's accessibility and styling (focus rings, hover states) whil
 export default meta;
 type Story = StoryObj<typeof Link>;
 
-// --- 1. React Router Integration ---
-export const WithReactRouter: Story = {
+// --- 1. Core Variants ---
+export const Primary: Story = {
   args: {
-    as: MockRouterLink,
-    to: "/app/dashboard", // This prop is passed through to the Router Link
-    children: "Go to Dashboard",
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "To use with **React Router**, import their `Link` and pass it to the `as` prop. You can then use the `to` prop as usual.",
-      },
-      source: {
-        language: "tsx",
-        code: `
-import { Link } from "@roster/ui";
-import { Link as RouterLink } from "react-router";
-
-export const NavBar = () => (
-  <nav>
-    <Link as={RouterLink} to="/dashboard">
-      Dashboard
-    </Link>
-  </nav>
-);
-        `,
-      },
-    },
+    variant: "primary",
+    href: "#",
+    children: "Primary Action Link",
   },
 };
 
-// --- 2. Next.js Integration ---
-export const WithNextJS: Story = {
+export const Neutral: Story = {
   args: {
-    as: MockNextLink,
-    href: "/blog/latest", // Next.js uses 'href', so we pass that
-    children: "Read Latest Post",
     variant: "neutral",
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "For **Next.js (App Router)**, simply pass `next/link` to the `as` prop. Since Next.js uses `href` just like a standard anchor, the API feels native.",
-      },
-      source: {
-        language: "tsx",
-        code: `
-import { Link } from "@roster/ui";
-import NextLink from "next/link";
-
-export const Footer = () => (
-  <footer>
-    <Link as={NextLink} href="/privacy" variant="neutral">
-      Privacy Policy
-    </Link>
-  </footer>
-);
-        `,
-      },
-    },
+    href: "#",
+    children: "Neutral Secondary Link",
   },
 };
 
-// --- 3. External Links ---
-export const External: Story = {
+export const Danger: Story = {
   args: {
-    href: "https://github.com",
-    children: "View Source on GitHub",
-    // Note: showExternalIcon is NOT needed here; it is automatic for https://
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Links starting with `http` are automatically treated as external. They get `target='_blank'`, `rel='noopener'`, and **automatically display the external icon**.",
-      },
-    },
+    variant: "danger",
+    href: "#",
+    children: "Delete Account",
   },
 };
 
-// --- 4. External (Clean) ---
-export const ExternalClean: Story = {
+export const WhiteMegaSquad: Story = {
   args: {
-    href: "https://google.com",
-    children: "External (Icon Suppressed)",
-    showExternalIcon: false,
+    variant: "white",
+    href: "#",
+    children: "White Link (Visible on Dark)",
   },
   parameters: {
     docs: {
       description: {
         story:
-          "You can suppress the automatic icon by explicitly setting `showExternalIcon={false}`.",
+          "The `white` variant is specifically designed to sit on top of dark panels, dialogs, or primary colored backgrounds. (Note: It will be nearly invisible in the Light Mode preview above).",
       },
     },
   },
 };
 
-// --- 5. Composition Example ---
+// --- 2. Composition Example ---
 export const InlineParagraph: Story = {
   render: () => (
-    <p className="text-gray-600 max-w-md leading-relaxed border p-4 rounded bg-gray-50">
+    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
       By clicking "Agree", you accept our{" "}
       <Link href="/terms" size="md" underline="always">
         Terms of Service
@@ -226,17 +187,66 @@ export const InlineParagraph: Story = {
     docs: {
       description: {
         story:
-          "Links are `inline-flex` by default, allowing them to sit perfectly inside paragraph text.",
+          "Links are `inline-flex` by default, allowing them to sit perfectly inside paragraph text while adapting to the surrounding font size.",
       },
     },
   },
 };
 
-// --- 6. Danger Variant ---
-export const Danger: Story = {
+// --- 3. External Links ---
+export const ExternalWithIcon: Story = {
   args: {
-    variant: "danger",
-    children: "Delete Account",
-    href: "#delete",
+    href: "https://github.com",
+    children: "View Source on GitHub",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Links starting with `http` are automatically treated as external. They receive `target='_blank'` and automatically display the external icon.",
+      },
+    },
+  },
+};
+
+export const ExternalClean: Story = {
+  args: {
+    href: "https://google.com",
+    children: "External (Icon Suppressed)",
+    showExternalIcon: false,
+  },
+};
+
+// --- 4. Polymorphic Integrations ---
+export const WithReactRouter: Story = {
+  args: {
+    as: MockRouterLink,
+    to: "/app/dashboard",
+    children: "Go to Dashboard",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "To use with **React Router**, import their `Link` and pass it to the `as` prop. You can then use the `to` prop natively.",
+      },
+    },
+  },
+};
+
+export const WithNextJS: Story = {
+  args: {
+    as: MockNextLink,
+    href: "/blog/latest",
+    children: "Read Latest Post",
+    variant: "neutral",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "For **Next.js**, pass `next/link` to the `as` prop. Next uses `href` just like a standard anchor, so the API feels native.",
+      },
+    },
   },
 };
