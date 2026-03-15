@@ -35,7 +35,6 @@ const meta = {
   argTypes: {
     variant: {
       control: "select",
-      // Updated to match our new unified options!
       options: ["white", "soft", "slate", "outline", "ghost"],
       description: "The visual style of the disclosure.",
     },
@@ -83,7 +82,6 @@ export const Slate: Story = {
     defaultOpen: true,
     children: (
       <div className="space-y-2">
-        {/* Swapped hardcoded text colors for text-inherit here so it adapts perfectly */}
         <p className="font-semibold text-inherit">Pick Timer: 60s</p>
         <p className="text-inherit opacity-80">Auto-pick enabled</p>
       </div>
