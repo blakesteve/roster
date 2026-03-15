@@ -87,7 +87,6 @@ describe("Disclosure Atom", () => {
     );
 
     const button = screen.getByRole("button", { name: "Variant Test" });
-    // Updated to test the new slate variant
     expect(button).toHaveClass("bg-gray-700", "dark:bg-gray-900");
 
     rerender(
@@ -95,7 +94,6 @@ describe("Disclosure Atom", () => {
         Content
       </Disclosure>,
     );
-    // Updated to test the adjusted soft variant
     expect(button).toHaveClass("bg-gray-100", "dark:bg-gray-800");
   });
 
@@ -106,7 +104,6 @@ describe("Disclosure Atom", () => {
       </Disclosure>,
     );
 
-    // Added the new flex base classes to the assertion
     expect(container.firstChild).toHaveClass(
       "my-custom-wrapper-class",
       "w-full",
