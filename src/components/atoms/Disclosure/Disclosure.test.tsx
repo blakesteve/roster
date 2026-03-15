@@ -81,20 +81,20 @@ describe("Disclosure Atom", () => {
 
   it("applies variant classes correctly including dark mode", () => {
     const { rerender } = render(
-      <Disclosure title="Variant Test" variant="filled">
+      <Disclosure title="Variant Test" variant="slate">
         Content
       </Disclosure>,
     );
 
     const button = screen.getByRole("button", { name: "Variant Test" });
-    expect(button).toHaveClass("bg-gray-300", "dark:bg-gray-700");
+    expect(button).toHaveClass("bg-gray-700", "dark:bg-gray-900");
 
     rerender(
-      <Disclosure title="Variant Test" variant="ghost">
+      <Disclosure title="Variant Test" variant="soft">
         Content
       </Disclosure>,
     );
-    expect(button).toHaveClass("bg-transparent", "dark:text-gray-300");
+    expect(button).toHaveClass("bg-gray-100", "dark:bg-gray-800");
   });
 
   it("merges custom classNames correctly", () => {
@@ -107,6 +107,23 @@ describe("Disclosure Atom", () => {
     expect(container.firstChild).toHaveClass(
       "my-custom-wrapper-class",
       "w-full",
+      "flex",
+      "flex-col",
+    );
+  });
+
+  it("removes bottom border on outline variant when open", () => {
+    render(
+      <Disclosure title="Outline Open" variant="outline" defaultOpen={true}>
+        Content
+      </Disclosure>,
+    );
+
+    const button = screen.getByRole("button", { name: "Outline Open" });
+    // Verifies the fix that prevents double-thick borders between trigger and content
+    expect(button).toHaveClass(
+      "border-b-transparent",
+      "dark:border-b-transparent",
     );
   });
 });
