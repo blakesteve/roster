@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Input } from "./Input";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch, faEnvelope, faEye } from "@fortawesome/free-solid-svg-icons";
@@ -8,12 +8,39 @@ const meta = {
   component: Input,
   tags: ["autodocs"],
   parameters: {
-    layout: "centered",
+    docs: {
+      description: {
+        component:
+          "A highly versatile **Input** atom powered by Headless UI. It supports leading and trailing icons, built-in labels, helper text, error validation states, and full dark mode compliance across all variants.",
+      },
+    },
   },
+  decorators: [
+    (Story) => (
+      <div className="p-8 space-y-12">
+        <div className="light bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+            Light Mode Preview
+          </p>
+          <div className="max-w-md">
+            <Story />
+          </div>
+        </div>
+        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
+          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+            Dark Mode Preview
+          </p>
+          <div className="max-w-md">
+            <Story />
+          </div>
+        </div>
+      </div>
+    ),
+  ],
   argTypes: {
     variant: {
       control: "select",
-      options: ["outline", "soft", "ghost", "filled"],
+      options: ["white", "soft", "slate", "outline", "ghost"],
     },
     disabled: { control: "boolean" },
     error: { control: "boolean" },
@@ -23,8 +50,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// 1. Standard Text Field
-export const Default: Story = {
+/**
+ * The default standard text field. Clean, bordered, and works well on light or dark backgrounds.
+ */
+export const DefaultOutline: Story = {
   args: {
     placeholder: "Enter your name...",
     label: "Full Name",
@@ -32,8 +61,24 @@ export const Default: Story = {
   },
 };
 
-// 2. With Icons (Search)
-export const Search: Story = {
+/**
+ * The `white` variant provides a solid, elevated background. Perfect for placing inside tinted cards or gray backgrounds.
+ */
+export const WhiteWithEmail: Story = {
+  args: {
+    type: "email",
+    label: "Email Address",
+    placeholder: "user@megasquad.com",
+    startIcon: <FontAwesomeIcon icon={faEnvelope} className="h-4 w-4" />,
+    helperText: "We'll never share your email.",
+    variant: "white",
+  },
+};
+
+/**
+ * The `soft` variant removes the border and uses a subtle background fill. Great for search bars or high-density forms.
+ */
+export const SoftSearch: Story = {
   args: {
     placeholder: "Search players...",
     variant: "soft",
@@ -41,26 +86,28 @@ export const Search: Story = {
   },
 };
 
-// 3. Email with Helper
-export const Email: Story = {
+/**
+ * The `slate` variant provides a bold, dark background. Originally designed for MegaSquad's heavy dashboard dialogs.
+ */
+export const MegaSquadSlate: Story = {
   args: {
-    type: "email",
-    label: "Email Address",
-    placeholder: "user@megasquad.com",
-    startIcon: <FontAwesomeIcon icon={faEnvelope} className="h-4 w-4" />,
-    helperText: "We'll never share your email.",
-    variant: "outline",
+    variant: "slate",
+    label: "Filter Roster",
+    placeholder: "Filter by name...",
+    startIcon: <FontAwesomeIcon icon={faSearch} className="h-4 w-4" />,
   },
 };
 
-// 4. Password with Action Icon
-export const Password: Story = {
+/**
+ * Showcases how to pass interactive elements into the `endIcon` prop.
+ */
+export const PasswordAction: Story = {
   args: {
     type: "password",
     label: "Password",
     defaultValue: "Secret123",
     endIcon: (
-      <button className="hover:text-gray-800 focus:outline-none">
+      <button className="opacity-70 hover:opacity-100 transition-opacity focus:outline-none">
         <FontAwesomeIcon icon={faEye} className="h-4 w-4" />
       </button>
     ),
@@ -68,23 +115,28 @@ export const Password: Story = {
   },
 };
 
-// 5. Error State
+/**
+ * Error states automatically override the border, text, and focus ring colors, and explicitly style the helper text.
+ */
 export const WithError: Story = {
   args: {
     label: "Username",
     defaultValue: "taken_username",
     errorMessage: "This username is already taken.",
+    variant: "soft",
+    error: true,
   },
 };
 
-// 6. MegaSquad Dark Theme
-export const MegaSquadFilled: Story = {
+/**
+ * Disabled inputs automatically dim their opacity and prevent user interaction.
+ */
+export const Disabled: Story = {
   args: {
-    variant: "filled",
-    label: "Filter Roster",
-    placeholder: "Filter by name...",
-  },
-  parameters: {
-    backgrounds: { default: "dark" }, // Show on dark bg in storybook if configured
+    label: "League ID",
+    defaultValue: "LGE-99482-X",
+    disabled: true,
+    variant: "soft",
+    helperText: "You cannot change your league ID after creation.",
   },
 };

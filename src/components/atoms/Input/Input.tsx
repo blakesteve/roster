@@ -7,7 +7,7 @@ import {
 } from "@headlessui/react";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
-import { inputVariants } from "./input-variants";
+import { inputVariants, iconVariants } from "./input-variants";
 
 export interface InputProps
   extends
@@ -42,14 +42,19 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <Field className={cn("w-full space-y-1.5", className)}>
         {label && (
-          <Label className="block text-sm font-medium leading-none text-gray-900 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <Label className="block text-sm font-medium leading-none text-gray-900 dark:text-gray-100 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-left">
             {label}
           </Label>
         )}
 
         <div className="relative">
           {startIcon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+            <div
+              className={cn(
+                iconVariants({ variant, error: hasError }),
+                "left-3",
+              )}
+            >
               {startIcon}
             </div>
           )}
@@ -60,7 +65,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             disabled={disabled}
             className={cn(
               inputVariants({ variant, error: hasError }),
-              // Adjust padding if icons are present so text doesn't overlap
               startIcon && "pl-10",
               endIcon && "pr-10",
             )}
@@ -68,7 +72,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
 
           {endIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+            <div
+              className={cn(
+                iconVariants({ variant, error: hasError }),
+                "right-3",
+              )}
+            >
               {endIcon}
             </div>
           )}
@@ -77,8 +86,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {(helperText || errorMessage) && (
           <Description
             className={cn(
-              "text-xs",
-              hasError ? "text-error-600 font-medium" : "text-gray-500",
+              "text-xs text-left mt-1",
+              hasError
+                ? "text-error-600 dark:text-error-400 font-medium"
+                : "text-gray-500 dark:text-gray-400",
             )}
           >
             {errorMessage || helperText}
