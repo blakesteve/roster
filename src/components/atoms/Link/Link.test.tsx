@@ -30,7 +30,7 @@ describe("Link Atom", () => {
 
     expect(link.tagName).toBe("A");
     expect(link).toHaveAttribute("href", "/local");
-    expect(link).not.toHaveAttribute("target"); // Should remain internal
+    expect(link).not.toHaveAttribute("target");
   });
 
   // 2. External Link Security
@@ -45,7 +45,6 @@ describe("Link Atom", () => {
   // 3. Auto-Icon Logic (The "Smart Default")
   it("automatically shows the icon for external links by default", () => {
     render(<Link href="https://google.com">Google</Link>);
-    // We didn't ask for it, but it should be there because it's 'https'
     expect(screen.getByTestId("external-icon")).toBeInTheDocument();
   });
 
@@ -71,8 +70,6 @@ describe("Link Atom", () => {
 
   // 6. Polymorphism Test
   it("renders as a custom component when 'as' is provided", () => {
-    // We pass our MockLink. Notice we pass 'to' (a prop belonging to MockLink),
-    // and NOT 'href'. If this renders without TS errors, our types are working.
     render(
       <Link as={MockLink} to="/dashboard">
         Polymorphic
@@ -81,23 +78,30 @@ describe("Link Atom", () => {
 
     const link = screen.getByTestId("custom-link");
 
-    // Did it receive the custom prop?
     expect(link).toHaveAttribute("href", "/dashboard");
-    // Did it render our custom styling class?
-    expect(link).toHaveClass("text-primary-500");
-    // Did it render the children?
+    expect(link).toHaveClass("text-primary-600", "dark:text-primary-400");
+
     expect(link).toHaveTextContent("Polymorphic (Mock)");
   });
 
   // 7. Styling
-  it("applies variant classes correctly", () => {
-    render(
+  it("applies variant classes correctly (including dark mode)", () => {
+    const { rerender } = render(
       <Link href="#" variant="danger">
         Delete
       </Link>,
     );
-    const link = screen.getByRole("link", { name: "Delete" });
+    let link = screen.getByRole("link", { name: "Delete" });
 
-    expect(link).toHaveClass("text-error-600");
+    expect(link).toHaveClass("text-error-600", "dark:text-error-500");
+
+    rerender(
+      <Link href="#" variant="white">
+        MegaSquad Dark
+      </Link>,
+    );
+    link = screen.getByRole("link", { name: "MegaSquad Dark" });
+
+    expect(link).toHaveClass("text-gray-200", "dark:text-gray-300");
   });
 });

@@ -10,6 +10,7 @@ interface LinkBaseProps extends VariantProps<typeof linkVariants> {
   external?: boolean;
   showExternalIcon?: boolean;
   className?: string;
+  href?: string;
 }
 
 type LinkProps<C extends React.ElementType> = LinkBaseProps & {
@@ -25,11 +26,11 @@ export const Link = <C extends React.ElementType = "a">({
   external,
   showExternalIcon,
   children,
+  href,
   ...props
 }: LinkProps<C>) => {
   const Component = as || "a";
 
-  const href = (props as any).href;
   const isExternal =
     external || (typeof href === "string" && href.startsWith("http"));
 
@@ -64,9 +65,12 @@ export const Link = <C extends React.ElementType = "a">({
   }
 
   return (
-    <Component className={commonClasses} {...props}>
+    <Component
+      className={commonClasses}
+      {...(href !== undefined ? { href } : {})}
+      {...props}
+    >
       {children}
-      {/* We allow showing the icon even on internal links if explicitly requested */}
       {shouldShowIcon && (
         <FontAwesomeIcon
           icon={faExternalLinkAlt}
