@@ -35,7 +35,8 @@ const meta = {
   argTypes: {
     variant: {
       control: "select",
-      options: ["soft", "filled", "outline", "ghost"],
+      // Updated to match our new unified options!
+      options: ["white", "soft", "slate", "outline", "ghost"],
       description: "The visual style of the disclosure.",
     },
     defaultOpen: {
@@ -49,7 +50,19 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * The standard subtle appearance. Great for FAQs or secondary settings.
+ * The standard clean appearance. Crisp white in light mode, elevated gray in dark mode.
+ */
+export const White: Story = {
+  args: {
+    variant: "white",
+    title: "What is MegaSquad?",
+    children:
+      "MegaSquad is the ultimate sports pick-em application for you and your friends.",
+  },
+};
+
+/**
+ * A slightly inset, subtle appearance. Great for FAQs or secondary settings.
  */
 export const Soft: Story = {
   args: {
@@ -63,17 +76,16 @@ export const Soft: Story = {
 /**
  * A heavier visual weight, providing strong contrast against page backgrounds.
  */
-export const Filled: Story = {
+export const Slate: Story = {
   args: {
-    variant: "filled",
+    variant: "slate",
     title: "Draft Settings",
     defaultOpen: true,
     children: (
       <div className="space-y-2">
-        <p className="font-semibold text-gray-900 dark:text-gray-100">
-          Pick Timer: 60s
-        </p>
-        <p className="text-gray-600 dark:text-gray-400">Auto-pick enabled</p>
+        {/* Swapped hardcoded text colors for text-inherit here so it adapts perfectly */}
+        <p className="font-semibold text-inherit">Pick Timer: 60s</p>
+        <p className="text-inherit opacity-80">Auto-pick enabled</p>
       </div>
     ),
   },

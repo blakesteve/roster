@@ -20,6 +20,7 @@ export interface DisclosureProps
   onToggle?: (isOpen: boolean) => void;
   icon?: React.ReactNode;
 }
+
 const Disclosure = ({
   title,
   children,
@@ -46,7 +47,7 @@ const Disclosure = ({
   };
 
   return (
-    <div className={cn("w-full", className)} {...props}>
+    <div className={cn("w-full flex flex-col", className)} {...props}>
       {/* TRIGGER BUTTON */}
       <button
         type="button"
@@ -54,14 +55,18 @@ const Disclosure = ({
         aria-expanded={isOpen}
         className={cn(
           disclosureTriggerVariants({ variant }),
-          // Dynamic rounding: flatten bottom if open
+          // Dynamic rounding and border fix
           isOpen ? "rounded-t-md rounded-b-none" : "rounded-md",
+          // If it's the outline variant and it's open, remove the bottom border so it merges seamlessly with the content box
+          isOpen &&
+            variant === "outline" &&
+            "border-b-transparent dark:border-b-transparent",
         )}
       >
-        <span className="flex-1 text-left text-current">{title}</span>
+        <span className="flex-1 text-left text-inherit">{title}</span>
         <span
           className={cn(
-            "ml-2 flex items-center transition-transform duration-200 text-current",
+            "ml-2 flex items-center transition-transform duration-200 text-inherit",
             isOpen ? "rotate-180" : "",
           )}
         >
