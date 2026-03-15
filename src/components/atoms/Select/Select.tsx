@@ -2,11 +2,10 @@ import { Fragment } from "react";
 import {
   Listbox,
   ListboxButton,
-  ListboxLabel,
+  Label,
   ListboxOption,
   ListboxOptions,
   Transition,
-  Portal,
 } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faCheck } from "@fortawesome/free-solid-svg-icons";
@@ -50,9 +49,9 @@ const Select = ({
     <Listbox value={value ?? undefined} onChange={onChange} disabled={disabled}>
       <div className={cn("flex flex-col gap-1.5", className)}>
         {label && (
-          <ListboxLabel className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+          <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
             {label}
-          </ListboxLabel>
+          </Label>
         )}
 
         <div className="relative">
@@ -62,7 +61,7 @@ const Select = ({
             <span
               className={cn(
                 "block truncate",
-                !selectedOption && "text-gray-500",
+                !selectedOption && "text-gray-500 dark:text-gray-400",
               )}
             >
               {selectedOption ? selectedOption.label : placeholder}
@@ -70,72 +69,56 @@ const Select = ({
             <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
               <FontAwesomeIcon
                 icon={faChevronDown}
-                className="h-3.5 w-3.5 text-gray-400"
+                className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500"
                 aria-hidden="true"
               />
             </span>
           </ListboxButton>
 
-          <Portal>
-            <Transition
-              as={Fragment}
-              leave="transition ease-in duration-100"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
+          <Transition
+            as={Fragment}
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <ListboxOptions
+              anchor="bottom start"
+              className={cn(
+                "w-(--button-width) z-50 rounded-md bg-white dark:bg-gray-800 py-1 text-base shadow-lg ring-1 ring-black/5 dark:ring-gray-700 focus:outline-none sm:text-sm",
+                "[--anchor-gap:4px]",
+              )}
             >
-              <ListboxOptions
-                anchor="bottom start"
-                className={cn(
-                  "w-(--button-width) z-50 rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm",
-                  "[--anchor-gap:4px]",
-                )}
-              >
-                {options.map((option) => (
-                  <ListboxOption
-                    key={option.value}
-                    value={option.value}
-                    disabled={option.disabled}
-                    className={({ focus, selected, disabled }) =>
-                      cn(
-                        "relative cursor-default select-none py-2.5 pl-4 pr-9 transition-colors",
-                        focus
-                          ? "bg-primary-100 text-primary-900"
-                          : "text-gray-900",
-                        selected && !focus && "bg-gray-50",
-                        disabled && "opacity-50 cursor-not-allowed",
-                      )
-                    }
-                  >
-                    {({ selected, focus }) => (
-                      <>
-                        <span
-                          className={cn(
-                            "block truncate",
-                            selected ? "font-semibold" : "font-normal",
-                          )}
-                        >
-                          {option.label}
-                        </span>
-                        {selected ? (
-                          <span
-                            className={cn(
-                              "absolute inset-y-0 right-0 flex items-center pr-4",
-                              focus ? "text-primary-600" : "text-primary-600",
-                            )}
-                          >
-                            <FontAwesomeIcon
-                              icon={faCheck}
-                              className="h-3.5 w-3.5"
-                            />
-                          </span>
-                        ) : null}
-                      </>
-                    )}
-                  </ListboxOption>
-                ))}
-              </ListboxOptions>
-            </Transition>
-          </Portal>
+              {options.map((option) => (
+                <ListboxOption
+                  key={option.value}
+                  value={option.value}
+                  disabled={option.disabled}
+                  className={cn(
+                    // Added 'group' so children can react to the selected/focus states
+                    "group relative cursor-default select-none py-2.5 pl-4 pr-9 transition-colors",
+                    "text-gray-900 dark:text-gray-100",
+                    // Focus (Hover) State
+                    "data-focus:bg-primary-100 data-focus:text-primary-900",
+                    "dark:data-focus:bg-primary-900/30 dark:data-focus:text-primary-100",
+                    // Selected State
+                    "data-selected:bg-gray-50 dark:data-selected:bg-gray-700/50",
+                    // Disabled State
+                    "data-disabled:opacity-50 data-disabled:cursor-not-allowed",
+                  )}
+                >
+                  {/* Replaced render props with group-data-[*] modifiers! */}
+                  <span className="block truncate font-normal group-data-selected:font-semibold">
+                    {option.label}
+                  </span>
+
+                  {/* The checkmark is hidden by default, and visible when the option is selected */}
+                  <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary-600 dark:text-primary-400 group-data-selected:flex">
+                    <FontAwesomeIcon icon={faCheck} className="h-3.5 w-3.5" />
+                  </span>
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </Transition>
         </div>
       </div>
     </Listbox>
