@@ -42,7 +42,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <Field className={cn("w-full space-y-1.5", className)}>
         {label && (
-          <Label className="block text-sm font-medium leading-none text-gray-900 dark:text-gray-100 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-left">
+          <Label
+            className={cn(
+              "block text-sm font-medium leading-none text-left mb-1.5 transition-colors",
+              "text-gray-900 dark:text-gray-100",
+              "peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+            )}
+          >
             {label}
           </Label>
         )}
