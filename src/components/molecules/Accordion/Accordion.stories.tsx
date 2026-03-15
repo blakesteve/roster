@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Accordion } from "./Accordion";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Button } from "../../atoms/Button/Button";
@@ -15,13 +15,31 @@ const meta = {
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <div className="p-8 space-y-12">
+        <div className="light bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+            Light Mode Preview
+          </p>
+          <Story />
+        </div>
+        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
+          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+            Dark Mode Preview
+          </p>
+          <Story />
+        </div>
+      </div>
+    ),
+  ],
   argTypes: {
     items: {
       description: "Array of objects containing `id`, `title`, and `content`.",
     },
     variant: {
       control: "select",
-      options: ["soft", "filled", "outline", "ghost"],
+      options: ["white", "soft", "slate", "outline", "ghost"],
       description: "Visual style applied to all items in the list.",
       table: { defaultValue: { summary: "soft" } },
     },
@@ -79,9 +97,13 @@ const richItems = [
     ),
     content: (
       <div className="space-y-4">
-        <p className="text-gray-600">Visa ending in 4242</p>
+        <p className="text-inherit opacity-80">Visa ending in 4242</p>
         <div className="flex gap-2">
-          <Button size="sm" variant="outline">
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-current text-inherit hover:bg-current/10"
+          >
             Edit
           </Button>
           <Button size="sm" variant="ghost" colorScheme="error">
@@ -96,11 +118,11 @@ const richItems = [
     title: (
       <div className="flex items-center justify-between w-full pr-4">
         <span>Billing History</span>
-        <span className="text-xs text-gray-400 font-normal">3 Invoices</span>
+        <span className="text-inherit opacity-60 font-normal">3 Invoices</span>
       </div>
     ),
     content: (
-      <ul className="list-disc pl-5 text-gray-600 space-y-1">
+      <ul className="list-disc pl-5 text-inherit opacity-80 space-y-1">
         <li>Jan 2026 - $12.00</li>
         <li>Dec 2025 - $12.00</li>
         <li>Nov 2025 - $12.00</li>
@@ -133,7 +155,7 @@ export const MultiExpand: Story = {
   },
 };
 
-export const MegaSquadFilled: Story = {
+export const MegaSquadSlate: Story = {
   args: {
     items: [
       {
@@ -147,7 +169,7 @@ export const MegaSquadFilled: Story = {
         content: "QB: 1, RB: 2, WR: 2, TE: 1, FLEX: 1, K: 1, DST: 1, BENCH: 6",
       },
     ],
-    variant: "filled",
+    variant: "slate",
     allowMultiple: false,
     showDividers: true,
   },
@@ -155,7 +177,7 @@ export const MegaSquadFilled: Story = {
     docs: {
       description: {
         story:
-          "The `filled` variant uses the darker gray background requested for the MegaSquad dashboard panels.",
+          "The `slate` variant uses the darker background requested for the MegaSquad dashboard panels, automatically flipping the text to light mode.",
       },
     },
   },
@@ -180,14 +202,14 @@ export const GhostMinimal: Story = {
 export const ComplexContent: Story = {
   args: {
     items: richItems,
-    variant: "outline",
+    variant: "white",
     allowMultiple: true,
   },
   parameters: {
     docs: {
       description: {
         story:
-          "The `title` and `content` props accept any React Node, allowing you to embed Badges, Buttons, or complex layouts directly into the Accordion.",
+          "The `title` and `content` props accept any React Node, allowing you to embed Badges, Buttons, or complex layouts directly into the Accordion. This example uses the `white` variant.",
       },
     },
   },

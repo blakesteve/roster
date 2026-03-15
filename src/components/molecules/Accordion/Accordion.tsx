@@ -12,7 +12,7 @@ export interface AccordionItem {
 export interface AccordionProps {
   items: AccordionItem[];
   allowMultiple?: boolean;
-  variant?: "soft" | "filled" | "outline" | "ghost";
+  variant?: "white" | "soft" | "slate" | "outline" | "ghost";
   className?: string;
   showDividers?: boolean;
   defaultOpenIds?: (string | number)[];
@@ -51,7 +51,7 @@ const Accordion = ({
       {items.map((item, index) => (
         <div key={item.id} className="relative">
           {showDividers && index > 0 && (
-            <div className="mx-4 h-px bg-gray-200/50 mb-1" />
+            <div className="mx-4 h-px bg-gray-200/50 dark:bg-gray-700/50 transition-colors mb-1" />
           )}
 
           <Disclosure
