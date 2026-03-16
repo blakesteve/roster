@@ -29,7 +29,9 @@ const Breadcrumbs = ({
   ...props
 }: BreadcrumbsProps) => {
   const SeparatorIcon = separator ?? (
-    <span className="text-gray-300 text-sm">/</span>
+    <span className="text-gray-300 dark:text-gray-600 text-sm transition-colors">
+      /
+    </span>
   );
 
   return (
@@ -39,7 +41,10 @@ const Breadcrumbs = ({
           <li className="flex items-center">
             <Link
               href="/"
-              className={cn(breadcrumbVariants({ variant }))}
+              className={cn(
+                breadcrumbVariants({ variant }),
+                "hover:underline-none",
+              )}
               aria-label="Home"
             >
               <FontAwesomeIcon icon={faHome} className="h-4 w-4" />
@@ -70,8 +75,10 @@ const Breadcrumbs = ({
               {isLast ? (
                 <span
                   className={cn(
-                    "font-medium text-sm cursor-default",
-                    variant === "inverse" ? "text-gray-300" : "text-gray-400",
+                    "font-semibold text-sm cursor-default transition-colors",
+                    variant === "inverse"
+                      ? "text-white"
+                      : "text-gray-900 dark:text-gray-100",
                   )}
                   aria-current="page"
                 >
@@ -80,7 +87,10 @@ const Breadcrumbs = ({
               ) : (
                 <Link
                   href={item.href}
-                  className={cn(breadcrumbVariants({ variant }))}
+                  className={cn(
+                    breadcrumbVariants({ variant }),
+                    "hover:underline",
+                  )}
                 >
                   {item.label}
                 </Link>

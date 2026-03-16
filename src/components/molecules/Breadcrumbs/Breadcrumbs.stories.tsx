@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
@@ -11,20 +11,42 @@ const meta = {
     docs: {
       description: {
         component:
-          "Navigation helper that indicates the current page's location within a navigational hierarchy. It automatically handles accessibility attributes like `aria-current` and supports multiple visual themes.",
+          "A navigation helper that indicates the user's current location within a hierarchical structure. It automatically handles accessibility attributes (`aria-current`, `aria-label`), visually emphasizes the active page, and features comprehensive dark mode resilience.",
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <div className="p-8 space-y-12 w-full max-w-4xl mx-auto">
+        <div className="light bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+            Light Mode Preview
+          </p>
+          <div className="max-w-xl">
+            <Story />
+          </div>
+        </div>
+        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
+          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+            Dark Mode Preview
+          </p>
+          <div className="max-w-xl">
+            <Story />
+          </div>
+        </div>
+      </div>
+    ),
+  ],
   argTypes: {
     variant: {
       control: "select",
-      options: ["default", "inverse", "primary"],
-      description: "Color theme. Use 'inverse' for dark backgrounds.",
+      options: ["default", "primary", "inverse"],
+      description: "Color theme applied to the interactive links.",
       table: { defaultValue: { summary: "default" } },
     },
     separator: {
       control: false,
-      description: "Custom separator element (defaults to a slash '/').",
+      description: "Custom separator element (defaults to a slash `/`).",
     },
     showHomeIcon: {
       control: "boolean",
@@ -43,46 +65,48 @@ const sampleItems = [
   { label: "Settings", href: "/leagues/123/settings" },
 ];
 
-// 1. Standard (Default Slash)
-export const Default: Story = {
+// --- 1. The Playground ---
+export const Playground: Story = {
   args: {
     items: sampleItems,
     variant: "default",
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "The default style uses a simple slash `/` separator and neutral gray colors.",
-      },
-    },
-  },
-};
-
-// 2. With Home Icon
-export const WithHome: Story = {
-  args: {
-    items: sampleItems,
     showHomeIcon: true,
   },
+};
+
+// --- 2. All Variants Showcase ---
+export const AllVariants: Story = {
+  render: () => (
+    <div className="space-y-6">
+      <div>
+        <p className="text-xs font-mono text-gray-400 mb-2">default</p>
+        <Breadcrumbs items={sampleItems} variant="default" showHomeIcon />
+      </div>
+      <div>
+        <p className="text-xs font-mono text-gray-400 mb-2">primary</p>
+        <Breadcrumbs items={sampleItems} variant="primary" showHomeIcon />
+      </div>
+    </div>
+  ),
   parameters: {
     docs: {
       description: {
         story:
-          "Use `showHomeIcon` to add a clickable home icon at the start of the trail.",
+          "Breadcrumbs automatically style the final item (the current page) as high-contrast, non-interactive text to firmly ground the user in their current location.",
       },
     },
   },
 };
 
-// 3. Custom Separator (Chevron)
+// --- 3. Custom Separator ---
 export const ChevronSeparator: Story = {
   args: {
     items: sampleItems,
+    showHomeIcon: true,
     separator: (
       <FontAwesomeIcon
         icon={faChevronRight}
-        className="h-2.5 w-2.5 text-gray-400"
+        className="h-2.5 w-2.5 text-gray-400 dark:text-gray-600 transition-colors"
       />
     ),
   },
@@ -90,31 +114,25 @@ export const ChevronSeparator: Story = {
     docs: {
       description: {
         story:
-          "You can override the default slash with any React node, such as a Chevron icon.",
+          "You can override the default slash with any React node, such as a customized Chevron icon.",
       },
     },
   },
 };
 
-// 4. Inverse (Dark Background)
+// --- 4. Inverse (Dark Backgrounds) ---
 export const InverseOnDark: Story = {
-  args: {
-    items: sampleItems,
-    variant: "inverse",
-    showHomeIcon: true,
-  },
+  render: () => (
+    <div className="bg-slate-900 dark:bg-slate-950 p-6 rounded-md border border-slate-700 shadow-inner">
+      <Breadcrumbs items={sampleItems} variant="inverse" showHomeIcon />
+    </div>
+  ),
   parameters: {
-    backgrounds: { default: "dark" },
     docs: {
       description: {
         story:
-          "Use `variant='inverse'` when placing breadcrumbs on a dark header or sidebar. Text is lightened (Gray-400) for readability against dark backgrounds.",
+          "Use `variant='inverse'` when placing breadcrumbs inside dark headers, hero sections, or sidebars regardless of the overall app theme. The links default to a muted light-gray and illuminate to pure white on hover.",
       },
     },
   },
-  render: (args) => (
-    <div className="bg-slate-900 p-6 rounded-md border border-slate-700">
-      <Breadcrumbs {...args} />
-    </div>
-  ),
 };
