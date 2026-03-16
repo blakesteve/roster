@@ -1,13 +1,13 @@
 import { useState, type ReactNode } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
-import { Navbar } from "./Navbar";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Navbar, type NavbarProps } from "./Navbar";
 
 const InteractiveWrapper = ({
   args,
   className = "bg-gray-50 dark:bg-gray-900 min-h-75",
   children,
 }: {
-  args: any;
+  args: NavbarProps;
   className?: string;
   children?: ReactNode;
 }) => {
@@ -128,7 +128,6 @@ export const SlateTheme: Story = {
     logoSrc: mockLogo,
     brandName: "MegaSquad",
     items: defaultItems,
-    activePath: "/leagues",
     variant: "slate",
     user: mockUser,
   },
@@ -142,12 +141,30 @@ export const SlateTheme: Story = {
   },
 };
 
+export const ActiveLinkState: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: defaultItems,
+    activePath: "/leagues",
+    variant: "slate",
+    user: mockUser,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When the `activePath` prop matches a navigation item's `path`, the link text transforms to indicate the user's current location. Notice how the active link uses `text-primary-400` on dark surfaces to ensure it pops vibrantly against the background.",
+      },
+    },
+  },
+};
+
 export const PrimaryTheme: Story = {
   args: {
     logoSrc: mockLogo,
     brandName: "MegaSquad",
     items: defaultItems,
-    activePath: "/settings",
     variant: "primary",
     user: mockUser,
   },
@@ -166,7 +183,6 @@ export const FallbackInitials: Story = {
     logoSrc: mockLogo,
     brandName: "MegaSquad",
     items: defaultItems,
-    activePath: "/leagues",
     variant: "slate",
     user: {
       initials: "MS",
@@ -189,7 +205,6 @@ export const WhiteTheme: Story = {
     logoSrc: mockLogo,
     brandName: "MegaSquad",
     items: defaultItems,
-    activePath: "/schedule",
     variant: "white",
     user: mockUser,
   },
@@ -197,7 +212,7 @@ export const WhiteTheme: Story = {
     docs: {
       description: {
         story:
-          "The **White** variant is designed for lighter contexts, such as admin panels or settings pages.",
+          "The **White** variant is designed for lighter contexts, such as admin panels or settings pages. Toggle dark mode to see it gracefully transition to a deep, elevated surface gray.",
       },
     },
   },
@@ -239,7 +254,6 @@ export const WithNotifications: Story = {
     logoSrc: mockLogo,
     brandName: "MegaSquad",
     items: defaultItems,
-    activePath: "/schedule",
     variant: "slate",
     notificationVariant: "amber",
     user: {

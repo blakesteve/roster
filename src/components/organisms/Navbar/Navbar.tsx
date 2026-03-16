@@ -92,20 +92,20 @@ const Navbar = ({
   // Surface colors strictly apply to the main Navbar strip
   const surfaceColors = {
     brand: isDarkSurface
-      ? "text-white hover:text-gray-200"
-      : "text-gray-900 hover:text-gray-600",
+      ? "text-white dark:text-white hover:text-gray-200 dark:hover:text-gray-200"
+      : "text-gray-900 dark:text-gray-900 hover:text-gray-600 dark:hover:text-gray-600",
 
     linkBase: isDarkSurface
-      ? "text-gray-300 hover:text-white"
-      : "text-gray-600 hover:text-gray-900",
+      ? "text-gray-300 dark:text-gray-300 hover:text-white dark:hover:text-white"
+      : "text-gray-600 dark:text-gray-600 hover:text-gray-900 dark:hover:text-gray-900",
 
     linkActive: isDarkSurface
-      ? "text-primary-300 font-semibold hover:text-primary-200"
-      : "text-primary-600 font-semibold hover:text-primary-700",
+      ? "text-primary-400 dark:text-primary-400 font-semibold hover:text-primary-300 dark:hover:text-primary-300"
+      : "text-primary-600 dark:text-primary-600 font-semibold hover:text-primary-700 dark:hover:text-primary-700",
 
     hamburger: isDarkSurface
-      ? "text-gray-300 hover:bg-white/10 hover:text-white"
-      : "text-gray-500 hover:bg-gray-100 hover:text-gray-700",
+      ? "text-gray-300 dark:text-gray-300 hover:bg-white/10 dark:hover:bg-white/10 hover:text-white dark:hover:text-white"
+      : "text-gray-500 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-100 hover:text-gray-700 dark:hover:text-gray-700",
   };
 
   return (
@@ -123,8 +123,9 @@ const Navbar = ({
               href="/"
               to="/"
               variant="neutral"
+              underline="none"
               className={cn(
-                "flex items-center gap-3 transition-opacity no-underline",
+                "flex items-center gap-3 transition-opacity",
                 surfaceColors.brand,
               )}
             >
@@ -150,8 +151,9 @@ const Navbar = ({
                       href={item.path}
                       to={item.path}
                       variant="neutral"
+                      underline="none"
                       className={cn(
-                        "text-sm font-medium transition-colors duration-200 no-underline",
+                        "text-sm transition-colors duration-200",
                         isActive
                           ? surfaceColors.linkActive
                           : surfaceColors.linkBase,
@@ -233,7 +235,7 @@ const Navbar = ({
                             {({ focus }) => (
                               <button
                                 onClick={(e) => {
-                                  e.preventDefault(); // Keeps menu open
+                                  e.preventDefault();
                                   onThemeToggle();
                                 }}
                                 className={cn(
@@ -255,7 +257,7 @@ const Navbar = ({
                                 </div>
                                 <Switch
                                   checked={isDarkMode}
-                                  onChange={() => {}} // Controlled by the parent button click
+                                  onChange={() => {}}
                                   size="xs"
                                   variant="neutral"
                                   className="pointer-events-none m-0"
@@ -381,8 +383,9 @@ const Navbar = ({
                             to={item.path}
                             onClick={() => close()}
                             variant="neutral"
+                            underline="none"
                             className={cn(
-                              "-m-3 flex items-center rounded-md p-3 no-underline transition-colors",
+                              "-m-3 flex items-center rounded-md p-3 transition-colors",
                               "hover:bg-gray-50 dark:hover:bg-gray-700",
                               isActive
                                 ? "bg-gray-50 dark:bg-gray-700"
@@ -436,7 +439,7 @@ const Navbar = ({
                     {onThemeToggle && (
                       <button
                         onClick={(e) => {
-                          e.preventDefault(); // Keeps mobile slide-out open
+                          e.preventDefault();
                           onThemeToggle();
                         }}
                         className="flex w-full items-center justify-between rounded-md px-4 py-2 text-base transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -453,7 +456,7 @@ const Navbar = ({
                         </div>
                         <Switch
                           checked={isDarkMode}
-                          onChange={() => {}} // Controlled by parent button click
+                          onChange={() => {}}
                           size="sm"
                           variant="neutral"
                           className="pointer-events-none m-0"

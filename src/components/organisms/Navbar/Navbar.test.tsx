@@ -44,7 +44,8 @@ describe("Navbar Component", () => {
     const activeLink = screen.getByText("Leagues");
     const linkElement = activeLink.closest("a");
 
-    expect(linkElement).toHaveClass("text-primary-300");
+    expect(linkElement).toHaveClass("text-primary-400");
+    expect(linkElement).toHaveClass("dark:text-primary-400");
     expect(linkElement).toHaveClass("font-semibold");
   });
 
