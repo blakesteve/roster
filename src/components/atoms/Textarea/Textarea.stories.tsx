@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Textarea } from "./Textarea";
 import { Button } from "../Button/Button";
 
@@ -8,22 +8,44 @@ const meta = {
   component: Textarea,
   tags: ["autodocs"],
   parameters: {
-    layout: "centered",
     docs: {
       description: {
         component: `
 ### The Multiline Input
 
-The **Textarea** component is used for collecting long-form text input from users, such as bios, feedback, or descriptions. 
+The **Textarea** component is used for collecting long-form text input from users, such as bios, feedback, or scouting reports. 
 
-It matches the visual style of the \`Input\` and \`Select\` components to ensure consistency across forms. It includes built-in support for:
+It matches the exact visual style and dark mode resilience of the \`Input\` and \`Select\` components to ensure consistency across your forms. It includes built-in support for:
 - **Labels & Helper Text:** Automatically handles accessible associations.
-- **Validation:** Visual error states and error messages.
-- **Resize Control:** precise control over how users can resize the box.
+- **Validation:** Visual error states and error messages that adapt perfectly to dark backgrounds.
+- **Resize Control:** Precise control over how users can resize the box.
+- **Custom Scrollbars:** Automatically applies themed scrollbars when text overflows.
 `,
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <div className="p-8 space-y-12 w-full max-w-4xl mx-auto">
+        <div className="light bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
+          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+            Light Mode Preview
+          </p>
+          <div className="max-w-md mx-auto">
+            <Story />
+          </div>
+        </div>
+        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
+          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+            Dark Mode Preview
+          </p>
+          <div className="max-w-md mx-auto">
+            <Story />
+          </div>
+        </div>
+      </div>
+    ),
+  ],
   argTypes: {
     label: {
       description: "The text label displayed above the input.",
@@ -45,7 +67,7 @@ It matches the visual style of the \`Input\` and \`Select\` components to ensure
     },
     variant: {
       control: "select",
-      options: ["outline", "soft", "ghost", "filled"],
+      options: ["outline", "soft", "ghost", "white"],
       description: "The visual style of the input container.",
       table: { defaultValue: { summary: "outline" } },
     },
@@ -79,7 +101,7 @@ export const Playground: Story = {
   },
 };
 
-// --- 2. MegaSquad Use Case: Scouting Report ---
+// --- 2. Standard Use Case: Outline ---
 export const ScoutingReport: Story = {
   args: {
     label: "Player Scouting Report",
@@ -105,7 +127,6 @@ export const CommentBox: Story = {
     variant: "soft",
     placeholder: "Write a comment...",
     rows: 3,
-    className: "min-h-[60px]", // Custom override if needed
   },
   parameters: {
     docs: {
@@ -117,7 +138,25 @@ export const CommentBox: Story = {
   },
 };
 
-// --- 4. Validation States ---
+// --- 4. The White Variant (Dark Mode specific) ---
+export const WhiteVariant: Story = {
+  args: {
+    variant: "white",
+    label: "Squad Description",
+    placeholder: "What is this squad all about?",
+    rows: 3,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The `white` variant provides a solid white background in light mode, but gracefully degrades to a slightly elevated gray in dark mode. It is the perfect choice for text areas sitting inside of `soft` or `slate` Cards.",
+      },
+    },
+  },
+};
+
+// --- 5. Validation States ---
 export const WithError: Story = {
   args: {
     label: "Pick Justification",
@@ -135,16 +174,16 @@ export const WithError: Story = {
   },
 };
 
-// --- 5. Controlled Component Example ---
-// This proves it works with React state
+// --- 6. Controlled Component Example ---
 const ControlledExample = () => {
   const [value, setValue] = useState("");
   const limit = 100;
 
   return (
-    <div className="w-100 space-y-4 p-4 border rounded-lg bg-white shadow-sm">
+    <div className="w-full space-y-4 p-4 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-gray-900 shadow-sm transition-colors">
       <Textarea
         label="Tweet your pick"
+        variant="outline"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         rows={3}
@@ -168,19 +207,20 @@ export const ControlledWithCharacterLimit: Story = {
     docs: {
       description: {
         story:
-          "An example of a **Controlled Component** implementation with character counting logic and button interaction.",
+          "An example of a **Controlled Component** implementation with character counting logic and button interaction. Try typing past 100 characters to see the error state trigger.",
       },
     },
   },
 };
 
-// --- 6. Read-Only / Disabled ---
+// --- 7. Read-Only / Disabled ---
 export const ReadOnly: Story = {
   args: {
     label: "System Logs",
-    value: "Error: Connection timeout at 12:00 PM\nWarn: Retrying request...",
+    value:
+      "Error: Connection timeout at 12:00 PM\nWarn: Retrying request...\nInfo: Connection established.",
     readOnly: true,
-    variant: "filled",
+    variant: "soft",
     rows: 4,
   },
   parameters: {
