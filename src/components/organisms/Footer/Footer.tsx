@@ -1,7 +1,12 @@
 import React from "react";
+import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { footerVariants } from "./footer-variants";
 
-export interface FooterProps extends React.HTMLAttributes<HTMLElement> {
+export interface FooterProps
+  extends
+    React.HTMLAttributes<HTMLElement>,
+    VariantProps<typeof footerVariants> {
   /** * The company name to display in the copyright notice.
    * @default "Ball Collaborative"
    */
@@ -9,23 +14,23 @@ export interface FooterProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 const Footer = React.forwardRef<HTMLElement, FooterProps>(
-  ({ className, companyName = "Ball Collaborative", ...props }, ref) => {
+  (
+    { className, variant, companyName = "Ball Collaborative", ...props },
+    ref,
+  ) => {
     const currentYear = new Date().getFullYear();
 
     return (
       <footer
         ref={ref}
-        className={cn("w-full py-4 mt-auto", className)}
+        className={cn(footerVariants({ variant }), className)}
         {...props}
       >
-        <p
-          className={cn(
-            "text-center text-xs text-gray-100",
-            className && "text-inherit",
-          )}
-        >
-          © {currentYear} {companyName}, All rights reserved.
-        </p>
+        <div className="container mx-auto px-4">
+          <p className="text-center text-sm font-medium text-inherit">
+            © {currentYear} {companyName}, All rights reserved.
+          </p>
+        </div>
       </footer>
     );
   },

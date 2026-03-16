@@ -25,9 +25,37 @@ describe("Footer Component", () => {
   });
 
   it("applies custom classNames passed to it", () => {
-    render(<Footer data-testid="footer" className="bg-red-500" />);
+    render(<Footer data-testid="footer" className="mt-12 opacity-50" />);
 
     const footerElement = screen.getByTestId("footer");
-    expect(footerElement).toHaveClass("bg-red-500");
+    expect(footerElement).toHaveClass("mt-12");
+    expect(footerElement).toHaveClass("opacity-50");
+  });
+
+  it("applies the default variant classes when no variant is specified", () => {
+    render(<Footer data-testid="footer" />);
+
+    const footerElement = screen.getByTestId("footer");
+    expect(footerElement).toHaveClass("bg-gray-50");
+    expect(footerElement).toHaveClass("text-gray-500");
+    expect(footerElement).toHaveClass("dark:bg-gray-900/50");
+  });
+
+  it("applies the primary variant classes", () => {
+    render(<Footer data-testid="footer" variant="primary" />);
+
+    const footerElement = screen.getByTestId("footer");
+    expect(footerElement).toHaveClass("bg-primary-900");
+    expect(footerElement).toHaveClass("text-primary-200");
+    expect(footerElement).toHaveClass("dark:bg-primary-950");
+  });
+
+  it("applies the transparent variant classes", () => {
+    render(<Footer data-testid="footer" variant="transparent" />);
+
+    const footerElement = screen.getByTestId("footer");
+    expect(footerElement).toHaveClass("bg-transparent");
+    expect(footerElement).toHaveClass("text-gray-500");
+    expect(footerElement).toHaveClass("dark:text-gray-400");
   });
 });

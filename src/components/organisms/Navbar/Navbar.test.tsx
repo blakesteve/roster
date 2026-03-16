@@ -111,8 +111,7 @@ describe("Navbar Component", () => {
     const themeToggleText = screen.getByText(/dark mode/i);
     expect(themeToggleText).toBeInTheDocument();
 
-    const toggleButton = themeToggleText.closest("button");
-    fireEvent.click(toggleButton!);
+    fireEvent.click(themeToggleText);
 
     expect(onThemeToggle).toHaveBeenCalledTimes(1);
   });
@@ -130,12 +129,10 @@ describe("Navbar Component", () => {
     const hamburger = screen.getByRole("button", { name: /open main menu/i });
     fireEvent.click(hamburger);
 
-    // Wait for the mobile menu PopoverPanel to render
     const themeToggleText = await screen.findByText(/dark mode/i);
     expect(themeToggleText).toBeInTheDocument();
 
-    const toggleButton = themeToggleText.closest("button");
-    fireEvent.click(toggleButton!);
+    fireEvent.click(themeToggleText);
 
     expect(onThemeToggle).toHaveBeenCalledTimes(1);
   });
