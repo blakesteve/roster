@@ -5,7 +5,7 @@ import { Button } from "../../atoms/Button/Button";
 import "@testing-library/jest-dom";
 
 describe("CallToAction Molecule", () => {
-  it("renders title and description correctly", () => {
+  it("renders title and standard string description correctly", () => {
     render(
       <CallToAction
         title="Welcome Back"
@@ -17,6 +17,24 @@ describe("CallToAction Molecule", () => {
     expect(
       screen.getByText("Don't forget to check your picks."),
     ).toBeInTheDocument();
+  });
+
+  it("renders a complex ReactNode injected into the description prop", () => {
+    render(
+      <CallToAction
+        title="Embedded Component"
+        description={
+          <div data-testid="complex-node">
+            <span className="font-bold">Rich Text</span>
+            <button>Embedded Button</button>
+          </div>
+        }
+      />,
+    );
+
+    expect(screen.getByTestId("complex-node")).toBeInTheDocument();
+    expect(screen.getByText("Rich Text")).toBeInTheDocument();
+    expect(screen.getByText("Embedded Button")).toBeInTheDocument();
   });
 
   it("renders the action element when provided", () => {
@@ -54,13 +72,13 @@ describe("CallToAction Molecule", () => {
     );
 
     expect(screen.getByTestId("test-icon")).toBeInTheDocument();
-    // Verify icon container has the expected opacity/utility classes
     expect(screen.getByTestId("test-icon").parentElement).toHaveClass(
-      "opacity-80",
+      "shrink-0",
+      "text-current",
     );
   });
 
-  it("applies variant-specific styling including dark mode support", () => {
+  it("applies primary and error variant styling including rich dark mode support", () => {
     const { container, rerender } = render(
       <CallToAction title="Primary Test" variant="primary" />,
     );
@@ -70,14 +88,17 @@ describe("CallToAction Molecule", () => {
       "bg-primary-50",
       "text-primary-900",
     );
-    // Dark mode check
+
     expect(container.firstChild).toHaveClass(
-      "dark:bg-primary-900/10",
-      "dark:text-primary-100",
+      "dark:bg-primary-900/30",
+      "dark:text-primary-200",
     );
 
     rerender(<CallToAction title="Error Test" variant="error" />);
-    expect(container.firstChild).toHaveClass("bg-red-50", "dark:bg-red-900/10");
+    expect(container.firstChild).toHaveClass(
+      "bg-error-50",
+      "dark:bg-error-900/30",
+    );
   });
 
   it("applies the warning variant properly", () => {
@@ -87,7 +108,29 @@ describe("CallToAction Molecule", () => {
 
     expect(container.firstChild).toHaveClass(
       "bg-amber-50",
-      "dark:bg-amber-900/10",
+      "dark:bg-amber-900/30",
+    );
+  });
+
+  // success variant test
+  it("applies the new success variant properly", () => {
+    const { container } = render(
+      <CallToAction title="Success" variant="success" />,
+    );
+
+    expect(container.firstChild).toHaveClass(
+      "bg-success-50",
+      "dark:bg-success-900/30",
+    );
+  });
+
+  // info variant test
+  it("applies the new info variant properly", () => {
+    const { container } = render(<CallToAction title="Info" variant="info" />);
+
+    expect(container.firstChild).toHaveClass(
+      "bg-blue-50",
+      "dark:bg-blue-900/30",
     );
   });
 

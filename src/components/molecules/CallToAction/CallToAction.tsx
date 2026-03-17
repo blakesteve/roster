@@ -11,7 +11,7 @@ export interface CallToActionProps
     React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof ctaVariants> {
   title: string;
-  description?: string;
+  description?: React.ReactNode;
   action?: React.ReactNode;
   icon?: React.ReactNode;
   onDismiss?: () => void;
@@ -30,17 +30,15 @@ const CallToAction = ({
   return (
     <div className={cn(ctaVariants({ variant }), className)} {...props}>
       <div className="flex items-start gap-4">
-        {icon && (
-          <div className="mt-1 shrink-0 opacity-80 text-current">{icon}</div>
-        )}
-        <div className="flex flex-col gap-1.5">
+        {icon && <div className="mt-1 shrink-0 text-current">{icon}</div>}
+        <div className="flex flex-col gap-1.5 w-full">
           <h3 className="text-lg font-bold leading-tight tracking-tight text-current">
             {title}
           </h3>
           {description && (
-            <p className="max-w-prose text-sm leading-relaxed text-current opacity-80 dark:opacity-70">
+            <div className="max-w-prose text-sm leading-relaxed text-current opacity-90 dark:opacity-80">
               {description}
-            </p>
+            </div>
           )}
         </div>
       </div>
