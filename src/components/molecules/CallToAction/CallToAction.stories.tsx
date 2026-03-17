@@ -1,13 +1,15 @@
 import { useState } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { CallToAction } from "./CallToAction";
 import { Button } from "../../atoms/Button/Button";
+import { Countdown } from "../../organisms/Countdown/Countdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTrophy,
   faTriangleExclamation,
   faInfoCircle,
   faCircleCheck,
+  faCheckDouble,
 } from "@fortawesome/free-solid-svg-icons";
 
 const meta = {
@@ -22,8 +24,9 @@ const meta = {
 The \`CallToAction\` is a high-visibility banner used to nudge users toward specific actions or notify them of time-sensitive events (like lock times or league invites). 
 
 ### Key Features
-- **Themed Variants**: Supports \`primary\`, \`neutral\`, \`warning\`, and \`error\` via CVA.
-- **Dark Mode Ready**: Automatically adjusts backgrounds and text contrast based on the \`.dark\` root class.
+- **Themed Variants**: Supports \`primary\`, \`neutral\`, \`warning\`, \`error\`, \`success\`, and \`info\` via CVA.
+- **Dark Mode Perfected**: Automatically adjusts backgrounds to a rich 30% opacity with vibrant, high-contrast borders and text when the \`.dark\` root class is applied.
+- **Rich Content**: The \`description\` prop accepts any React Node, meaning you can embed complex components (like a \`Countdown\` timer) directly into the body of the CTA!
 - **Flexible Action**: The \`action\` prop accepts any React node, allowing for custom buttons, links, or groups.
 - **Dismissible**: Includes an optional \`onDismiss\` callback for user-controlled closure.
 `,
@@ -33,13 +36,13 @@ The \`CallToAction\` is a high-visibility banner used to nudge users toward spec
   decorators: [
     (Story) => (
       <div className="p-8 space-y-12">
-        <div className="light bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+        <div className="light bg-gray-50 p-8 rounded-xl border border-gray-100 shadow-sm">
           <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
             Light Mode Preview
           </p>
           <Story />
         </div>
-        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
+        <div className="dark bg-gray-950 p-8 rounded-xl border border-gray-800 shadow-xl">
           <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
             Dark Mode Preview
           </p>
@@ -52,10 +55,12 @@ The \`CallToAction\` is a high-visibility banner used to nudge users toward spec
     variant: {
       description: "Defines the color scheme and intent of the CTA.",
       control: "select",
-      options: ["primary", "neutral", "warning", "error"],
+      options: ["primary", "neutral", "warning", "error", "success", "info"],
     },
     title: { description: "The main bold heading." },
-    description: { description: "The supporting body text (optional)." },
+    description: {
+      description: "The supporting body text or React Node (optional).",
+    },
     icon: {
       description: "An optional icon displayed to the left of the text.",
     },
@@ -92,8 +97,67 @@ export const PicksOpen: Story = {
 };
 
 /**
+ * The brand new Rich Description superpower!
+ * Demonstrates embedding another component (Countdown) directly into the description prop.
+ */
+export const RichDescriptionEmbedded: Story = {
+  args: {
+    title: "NFL Season is coming soon!",
+    variant: "primary",
+    icon: <FontAwesomeIcon icon={faTrophy} className="h-5 w-5" />,
+    description: (
+      <div className="flex flex-col gap-4 mt-2">
+        <span>
+          First game expected on September 4th. Get your squad together and
+          create a NFL league. Once games are available, the schedule will
+          automatically populate.
+        </span>
+        <div className="bg-black/5 dark:bg-black/20 p-4 rounded-xl border border-black/10 dark:border-white/10 self-start">
+          <Countdown
+            targetDate={new Date(new Date().setDate(new Date().getDate() + 14))} // 14 days from now
+            size="sm"
+            variant="neutral" // Instructs the text to inherit the CTA's color!
+            className="text-left"
+          />
+        </div>
+      </div>
+    ),
+    action: (
+      <Button variant="solid" colorScheme="primary">
+        Create League
+      </Button>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Because `description` is a ReactNode, you can inject complex layouts and other components—like this `Countdown` timer—directly into the body of the Call To Action. Setting the Countdown to `variant="neutral"` ensures it perfectly inherits the text color of the CTA variant!',
+      },
+    },
+  },
+};
+
+/**
+ * The new Success variant. Perfect for confirmation states or completed onboarding steps.
+ */
+export const SuccessState: Story = {
+  args: {
+    title: "All Picks Submitted",
+    description:
+      "You are locked in for Week 5 across all 3 of your active leagues. Good luck!",
+    variant: "success",
+    icon: <FontAwesomeIcon icon={faCheckDouble} className="h-5 w-5" />,
+    action: (
+      <Button variant="outline" colorScheme="success" size="sm">
+        Review Picks
+      </Button>
+    ),
+  },
+};
+
+/**
  * Used for high-priority alerts that require immediate attention.
- * Best paired with the 'warning' button color scheme.
  */
 export const LockWarning: Story = {
   args: {
@@ -105,6 +169,24 @@ export const LockWarning: Story = {
     action: (
       <Button variant="outline" colorScheme="amber">
         Finish Picks
+      </Button>
+    ),
+  },
+};
+
+/**
+ * The new Info variant. Great for general system messages or contextual help.
+ */
+export const InfoMessage: Story = {
+  args: {
+    title: "Scoring Update",
+    description:
+      "We've updated how tie-breakers are calculated for the playoffs. Check out the new rules before making your wildcard picks.",
+    variant: "info",
+    icon: <FontAwesomeIcon icon={faInfoCircle} className="h-5 w-5" />,
+    action: (
+      <Button variant="ghost" colorScheme="primary" size="sm">
+        Read Rules
       </Button>
     ),
   },
@@ -130,7 +212,6 @@ export const ScoreSyncError: Story = {
 
 /**
  * Demonstrates how to handle a dismissible state with local persistence.
- * This mimics the legacy `MegaCTA` behavior for one-time announcements.
  */
 export const WithPersistenceLogic: Story = {
   render: () => {
