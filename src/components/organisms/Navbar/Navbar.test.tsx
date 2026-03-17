@@ -38,8 +38,29 @@ describe("Navbar Component", () => {
     expect(logo).toHaveAttribute("src", "/logo.png");
   });
 
-  it("highlights the active navigation item", () => {
+  // Verifies  seamless base classes
+  it("applies the new 'default' seamless variant classes by default", () => {
+    render(<Navbar {...defaultProps} />);
+
+    const navElement = screen.getByRole("navigation");
+    expect(navElement).toHaveClass("bg-white", "dark:bg-gray-950");
+  });
+
+  // The default variant in light mode uses the darker primary-600 text
+  it("highlights the active navigation item using light surface colors by default", () => {
     render(<Navbar {...defaultProps} activePath="/leagues" />);
+
+    const activeLink = screen.getByText("Leagues");
+    const linkElement = activeLink.closest("a");
+
+    expect(linkElement).toHaveClass("text-primary-600");
+    expect(linkElement).toHaveClass("dark:text-primary-600");
+    expect(linkElement).toHaveClass("font-semibold");
+  });
+
+  // Proves that the "slate" variant flips the links to light text (primary-400)
+  it("highlights the active navigation item using dark surface colors when variant is slate", () => {
+    render(<Navbar {...defaultProps} activePath="/leagues" variant="slate" />);
 
     const activeLink = screen.getByText("Leagues");
     const linkElement = activeLink.closest("a");
