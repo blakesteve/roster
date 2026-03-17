@@ -10,7 +10,7 @@ type TestUser = {
   name: string;
 };
 
-const columns: ColumnDef<TestUser>[] = [
+const columns: ColumnDef<TestUser, unknown>[] = [
   { accessorKey: "id", header: "ID" },
   { accessorKey: "name", header: "Name" },
 ];
@@ -50,9 +50,9 @@ describe("DataTable Component", () => {
     expect(screen.getByText("User 1")).toBeInTheDocument();
     expect(screen.queryByText("User 11")).not.toBeInTheDocument();
 
-    // Find the pagination buttons (Next Page is the 3rd button in our setup)
-    const buttons = screen.getAllByRole("button");
-    const nextPageButton = buttons[2];
+    const nextPageButton = screen.getByRole("button", {
+      name: /go to next page/i,
+    });
 
     // Click Next Page
     fireEvent.click(nextPageButton);
@@ -80,5 +80,32 @@ describe("DataTable Component", () => {
     // Verify the DOM reordered by checking if the component didn't crash
     // and the headers are still interactive.
     expect(screen.getByText("User 9")).toBeInTheDocument();
+  });
+
+  it("passes variant, size, and hoverable props down to the table primitives", () => {
+    render(
+      <DataTable
+        columns={columns}
+        data={mockData}
+        variant="ghost"
+        size="sm"
+        hoverable={true}
+      />,
+    );
+
+    const tableElement = screen.getByRole("table");
+    const dataRows = screen.getAllByRole("row");
+    // Grab the first actual data row (index 0 is the header row)
+    const firstDataRow = dataRows[1];
+
+    // Assert Size ("sm" maps to "text-xs" on the table)
+    expect(tableElement).toHaveClass("text-xs");
+
+    // Assert Variant ("ghost" maps to "bg-transparent" on rows)
+    expect(firstDataRow).toHaveClass("bg-transparent");
+
+    // Assert Hoverable (hoverable={true} maps to "cursor-pointer" and hover utility classes)
+    expect(firstDataRow).toHaveClass("cursor-pointer");
+    expect(firstDataRow).toHaveClass("hover:bg-gray-50");
   });
 });
