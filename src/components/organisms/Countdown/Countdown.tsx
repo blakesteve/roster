@@ -1,101 +1,37 @@
 import React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 import { useCountdown } from "../../../hooks/useCountdown";
+import {
+  countdownTitleVariants,
+  countdownNumberVariants,
+  countdownLabelVariants,
+} from "./countdown-variants";
 
-// --- Variants ---
-
-const titleVariants = cva("font-semibold uppercase tracking-wider mb-4", {
-  variants: {
-    size: {
-      xs: "text-sm",
-      sm: "text-base",
-      md: "text-lg",
-      lg: "text-xl",
-      xl: "text-2xl",
-    },
-    themeMode: {
-      light: "text-gray-900",
-      dark: "text-gray-100",
-    },
-  },
-  defaultVariants: {
-    size: "md",
-    themeMode: "light",
-  },
-});
-
-const numberVariants = cva(
-  "font-mono bg-clip-text text-transparent animate-pulse",
-  {
-    variants: {
-      size: {
-        xs: "text-2xl",
-        sm: "text-3xl",
-        md: "text-4xl",
-        lg: "text-5xl",
-        xl: "text-6xl",
-      },
-      themeMode: {
-        light:
-          "bg-gradient-to-br from-primary-700 via-accent-600 to-primary-700 drop-shadow-sm",
-        dark: "bg-gradient-to-br from-primary-400 via-accent-300 to-primary-400 drop-shadow-md",
-      },
-    },
-    defaultVariants: {
-      size: "md",
-      themeMode: "light",
-    },
-  },
-);
-
-const labelVariants = cva("uppercase tracking-widest mt-1", {
-  variants: {
-    size: {
-      xs: "text-[10px]",
-      sm: "text-xs",
-      md: "text-xs",
-      lg: "text-sm",
-      xl: "text-sm",
-    },
-    themeMode: {
-      light: "text-gray-600",
-      dark: "text-gray-400",
-    },
-  },
-  defaultVariants: {
-    size: "md",
-    themeMode: "light",
-  },
-});
-
-interface CountdownItemProps extends VariantProps<typeof numberVariants> {
+interface CountdownItemProps extends VariantProps<
+  typeof countdownNumberVariants
+> {
   value: number;
   label: string;
 }
 
-const CountdownItem = ({
-  value,
-  label,
-  size,
-  themeMode,
-}: CountdownItemProps) => (
+const CountdownItem = ({ value, label, size, variant }: CountdownItemProps) => (
   <div className="flex flex-col items-center">
-    <span className={cn(numberVariants({ size, themeMode }))}>
+    <span className={cn(countdownNumberVariants({ size, variant }))}>
       {String(value).padStart(2, "0")}
     </span>
-    <span className={cn(labelVariants({ size, themeMode }))}>{label}</span>
+    <span className={cn(countdownLabelVariants({ size }))}>{label}</span>
   </div>
 );
 
 export interface CountdownProps
   extends
     React.HTMLAttributes<HTMLDivElement>,
-    Omit<VariantProps<typeof titleVariants>, "themeMode"> {
+    VariantProps<typeof countdownTitleVariants> {
   targetDate: Date;
   title?: string;
   completionText?: string;
-  themeMode?: "light" | "dark";
+  variant?: VariantProps<typeof countdownNumberVariants>["variant"];
 }
 
 const Countdown = React.forwardRef<HTMLDivElement, CountdownProps>(
@@ -104,7 +40,7 @@ const Countdown = React.forwardRef<HTMLDivElement, CountdownProps>(
       targetDate,
       title,
       size,
-      themeMode = "light",
+      variant = "gradient",
       className,
       completionText,
       ...props
@@ -119,10 +55,13 @@ const Countdown = React.forwardRef<HTMLDivElement, CountdownProps>(
         return (
           <div
             ref={ref}
-            className={cn("font-bold w-full text-center", className)}
+            className={cn(
+              "font-bold w-full text-center text-gray-900 dark:text-gray-100",
+              className,
+            )}
             {...props}
           >
-            <h3 className={cn(titleVariants({ size, themeMode }), "mb-0")}>
+            <h3 className={cn(countdownTitleVariants({ size }), "mb-0")}>
               {completionText}
             </h3>
           </div>
@@ -134,36 +73,39 @@ const Countdown = React.forwardRef<HTMLDivElement, CountdownProps>(
     return (
       <div
         ref={ref}
-        className={cn("font-bold w-full text-center", className)}
+        className={cn(
+          "font-bold w-full text-center text-gray-900 dark:text-gray-100",
+          className,
+        )}
         {...props}
       >
         {title && (
-          <h3 className={cn(titleVariants({ size, themeMode }))}>{title}</h3>
+          <h3 className={cn(countdownTitleVariants({ size }))}>{title}</h3>
         )}
         <div className="flex justify-center gap-4 sm:gap-6 md:gap-8">
           <CountdownItem
             value={days}
             label="Days"
             size={size}
-            themeMode={themeMode}
+            variant={variant}
           />
           <CountdownItem
             value={hours}
             label="Hours"
             size={size}
-            themeMode={themeMode}
+            variant={variant}
           />
           <CountdownItem
             value={minutes}
             label="Minutes"
             size={size}
-            themeMode={themeMode}
+            variant={variant}
           />
           <CountdownItem
             value={seconds}
             label="Seconds"
             size={size}
-            themeMode={themeMode}
+            variant={variant}
           />
         </div>
       </div>

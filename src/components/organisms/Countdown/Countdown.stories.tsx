@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Countdown } from "./Countdown";
 
 const meta = {
@@ -6,7 +6,7 @@ const meta = {
   component: Countdown,
   tags: ["autodocs"],
   parameters: {
-    layout: "centered",
+    layout: "fullscreen",
     docs: {
       description: {
         component: `
@@ -15,9 +15,10 @@ const meta = {
 The **Countdown** component provides a highly visual, animated timer for upcoming deadlines. Powered by \`date-fns\`, it guarantees precise calculations across timezones and daylight saving boundaries.
 
 #### 🎨 Design System Integrations
-* **Theme Aware:** Fully supports both \`light\` and \`dark\` mode environments via the \`themeMode\` prop, automatically adjusting gradients, shadows, and text contrast to ensure WCAG accessibility.
+* **Zero-Config Dark Mode:** No manual theme props required! The component natively listens to your app's \`.dark\` class and perfectly flips its text contrast, gradients, and shadows.
+* **Variant System:** Choose between the flashy animated \`gradient\`, a solid \`primary\` brand color, or a \`neutral\` style that inherits from its parent container.
 * **Fluid Typography:** Scales harmoniously using the \`size\` prop, making it suitable for anything from a small sidebar widget to a massive full-screen hero section.
-* **Graceful Degradation:** Automatically handles expired dates by unmounting the timer or replacing it with customized \`completionText\`.
+* **Graceful Degradation:** Automatically handles expired dates by replacing the timer with customized \`completionText\`.
 
 ---
 
@@ -51,8 +52,13 @@ const CustomTimer = () => {
     },
     completionText: {
       control: "text",
-      description:
-        "Text to display when the countdown hits zero. If omitted, the component renders `null` upon completion.",
+      description: "Text to display when the countdown hits zero.",
+    },
+    variant: {
+      control: "select",
+      options: ["gradient", "primary", "neutral"],
+      description: "The visual style applied to the countdown numbers.",
+      table: { defaultValue: { summary: "gradient" } },
     },
     size: {
       control: "select",
@@ -60,14 +66,32 @@ const CustomTimer = () => {
       description: "Proportionally scales the entire component.",
       table: { defaultValue: { summary: "md" } },
     },
-    themeMode: {
-      control: "radio",
-      options: ["light", "dark"],
-      description:
-        "Adjusts the text colors, gradient intensity, and drop-shadows to match the parent container's background.",
-      table: { defaultValue: { summary: "light" } },
-    },
   },
+  decorators: [
+    (Story) => (
+      <div className="p-8 space-y-12 w-full max-w-4xl mx-auto">
+        {/* Light Mode Preview */}
+        <div className="light bg-white p-8 rounded-xl border border-gray-100 shadow-sm flex flex-col relative min-h-50">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest absolute top-4 left-4">
+            Light Mode Preview
+          </p>
+          <div className="grow flex items-center justify-center mt-6">
+            <Story />
+          </div>
+        </div>
+
+        {/* Dark Mode Preview */}
+        <div className="dark bg-gray-950 p-8 rounded-xl border border-gray-800 shadow-xl flex flex-col relative min-h-50">
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest absolute top-4 left-4">
+            Dark Mode Preview
+          </p>
+          <div className="grow flex items-center justify-center mt-6">
+            <Story />
+          </div>
+        </div>
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof Countdown>;
 
 export default meta;
@@ -89,41 +113,70 @@ const getPastDate = () => {
 
 // --- Stories ---
 
-export const StandardLight: Story = {
+export const DefaultGradient: Story = {
   args: {
     targetDate: getFutureDate(3, 14),
-    title: "Season Begins In",
-    themeMode: "light",
+    title: "Draft Begins In",
+    variant: "gradient",
     size: "md",
   },
-  decorators: [
-    (Story) => (
-      <div className="p-12 bg-white rounded-xl shadow-sm border border-gray-200 min-w-125 flex justify-center">
-        <Story />
-      </div>
-    ),
-  ],
   parameters: {
     docs: {
       description: {
         story:
-          "The default configuration. Uses deeper, high-contrast gradients and darker text to remain legible against white or light-gray backgrounds.",
+          "The default configuration. Uses an animated gradient that automatically shifts to a brighter, glowing tone when placed in a dark mode container.",
       },
     },
   },
 };
 
-export const HeroDark: Story = {
+export const PrimarySolid: Story = {
   args: {
-    targetDate: getFutureDate(0, 5), // 5 hours from now
+    targetDate: getFutureDate(7, 2),
+    title: "Next Matchup",
+    variant: "primary",
+    size: "md",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Applies your design system's primary brand color to the numbers. A great choice for cleaner, less flashy interfaces.",
+      },
+    },
+  },
+};
+
+export const NeutralText: Story = {
+  args: {
+    targetDate: getFutureDate(1, 5),
+    title: "Maintenance Window",
+    variant: "neutral",
+    size: "md",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The neutral variant strips away distinct colors and forces the numbers to inherit the standard text color of its environment (`gray-900` in light mode, `gray-100` in dark mode).",
+      },
+    },
+  },
+};
+
+export const HeroLarge: Story = {
+  args: {
+    targetDate: getFutureDate(0, 5),
     title: "Championship Kickoff",
-    themeMode: "dark",
+    variant: "gradient",
     size: "xl",
   },
   decorators: [
     (Story) => (
-      <div className="p-16 bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 min-w-200 flex justify-center bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
-        <Story />
+      <div className="p-8 w-full max-w-5xl mx-auto">
+        <div className="dark p-16 bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 flex justify-center bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+          <Story />
+        </div>
       </div>
     ),
   ],
@@ -131,7 +184,7 @@ export const HeroDark: Story = {
     docs: {
       description: {
         story:
-          "Designed for dark mode hero sections. It scales up to `xl` and uses brighter, glowing gradients with light text to pop against dark slate backgrounds.",
+          "Scales the typography and spacing up to `xl`. Perfect for anchoring a large hero section or landing page against a textured dark background.",
       },
     },
   },
@@ -140,16 +193,9 @@ export const HeroDark: Story = {
 export const WidgetSmall: Story = {
   args: {
     targetDate: getFutureDate(1, 2),
-    themeMode: "light",
+    variant: "primary",
     size: "xs",
   },
-  decorators: [
-    (Story) => (
-      <div className="p-6 bg-gray-50 rounded-lg shadow-inner border border-gray-200 max-w-75 flex justify-center">
-        <Story />
-      </div>
-    ),
-  ],
   parameters: {
     docs: {
       description: {
@@ -165,13 +211,15 @@ export const EventCompleted: Story = {
     targetDate: getPastDate(),
     title: "Trade Deadline",
     completionText: "The Trade Window is Closed",
-    themeMode: "light",
+    variant: "neutral",
     size: "lg",
   },
   decorators: [
     (Story) => (
-      <div className="p-12 bg-red-50 rounded-xl border-2 border-red-100 min-w-125 flex justify-center text-red-900">
-        <Story />
+      <div className="p-8 w-full max-w-4xl mx-auto">
+        <div className="bg-error-50 dark:bg-error-900/20 border-2 border-error-200 dark:border-error-800 rounded-xl p-12 flex justify-center text-error-900 dark:text-error-100">
+          <Story />
+        </div>
       </div>
     ),
   ],
@@ -179,7 +227,7 @@ export const EventCompleted: Story = {
     docs: {
       description: {
         story:
-          "Demonstrates the UI when the `targetDate` has passed. The timer is unmounted and safely replaced by the `completionText` string.",
+          "Demonstrates the UI when the `targetDate` has passed. The timer is unmounted and safely replaced by the `completionText`. Notice how the component seamlessly inherits the red text color from the parent wrapper!",
       },
     },
   },
