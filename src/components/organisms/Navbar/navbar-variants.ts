@@ -5,7 +5,11 @@ export const navbarVariants = cva(
   {
     variants: {
       variant: {
-        // Slate: A solid mid-dark gray in light mode, drops to a deep, moody gray in dark mode
+        // White in light mode, deep gray-950 in dark mode.
+        default:
+          "bg-white border-gray-200 text-gray-900 dark:bg-gray-950 dark:border-gray-800 dark:text-gray-100",
+          
+        // Slate: A solid mid-dark gray in light mode, drops to a moody gray in dark mode
         slate: 
           "bg-gray-700 border-gray-600 text-gray-100 dark:bg-gray-900 dark:border-gray-800", 
         
@@ -17,7 +21,7 @@ export const navbarVariants = cva(
         white: 
           "bg-white border-gray-200 text-gray-900 dark:bg-gray-600 dark:border-gray-700 dark:text-gray-100",
         
-        // Transparent: Stays invisible, adapts text for standard readability if no image is behind it
+        // Transparent: Stays invisible, adapts text for standard readability
         transparent: 
           "bg-transparent border-transparent text-gray-900 dark:text-white",
       },
@@ -28,7 +32,7 @@ export const navbarVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "slate",
+      variant: "default",
       position: "sticky",
     },
   }

@@ -4,14 +4,14 @@ import { Navbar, type NavbarProps } from "./Navbar";
 
 const InteractiveWrapper = ({
   args,
-  className = "bg-gray-50 dark:bg-gray-900 min-h-75",
+  className = "bg-gray-50 dark:bg-gray-950 min-h-75",
   children,
 }: {
   args: NavbarProps;
   className?: string;
   children?: ReactNode;
 }) => {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
 
   return (
     <div className={isDark ? "dark" : ""}>
@@ -56,7 +56,8 @@ import { NavLink } from "react-router-dom";
 \`\`\`
 
 **2. Layout & Positioning (Defaults)**
-By default, the Navbar renders with \`variant="slate"\` and \`position="sticky"\`. 
+By default, the Navbar renders with \`variant="default"\` and \`position="sticky"\`. 
+* The \`default\` variant is fully theme-aware: it renders pure white in light mode and deep \`gray-950\` in dark mode to seamlessly blend into your application's background.
 * Using \`sticky\` ensures the Navbar stays at the top of the viewport when scrolling, without pulling it out of the document flow (meaning you don't need to add top padding to your page content). 
 * Use \`fixed\` only when you want the Navbar to float *over* elements like large hero images.
 
@@ -69,9 +70,9 @@ The component supports multiple visual variants to suit different contexts. Addi
   argTypes: {
     variant: {
       control: "select",
-      options: ["slate", "primary", "white", "transparent"],
+      options: ["default", "slate", "primary", "white", "transparent"],
       description: "The visual theme of the navbar.",
-      table: { defaultValue: { summary: "slate" } },
+      table: { defaultValue: { summary: "default" } },
     },
     themeMode: {
       control: "radio",
@@ -123,6 +124,24 @@ const mockUser = {
   avatarSrc: "https://i.pravatar.cc/150?u=ms",
 };
 
+export const DefaultTheme: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: defaultItems,
+    variant: "default",
+    user: mockUser,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The **Default** variant is the true baseline. It uses pure white in light mode and deep `gray-950` in dark mode to blend perfectly into the application background. **Click the user avatar in this interactive story** to test the fully functional theme toggle switch.",
+      },
+    },
+  },
+};
+
 export const SlateTheme: Story = {
   args: {
     logoSrc: mockLogo,
@@ -135,7 +154,7 @@ export const SlateTheme: Story = {
     docs: {
       description: {
         story:
-          "The **Slate** variant is the standard dark theme. **Click the user avatar in this interactive story** to test the fully functional Switch component and watch the background respond.",
+          "The **Slate** variant forces a dark, moody surface in both light and dark modes. Excellent for contrast-heavy dashboards.",
       },
     },
   },
@@ -147,14 +166,14 @@ export const ActiveLinkState: Story = {
     brandName: "MegaSquad",
     items: defaultItems,
     activePath: "/leagues",
-    variant: "slate",
+    variant: "default",
     user: mockUser,
   },
   parameters: {
     docs: {
       description: {
         story:
-          "When the `activePath` prop matches a navigation item's `path`, the link text transforms to indicate the user's current location. Notice how the active link uses `text-primary-400` on dark surfaces to ensure it pops vibrantly against the background.",
+          "When the `activePath` prop matches a navigation item's `path`, the link text transforms to indicate the user's current location.",
       },
     },
   },
@@ -183,7 +202,7 @@ export const FallbackInitials: Story = {
     logoSrc: mockLogo,
     brandName: "MegaSquad",
     items: defaultItems,
-    variant: "slate",
+    variant: "default",
     user: {
       initials: "MS",
       notificationCount: 0,
@@ -212,7 +231,7 @@ export const WhiteTheme: Story = {
     docs: {
       description: {
         story:
-          "The **White** variant is designed for lighter contexts, such as admin panels or settings pages. Toggle dark mode to see it gracefully transition to a deep, elevated surface gray.",
+          "The **White** variant is designed for lighter contexts, but unlike `default`, it transitions to an elevated surface gray (`gray-600`) in dark mode rather than sinking into the deep background.",
       },
     },
   },
@@ -254,7 +273,7 @@ export const WithNotifications: Story = {
     logoSrc: mockLogo,
     brandName: "MegaSquad",
     items: defaultItems,
-    variant: "slate",
+    variant: "default",
     notificationVariant: "amber",
     user: {
       initials: "MS",
@@ -278,7 +297,7 @@ export const MobileView: Story = {
     brandName: "MegaSquad",
     items: defaultItems,
     activePath: "/leagues",
-    variant: "slate",
+    variant: "default",
     user: {
       initials: "MS",
       notificationCount: 2,

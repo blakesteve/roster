@@ -71,7 +71,7 @@ const Navbar = ({
   onInboxClick,
   onThemeToggle,
   className,
-  variant = "slate",
+  variant = "default",
   position = "sticky",
   themeMode,
   notificationVariant = "error",
@@ -79,13 +79,17 @@ const Navbar = ({
 }: NavbarProps) => {
   const hasNotifications = (user?.notificationCount || 0) > 0;
 
-  const computedMode = themeMode ?? (variant === "white" ? "light" : "dark");
+  // "default" for the light-mode assumption fallback
+  const computedMode =
+    themeMode ??
+    (variant === "white" || variant === "default" ? "light" : "dark");
   const isDarkMode = computedMode === "dark";
 
-  // Determines if the main navbar strip is currently a dark surface
+  // Ensures default is treated as a dark surface when the app is in dark mode
   const isDarkSurface =
     variant === "slate" ||
     variant === "primary" ||
+    (variant === "default" && isDarkMode) ||
     (variant === "white" && isDarkMode) ||
     (variant === "transparent" && isDarkMode);
 
