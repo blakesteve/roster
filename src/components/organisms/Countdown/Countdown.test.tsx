@@ -53,26 +53,35 @@ describe("Countdown Component", () => {
     expect(screen.getByText("07")).toBeInTheDocument();
   });
 
-  it("applies the correct themeMode classes for accessibility", () => {
+  it("applies the correct variant classes to the countdown numbers", () => {
+    const targetDate = new Date("2026-01-02T12:00:00Z"); // Exactly 1 day in the future (Days = "01")
+
+    // Test Default (Gradient)
+    const { rerender } = render(<Countdown targetDate={targetDate} />);
+    let dayNumber = screen.getByText("01");
+    expect(dayNumber).toHaveClass("bg-gradient-to-br", "from-primary-700");
+
+    // Test Primary Variant
+    rerender(<Countdown targetDate={targetDate} variant="primary" />);
+    dayNumber = screen.getByText("01");
+    expect(dayNumber).toHaveClass("text-primary-600", "dark:text-primary-400");
+
+    // Test Neutral Variant
+    rerender(<Countdown targetDate={targetDate} variant="neutral" />);
+    dayNumber = screen.getByText("01");
+    expect(dayNumber).toHaveClass("text-gray-900", "dark:text-gray-100");
+  });
+
+  // Ensures native dark mode inheritance is working
+  it("applies base text inheritance classes to the root container for native dark mode", () => {
     const targetDate = new Date("2026-01-02T12:00:00Z");
+    const { container } = render(<Countdown targetDate={targetDate} />);
 
-    // Test Light Mode (Default)
-    const { rerender } = render(
-      <Countdown
-        targetDate={targetDate}
-        title="Theme Test"
-        themeMode="light"
-      />,
+    // The root div should explicitly define the baseline text colors
+    expect(container.firstChild).toHaveClass(
+      "text-gray-900",
+      "dark:text-gray-100",
     );
-    const lightTitle = screen.getByText("Theme Test");
-    expect(lightTitle).toHaveClass("text-gray-900");
-
-    // Test Dark Mode
-    rerender(
-      <Countdown targetDate={targetDate} title="Theme Test" themeMode="dark" />,
-    );
-    const darkTitle = screen.getByText("Theme Test");
-    expect(darkTitle).toHaveClass("text-gray-100");
   });
 
   it("renders completionText when the target date is in the past", () => {
