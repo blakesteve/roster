@@ -13,7 +13,7 @@ import {
 type TableContextType = {
   variant?: "default" | "ghost" | "subtle" | "primary" | null;
   size?: "sm" | "md" | "lg" | null;
-  hoverable?: boolean; // ✨ Added to context
+  hoverable?: boolean;
 };
 
 const TableContext = React.createContext<TableContextType>({
@@ -108,7 +108,7 @@ const TableRow = React.forwardRef<
   return (
     <tr
       ref={ref}
-      // ✨ Injects hoverable state to trigger the compound variant
+      // Injects hoverable state to trigger the compound variant
       className={cn(tableRowVariants({ variant, hoverable }), className)}
       {...props}
     />

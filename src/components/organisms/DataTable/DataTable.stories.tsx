@@ -144,7 +144,7 @@ The **DataTable** is a smart, fully-featured data grid powered by \`@tanstack/re
 export default meta;
 type Story = StoryObj<typeof DataTable>;
 
-// ✨ Helper to safely bypass generic inference issues in Storybook without using "any"
+// Helper to safely bypass generic inference issues in Storybook without using "any"
 type DataTableStoryProps = Omit<
   DataTableProps<PickRecord, unknown>,
   "columns" | "data"

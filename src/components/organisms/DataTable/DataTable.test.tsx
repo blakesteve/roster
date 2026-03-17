@@ -10,7 +10,6 @@ type TestUser = {
   name: string;
 };
 
-// ✨ Updated to strict generic typing
 const columns: ColumnDef<TestUser, unknown>[] = [
   { accessorKey: "id", header: "ID" },
   { accessorKey: "name", header: "Name" },
@@ -51,7 +50,6 @@ describe("DataTable Component", () => {
     expect(screen.getByText("User 1")).toBeInTheDocument();
     expect(screen.queryByText("User 11")).not.toBeInTheDocument();
 
-    // ✨ Vastly improved: querying by accessible name instead of hardcoded array index!
     const nextPageButton = screen.getByRole("button", {
       name: /go to next page/i,
     });
