@@ -77,7 +77,7 @@ export default meta;
 type Story = StoryObj<typeof ActionBar>;
 
 const DualPreviewDecorator: Decorator = (Story) => (
-  <div className="flex flex-col w-full h-[800px]">
+  <div className="flex flex-col w-full h-200">
     {/* Light Mode Container */}
     <div className="light flex-1 bg-gray-50 overflow-y-auto relative border-b border-gray-200">
       <p className="absolute top-4 right-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest z-10">
@@ -242,9 +242,8 @@ const InteractiveWrapper = (args: ActionBarProps) => {
 
   return (
     <div className={isDark ? "dark" : ""}>
-      <div className="h-[600px] w-full bg-gray-50 dark:bg-gray-950 flex flex-col overflow-hidden transition-colors duration-300">
+      <div className="h-150 w-full bg-gray-50 dark:bg-gray-950 flex flex-col overflow-hidden transition-colors duration-300">
         <div className="flex-1 overflow-y-auto relative">
-          {/* ✨ MOVED TO THE TOP: The Action Bar must be first in the DOM for sticky top-0 to work! */}
           {selectedIds.length > 0 && (
             <ActionBar
               {...args}
