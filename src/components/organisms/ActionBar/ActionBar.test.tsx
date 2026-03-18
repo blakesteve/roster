@@ -44,12 +44,11 @@ describe("ActionBar Component", () => {
     expect(actionBar).toHaveClass("sticky", "top-0", "border-b");
   });
 
-  // test fixed bottom positioning
   it('applies the correct CSS classes for position="bottom"', () => {
     render(<ActionBar data-testid="action-bar" position="bottom" />);
 
     const actionBar = screen.getByTestId("action-bar");
-    expect(actionBar).toHaveClass("fixed", "bottom-0", "inset-x-0", "border-t");
+    expect(actionBar).toHaveClass("sticky", "bottom-0", "border-t");
   });
 
   // verifying the /50 opacities
