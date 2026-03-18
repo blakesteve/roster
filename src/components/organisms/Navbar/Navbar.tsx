@@ -116,7 +116,7 @@ const Navbar = ({
   return (
     <Popover
       as="nav"
-      className={cn(navbarVariants({ variant, position }), className)}
+      className={cn("z-50", navbarVariants({ variant, position }), className)}
       {...props}
     >
       {({ open, close }) => (
@@ -207,7 +207,7 @@ const Navbar = ({
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <MenuItems className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black/5 dark:ring-white/10 focus:outline-none divide-y divide-gray-100 dark:divide-gray-700">
+                    <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black/5 dark:ring-white/10 focus:outline-none divide-y divide-gray-100 dark:divide-gray-700">
                       <div className="py-1">
                         {hasNotifications && (
                           <MenuItem>
@@ -358,7 +358,7 @@ const Navbar = ({
           >
             <PopoverPanel
               focus
-              className="absolute top-0 inset-x-0 z-30 origin-top-right transform p-2 transition md:hidden"
+              className="absolute top-0 inset-x-0 z-50 origin-top-right transform p-2 transition md:hidden"
             >
               <div className="rounded-lg shadow-lg ring-1 ring-black/5 dark:ring-white/10 divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
                 <div className="px-5 pt-5 pb-6">
