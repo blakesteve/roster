@@ -28,7 +28,7 @@ const ActionBar = forwardRef<HTMLDivElement, ActionBarProps>(
       actions,
       children,
       position,
-      themeMode,
+      variant,
       className,
       ...props
     },
@@ -37,14 +37,14 @@ const ActionBar = forwardRef<HTMLDivElement, ActionBarProps>(
     return (
       <div
         ref={ref}
-        className={cn(actionBarVariants({ position, themeMode }), className)}
+        className={cn(actionBarVariants({ variant, position }), className)}
         {...props}
       >
         <div className="container mx-auto p-4">
           <div className="flex justify-between items-center">
             {/* Left Content */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-2">
-              {title && <span className="font-semibold">{title}</span>}
+              {title && <span className="font-semibold text-lg">{title}</span>}
               {badge && (
                 <div className="max-w-44 sm:max-w-max mr-2">{badge}</div>
               )}
@@ -56,14 +56,16 @@ const ActionBar = forwardRef<HTMLDivElement, ActionBarProps>(
 
           {/* Subtitle */}
           {subtitle && (
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            // ✨ Swapped hardcoded grays for `opacity-80` so it inherits the variant's text color perfectly
+            <div className="text-sm opacity-80 mt-1 font-medium">
               {subtitle}
             </div>
           )}
 
           {/* Bottom Tray */}
           {children && (
-            <div className="flex flex-wrap items-center mt-3 pt-3 border-t border-gray-200 dark:border-slate-700 gap-y-2">
+            // ✨ Used border-black/10 and white/10 to create a universal separator line
+            <div className="flex flex-wrap items-center mt-4 pt-4 border-t border-black/10 dark:border-white/10 gap-y-2">
               {children}
             </div>
           )}
