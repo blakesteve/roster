@@ -41,25 +41,38 @@ describe("ActionBar Component", () => {
     render(<ActionBar data-testid="action-bar" />);
 
     const actionBar = screen.getByTestId("action-bar");
-    expect(actionBar).toHaveClass("sticky");
-    expect(actionBar).toHaveClass("top-0");
+    expect(actionBar).toHaveClass("sticky", "top-0", "border-b");
   });
 
   it('applies the correct CSS classes for position="bottom"', () => {
     render(<ActionBar data-testid="action-bar" position="bottom" />);
 
     const actionBar = screen.getByTestId("action-bar");
-    expect(actionBar).toHaveClass("sticky");
-    expect(actionBar).toHaveClass("bottom-0");
-    expect(actionBar).toHaveClass("border-t");
+    expect(actionBar).toHaveClass("sticky", "bottom-0", "border-t");
   });
 
-  it('applies the correct CSS classes for themeMode="dark"', () => {
-    render(<ActionBar data-testid="action-bar" themeMode="dark" />);
+  // verifying the /50 opacities
+  it('applies the correct CSS classes for variant="primary"', () => {
+    render(<ActionBar data-testid="action-bar" variant="primary" />);
 
     const actionBar = screen.getByTestId("action-bar");
-    expect(actionBar).toHaveClass("bg-slate-800/90");
-    expect(actionBar).toHaveClass("text-white");
+    expect(actionBar).toHaveClass("bg-primary-700/50", "text-white");
+    expect(actionBar).toHaveClass(
+      "dark:bg-primary-950/50",
+      "dark:text-primary-50",
+    );
+  });
+
+  // test for the transparent variant to ensure background drops out
+  it('applies the correct CSS classes for variant="transparent"', () => {
+    render(<ActionBar data-testid="action-bar" variant="transparent" />);
+
+    const actionBar = screen.getByTestId("action-bar");
+    expect(actionBar).toHaveClass(
+      "bg-transparent",
+      "border-transparent",
+      "shadow-none",
+    );
   });
 
   it("merges custom classNames correctly", () => {
@@ -69,7 +82,7 @@ describe("ActionBar Component", () => {
 
     const actionBar = screen.getByTestId("action-bar");
     expect(actionBar).toHaveClass("custom-test-class");
-    // Ensure default classes are still there
-    expect(actionBar).toHaveClass("sticky");
+    // Ensure default base classes are still there
+    expect(actionBar).toHaveClass("z-40", "w-full", "backdrop-blur-md");
   });
 });
