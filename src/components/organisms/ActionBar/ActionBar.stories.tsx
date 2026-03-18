@@ -76,9 +76,7 @@ The **ActionBar** provides a persistent, floating area for page-level actions an
 export default meta;
 type Story = StoryObj<typeof ActionBar>;
 
-// ✨ Strictly typed the Storybook Decorator
 const DualPreviewDecorator: Decorator = (Story) => (
-  // ✨ Stacked vertically with flex-col
   <div className="flex flex-col w-full h-200">
     {/* Light Mode Container */}
     <div className="light flex-1 bg-gray-50 overflow-y-auto relative border-b border-gray-200">
@@ -216,10 +214,8 @@ const AVAILABLE_ICONS = [
   { id: "cube", icon: faCube, color: "text-purple-500" },
 ];
 
-// ✨ Explicitly typed args using ActionBarProps
 const InteractiveWrapper = (args: ActionBarProps) => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  // Local state just for the story preview toggle
   const [isDark, setIsDark] = useState(false);
 
   const toggleItem = (id: string) => {
