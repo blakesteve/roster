@@ -16,7 +16,7 @@ export const actionBarVariants = cva(
       },
       position: {
         top: "sticky top-0 border-b",
-        bottom: "fixed bottom-0 inset-x-0 border-t", 
+        bottom: "sticky bottom-0 border-t", 
         static: "relative border-y",
       },
     },
