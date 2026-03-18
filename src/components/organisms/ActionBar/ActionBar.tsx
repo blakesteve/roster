@@ -7,15 +7,10 @@ export interface ActionBarProps
   extends
     Omit<HTMLAttributes<HTMLDivElement>, "title">,
     VariantProps<typeof actionBarVariants> {
-  /** The primary text or element on the left (e.g., "5 of 16") */
   title?: ReactNode;
-  /** Secondary text below the title/badge (e.g., "Week 4") */
   subtitle?: ReactNode;
-  /** A slot for a status indicator next to the title */
   badge?: ReactNode;
-  /** A slot for buttons aligned to the right */
   actions?: ReactNode;
-  /** Content rendered in the bottom tray (e.g., the logo list) */
   children?: ReactNode;
 }
 
@@ -56,7 +51,6 @@ const ActionBar = forwardRef<HTMLDivElement, ActionBarProps>(
 
           {/* Subtitle */}
           {subtitle && (
-            // ✨ Swapped hardcoded grays for `opacity-80` so it inherits the variant's text color perfectly
             <div className="text-sm opacity-80 mt-1 font-medium">
               {subtitle}
             </div>
@@ -64,7 +58,6 @@ const ActionBar = forwardRef<HTMLDivElement, ActionBarProps>(
 
           {/* Bottom Tray */}
           {children && (
-            // ✨ Used border-black/10 and white/10 to create a universal separator line
             <div className="flex flex-wrap items-center mt-4 pt-4 border-t border-black/10 dark:border-white/10 gap-y-2">
               {children}
             </div>
