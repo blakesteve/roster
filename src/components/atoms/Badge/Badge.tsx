@@ -37,13 +37,15 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
         {...props}
       >
         {leftIcon && (
-          <span className="flex items-center justify-center opacity-70">
+          <span className="flex shrink-0 items-center justify-center opacity-70">
             {leftIcon}
           </span>
         )}
-        {children}
+
+        <span className="truncate min-w-0">{children}</span>
+
         {rightIcon && (
-          <span className="flex items-center justify-center opacity-70">
+          <span className="flex shrink-0 items-center justify-center opacity-70">
             {rightIcon}
           </span>
         )}

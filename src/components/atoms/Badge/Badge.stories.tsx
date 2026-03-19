@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Badge } from "./Badge";
+import type { Meta, StoryObj, Decorator } from "@storybook/react-vite";
+import { Badge, type BadgeProps } from "./Badge";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheck,
@@ -12,7 +12,7 @@ import {
   faLightbulb,
 } from "@fortawesome/free-solid-svg-icons";
 
-const iconMap = {
+const iconMap: Record<string, React.ReactNode> = {
   None: null,
   Check: <FontAwesomeIcon icon={faCheck} />,
   Plus: <FontAwesomeIcon icon={faPlus} />,
@@ -24,7 +24,7 @@ const iconMap = {
   Idea: <FontAwesomeIcon icon={faLightbulb} />,
 };
 
-const meta: Meta<typeof Badge> = {
+const meta = {
   title: "Atoms/Badge",
   component: Badge,
   tags: ["autodocs"],
@@ -32,7 +32,7 @@ const meta: Meta<typeof Badge> = {
     docs: {
       description: {
         component:
-          "A versatile **Badge** component used to label content, display status, or indicate counts. \n\n✨ **New:** Badges now use an **opacity-based scaling system** for backgrounds and adaptive text colors. \n\n💡 **Light Variant:** We've added a 'light' fill variant that provides a middle ground between 'soft' and 'solid'—perfect for categorized labels that need structure without being overwhelming.",
+          "A versatile **Badge** component used to label content, display status, or indicate counts. \n\n✨ **New in v2:** \n* **Crisp Colors:** Light mode now uses solid pastel backgrounds (`bg-[color]-50`) to prevent muddy text, while dark mode intelligently adapts to translucent layers (`bg-[color]-900/30`) for a stained-glass effect.\n* **Truncation:** Badges now natively support truncation (`...`) when placed in restrictive containers, and icons are protected from crushing via `shrink-0`.",
       },
     },
   },
@@ -83,10 +83,28 @@ const meta: Meta<typeof Badge> = {
       description: "Icon to display on the right side of the text.",
     },
   },
-};
+} satisfies Meta<typeof Badge>;
 
 export default meta;
 type Story = StoryObj<typeof Badge>;
+
+// ✨ Side-by-side decorator perfect for showcasing Atom-level components
+const DualPreviewDecorator: Decorator = (Story) => (
+  <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
+    <div className="light flex-1 bg-white p-12 relative flex flex-col items-center justify-center">
+      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest z-10">
+        Light Mode
+      </p>
+      <Story />
+    </div>
+    <div className="dark flex-1 bg-gray-950 p-12 relative flex flex-col items-center justify-center border-l border-gray-200 dark:border-gray-800">
+      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest z-10">
+        Dark Mode
+      </p>
+      <Story />
+    </div>
+  </div>
+);
 
 export const Default: Story = {
   args: {
@@ -94,62 +112,115 @@ export const Default: Story = {
     variant: "primary",
     fill: "solid",
     size: "sm",
-    leftIcon: "None",
   },
+  decorators: [DualPreviewDecorator],
 };
 
-export const SuccessSolid: Story = {
+export const SoftPastels: Story = {
   args: {
-    children: "Verified",
-    variant: "success",
-    fill: "solid",
-    leftIcon: "Shield",
-  },
-};
-
-export const TealLight: Story = {
-  args: {
-    children: "Subtle Hint",
-    variant: "teal",
-    fill: "light",
-    leftIcon: "Idea",
-  },
-};
-
-export const ErrorOutline: Story = {
-  args: {
-    children: "Failed",
-    variant: "error",
-    fill: "outline",
-    rightIcon: "Warning",
-  },
-};
-
-export const UserBadge: Story = {
-  args: {
-    children: "Admin",
-    variant: "orange",
+    children: "User Settings",
+    variant: "purple",
     fill: "soft",
-    leftIcon: "User",
+    leftIcon: iconMap.User,
+  },
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The **Soft** fill uses a crisp, solid pastel background in light mode (no more muddy transparency) and a rich, translucent background in dark mode.",
+      },
+    },
   },
 };
 
-export const NotificationCount: Story = {
+export const StatusPill: Story = {
   args: {
-    children: "3",
+    children: "12",
     statusBadge: true,
     variant: "error",
     fill: "solid",
     size: "sm",
   },
+  decorators: [DualPreviewDecorator],
 };
 
-export const AmberSolidTest: Story = {
+export const OutlineHighlight: Story = {
   args: {
-    children: "New Feature",
+    children: "Beta Feature",
     variant: "amber",
-    fill: "solid",
-    size: "sm",
-    leftIcon: "Lightning",
+    fill: "outline",
+    leftIcon: iconMap.Lightning,
+  },
+  decorators: [DualPreviewDecorator],
+};
+
+// ✨ The new Truncation demonstration!
+export const LongTextTruncation: Story = {
+  render: (args) => (
+    <div className="w-32 p-4 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg flex flex-col gap-2 items-center text-center">
+      <span className="text-xs text-gray-400 mb-2">
+        Restricted Container (128px)
+      </span>
+      <Badge {...args} leftIcon={iconMap.Shield} rightIcon={iconMap.Check}>
+        Super Long Badge Name That Should Never Wrap
+      </Badge>
+    </div>
+  ),
+  args: {
+    variant: "teal",
+    fill: "light",
+  },
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Demonstrates the new `truncate` and `shrink-0` protections. When placed in a restrictive container, the text perfectly ellipses out without crushing the icons or wrapping to a second line.",
+      },
+    },
+  },
+};
+
+// ✨ The Ultimate Grid! Auto-generates all variants so you can review the whole palette at once.
+const ALL_VARIANTS: BadgeProps["variant"][] = [
+  "primary",
+  "orange",
+  "teal",
+  "purple",
+  "amber",
+  "success",
+  "error",
+  "neutral",
+];
+const ALL_FILLS: BadgeProps["fill"][] = ["soft", "light", "solid", "outline"];
+
+export const AllVariantsMatrix: Story = {
+  render: () => (
+    <div className="flex flex-col gap-12 w-full">
+      {ALL_FILLS.map((fill) => (
+        <div key={fill} className="flex flex-col gap-4">
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-gray-800 pb-2">
+            Fill: {fill}
+          </h3>
+          <div className="flex flex-wrap gap-4">
+            {ALL_VARIANTS.map((variant) => (
+              <Badge key={`${fill}-${variant}`} variant={variant} fill={fill}>
+                {variant}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A complete matrix of all semantic colors and fill styles across light and dark modes.",
+      },
+    },
   },
 };
