@@ -4,70 +4,86 @@ import "@testing-library/jest-dom";
 import { Badge } from "./Badge";
 
 describe("Badge Component", () => {
-  it("renders children correctly", () => {
+  it("renders children correctly and applies truncation protections", () => {
     const { getByText } = render(<Badge>New Feature</Badge>);
-    expect(getByText("New Feature")).toBeInTheDocument();
+    const textNode = getByText("New Feature");
+
+    expect(textNode).toBeInTheDocument();
+    // Ensures the text is wrapped in the truncation span
+    expect(textNode).toHaveClass("truncate", "min-w-0");
   });
 
   it("applies the default solid variant classes", () => {
-    const { getByText } = render(<Badge variant="primary">Default</Badge>);
-    const badge = getByText("Default");
+    const { container } = render(<Badge variant="primary">Default</Badge>);
+    // Grabbing the root element to check the variant classes
+    const badge = container.firstChild as HTMLElement;
 
     // Testing default fill: solid
-    expect(badge).toHaveClass("bg-primary-500");
-    expect(badge).toHaveClass("text-white");
+    expect(badge).toHaveClass("bg-primary-500", "text-white");
   });
 
-  it("applies light variant classes", () => {
-    const { getByText } = render(
+  it("applies light variant classes with the new crisp colors", () => {
+    const { container } = render(
       <Badge fill="light" variant="success">
         Light Mode
       </Badge>,
     );
-    const badge = getByText("Light Mode");
+    const badge = container.firstChild as HTMLElement;
 
-    // Testing the light middle-ground variant
-    expect(badge).toHaveClass("bg-success-500/30");
-    expect(badge).toHaveClass("border-success-400");
-    expect(badge).toHaveClass("text-success-800");
+    // Testing the new crisp pastel light variant (no more /30 opacity)
+    expect(badge).toHaveClass(
+      "bg-success-100",
+      "border-success-300",
+      "text-success-800",
+    );
   });
 
   it("applies solid variant classes", () => {
-    const { getByText } = render(
+    const { container } = render(
       <Badge fill="solid" variant="error">
         Critical
       </Badge>,
     );
-    const badge = getByText("Critical");
+    const badge = container.firstChild as HTMLElement;
 
-    expect(badge).toHaveClass("bg-error-500");
-    expect(badge).toHaveClass("text-white");
+    expect(badge).toHaveClass("bg-error-500", "text-white");
   });
 
   it("applies outline variant classes", () => {
-    const { getByText } = render(
+    const { container } = render(
       <Badge fill="outline" variant="neutral">
         Ghost
       </Badge>,
     );
-    const badge = getByText("Ghost");
+    const badge = container.firstChild as HTMLElement;
 
-    expect(badge).toHaveClass("bg-transparent");
-    expect(badge).toHaveClass("border-gray-500");
+    // ✨ Verifying neutral outline colors
+    expect(badge).toHaveClass(
+      "bg-transparent",
+      "border-gray-500",
+      "text-gray-600",
+    );
   });
 
-  it("renders icons when provided", () => {
+  it("renders icons with shrink-0 protection when provided", () => {
     const { getByTestId } = render(
       <Badge leftIcon={<span data-testid="icon">👋</span>}>Hello</Badge>,
     );
-    expect(getByTestId("icon")).toBeInTheDocument();
+    const iconElement = getByTestId("icon");
+
+    expect(iconElement).toBeInTheDocument();
+    // Check that the icon wrapper has shrink-0 to prevent crushing
+    expect(iconElement.parentElement).toHaveClass(
+      "shrink-0",
+      "flex",
+      "items-center",
+    );
   });
 
   it("renders as a status badge (pill shape)", () => {
-    const { getByText } = render(<Badge statusBadge>99</Badge>);
-    const badge = getByText("99");
+    const { container } = render(<Badge statusBadge>99</Badge>);
+    const badge = container.firstChild as HTMLElement;
 
-    expect(badge).toHaveClass("rounded-full");
-    expect(badge).toHaveClass("justify-center");
+    expect(badge).toHaveClass("rounded-full", "justify-center");
   });
 });
