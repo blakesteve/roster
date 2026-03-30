@@ -57,7 +57,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// ✨ Side-by-side decorator for showcasing Light/Dark modes perfectly
 const DualPreviewDecorator: Decorator = (Story) => (
   <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
     <div className="light flex-1 bg-white p-12 relative flex flex-col items-center justify-center">
@@ -135,7 +134,6 @@ export const Sizes: Story = {
   decorators: [DualPreviewDecorator],
 };
 
-// ✨ The Ultimate Grid! Auto-generates all variants so you can review the whole palette at once.
 const ALL_COLOR_SCHEMES: NonNullable<AvatarProps["colorScheme"]>[] = [
   "primary",
   "orange",
