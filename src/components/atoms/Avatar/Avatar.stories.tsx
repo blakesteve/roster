@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Avatar } from "./Avatar";
+import type { Meta, StoryObj, Decorator } from "@storybook/react-vite";
+import { Avatar, type AvatarProps } from "./Avatar";
 
 const meta = {
   title: "Atoms/Avatar",
@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "A robust **Avatar** component used to represent a user or entity. It automatically handles image loading errors by falling back to the user's initials. It supports a variety of **sizes**, **shapes**, and semantic **color schemes**, as well as an optional **tooltip** for displaying the full name on hover.",
+          "A robust **Avatar** component used to represent a user or entity. It automatically handles image loading errors by falling back to the user's initials. It supports a variety of **sizes**, **shapes**, and semantic **color schemes**, as well as an optional **tooltip** for displaying the full name on hover.\n\n✨ **New in v2:** \n* **Crisp Colors:** Light mode now uses solid pastel backgrounds (`bg-[color]-50`) to prevent muddy text, while dark mode intelligently adapts to translucent layers (`bg-[color]-900/30`) for a stained-glass effect.\n* **Popover Upgrades:** The tooltip now perfectly respects dark and light mode contrast layers.",
       },
     },
   },
@@ -57,12 +57,31 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// ✨ Side-by-side decorator for showcasing Light/Dark modes perfectly
+const DualPreviewDecorator: Decorator = (Story) => (
+  <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
+    <div className="light flex-1 bg-white p-12 relative flex flex-col items-center justify-center">
+      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest z-10">
+        Light Mode
+      </p>
+      <Story />
+    </div>
+    <div className="dark flex-1 bg-gray-950 p-12 relative flex flex-col items-center justify-center border-l border-gray-200 dark:border-gray-800">
+      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest z-10">
+        Dark Mode
+      </p>
+      <Story />
+    </div>
+  </div>
+);
+
 export const Default: Story = {
   args: {
     initials: "JD",
     colorScheme: "primary",
     size: "md",
   },
+  decorators: [DualPreviewDecorator],
 };
 
 export const WithImage: Story = {
@@ -72,6 +91,7 @@ export const WithImage: Story = {
     initials: "TC",
     size: "lg",
   },
+  decorators: [DualPreviewDecorator],
 };
 
 export const WithTitleTooltip: Story = {
@@ -80,6 +100,15 @@ export const WithTitleTooltip: Story = {
     colorScheme: "purple",
     title: "Michael Knight",
     size: "md",
+  },
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Click or hover over the Avatar to see the newly styled, theme-aware popover tooltip.",
+      },
+    },
   },
 };
 
@@ -90,6 +119,7 @@ export const Square: Story = {
     colorScheme: "orange",
     size: "md",
   },
+  decorators: [DualPreviewDecorator],
 };
 
 export const Sizes: Story = {
@@ -102,4 +132,42 @@ export const Sizes: Story = {
       <Avatar initials="XL" size="xl" colorScheme="orange" />
     </div>
   ),
+  decorators: [DualPreviewDecorator],
+};
+
+// ✨ The Ultimate Grid! Auto-generates all variants so you can review the whole palette at once.
+const ALL_COLOR_SCHEMES: NonNullable<AvatarProps["colorScheme"]>[] = [
+  "primary",
+  "orange",
+  "teal",
+  "purple",
+  "amber",
+  "success",
+  "error",
+  "neutral",
+];
+
+export const AllVariantsMatrix: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-4 justify-center">
+      {ALL_COLOR_SCHEMES.map((color) => (
+        <Avatar
+          key={color}
+          initials={color?.slice(0, 2).toUpperCase()}
+          colorScheme={color}
+          size="lg"
+          title={color}
+        />
+      ))}
+    </div>
+  ),
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A complete matrix of all semantic color schemes across light and dark modes.",
+      },
+    },
+  },
 };

@@ -62,14 +62,18 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
     // Popover Render (With Tooltip)
     return (
       <Popover className="relative inline-flex">
-        <PopoverButton as="div" className="outline-none cursor-pointer">
+        <PopoverButton
+          as="div"
+          className="outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-full"
+        >
           {AvatarContent}
         </PopoverButton>
 
         <PopoverPanel
           anchor="bottom"
           className={cn(
-            "z-50 mt-2 rounded-md bg-gray-800 px-3 py-1.5 text-xs text-white shadow-md ring-1 ring-white/10",
+            "z-50 mt-2 rounded-md px-3 py-1.5 text-xs font-medium shadow-xl backdrop-blur-md ring-1",
+            "bg-gray-900/95 text-white ring-black/5 dark:bg-gray-100/95 dark:text-gray-900 dark:ring-white/20",
             "transition duration-200 ease-in-out data-closed:opacity-0 data-closed:translate-y-1",
           )}
         >

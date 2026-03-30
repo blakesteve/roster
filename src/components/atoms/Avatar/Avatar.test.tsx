@@ -16,14 +16,15 @@ describe("Avatar Component", () => {
     expect(img).toHaveAttribute("src", "avatar.jpg");
   });
 
-  it("applies variant classes", () => {
+  it("applies variant classes with the new crisp colors", () => {
     const { container } = render(
       <Avatar initials="XY" size="xl" colorScheme="orange" />,
     );
 
-    expect(container.firstChild).toHaveClass("h-16 w-16");
+    const avatarDiv = container.firstChild as HTMLElement;
 
-    expect(container.firstChild).toHaveClass("bg-orange-100");
+    expect(avatarDiv).toHaveClass("h-16", "w-16");
+    expect(avatarDiv).toHaveClass("bg-orange-50", "text-orange-700");
   });
 
   it("renders Popover structure when title is provided", () => {
