@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const avatarVariants = cva(
-  "relative inline-flex items-center justify-center overflow-hidden font-semibold border transition-colors focus:outline-hidden select-none shrink-0",
+  "relative inline-flex items-center justify-center overflow-hidden font-semibold border transition-colors focus:outline-none select-none shrink-0 shadow-sm",
   {
     variants: {
       size: {
@@ -12,14 +12,14 @@ export const avatarVariants = cva(
         xl: "h-16 w-16 text-xl",
       },
       colorScheme: {
-        primary: "bg-primary-100 text-primary-700 border-primary-200",
-        orange:  "bg-orange-100 text-orange-700 border-orange-200",
-        teal:    "bg-teal-100 text-teal-700 border-teal-200",
-        purple:  "bg-purple-100 text-purple-700 border-purple-200",
-        amber:   "bg-amber-100 text-amber-700 border-amber-200",
-        success: "bg-success-100 text-success-700 border-success-200",
-        error:   "bg-error-100 text-error-700 border-error-200",
-        neutral: "bg-gray-100 text-gray-700 border-gray-200",
+        primary: "bg-primary-50 border-primary-200 text-primary-700 dark:bg-primary-900/30 dark:border-primary-800/50 dark:text-primary-300",
+        orange:  "bg-orange-50 border-orange-200 text-orange-700 dark:bg-orange-900/30 dark:border-orange-800/50 dark:text-orange-300",
+        teal:    "bg-teal-50 border-teal-200 text-teal-700 dark:bg-teal-900/30 dark:border-teal-800/50 dark:text-teal-300",
+        purple:  "bg-purple-50 border-purple-200 text-purple-700 dark:bg-purple-900/30 dark:border-purple-800/50 dark:text-purple-300",
+        amber:   "bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/30 dark:border-amber-800/50 dark:text-amber-300",
+        success: "bg-success-50 border-success-200 text-success-700 dark:bg-success-900/30 dark:border-success-800/50 dark:text-success-300",
+        error:   "bg-error-50 border-error-200 text-error-700 dark:bg-error-900/30 dark:border-error-800/50 dark:text-error-300",
+        neutral: "bg-gray-100 border-gray-200 text-gray-700 dark:bg-gray-800/50 dark:border-gray-700/50 dark:text-gray-300",
       },
       shape: {
         circle: "rounded-full",
