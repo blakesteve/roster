@@ -17,7 +17,7 @@ export const cardVariants = cva(
         slate: 
           "bg-gray-700 border border-gray-600 text-gray-100 shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100",
         
-        // ✨ Shifted to primary-600 to perfectly match the Solid Primary buttons
+        // Primary: Fully drenched in brand color.
         primary: 
           "bg-primary-600 border border-primary-700 text-white shadow-sm dark:bg-primary-900 dark:border-primary-800 dark:text-primary-50",
         
