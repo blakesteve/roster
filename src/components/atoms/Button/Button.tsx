@@ -44,8 +44,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {isLoading && (
-          <span className="mr-2 flex items-center">
-            <Spinner size="sm" className="text-current" />
+          <span className="mr-2 flex shrink-0 items-center">
+            <Spinner size="sm" variant="current" />
           </span>
         )}
 
