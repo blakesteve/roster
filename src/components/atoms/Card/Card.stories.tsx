@@ -1,39 +1,24 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Card } from "./Card";
-import { Button } from "../Button/Button";
-import { Badge } from "../Badge/Badge";
+import type { Meta, StoryObj, Decorator } from "@storybook/react-vite";
+import { Card, type CardProps } from "./Card";
 
 const meta = {
   title: "Atoms/Card",
   component: Card,
-  tags: ["autodocs"],
   parameters: {
+    layout: "padded",
     docs: {
       description: {
         component:
-          "A foundational layout atom used to group related content. \n\n### 🌙 Native Dark Mode\nThis component leverages Tailwind's native `dark:` classes. Text elements placed inside the card should utilize `text-inherit` so they automatically adjust their contrast based on the card's background variant.\n\n### 🎨 Branding\nThe `branded` prop can be applied to **any** variant to add the signature MegaSquad top and bottom colored borders. You can optionally override these default brand colors using `brandColorTop` and `brandColorBottom`.",
+          "The **Card** is the primary container for grouping related content. It handles structural padding, rounded corners, and complex theming perfectly. \n* **Glassmorphism:** The `glass` variant now uses the perfected `/50` opacity + `backdrop-blur-md` formula.\n* **Deep Dark Mode:** Standard cards now use `gray-900` in dark mode for a much more premium, high-contrast look.\n* **Branded Stripes:** Use the `branded` prop to automatically inject customizable colored accent stripes at the top and bottom of the card.",
       },
     },
   },
-  decorators: [
-    (Story) => (
-      <div className="p-8 space-y-12 max-w-3xl mx-auto">
-        <div className="light bg-gray-50 p-8 rounded-xl border border-gray-200 shadow-inner">
-          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
-            Light Mode Preview
-          </p>
-          <Story />
-        </div>
-        <div className="dark bg-gray-950 p-8 rounded-xl border border-gray-800 shadow-inner">
-          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
-            Dark Mode Preview
-          </p>
-          <Story />
-        </div>
-      </div>
-    ),
-  ],
+  tags: ["autodocs"],
   argTypes: {
+    children: {
+      control: false,
+      description: "The content of the card.",
+    },
     variant: {
       control: "select",
       options: [
@@ -45,24 +30,28 @@ const meta = {
         "ghost",
         "glass",
       ],
-      description: "The background and border style of the card.",
+      description: "The visual style and background surface of the card.",
+      table: { defaultValue: { summary: "white" } },
     },
     padding: {
-      control: "select",
+      control: "radio",
       options: ["none", "sm", "md", "lg"],
       description: "Internal padding scale.",
+      table: { defaultValue: { summary: "md" } },
     },
     branded: {
       control: "boolean",
-      description: "Adds top and bottom accent borders.",
+      description: "Injects absolute-positioned signature color stripes.",
+      table: { defaultValue: { summary: "false" } },
     },
     brandColorTop: {
       control: "color",
-      description: "Hex override for top border.",
+      description: "Custom hex for the top stripe (defaults to theme Orange).",
     },
     brandColorBottom: {
       control: "color",
-      description: "Hex override for bottom border.",
+      description:
+        "Custom hex for the bottom stripe (defaults to theme Primary).",
     },
   },
 } satisfies Meta<typeof Card>;
@@ -70,150 +59,189 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const WhiteBranded: Story = {
+// Side-by-side decorator (using gray-100 in light mode so White cards pop!)
+const DualPreviewDecorator: Decorator = (Story) => (
+  <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
+    <div className="light flex-1 bg-gray-100 p-12 relative flex flex-col items-center justify-center">
+      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest z-10">
+        Light Mode
+      </p>
+      <div className="w-full max-w-sm">
+        <Story />
+      </div>
+    </div>
+    <div className="dark flex-1 bg-gray-950 p-12 relative flex flex-col items-center justify-center border-l border-gray-200 dark:border-gray-800">
+      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest z-10">
+        Dark Mode
+      </p>
+      <div className="w-full max-w-sm">
+        <Story />
+      </div>
+    </div>
+  </div>
+);
+
+// Helper to provide consistent dummy content inside the cards
+const SampleContent = () => (
+  <div className="flex flex-col gap-2">
+    <h3 className="text-lg font-bold">Weekly Performance</h3>
+    <p className="text-sm opacity-80 leading-relaxed">
+      Your picks are looking solid this week. You are currently in the top 10%
+      of your primary league.
+    </p>
+  </div>
+);
+
+export const DefaultWhite: Story = {
   args: {
     variant: "white",
-    branded: true,
     padding: "md",
-    children: (
-      <>
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="font-bold text-lg text-inherit">Premium Plan</h3>
-          <Badge variant="orange" size="xs">
-            PRO
-          </Badge>
-        </div>
-        <p className="text-inherit opacity-75 mb-6 text-sm">
-          Standard white card with default brand stripes applied.
-        </p>
-        <Button
-          className="w-full justify-center"
-          variant="solid"
-          colorScheme="primary"
-        >
-          Upgrade Now
-        </Button>
-      </>
-    ),
+    children: <SampleContent />,
   },
+  decorators: [DualPreviewDecorator],
 };
 
-export const SoftCard: Story = {
+export const Soft: Story = {
   args: {
     variant: "soft",
-    branded: false,
     padding: "md",
-    children: (
-      <>
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="font-bold text-lg text-inherit">MegaSquad Draft</h3>
-          <Badge variant="neutral" fill="solid" size="xs">
-            LIVE
-          </Badge>
-        </div>
-        <p className="text-inherit opacity-75 mb-6 text-sm">
-          A subtle background fill without structural borders. Notice how the
-          text remains perfectly legible in both themes.
-        </p>
-        <div className="space-y-2">
-          <div className="h-2 bg-current opacity-20 rounded-sm w-3/4"></div>
-          <div className="h-2 bg-current opacity-20 rounded-sm w-1/2"></div>
-        </div>
-      </>
-    ),
+    children: <SampleContent />,
+  },
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The **Soft** variant uses a crisp `gray-50` in light mode and drops into a beautiful translucent stained-glass effect in dark mode.",
+      },
+    },
   },
 };
 
-export const SlateMoody: Story = {
-  args: {
-    variant: "slate",
-    branded: true,
-    padding: "md",
-    children: (
-      <>
-        <h3 className="font-bold text-lg text-inherit mb-2">System Settings</h3>
-        <p className="text-inherit opacity-75 mb-6 text-sm">
-          The slate variant forces light text automatically, making it excellent
-          for high-contrast panels.
-        </p>
-        <Button
-          variant="outline"
-          className="w-full justify-center border-current text-inherit hover:bg-white/10"
-        >
-          Configure
-        </Button>
-      </>
-    ),
-  },
-};
-
-export const PrimaryBrand: Story = {
-  args: {
-    variant: "primary",
-    branded: false,
-    padding: "lg",
-    children: (
-      <>
-        <h3 className="font-bold text-2xl text-inherit mb-2">
-          Join the Action!
-        </h3>
-        <p className="text-inherit opacity-90 mb-6">
-          Create your squad today and invite your friends to start making picks.
-        </p>
-        <Button
-          variant="solid"
-          className="bg-white text-primary-700 hover:bg-gray-100"
-        >
-          Get Started
-        </Button>
-      </>
-    ),
-  },
-};
-
-export const CustomBrandColors: Story = {
+export const Branded: Story = {
   args: {
     variant: "white",
-    branded: true,
-    brandColorTop: "#8B5CF6", // Violet
-    brandColorBottom: "#10B981", // Emerald
     padding: "md",
-    children: (
-      <>
-        <h3 className="font-bold text-lg text-inherit mb-2">Custom Theme</h3>
-        <p className="text-inherit opacity-75 mb-4 text-sm">
-          This card uses hex codes passed directly to the component Props.
-        </p>
-        <div className="text-xs font-mono bg-current opacity-10 p-2 rounded-md">
-          top: #8B5CF6
-          <br />
-          bottom: #10B981
-        </div>
-      </>
-    ),
+    branded: true,
+    children: <SampleContent />,
+  },
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Setting `branded={true}` perfectly clips brand-colored stripes to the top and bottom of the card utilizing the `overflow-hidden` wrapper.",
+      },
+    },
   },
 };
 
-export const GlassEffect: Story = {
+export const Primary: Story = {
+  args: {
+    variant: "primary",
+    padding: "md",
+    children: <SampleContent />,
+  },
+  decorators: [DualPreviewDecorator],
+};
+
+export const Glassmorphism: Story = {
   args: {
     variant: "glass",
-    branded: false,
-    padding: "lg",
-    children: (
-      <>
-        <h3 className="font-bold text-xl text-inherit mb-2">Glassmorphism</h3>
-        <p className="text-inherit opacity-80 text-sm">
-          Applies a backdrop blur. Notice how the background gradient bleeds
-          through the card.
-        </p>
-      </>
-    ),
+    padding: "md",
+    children: <SampleContent />,
   },
   decorators: [
     (Story) => (
-      <div className="p-16 bg-linear-to-br from-blue-500 via-indigo-500 to-purple-600 dark:from-blue-900 dark:via-indigo-900 dark:to-purple-950 rounded-xl flex justify-center transition-colors">
-        <Story />
+      <div className="flex w-full rounded-xl overflow-hidden shadow-sm">
+        <div className="light flex-1 bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 p-12 relative flex justify-center">
+          <div className="w-full max-w-sm">
+            <Story />
+          </div>
+        </div>
+        <div className="dark flex-1 bg-linear-to-br from-indigo-900 via-purple-900 to-black p-12 relative flex justify-center border-l border-white/10">
+          <div className="w-full max-w-sm">
+            <Story />
+          </div>
+        </div>
       </div>
     ),
   ],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The **Glass** variant uses your new perfected `bg-[color]/50` and `backdrop-blur-md` utilities to float beautifully over complex backgrounds.",
+      },
+    },
+  },
+};
+
+export const CustomBrandedColors: Story = {
+  args: {
+    variant: "white",
+    padding: "md",
+    branded: true,
+    // Defined custom colors here. Accepts hex codes, RGB, or named colors.
+    brandColorTop: "#34D399", // A custom Emerald green
+    brandColorBottom: "#F472B6", // A custom Pink
+    children: (
+      <div className="flex flex-col gap-2">
+        <h3 className="text-lg font-bold">Custom Brand Alliance</h3>
+        <p className="text-sm opacity-80 leading-relaxed">
+          This card demonstrates using completely custom colors for the top
+          (#34D399) and bottom (#F472B6) brand stripes, overriding the default
+          theme colors.
+        </p>
+      </div>
+    ),
+  },
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Use the `brandColorTop` and `brandColorBottom` props to pass any valid CSS color (hex, rgb, named color, etc.) to completely customize the branded stripes for specific partnerships or UI contexts.",
+      },
+    },
+  },
+};
+
+const ALL_VARIANTS: NonNullable<CardProps["variant"]>[] = [
+  "white",
+  "soft",
+  "slate",
+  "primary",
+  "outline",
+  "ghost",
+  "glass",
+];
+
+export const AllVariantsMatrix: Story = {
+  args: {
+    children: <></>,
+  },
+  render: () => (
+    <div className="flex flex-col gap-6 w-full">
+      {ALL_VARIANTS.map((variant) => (
+        <Card key={variant} variant={variant} padding="md">
+          <div className="flex flex-col gap-1">
+            <h3 className="text-sm font-bold uppercase tracking-widest opacity-50">
+              Variant
+            </h3>
+            <p className="text-lg font-semibold capitalize">{variant}</p>
+          </div>
+        </Card>
+      ))}
+    </div>
+  ),
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A complete matrix of all Card variants across light and dark modes.",
+      },
+    },
+  },
 };

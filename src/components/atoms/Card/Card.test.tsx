@@ -48,20 +48,20 @@ describe("Card Component", () => {
     expect(bottomStripe).toHaveStyle({ backgroundColor: customBottom });
   });
 
-  it("applies white (default) variant classes including native dark mode", () => {
+  it("applies white (default) variant classes with deepened dark mode", () => {
     const { container } = render(<Card>Content</Card>);
     expect(container.firstChild).toHaveClass(
       "bg-white",
-      "dark:bg-gray-800",
+      "dark:bg-gray-900",
       "text-gray-900",
     );
   });
 
-  it("applies soft variant classes (replacing filled)", () => {
+  it("applies soft variant classes with crisp light mode and translucent dark mode", () => {
     const { container } = render(<Card variant="soft">Content</Card>);
     expect(container.firstChild).toHaveClass(
-      "bg-gray-200",
-      "dark:bg-gray-900/50",
+      "bg-gray-50",
+      "dark:bg-gray-900/40",
     );
   });
 
@@ -69,8 +69,25 @@ describe("Card Component", () => {
     const { container } = render(<Card variant="slate">Content</Card>);
     expect(container.firstChild).toHaveClass(
       "bg-gray-700",
-      "dark:bg-gray-900",
+      "dark:bg-gray-800",
       "text-gray-100",
+    );
+  });
+
+  it("applies primary variant classes matching solid buttons", () => {
+    const { container } = render(<Card variant="primary">Content</Card>);
+    expect(container.firstChild).toHaveClass(
+      "bg-primary-600",
+      "border-primary-700",
+    );
+  });
+
+  it("applies glass variant classes correctly", () => {
+    const { container } = render(<Card variant="glass">Content</Card>);
+    expect(container.firstChild).toHaveClass(
+      "bg-white/50",
+      "backdrop-blur-md",
+      "dark:bg-gray-950/50",
     );
   });
 
