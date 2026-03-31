@@ -8,6 +8,7 @@ const spinnerVariants = cva("animate-spin rounded-full transition-colors", {
       neutral: "border-gray-600 dark:border-gray-400",
       danger: "border-error-600 dark:border-error-500",
       white: "border-white",
+      current: "border-current",
     },
     size: {
       sm: "h-4 w-4 border-2",
