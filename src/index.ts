@@ -9,6 +9,8 @@ export * from './components/atoms/Button/Button';
 export * from './components/atoms/Button/button-variants';
 export * from './components/atoms/Card/Card';
 export * from './components/atoms/Card/card-variants';
+export * from './components/atoms/Checkbox/Checkbox';
+export * from './components/atoms/Checkbox/checkbox-variants';
 export * from './components/atoms/Disclosure/Disclosure';
 export * from './components/atoms/Disclosure/disclosure-variants';
 export * from './components/atoms/Input/Input';
