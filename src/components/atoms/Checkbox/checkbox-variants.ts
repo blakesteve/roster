@@ -7,7 +7,7 @@ export const checkboxVariants = cva(
       size: {
         sm: "h-4 w-4 rounded-sm border",
         md: "h-5 w-5 rounded border",
-        lg: "h-6 w-6 rounded-md border-[1.5px]",
+        lg: "h-6 w-6 rounded-md border",
       },
       variant: {
         solid: "",
