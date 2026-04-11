@@ -10,9 +10,10 @@ It is built with **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Vite**
 
 ## 🚀 Features
 
+- **Next.js App Router Ready:** All components are automatically bundled with `"use client"` directives for seamless SSR integration without context crashes.
+- **Decoupled Theming:** Bring your own brand. Roster ships structural CSS separately from its default design tokens, allowing you to easily override CSS variables or use the default MegaSquad theme.
 - **Atomic Design:** Components organized by atoms, molecules, and organisms.
 - **TypeScript First:** Fully typed for excellent developer experience (DX).
-- **Themable:** Built on Tailwind CSS v4 with semantic color tokens.
 - **Adaptive Dark Mode:** Fully supports manual, class-based dark mode toggling (`.dark`) independent of OS preferences.
 - **Headless UI:** Accessible interactive components powered by `@headlessui/react`.
 - **Tree-Shakeable:** Import only what you need.
@@ -32,7 +33,8 @@ Roster relies on a few peer dependencies that must be installed in your host app
 ```json
 "peerDependencies": {
   "react": "^19.0.0",
-  "react-dom": "^19.0.0"
+  "react-dom": "^19.0.0",
+  "tailwindcss": "^4.0.0"
 }
 ```
 
@@ -40,11 +42,15 @@ Roster relies on a few peer dependencies that must be installed in your host app
 
 ### 1. Import Styles
 
-You **must** import the CSS file at the root of your application (e.g., in `main.tsx` or `App.tsx`) to load the Tailwind styles and theme variables.
+Roster splits its CSS into two parts to give you ultimate flexibility over your theme. You must import the CSS at the root of your application (e.g., in `layout.tsx`, `main.tsx`, or `App.tsx`).
 
-```tsx
-import "roster/style.css";
-```
+````tsx
+// 1. Required: The structural Tailwind utility classes
+import "roster/dist/roster.css";
+
+// 2. Optional: The default MegaSquad color and theme tokens
+// (Omit this file if you are defining your own --roster-* variables in your app's global CSS)
+import "roster/dist/tokens.css";
 
 ### 2. Import Components
 
@@ -74,7 +80,7 @@ function App() {
     </div>
   );
 }
-```
+````
 
 ## 🎨 Development
 
@@ -100,9 +106,10 @@ npm run build
 
 This generates:
 
-- `dist/roster.es.js` (ES Modules)
-- `dist/roster.umd.js` (Universal Module Definition)
-- `dist/style.css` (Compiled Tailwind styles)
+- `dist/roster.es.js` (Main library ES Modules)
+- `dist/tokens.es.js` (Token injection script)
+- `dist/roster.css` (Compiled structural Tailwind styles)
+- `dist/tokens.css` (Design token CSS variables)
 - `dist/index.d.ts` (Type definitions)
 
 ## 📄 License
