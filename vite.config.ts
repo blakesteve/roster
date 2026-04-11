@@ -21,6 +21,7 @@ export default defineConfig({
     })
   ],
   build: {
+    cssCodeSplit: true,
     lib: {
       entry: {
         roster: path.resolve(__dirname, 'src/index.ts'),
