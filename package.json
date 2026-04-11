@@ -14,7 +14,8 @@
       "import": "./dist/roster.es.js",
       "require": "./dist/roster.umd.js"
     },
-    "./style.css": "./dist/roster.css"
+    "./style.css": "./dist/roster.css",
+    "./tokens.css": "./dist/tokens.css"
   },
   "scripts": {
     "dev": "vite",
