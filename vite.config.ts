@@ -22,13 +22,17 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: {
+        roster: path.resolve(__dirname, 'src/index.ts'),
+        tokens: path.resolve(__dirname, 'src/tokens.ts'),
+      },
       name: 'Roster',
-      fileName: format => `roster.${format}.js`
+      fileName: (format, entryName) => `${entryName}.${format}.js`
     },
     rollupOptions: {
       external: ['react', 'react-dom', 'tailwindcss'],
       output: {
+        banner: '"use client";',
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
