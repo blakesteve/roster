@@ -45,8 +45,8 @@ export interface NavbarProps
     notificationCount?: number;
     avatarSrc?: string;
   };
-  onLogout: () => void;
-  onInboxClick: () => void;
+  onLogout?: () => void;
+  onInboxClick?: () => void;
   onThemeToggle?: () => void;
   themeMode?: "light" | "dark";
   notificationVariant?:
@@ -58,6 +58,12 @@ export interface NavbarProps
     | "orange"
     | "teal"
     | "purple";
+  /**
+   * Custom content rendered in the right-side action area. When provided it
+   * replaces the built-in user menu / "Log In" button on desktop and the user
+   * section in the mobile panel, giving you full control over auth UI.
+   */
+  actions?: React.ReactNode;
 }
 
 const Navbar = ({
@@ -70,6 +76,7 @@ const Navbar = ({
   onLogout,
   onInboxClick,
   onThemeToggle,
+  actions,
   className,
   variant = "default",
   position = "sticky",
@@ -170,8 +177,8 @@ const Navbar = ({
                 })}
               </div>
 
-              {/* User Menu */}
-              {user ? (
+              {/* User Menu / Custom Actions */}
+              {actions ?? (user ? (
                 <Menu as="div" className="relative ml-2">
                   <MenuButton className="relative flex rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ring-offset-transparent">
                     <span className="sr-only">Open user menu</span>
@@ -209,7 +216,7 @@ const Navbar = ({
                   >
                     <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black/5 dark:ring-white/10 focus:outline-none divide-y divide-gray-100 dark:divide-gray-700">
                       <div className="py-1">
-                        {hasNotifications && (
+                        {hasNotifications && onInboxClick && (
                           <MenuItem>
                             {({ focus }) => (
                               <Button
@@ -281,30 +288,32 @@ const Navbar = ({
                         )}
                       </div>
 
-                      <div className="py-1">
-                        <MenuItem>
-                          {({ focus }) => (
-                            <Button
-                              variant="ghost"
-                              colorScheme="neutral"
-                              size="sm"
-                              onClick={onLogout}
-                              className={cn(
-                                "w-full justify-start rounded-none px-4",
-                                focus && "bg-gray-50 dark:bg-gray-700",
-                              )}
-                              startIcon={
-                                <FontAwesomeIcon
-                                  icon={faRightFromBracket}
-                                  className="text-gray-400 dark:text-gray-500 w-4"
-                                />
-                              }
-                            >
-                              Log Out
-                            </Button>
-                          )}
-                        </MenuItem>
-                      </div>
+                      {onLogout && (
+                        <div className="py-1">
+                          <MenuItem>
+                            {({ focus }) => (
+                              <Button
+                                variant="ghost"
+                                colorScheme="neutral"
+                                size="sm"
+                                onClick={onLogout}
+                                className={cn(
+                                  "w-full justify-start rounded-none px-4",
+                                  focus && "bg-gray-50 dark:bg-gray-700",
+                                )}
+                                startIcon={
+                                  <FontAwesomeIcon
+                                    icon={faRightFromBracket}
+                                    className="text-gray-400 dark:text-gray-500 w-4"
+                                  />
+                                }
+                              >
+                                Log Out
+                              </Button>
+                            )}
+                          </MenuItem>
+                        </div>
+                      )}
                     </MenuItems>
                   </Transition>
                 </Menu>
@@ -312,7 +321,7 @@ const Navbar = ({
                 <Button size="sm" variant="solid" colorScheme="primary">
                   Log In
                 </Button>
-              )}
+              ))}
             </div>
 
             {/* Mobile Hamburger */}
@@ -422,80 +431,88 @@ const Navbar = ({
                   </div>
                 </div>
 
-                {user && (
+                {(user || actions) && (
                   <div className="py-6 px-5 space-y-4">
-                    {hasNotifications && (
-                      <Button
-                        variant="ghost"
-                        colorScheme="neutral"
-                        onClick={() => {
-                          onInboxClick();
-                          close();
-                        }}
-                        className="w-full justify-between px-4 text-base font-medium hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        endIcon={
-                          <Badge
-                            fill="solid"
-                            size="xs"
-                            statusBadge
-                            variant={notificationVariant}
+                    {actions ? (
+                      actions
+                    ) : (
+                      <>
+                        {hasNotifications && onInboxClick && (
+                          <Button
+                            variant="ghost"
+                            colorScheme="neutral"
+                            onClick={() => {
+                              onInboxClick?.();
+                              close();
+                            }}
+                            className="w-full justify-between px-4 text-base font-medium hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            endIcon={
+                              <Badge
+                                fill="solid"
+                                size="xs"
+                                statusBadge
+                                variant={notificationVariant}
+                              >
+                                {user?.notificationCount}
+                              </Badge>
+                            }
                           >
-                            {user.notificationCount}
-                          </Badge>
-                        }
-                      >
-                        Pending Invitations
-                      </Button>
-                    )}
+                            Pending Invitations
+                          </Button>
+                        )}
 
-                    {/* THEME TOGGLE (MOBILE) */}
-                    {onThemeToggle && (
-                      <div
-                        onClick={(e) => {
-                          e.preventDefault();
-                          onThemeToggle();
-                        }}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            onThemeToggle();
-                          }
-                        }}
-                        className="flex w-full items-center justify-between rounded-md px-4 py-2 text-base transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      >
-                        <div className="flex items-center gap-3 font-medium">
-                          <FontAwesomeIcon
-                            icon={faMoon}
-                            className={cn(
-                              "w-5 transition-colors",
-                              isDarkMode ? "text-amber-500" : "text-gray-400",
-                            )}
-                          />
-                          <span>Dark Mode</span>
-                        </div>
-                        <Switch
-                          checked={isDarkMode}
-                          onChange={() => {}}
-                          size="sm"
-                          variant="neutral"
-                          className="pointer-events-none m-0"
-                        />
-                      </div>
-                    )}
+                        {/* THEME TOGGLE (MOBILE) */}
+                        {onThemeToggle && (
+                          <div
+                            onClick={(e) => {
+                              e.preventDefault();
+                              onThemeToggle();
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                onThemeToggle();
+                              }
+                            }}
+                            className="flex w-full items-center justify-between rounded-md px-4 py-2 text-base transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
+                          >
+                            <div className="flex items-center gap-3 font-medium">
+                              <FontAwesomeIcon
+                                icon={faMoon}
+                                className={cn(
+                                  "w-5 transition-colors",
+                                  isDarkMode ? "text-amber-500" : "text-gray-400",
+                                )}
+                              />
+                              <span>Dark Mode</span>
+                            </div>
+                            <Switch
+                              checked={isDarkMode}
+                              onChange={() => {}}
+                              size="sm"
+                              variant="neutral"
+                              className="pointer-events-none m-0"
+                            />
+                          </div>
+                        )}
 
-                    <Button
-                      variant="outline"
-                      colorScheme="error"
-                      className="w-full justify-center"
-                      onClick={() => {
-                        onLogout();
-                        close();
-                      }}
-                    >
-                      Log Out
-                    </Button>
+                        {onLogout && (
+                          <Button
+                            variant="outline"
+                            colorScheme="error"
+                            className="w-full justify-center"
+                            onClick={() => {
+                              onLogout?.();
+                              close();
+                            }}
+                          >
+                            Log Out
+                          </Button>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
               </div>

@@ -116,6 +116,59 @@ describe("Navbar Component", () => {
     expect(screen.queryByText(/dark mode/i)).not.toBeInTheDocument();
   });
 
+  it("omits the Log Out button when onLogout is not provided", () => {
+    render(<Navbar {...defaultProps} user={mockUser} onLogout={undefined} />);
+
+    const userButton = screen.getByRole("button", { name: /user menu/i });
+    fireEvent.click(userButton);
+
+    expect(screen.queryByText(/log out/i)).not.toBeInTheDocument();
+  });
+
+  it("omits the inbox button when onInboxClick is not provided even with notifications", () => {
+    const userWithNotifications = { initials: "JD", notificationCount: 3 };
+    render(
+      <Navbar
+        {...defaultProps}
+        user={userWithNotifications}
+        onInboxClick={undefined}
+      />,
+    );
+
+    const userButton = screen.getByRole("button", { name: /user menu/i });
+    fireEvent.click(userButton);
+
+    expect(screen.queryByText(/inbox/i)).not.toBeInTheDocument();
+  });
+
+  it("renders custom actions slot instead of user menu on desktop", () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        actions={<button>Custom Sign In</button>}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /custom sign in/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /user menu/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /log in/i })).not.toBeInTheDocument();
+  });
+
+  it("renders custom actions slot in the mobile panel when open", async () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        actions={<button>Custom Auth</button>}
+      />,
+    );
+
+    const hamburger = screen.getByRole("button", { name: /open main menu/i });
+    fireEvent.click(hamburger);
+
+    const customActions = await screen.findAllByRole("button", { name: /custom auth/i });
+    expect(customActions.length).toBeGreaterThan(0);
+  });
+
   it("renders and triggers the theme toggle in the desktop menu", () => {
     const onThemeToggle = vi.fn();
     render(
