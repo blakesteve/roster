@@ -63,6 +63,18 @@ By default, the Navbar renders with \`variant="default"\` and \`position="sticky
 
 **3. Theming & Dark Mode**
 The component supports multiple visual variants to suit different contexts. Additionally, if you pass a function to the \`onThemeToggle\` prop, the Navbar will automatically inject a Dark/Light mode toggle button into both the desktop dropdown and the mobile slide-out menu.
+
+**4. Custom Auth UI (actions prop)**
+Pass any React node to \`actions\` to replace the built-in user avatar menu and *Log In* button entirely. The same content is mirrored into the mobile slide-out panel. This is the escape hatch for apps with custom auth flows, framework-specific Link components, or loading states.
+\`\`\`tsx
+<Navbar
+  actions={
+    <div className="flex items-center gap-3">
+      <NavAuth />
+    </div>
+  }
+/>
+\`\`\`
 `,
       },
     },
@@ -102,6 +114,11 @@ The component supports multiple visual variants to suit different contexts. Addi
     onLogout: { action: "logout clicked" },
     onInboxClick: { action: "inbox clicked" },
     onThemeToggle: { action: "theme toggled" },
+    actions: {
+      control: false,
+      description:
+        "Custom React node rendered in the right-side action area. When provided, replaces the built-in user menu and Log In button on desktop and the user section in the mobile panel.",
+    },
   },
   args: {
     position: "sticky",
@@ -311,6 +328,41 @@ export const MobileView: Story = {
       description: {
         story:
           "Demonstrates the responsive hamburger menu behavior on constrained viewports. The interactive theme toggle is injected directly into the slide-out menu.",
+      },
+    },
+  },
+};
+
+export const CustomActions: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: defaultItems,
+    variant: "default",
+    activePath: "/schedule",
+    // Intentionally no `user`, `onLogout`, or `onInboxClick` — actions replaces all of that
+    actions: (
+      <div className="flex items-center gap-3">
+        <a
+          href="/login"
+          className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+        >
+          Sign In
+        </a>
+        <a
+          href="/signup"
+          className="rounded-md bg-primary-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors"
+        >
+          Get Started
+        </a>
+      </div>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When the `actions` prop is provided it completely replaces the built-in user menu and *Log In* button on desktop, and the user section in the mobile slide-out panel. Use this to plug in any custom auth UI — framework links, OAuth buttons, loading skeletons — without forking the component.",
       },
     },
   },
