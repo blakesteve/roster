@@ -169,6 +169,78 @@ describe("Navbar Component", () => {
     expect(customActions.length).toBeGreaterThan(0);
   });
 
+  it("renders custom brandElement instead of the default brand name span", () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        brandElement={<span data-testid="custom-brand">CUSTOM BRAND</span>}
+      />,
+    );
+
+    expect(screen.getByTestId("custom-brand")).toBeInTheDocument();
+    expect(screen.getByTestId("custom-brand")).toHaveTextContent("CUSTOM BRAND");
+    // The plain brandName string should not appear as visible text outside the img alt
+    expect(screen.queryByText("MegaSquad")).not.toBeInTheDocument();
+  });
+
+  it("renders userMenuItems in the desktop dropdown when user is present", () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        user={mockUser}
+        userMenuItems={[{ label: "Admin", path: "/admin" }]}
+      />,
+    );
+
+    const userButton = screen.getByRole("button", { name: /user menu/i });
+    fireEvent.click(userButton);
+
+    expect(screen.getByText("Admin")).toBeInTheDocument();
+  });
+
+  it("does not render userMenuItems when no user is provided", () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        userMenuItems={[{ label: "Admin", path: "/admin" }]}
+      />,
+    );
+
+    expect(screen.queryByText("Admin")).not.toBeInTheDocument();
+  });
+
+  it("renders userMenuItems in the mobile panel nav section when user is present", async () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        user={mockUser}
+        userMenuItems={[{ label: "Admin", path: "/admin" }]}
+      />,
+    );
+
+    const hamburger = screen.getByRole("button", { name: /open main menu/i });
+    fireEvent.click(hamburger);
+
+    const adminLinks = await screen.findAllByText("Admin");
+    expect(adminLinks.length).toBeGreaterThan(0);
+  });
+
+  it("does not render userMenuItems in the mobile panel when no user is provided", async () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        userMenuItems={[{ label: "Admin", path: "/admin" }]}
+      />,
+    );
+
+    const hamburger = screen.getByRole("button", { name: /open main menu/i });
+    fireEvent.click(hamburger);
+
+    // Wait for panel to open then assert Admin is absent
+    await screen.findByRole("button", { name: /close menu/i });
+    expect(screen.queryByText("Admin")).not.toBeInTheDocument();
+  });
+
   it("renders and triggers the theme toggle in the desktop menu", () => {
     const onThemeToggle = vi.fn();
     render(

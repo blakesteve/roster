@@ -64,7 +64,30 @@ By default, the Navbar renders with \`variant="default"\` and \`position="sticky
 **3. Theming & Dark Mode**
 The component supports multiple visual variants to suit different contexts. Additionally, if you pass a function to the \`onThemeToggle\` prop, the Navbar will automatically inject a Dark/Light mode toggle button into both the desktop dropdown and the mobile slide-out menu.
 
-**4. Custom Auth UI (actions prop)**
+**4. Custom Brand Element (brandElement prop)**
+Pass a React node to \`brandElement\` to replace the default brand name \`<span>\` with custom markup. The logo image is always rendered; this only controls the text element. Use this when you need mixed weights, colours, or other rich styling that a plain string cannot express.
+\`\`\`tsx
+<Navbar
+  brandElement={
+    <span className="text-sm tracking-widest text-indigo-400">
+      <span className="font-bold">GAME</span>
+      <span className="font-extralight"> VERDICT</span>
+    </span>
+  }
+/>
+\`\`\`
+
+**5. Auth-Gated Nav Items (userMenuItems prop)**
+Pass \`userMenuItems\` to inject additional navigation links that only appear when a \`user\` is present. On desktop they appear in the avatar dropdown (above Log Out). On mobile they appear as nav items in the slide-out panel, separated from the main \`items\` by a divider. Ideal for role-gated links like Admin panels.
+\`\`\`tsx
+<Navbar
+  user={{ initials: "BS" }}
+  onLogout={handleLogout}
+  userMenuItems={[{ label: "Admin", path: "/admin" }]}
+/>
+\`\`\`
+
+**6. Custom Auth UI (actions prop)**
 Pass any React node to \`actions\` to replace the built-in user avatar menu and *Log In* button entirely. The same content is mirrored into the mobile slide-out panel. This is the escape hatch for apps with custom auth flows, framework-specific Link components, or loading states.
 \`\`\`tsx
 <Navbar
@@ -363,6 +386,61 @@ export const CustomActions: Story = {
       description: {
         story:
           "When the `actions` prop is provided it completely replaces the built-in user menu and *Log In* button on desktop, and the user section in the mobile slide-out panel. Use this to plug in any custom auth UI — framework links, OAuth buttons, loading skeletons — without forking the component.",
+      },
+    },
+  },
+};
+
+export const CustomBrandElement: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: defaultItems,
+    variant: "transparent",
+    position: "fixed",
+    user: mockUser,
+    brandElement: (
+      <span style={{ fontSize: "0.75rem", letterSpacing: "0.15em", color: "#818cf8" }}>
+        <span style={{ fontWeight: 700 }}>GAME</span>
+        <span style={{ fontWeight: 200 }}> VERDICT</span>
+      </span>
+    ),
+  },
+  render: (args) => (
+    <InteractiveWrapper
+      args={args}
+      className="bg-linear-to-br from-indigo-950 via-zinc-900 to-black min-h-125"
+    >
+      <div className="pt-32 px-8 text-white text-center">
+        <h1 className="text-5xl font-extrabold tracking-tight opacity-30">Page Content</h1>
+      </div>
+    </InteractiveWrapper>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The `brandElement` prop replaces the plain brand name `<span>` with arbitrary markup, allowing mixed font weights, custom colours, and any other styling a string cannot express. The logo image is always rendered alongside it. Inline styles are used here to avoid conflicts with host-app CSS resets.",
+      },
+    },
+  },
+};
+
+export const WithUserMenuItems: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: defaultItems,
+    variant: "default",
+    activePath: "/schedule",
+    user: mockUser,
+    userMenuItems: [{ label: "Admin", path: "/admin" }],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pass `userMenuItems` to inject role-gated links into the avatar dropdown on desktop (above Log Out) and into the mobile panel nav section (below the main items, separated by a divider). Items are only rendered when `user` is provided — they are silently ignored for guests. **Click the avatar** to see the Admin link in the dropdown.",
       },
     },
   },
