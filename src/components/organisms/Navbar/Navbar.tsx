@@ -64,6 +64,19 @@ export interface NavbarProps
    * section in the mobile panel, giving you full control over auth UI.
    */
   actions?: React.ReactNode;
+  /**
+   * Replaces the default brand name `<span>` with arbitrary markup. Use this
+   * when you need mixed weights, colours, or other rich styling that a plain
+   * string cannot express (e.g. bold "GAME" + thin "VERDICT").
+   * The logo image is always rendered; this only affects the text element.
+   */
+  brandElement?: React.ReactNode;
+  /**
+   * Auth-gated navigation items appended to the built-in user avatar dropdown
+   * on desktop and to the nav section of the mobile slide-out panel. Only
+   * rendered when the `user` prop is provided. Ignored when `actions` is set.
+   */
+  userMenuItems?: NavItem[];
 }
 
 const Navbar = ({
@@ -77,6 +90,8 @@ const Navbar = ({
   onInboxClick,
   onThemeToggle,
   actions,
+  brandElement,
+  userMenuItems = [],
   className,
   variant = "default",
   position = "sticky",
@@ -146,9 +161,11 @@ const Navbar = ({
                 alt={`${brandName} Logo`}
                 className="h-8 w-8 rounded-md"
               />
-              <span className="text-xl font-bold tracking-tight">
-                {brandName}
-              </span>
+              {brandElement ?? (
+                <span className="text-xl font-bold tracking-tight">
+                  {brandName}
+                </span>
+              )}
             </Link>
 
             {/* Desktop Navigation */}
@@ -288,6 +305,30 @@ const Navbar = ({
                         )}
                       </div>
 
+                      {userMenuItems.length > 0 && (
+                        <div className="py-1">
+                          {userMenuItems.map((item) => (
+                            <MenuItem key={item.path}>
+                              {({ focus }) => (
+                                <Link
+                                  as={routerElement}
+                                  href={item.path}
+                                  to={item.path}
+                                  variant="neutral"
+                                  underline="none"
+                                  className={cn(
+                                    "block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 transition-colors",
+                                    focus && "bg-gray-50 dark:bg-gray-700",
+                                  )}
+                                >
+                                  {item.label}
+                                </Link>
+                              )}
+                            </MenuItem>
+                          ))}
+                        </div>
+                      )}
+
                       {onLogout && (
                         <div className="py-1">
                           <MenuItem>
@@ -378,9 +419,11 @@ const Navbar = ({
                         alt={brandName}
                         className="h-8 w-8 rounded-md"
                       />
-                      <span className="font-bold text-gray-900 dark:text-white">
-                        {brandName}
-                      </span>
+                      {brandElement ?? (
+                        <span className="font-bold text-gray-900 dark:text-white">
+                          {brandName}
+                        </span>
+                      )}
                     </div>
                     <div className="-mr-2">
                       <PopoverButton className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-500 dark:hover:text-white focus:outline-none">
@@ -427,6 +470,43 @@ const Navbar = ({
                           </Link>
                         );
                       })}
+                      {user && userMenuItems.length > 0 && (
+                        <>
+                          <hr className="border-gray-100 dark:border-gray-700" />
+                          {userMenuItems.map((item) => {
+                            const isActive = activePath === item.path;
+                            return (
+                              <Link
+                                key={item.path}
+                                as={routerElement}
+                                href={item.path}
+                                to={item.path}
+                                onClick={() => close()}
+                                variant="neutral"
+                                underline="none"
+                                className={cn(
+                                  "-m-3 flex items-center rounded-md p-3 transition-colors",
+                                  "hover:bg-gray-50 dark:hover:bg-gray-700",
+                                  isActive
+                                    ? "bg-gray-50 dark:bg-gray-700"
+                                    : "text-gray-900 dark:text-gray-100",
+                                )}
+                              >
+                                <span
+                                  className={cn(
+                                    "ml-3 text-base font-medium",
+                                    isActive
+                                      ? "text-primary-600 dark:text-primary-400 font-bold"
+                                      : "text-gray-900 dark:text-gray-100",
+                                  )}
+                                >
+                                  {item.label}
+                                </span>
+                              </Link>
+                            );
+                          })}
+                        </>
+                      )}
                     </nav>
                   </div>
                 </div>
