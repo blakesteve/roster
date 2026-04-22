@@ -87,8 +87,14 @@ Pass \`userMenuItems\` to inject additional navigation links that only appear wh
 />
 \`\`\`
 
-**6. Custom Auth UI (actions prop)**
-Pass any React node to \`actions\` to replace the built-in user avatar menu and *Log In* button entirely. The same content is mirrored into the mobile slide-out panel. This is the escape hatch for apps with custom auth flows, framework-specific Link components, or loading states.
+**6. Handling the Guest State (onLogin prop)**
+Pass \`onLogin\` to wire up the built-in *Log In* button that appears when no \`user\` is provided. Without it the button renders but does nothing.
+\`\`\`tsx
+<Navbar onLogin={() => router.push("/auth")} />
+\`\`\`
+
+**7. Custom Auth UI (actions prop)**
+Pass any React node to \`actions\` to fully replace the built-in user avatar menu and *Log In* button. The same content is mirrored into the mobile slide-out panel. Use this as the escape hatch for apps with custom auth flows, framework-specific link components, or loading skeleton states.
 \`\`\`tsx
 <Navbar
   actions={
@@ -134,6 +140,7 @@ Pass any React node to \`actions\` to replace the built-in user avatar menu and 
       description:
         "User profile object. Pass 'undefined' to render the Guest state.",
     },
+    onLogin: { action: "login clicked" },
     onLogout: { action: "logout clicked" },
     onInboxClick: { action: "inbox clicked" },
     onThemeToggle: { action: "theme toggled" },
@@ -351,6 +358,26 @@ export const MobileView: Story = {
       description: {
         story:
           "Demonstrates the responsive hamburger menu behavior on constrained viewports. The interactive theme toggle is injected directly into the slide-out menu.",
+      },
+    },
+  },
+};
+
+export const GuestState: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: defaultItems,
+    variant: "default",
+    activePath: "/schedule",
+    // No `user` — renders the guest state with a Log In button
+    onLogin: () => alert("navigate to /auth"),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When no `user` is provided the Navbar renders a *Log In* button. Pass `onLogin` to make it functional — without it the button renders but does nothing. The same button is also surfaced in the mobile slide-out panel.",
       },
     },
   },
