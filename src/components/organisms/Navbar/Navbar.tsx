@@ -45,6 +45,7 @@ export interface NavbarProps
     notificationCount?: number;
     avatarSrc?: string;
   };
+  onLogin?: () => void;
   onLogout?: () => void;
   onInboxClick?: () => void;
   onThemeToggle?: () => void;
@@ -86,6 +87,7 @@ const Navbar = ({
   activePath,
   routerElement,
   user,
+  onLogin,
   onLogout,
   onInboxClick,
   onThemeToggle,
@@ -359,7 +361,7 @@ const Navbar = ({
                   </Transition>
                 </Menu>
               ) : (
-                <Button size="sm" variant="solid" colorScheme="primary">
+                <Button size="sm" variant="solid" colorScheme="primary" onClick={onLogin}>
                   Log In
                 </Button>
               ))}
@@ -511,10 +513,19 @@ const Navbar = ({
                   </div>
                 </div>
 
-                {(user || actions) && (
+                {(user || actions || onLogin) && (
                   <div className="py-6 px-5 space-y-4">
                     {actions ? (
                       actions
+                    ) : !user && onLogin ? (
+                      <Button
+                        variant="solid"
+                        colorScheme="primary"
+                        className="w-full justify-center"
+                        onClick={() => { onLogin(); close(); }}
+                      >
+                        Log In
+                      </Button>
                     ) : (
                       <>
                         {hasNotifications && onInboxClick && (

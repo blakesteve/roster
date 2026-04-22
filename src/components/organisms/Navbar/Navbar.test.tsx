@@ -141,6 +141,27 @@ describe("Navbar Component", () => {
     expect(screen.queryByText(/inbox/i)).not.toBeInTheDocument();
   });
 
+  it("calls onLogin when the Log In button is clicked on desktop", () => {
+    const onLogin = vi.fn();
+    render(<Navbar {...defaultProps} onLogin={onLogin} />);
+
+    const loginButton = screen.getByRole("button", { name: /log in/i });
+    fireEvent.click(loginButton);
+
+    expect(onLogin).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the Log In button in the mobile panel when onLogin is provided", async () => {
+    const onLogin = vi.fn();
+    render(<Navbar {...defaultProps} onLogin={onLogin} />);
+
+    const hamburger = screen.getByRole("button", { name: /open main menu/i });
+    fireEvent.click(hamburger);
+
+    const loginButtons = await screen.findAllByRole("button", { name: /log in/i });
+    expect(loginButtons.length).toBeGreaterThan(0);
+  });
+
   it("renders custom actions slot instead of user menu on desktop", () => {
     render(
       <Navbar
