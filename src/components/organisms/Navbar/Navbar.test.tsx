@@ -283,6 +283,20 @@ describe("Navbar Component", () => {
     expect(onThemeToggle).toHaveBeenCalledTimes(1);
   });
 
+  it("applies a custom avatarColor to the user avatar button", () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        user={{ ...mockUser, avatarColor: "teal" }}
+      />,
+    );
+
+    const userButton = screen.getByRole("button", { name: /user menu/i });
+    // The avatar inside the button should carry the teal color class
+    const avatar = userButton.querySelector("[class*='teal']");
+    expect(avatar).toBeInTheDocument();
+  });
+
   it("renders and triggers the theme toggle in the mobile menu", async () => {
     const onThemeToggle = vi.fn();
     render(
