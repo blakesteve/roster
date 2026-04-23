@@ -104,6 +104,15 @@ Pass any React node to \`actions\` to fully replace the built-in user avatar men
   }
 />
 \`\`\`
+
+**8. Persistent Nav-Level Actions (navActions prop)**
+Use \`navActions\` to inject controls that should live between the nav links and the user menu — without replacing the built-in user menu. On desktop it renders inline; on mobile it renders above the nav links in the slide-out panel. The canonical use case is a search icon that expands into a search bar after the page's hero search scrolls above the fold.
+\`\`\`tsx
+<Navbar
+  user={{ initials: "BS" }}
+  navActions={<SearchToggle />}
+/>
+\`\`\`
 `,
       },
     },
@@ -148,6 +157,11 @@ Pass any React node to \`actions\` to fully replace the built-in user avatar men
       control: false,
       description:
         "Custom React node rendered in the right-side action area. When provided, replaces the built-in user menu and Log In button on desktop and the user section in the mobile panel.",
+    },
+    navActions: {
+      control: false,
+      description:
+        "Extra content rendered between the nav links and the user menu on desktop; above the nav links in the mobile slide-out panel. Does not replace the user menu — use `actions` for full replacement.",
     },
   },
   args: {
@@ -467,6 +481,46 @@ export const CustomAvatarColor: Story = {
       description: {
         story:
           "When `user.avatarColor` is set, the initials avatar uses that color scheme instead of the default `primary`. If `user.avatarSrc` is also provided, the color only shows as a fallback when the image fails to load.",
+      },
+    },
+  },
+};
+
+export const NavActionsSlot: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: defaultItems,
+    variant: "transparent",
+    position: "fixed",
+    user: mockUser,
+    navActions: (
+      <button
+        aria-label="Search"
+        className="flex h-8 w-8 items-center justify-center rounded-full text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+        onClick={() => alert("search clicked")}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+        </svg>
+      </button>
+    ),
+  },
+  render: (args) => (
+    <InteractiveWrapper
+      args={args}
+      className="bg-linear-to-br from-indigo-950 via-zinc-900 to-black min-h-125"
+    >
+      <div className="pt-32 px-8 text-white text-center">
+        <h1 className="text-5xl font-extrabold tracking-tight opacity-30">Page Content</h1>
+      </div>
+    </InteractiveWrapper>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The `navActions` prop renders custom content between the nav links and the user menu on desktop, and above the nav links in the mobile slide-out panel. The user menu is unaffected. The canonical use-case is a persistent search icon that only appears after the page's hero search scrolls above the fold.",
       },
     },
   },

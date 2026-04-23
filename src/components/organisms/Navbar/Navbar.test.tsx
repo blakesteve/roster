@@ -283,6 +283,35 @@ describe("Navbar Component", () => {
     expect(onThemeToggle).toHaveBeenCalledTimes(1);
   });
 
+  it("renders navActions between nav links and user menu on desktop", () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        user={mockUser}
+        navActions={<button>Search</button>}
+      />,
+    );
+
+    // navActions is visible alongside the user menu (not replacing it)
+    expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /user menu/i })).toBeInTheDocument();
+  });
+
+  it("renders navActions above nav links in the mobile panel", async () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        navActions={<input placeholder="Search games…" />}
+      />,
+    );
+
+    const hamburger = screen.getByRole("button", { name: /open main menu/i });
+    fireEvent.click(hamburger);
+
+    const searchInputs = await screen.findAllByPlaceholderText("Search games…");
+    expect(searchInputs.length).toBeGreaterThan(0);
+  });
+
   it("applies a custom avatarColor to the user avatar button", () => {
     render(
       <Navbar
