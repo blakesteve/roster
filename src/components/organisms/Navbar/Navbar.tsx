@@ -44,6 +44,7 @@ export interface NavbarProps
     initials: string;
     notificationCount?: number;
     avatarSrc?: string;
+    avatarColor?: string;
   };
   onLogin?: () => void;
   onLogout?: () => void;
@@ -207,7 +208,7 @@ const Navbar = ({
                       src={user.avatarSrc}
                       size="sm"
                       shape="circle"
-                      colorScheme="primary"
+                      colorScheme={(user.avatarColor as React.ComponentProps<typeof Avatar>["colorScheme"]) ?? "primary"}
                     />
 
                     {hasNotifications && (

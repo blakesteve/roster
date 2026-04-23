@@ -138,7 +138,7 @@ Pass any React node to \`actions\` to fully replace the built-in user avatar men
     user: {
       control: "object",
       description:
-        "User profile object. Pass 'undefined' to render the Guest state.",
+        "User profile object. Pass 'undefined' to render the Guest state. Includes optional `avatarSrc` (image URL) and `avatarColor` (initials fallback color scheme).",
     },
     onLogin: { action: "login clicked" },
     onLogout: { action: "logout clicked" },
@@ -448,6 +448,25 @@ export const CustomBrandElement: Story = {
       description: {
         story:
           "The `brandElement` prop replaces the plain brand name `<span>` with arbitrary markup, allowing mixed font weights, custom colours, and any other styling a string cannot express. The logo image is always rendered alongside it. Inline styles are used here to avoid conflicts with host-app CSS resets.",
+      },
+    },
+  },
+};
+
+export const CustomAvatarColor: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: defaultItems,
+    variant: "default",
+    activePath: "/schedule",
+    user: { initials: "MS", notificationCount: 0, avatarColor: "teal" },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When `user.avatarColor` is set, the initials avatar uses that color scheme instead of the default `primary`. If `user.avatarSrc` is also provided, the color only shows as a fallback when the image fails to load.",
       },
     },
   },
