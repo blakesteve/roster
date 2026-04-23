@@ -74,6 +74,14 @@ export interface NavbarProps
    */
   brandElement?: React.ReactNode;
   /**
+   * Extra content rendered between the nav link list and the user menu / Log In
+   * button on desktop, and above the nav links in the mobile slide-out panel.
+   * Use this for persistent nav-level controls like a search toggle that should
+   * coexist with the built-in user menu. Does not replace the user menu —
+   * see `actions` for full replacement.
+   */
+  navActions?: React.ReactNode;
+  /**
    * Auth-gated navigation items appended to the built-in user avatar dropdown
    * on desktop and to the nav section of the mobile slide-out panel. Only
    * rendered when the `user` prop is provided. Ignored when `actions` is set.
@@ -94,6 +102,7 @@ const Navbar = ({
   onThemeToggle,
   actions,
   brandElement,
+  navActions,
   userMenuItems = [],
   className,
   variant = "default",
@@ -196,6 +205,9 @@ const Navbar = ({
                   );
                 })}
               </div>
+
+              {/* Extra nav-level actions between links and user menu (e.g. search toggle) */}
+              {navActions}
 
               {/* User Menu / Custom Actions */}
               {actions ?? (user ? (
@@ -440,6 +452,9 @@ const Navbar = ({
                     </div>
                   </div>
                   <div className="mt-6">
+                    {navActions && (
+                      <div className="mb-4">{navActions}</div>
+                    )}
                     <nav className="grid gap-y-4">
                       {items.map((item) => {
                         const isActive = activePath === item.path;
