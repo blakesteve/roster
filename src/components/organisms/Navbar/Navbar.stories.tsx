@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Navbar, type NavbarProps } from "./Navbar";
+import { Badge } from "../../atoms/Badge/Badge";
 
 const InteractiveWrapper = ({
   args,
@@ -105,7 +106,22 @@ Pass any React node to \`actions\` to fully replace the built-in user avatar men
 />
 \`\`\`
 
-**8. Persistent Nav-Level Actions (navActions prop)**
+**8. Nav Item Badges (badge on NavItem)**
+Each object in the \`items\` array accepts an optional \`badge\` prop — any ReactNode rendered inline after the link text. Use it for "New" labels, notification counts, or status indicators. The badge renders in both the desktop nav and the mobile slide-out panel.
+\`\`\`tsx
+<Navbar
+  items={[
+    { label: "Browse", path: "/games" },
+    {
+      label: "Quick Vote",
+      path: "/vote",
+      badge: <Badge variant="primary" fill="light" size="xs">New</Badge>,
+    },
+  ]}
+/>
+\`\`\`
+
+**9. Persistent Nav-Level Actions (navActions prop)**
 Use \`navActions\` to inject controls that should live between the nav links and the user menu — without replacing the built-in user menu. On desktop it renders inline; on mobile it renders above the nav links in the slide-out panel. The canonical use case is a search icon that expands into a search bar after the page's hero search scrolls above the fold.
 \`\`\`tsx
 <Navbar
@@ -481,6 +497,36 @@ export const CustomAvatarColor: Story = {
       description: {
         story:
           "When `user.avatarColor` is set, the initials avatar uses that color scheme instead of the default `primary`. If `user.avatarSrc` is also provided, the color only shows as a fallback when the image fails to load.",
+      },
+    },
+  },
+};
+
+export const NavItemBadge: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: [
+      { label: "Schedule", path: "/schedule" },
+      {
+        label: "Quick Vote",
+        path: "/vote",
+        badge: (
+          <Badge variant="primary" fill="light" size="xs">
+            New
+          </Badge>
+        ),
+      },
+      { label: "Settings", path: "/settings" },
+    ],
+    variant: "default",
+    user: mockUser,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Each `NavItem` accepts an optional `badge` prop — any ReactNode rendered inline after the link label. Use it for \"New\" labels, version tags, or status indicators. The badge appears in both the desktop nav and the mobile slide-out panel.",
       },
     },
   },

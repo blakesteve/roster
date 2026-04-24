@@ -326,6 +326,39 @@ describe("Navbar Component", () => {
     expect(avatar).toBeInTheDocument();
   });
 
+  it("renders a badge next to a nav item label on desktop", () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        items={[
+          { label: "Home", path: "/" },
+          { label: "Quick Vote", path: "/vote", badge: <span data-testid="new-badge">New</span> },
+        ]}
+      />,
+    );
+
+    expect(screen.getByTestId("new-badge")).toBeInTheDocument();
+    expect(screen.getByTestId("new-badge")).toHaveTextContent("New");
+  });
+
+  it("renders a badge next to a nav item label in the mobile panel", async () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        items={[
+          { label: "Home", path: "/" },
+          { label: "Quick Vote", path: "/vote", badge: <span data-testid="mobile-badge">New</span> },
+        ]}
+      />,
+    );
+
+    const hamburger = screen.getByRole("button", { name: /open main menu/i });
+    fireEvent.click(hamburger);
+
+    const badges = await screen.findAllByTestId("mobile-badge");
+    expect(badges.length).toBeGreaterThan(0);
+  });
+
   it("renders and triggers the theme toggle in the mobile menu", async () => {
     const onThemeToggle = vi.fn();
     render(

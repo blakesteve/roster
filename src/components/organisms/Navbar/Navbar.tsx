@@ -29,6 +29,10 @@ import { navbarVariants } from "./navbar-variants";
 export interface NavItem {
   label: string;
   path: string;
+  /** Optional badge rendered inline after the link label — any ReactNode.
+   *  Use for "New" labels, notification counts, or status indicators.
+   *  Appears in both the desktop nav and the mobile slide-out panel. */
+  badge?: React.ReactNode;
 }
 
 export interface NavbarProps
@@ -194,13 +198,14 @@ const Navbar = ({
                       variant="neutral"
                       underline="none"
                       className={cn(
-                        "text-sm transition-colors duration-200",
+                        "inline-flex items-center gap-1.5 text-sm transition-colors duration-200",
                         isActive
                           ? surfaceColors.linkActive
                           : surfaceColors.linkBase,
                       )}
                     >
                       {item.label}
+                      {item.badge && <span className="inline-flex">{item.badge}</span>}
                     </Link>
                   );
                 })}
@@ -477,13 +482,14 @@ const Navbar = ({
                           >
                             <span
                               className={cn(
-                                "ml-3 text-base font-medium",
+                                "ml-3 inline-flex items-center gap-1.5 text-base font-medium",
                                 isActive
                                   ? "text-primary-600 dark:text-primary-400 font-bold"
                                   : "text-gray-900 dark:text-gray-100",
                               )}
                             >
                               {item.label}
+                              {item.badge && <span className="inline-flex">{item.badge}</span>}
                             </span>
                           </Link>
                         );
