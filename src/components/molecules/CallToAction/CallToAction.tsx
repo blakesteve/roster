@@ -8,7 +8,7 @@ import { Button } from "../../atoms/Button/Button";
 
 export interface CallToActionProps
   extends
-    React.HTMLAttributes<HTMLDivElement>,
+    Omit<React.HTMLAttributes<HTMLDivElement>, "title">,
     VariantProps<typeof ctaVariants> {
   title: React.ReactNode;
   description?: React.ReactNode;
