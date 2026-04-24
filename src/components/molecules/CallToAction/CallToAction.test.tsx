@@ -19,6 +19,23 @@ describe("CallToAction Molecule", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders a complex ReactNode injected into the title prop", () => {
+    render(
+      <CallToAction
+        title={
+          <span data-testid="rich-title">
+            <span data-testid="badge-in-title">New</span>
+            {" "}Quick Vote
+          </span>
+        }
+      />,
+    );
+
+    expect(screen.getByTestId("rich-title")).toBeInTheDocument();
+    expect(screen.getByTestId("badge-in-title")).toBeInTheDocument();
+    expect(screen.getByText("Quick Vote", { exact: false })).toBeInTheDocument();
+  });
+
   it("renders a complex ReactNode injected into the description prop", () => {
     render(
       <CallToAction

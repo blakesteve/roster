@@ -1,11 +1,13 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { CallToAction } from "./CallToAction";
+import { Badge } from "../../atoms/Badge/Badge";
 import { Button } from "../../atoms/Button/Button";
 import { Countdown } from "../../organisms/Countdown/Countdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTrophy,
+  faBolt,
   faTriangleExclamation,
   faInfoCircle,
   faCircleCheck,
@@ -76,6 +78,46 @@ The \`CallToAction\` is a high-visibility banner used to nudge users toward spec
 
 export default meta;
 type Story = StoryObj<typeof CallToAction>;
+
+/**
+ * Demonstrates embedding a Badge directly into the `title` prop for a "New feature"
+ * announcement pattern. Because `title` accepts any ReactNode, you can compose
+ * labels, badges, or icons alongside the heading text.
+ */
+export const RichTitleWithBadge: Story = {
+  args: {
+    variant: "primary",
+    title: (
+      <span className="flex flex-wrap items-center gap-2.5">
+        Quick Vote
+        <Badge
+          variant="primary"
+          fill="light"
+          size="xs"
+          leftIcon={<FontAwesomeIcon icon={faBolt} className="h-2.5 w-2.5" />}
+        >
+          New
+        </Badge>
+      </span>
+    ),
+    description:
+      "Rate games one-by-one — takes 5 seconds per game. Skip what you haven't played, vote on what you have.",
+    icon: <FontAwesomeIcon icon={faTrophy} className="h-6 w-6" />,
+    action: (
+      <Button variant="solid" colorScheme="primary">
+        Start voting
+      </Button>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Because `title` accepts a `ReactNode`, you can embed a `Badge` (or any inline element) alongside the heading text — useful for \"New\" labels, version tags, or status indicators without needing a separate prop.",
+      },
+    },
+  },
+};
 
 /**
  * The standard 'brand' look. Used for positive events,
