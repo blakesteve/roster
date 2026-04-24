@@ -10,7 +10,7 @@ export interface CallToActionProps
   extends
     React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof ctaVariants> {
-  title: string;
+  title: React.ReactNode;
   description?: React.ReactNode;
   action?: React.ReactNode;
   icon?: React.ReactNode;
