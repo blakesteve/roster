@@ -8,7 +8,6 @@ describe("Footer Component", () => {
   it("renders the current year and default company name", () => {
     render(<Footer />);
 
-    // Using a regex to match the text regardless of exact DOM structure
     const expectedText = new RegExp(
       `© ${currentYear} Ball Collaborative, All rights reserved.`,
     );
@@ -57,5 +56,54 @@ describe("Footer Component", () => {
     expect(footerElement).toHaveClass("bg-transparent");
     expect(footerElement).toHaveClass("text-gray-500");
     expect(footerElement).toHaveClass("dark:text-gray-400");
+  });
+
+  it("renders footer links when provided", () => {
+    render(
+      <Footer
+        links={[
+          { label: "Contact", href: "/contact" },
+          { label: "Privacy", href: "/privacy" },
+        ]}
+      />,
+    );
+
+    const contactLink = screen.getByRole("link", { name: "Contact" });
+    const privacyLink = screen.getByRole("link", { name: "Privacy" });
+
+    expect(contactLink).toBeInTheDocument();
+    expect(contactLink).toHaveAttribute("href", "/contact");
+    expect(privacyLink).toBeInTheDocument();
+    expect(privacyLink).toHaveAttribute("href", "/privacy");
+  });
+
+  it("renders a footer nav landmark when links are provided", () => {
+    render(
+      <Footer links={[{ label: "Contact", href: "/contact" }]} />,
+    );
+
+    expect(screen.getByRole("navigation", { name: /footer navigation/i })).toBeInTheDocument();
+  });
+
+  it("does not render a nav element when no links are provided", () => {
+    render(<Footer />);
+
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
+  });
+
+  it("uses a custom routerElement for link rendering", () => {
+    const MockLink = ({ href, children, ...rest }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+      <a data-testid="router-link" href={href} {...rest}>{children}</a>
+    );
+
+    render(
+      <Footer
+        links={[{ label: "Feedback", href: "/feedback" }]}
+        routerElement={MockLink}
+      />,
+    );
+
+    expect(screen.getByTestId("router-link")).toBeInTheDocument();
+    expect(screen.getByTestId("router-link")).toHaveTextContent("Feedback");
   });
 });

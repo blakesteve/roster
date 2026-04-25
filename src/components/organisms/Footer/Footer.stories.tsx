@@ -100,7 +100,28 @@ export const PrimaryTheme: Story = {
   },
 };
 
-// --- 3. Transparent Theme ---
+// --- 3. With Navigation Links ---
+export const WithLinks: Story = {
+  args: {
+    companyName: "MegaSquad",
+    variant: "default",
+    links: [
+      { label: "Contact", href: "/contact" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms", href: "/terms" },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pass a `links` array to render a row of navigation links above the copyright line. Useful for pages like Contact, Privacy Policy, and Terms of Service. Use the `routerElement` prop to swap the `<a>` tag for a framework-aware link (e.g. Next.js `Link`).",
+      },
+    },
+  },
+};
+
+// --- 4. Transparent Theme ---
 export const TransparentTheme: Story = {
   args: {
     companyName: "MegaSquad",
