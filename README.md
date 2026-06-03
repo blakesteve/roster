@@ -81,7 +81,11 @@ function App() {
 | `Disclosure` | Show/hide toggle using HeadlessUI |
 | `Input` | Text input with label, error state, and icon slots |
 | `Link` | Styled anchor with variant support |
+| `AvatarStrip` | Stacked avatar row with overflow chip, dismiss button, trailing slot, and label area |
+| `CollapsibleDescription` | Clamped text block with fade and Read more / Show less toggle |
+| `LiquidTabs` | Controlled tab strip with a liquid sliding pill indicator — pill and filled variants |
 | `Select` | Dropdown selector |
+| `SegmentBar` | Proportional horizontal bar divided into colored segments with optional legend |
 | `Spinner` | Loading indicator |
 | `Switch` | Toggle switch |
 | `Textarea` | Multi-line text input |
