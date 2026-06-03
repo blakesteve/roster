@@ -96,22 +96,22 @@ const DualPreviewDecorator: Decorator = (Story) => (
 
 // ─── Stories ─────────────────────────────────────────────────────────────────
 
+// Tagged !autodocs so it lives as an interactive sandbox in the sidebar only —
+// the autodocs page already shows the primary story canvas with live controls.
 export const Playground: Story = {
+  tags: ["!autodocs"],
   args: {
     content: "This is a helpful tooltip",
     placement: "top",
     variant: "dark",
-    children: <Button size="sm">Hover or tap me</Button>,
+    delayDuration: 300,
   } as TooltipProps,
+  render: (args) => (
+    <Tooltip {...args}>
+      <Button size="sm">Hover or tap me</Button>
+    </Tooltip>
+  ),
   decorators: [DualPreviewDecorator],
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Live sandbox — use the controls panel to adjust all props in real time. Hover or click the button to see the tooltip.",
-      },
-    },
-  },
 };
 
 export const Dark: Story = {

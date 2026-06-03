@@ -102,6 +102,7 @@ const DualPreviewDecorator: Decorator = (Story) => (
 // ─── Stories ─────────────────────────────────────────────────────────────────
 
 export const Playground: Story = {
+  tags: ["!autodocs"],
   args: {
     children: LONG_TEXT,
     size: "md",

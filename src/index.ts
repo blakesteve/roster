@@ -26,6 +26,7 @@ export * from './components/atoms/Textarea/Textarea';
 export * from './components/atoms/Textarea/textarea-variants';
 export * from './components/atoms/Tooltip/Tooltip';
 export * from './components/atoms/CollapsibleDescription/CollapsibleDescription';
+export * from './components/atoms/SegmentBar/SegmentBar';
 
 // --- MOLECULES ---
 export * from './components/molecules/Accordion/Accordion';
