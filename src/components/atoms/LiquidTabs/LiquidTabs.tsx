@@ -151,9 +151,9 @@ export function LiquidTabs({
       className={cn(
         "relative flex",
         isFilled
-          ? "w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900"
+          ? "w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800"
           : cn(
-              "gap-1 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-1",
+              "gap-1 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-1",
               fullWidth ? "w-full" : "w-fit",
             ),
         className,
@@ -165,7 +165,7 @@ export function LiquidTabs({
         aria-hidden
         data-testid="liquid-tabs-pill"
         className={cn(
-          "absolute rounded-lg bg-primary-500 dark:bg-primary-400",
+          "absolute rounded-lg bg-primary-500 dark:bg-primary-500",
           isFilled ? "top-0 bottom-0" : "top-1 bottom-1",
         )}
         style={{ opacity: 0, left: 0, width: 0 }}
