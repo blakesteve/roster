@@ -1,113 +1,168 @@
-# Roster 📋
+# @blakesteve/roster ✦
 
-**Roster** is the atomic UI component library powering the **MegaSquad** ecosystem.
+A production-grade atomic component library built with **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Vite**.
 
-It is built with **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Vite**, offering a set of high-quality, accessible, and theme-aware components.
+Roster ships a curated set of accessible, theme-aware components organized around the Atomic Design methodology — atoms, molecules, and organisms — each with Storybook documentation and full test coverage.
 
-## 🚀 Features
+## Features
 
-- **Next.js App Router Ready:** All components are automatically bundled with `"use client"` directives for seamless SSR integration without context crashes.
-- **Decoupled Theming:** Bring your own brand. Roster ships structural CSS separately from its default design tokens, allowing you to easily override CSS variables or use the default MegaSquad theme.
-- **Atomic Design:** Components organized by atoms, molecules, and organisms.
-- **TypeScript First:** Fully typed for excellent developer experience (DX).
-- **Adaptive Dark Mode:** Fully supports manual, class-based dark mode toggling (`.dark`) independent of OS preferences.
-- **Headless UI:** Accessible interactive components powered by `@headlessui/react`.
-- **Tree-Shakeable:** Import only what you need.
+- **Atomic Design** — components organized as atoms, molecules, and organisms
+- **TypeScript first** — fully typed props with exported variant types for maximum DX
+- **Adaptive dark mode** — class-based toggling (`.dark`) independent of OS preferences
+- **`"use client"` pre-bundled** — all outputs include the directive for seamless Next.js App Router integration
+- **Accessible** — interactive components powered by [`@headlessui/react`](https://headlessui.com) and [`@radix-ui`](https://radix-ui.com)
+- **Tree-shakeable** — import only what you need
 
-## 📦 Installation
+## Installation
 
 ```bash
-npm install roster
-# or
-yarn add roster
+npm install @blakesteve/roster
 ```
 
-### Peer Dependencies
+Roster ships pre-compiled CSS — you do not need Tailwind installed in your host app to use it.
 
-Roster relies on a few peer dependencies that must be installed in your host application:
+### Peer dependencies
 
 ```json
-"peerDependencies": {
+{
   "react": "^19.0.0",
-  "react-dom": "^19.0.0",
-  "tailwindcss": "^4.0.0"
+  "react-dom": "^19.0.0"
 }
 ```
 
-## 💻 Usage
+## Setup
 
-### 1. Import Styles
-
-Roster splits its CSS into two parts to give you ultimate flexibility over your theme. You must import the CSS at the root of your application (e.g., in `layout.tsx`, `main.tsx`, or `App.tsx`).
-
-````tsx
-// 1. Required: The structural Tailwind utility classes
-import "roster/dist/roster.css";
-
-// 2. Optional: The default MegaSquad color and theme tokens
-// (Omit this file if you are defining your own --roster-* variables in your app's global CSS)
-import "roster/dist/tokens.css";
-
-### 2. Import Components
-
-Now you can use the components anywhere in your app.
+Import Roster's CSS once at the root of your application (`layout.tsx`, `main.tsx`, or `App.tsx`):
 
 ```tsx
-import { Button, Spinner } from "roster";
+// Compiled component styles — always required
+import "@blakesteve/roster/style.css";
+
+// Default design tokens (color palette, spacing, radius)
+// Omit this if you are supplying your own --roster-* CSS variables
+import "@blakesteve/roster/tokens.css";
+```
+
+## Quick start
+
+```tsx
+import { Button, Spinner } from "@blakesteve/roster";
 
 function App() {
   return (
-    <div className="p-4 flex flex-col gap-4">
-      {/* Primary Button */}
-      <Button colorScheme="primary" onClick={() => alert("Clicked!")}>
-        Save Changes
+    <div className="flex flex-col gap-4 p-4">
+      <Button colorScheme="primary" onClick={() => alert("Saved!")}>
+        Save changes
       </Button>
 
-      {/* Destructive Variant */}
-      <Button colorScheme="destructive" variant="outline">
-        Delete Account
+      <Button colorScheme="error" variant="outline">
+        Delete account
       </Button>
 
-      {/* Loading State */}
-      <Button isLoading>Processing...</Button>
+      <Button isLoading>Processing…</Button>
 
-      {/* Standalone Spinner */}
-      <Spinner size="lg" className="text-accent-500" />
+      <Spinner size="lg" />
     </div>
   );
 }
-````
-
-## 🎨 Development
-
-We use **Storybook** to develop and document components in isolation.
-
-```bash
-# Install dependencies
-npm install
-
-# Start Storybook
-npm run storybook
 ```
 
-This will open the component playground at http://localhost:6006.
+## Component catalog
 
-## 🛠️ Building
+### Atoms
 
-To build the library for production (outputs to `dist/`):
+| Component | Description |
+|---|---|
+| `Avatar` | User avatar with image, initials fallback, and optional popover |
+| `Badge` | Status label with semantic color schemes and fill variants |
+| `Button` | Primary interactive element — solid, soft, outline, ghost, link variants |
+| `Card` | Bordered surface container |
+| `Checkbox` | Accessible checkbox with label support |
+| `Disclosure` | Show/hide toggle using HeadlessUI |
+| `Input` | Text input with label, error state, and icon slots |
+| `Link` | Styled anchor with variant support |
+| `Select` | Dropdown selector |
+| `Spinner` | Loading indicator |
+| `Switch` | Toggle switch |
+| `Textarea` | Multi-line text input |
+| `Tooltip` | Radix-powered tooltip — hover/focus on desktop, tap-to-toggle on mobile |
+
+### Molecules
+
+| Component | Description |
+|---|---|
+| `Accordion` | Collapsible content sections (single or multi-expand) |
+| `Breadcrumbs` | Navigation trail |
+| `CallToAction` | Prominent hero-style CTA block |
+| `EmptyState` | Zero-data placeholder with icon and action slot |
+| `ErrorState` | Error display with retry action |
+| `MatchupCard` | Head-to-head comparison card |
+
+### Organisms
+
+| Component | Description |
+|---|---|
+| `ActionBar` | Sticky bottom action strip |
+| `Countdown` | Live countdown timer |
+| `DataTable` | Full-featured table with sorting and pagination via TanStack Table |
+| `Dialog` | Modal dialog |
+| `Footer` | Site footer |
+| `Navbar` | Responsive navigation bar with mobile slide-out |
+| `Table` | Static data table |
+
+### Hooks
+
+| Hook | Description |
+|---|---|
+| `useCountdown` | Countdown timer logic without the UI |
+
+## Development
+
+Storybook is the component playground. Each component has dedicated stories covering all variants, props, and light/dark mode.
+
+```bash
+npm install
+npm run storybook
+# → http://localhost:6006
+```
+
+## Testing
+
+```bash
+# Unit tests (Vitest + jsdom)
+npm run test:run
+
+# Unit tests in watch mode
+npm run test
+
+# Storybook interaction tests (Vitest + Playwright)
+npx vitest run --project storybook
+```
+
+## Building
 
 ```bash
 npm run build
 ```
 
-This generates:
+Output in `dist/`:
 
-- `dist/roster.es.js` (Main library ES Modules)
-- `dist/tokens.es.js` (Token injection script)
-- `dist/roster.css` (Compiled structural Tailwind styles)
-- `dist/tokens.css` (Design token CSS variables)
-- `dist/index.d.ts` (Type definitions)
+| File | Description |
+|---|---|
+| `roster.es.js` | ES module bundle |
+| `roster.umd.js` | UMD bundle |
+| `roster.css` | Compiled component styles |
+| `tokens.css` | Design token CSS variables |
+| `index.d.ts` | TypeScript definitions |
 
-## 📄 License
+## Contributing
 
-MIT © Blake Ball
+Pull requests are welcome. Please:
+
+1. Open an issue or discussion first for significant changes
+2. Follow the existing code style (CVA variants, forwardRef, Storybook stories, unit tests)
+3. Fill out the pull request template checklist before requesting review
+
+## License
+
+MIT © [Blake Ball](https://github.com/blakesteve)
