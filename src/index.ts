@@ -24,6 +24,7 @@ export * from './components/atoms/Switch/Switch';
 export * from './components/atoms/Switch/switch-variants';
 export * from './components/atoms/Textarea/Textarea';
 export * from './components/atoms/Textarea/textarea-variants';
+export * from './components/atoms/LiquidTabs/LiquidTabs';
 export * from './components/atoms/Tooltip/Tooltip';
 export * from './components/atoms/CollapsibleDescription/CollapsibleDescription';
 export * from './components/atoms/SegmentBar/SegmentBar';
