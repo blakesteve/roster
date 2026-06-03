@@ -164,6 +164,8 @@ export const Light: Story = {
 };
 
 export const Placements: Story = {
+  // args satisfies required prop types; render overrides the output entirely
+  args: { content: "Placed on this side", children: "Trigger" },
   render: () => (
     <div className="grid grid-cols-2 gap-x-20 gap-y-16 p-12">
       {(["top", "bottom", "left", "right"] as const).map((side) => (
