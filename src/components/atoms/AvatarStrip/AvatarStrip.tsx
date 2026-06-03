@@ -119,7 +119,7 @@ export function AvatarStrip({
           );
 
           const wrapperClass = cn(
-            "relative rounded-full ring-2 transition-transform hover:z-10 hover:scale-110",
+            "relative inline-flex h-6 w-6 rounded-full ring-2 transition-transform hover:z-10 hover:scale-110",
             ringClass,
           );
 
