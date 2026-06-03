@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { describe, it, expect, afterEach } from "vitest";
-import { CollapsibleDescription } from "./CollapsibleDescription";
+import { CollapsibleSection } from "./CollapsibleSection";
 import "@testing-library/jest-dom";
 
 // ─── Scroll mock helpers ──────────────────────────────────────────────────────
@@ -39,7 +39,6 @@ function mockNoOverflow() {
 }
 
 afterEach(() => {
-  // Restore original descriptors so mocks don't leak between tests
   if (ORIGINAL_SCROLL_HEIGHT) {
     Object.defineProperty(
       HTMLElement.prototype,
@@ -61,30 +60,50 @@ afterEach(() => {
 const LONG = "A".repeat(600);
 const SHORT = "Short.";
 
+const GENRES = [
+  "Action", "Adventure", "RPG", "Strategy", "Simulation",
+  "Horror", "Puzzle", "Racing", "Sports", "Platformer",
+  "Fighting", "Shooter", "Stealth", "Survival", "Roguelike",
+];
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe("CollapsibleDescription", () => {
+describe("CollapsibleSection", () => {
   // ── Rendering ──────────────────────────────────────────────────────────────
 
   it("renders children correctly", () => {
-    render(<CollapsibleDescription>{LONG}</CollapsibleDescription>);
+    render(<CollapsibleSection>{LONG}</CollapsibleSection>);
     expect(screen.getByText(LONG)).toBeInTheDocument();
   });
 
-  it("renders ReactNode children", () => {
+  it("renders ReactNode children — multiple paragraphs", () => {
     render(
-      <CollapsibleDescription>
+      <CollapsibleSection>
         <p>Paragraph one</p>
         <p>Paragraph two</p>
-      </CollapsibleDescription>,
+      </CollapsibleSection>,
     );
     expect(screen.getByText("Paragraph one")).toBeInTheDocument();
     expect(screen.getByText("Paragraph two")).toBeInTheDocument();
   });
 
+  it("renders ReactNode children — chip buttons", () => {
+    render(
+      <CollapsibleSection size="xs">
+        <div className="flex flex-wrap gap-1.5">
+          {GENRES.map((g) => (
+            <button key={g} type="button">{g}</button>
+          ))}
+        </div>
+      </CollapsibleSection>,
+    );
+    expect(screen.getByText("Action")).toBeInTheDocument();
+    expect(screen.getByText("Roguelike")).toBeInTheDocument();
+  });
+
   it("applies className to the outer wrapper", () => {
     const { container } = render(
-      <CollapsibleDescription className="custom-wrapper">{SHORT}</CollapsibleDescription>,
+      <CollapsibleSection className="custom-wrapper">{SHORT}</CollapsibleSection>,
     );
     expect(container.firstChild).toHaveClass("custom-wrapper");
   });
@@ -93,13 +112,13 @@ describe("CollapsibleDescription", () => {
 
   it("does not render a toggle when content fits within the clamped height", () => {
     mockNoOverflow();
-    render(<CollapsibleDescription>{SHORT}</CollapsibleDescription>);
+    render(<CollapsibleSection>{SHORT}</CollapsibleSection>);
     expect(screen.queryByTestId("collapsible-toggle")).not.toBeInTheDocument();
   });
 
   it("does not apply mask-image when content fits", () => {
     mockNoOverflow();
-    render(<CollapsibleDescription>{SHORT}</CollapsibleDescription>);
+    render(<CollapsibleSection>{SHORT}</CollapsibleSection>);
     const content = screen.getByTestId("collapsible-content");
     expect(content.style.maskImage).toBeFalsy();
   });
@@ -108,25 +127,25 @@ describe("CollapsibleDescription", () => {
 
   it("renders the expand toggle when content overflows", () => {
     mockOverflow();
-    render(<CollapsibleDescription>{LONG}</CollapsibleDescription>);
+    render(<CollapsibleSection>{LONG}</CollapsibleSection>);
     expect(screen.getByTestId("collapsible-toggle")).toBeInTheDocument();
   });
 
-  it("shows the expandLabel text by default", () => {
+  it("shows the expandLabel text by default ('Show more')", () => {
     mockOverflow();
-    render(<CollapsibleDescription>{LONG}</CollapsibleDescription>);
-    expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Read more");
+    render(<CollapsibleSection>{LONG}</CollapsibleSection>);
+    expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Show more");
   });
 
   it("applies the max-height class when collapsed", () => {
     mockOverflow();
-    render(<CollapsibleDescription>{LONG}</CollapsibleDescription>);
+    render(<CollapsibleSection>{LONG}</CollapsibleSection>);
     expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-24");
   });
 
   it("applies mask-image style when clamped and collapsed", () => {
     mockOverflow();
-    render(<CollapsibleDescription>{LONG}</CollapsibleDescription>);
+    render(<CollapsibleSection>{LONG}</CollapsibleSection>);
     const content = screen.getByTestId("collapsible-content");
     expect(content.style.maskImage).toContain("linear-gradient");
   });
@@ -135,40 +154,32 @@ describe("CollapsibleDescription", () => {
 
   it("expands the content when the toggle is clicked", () => {
     mockOverflow();
-    render(<CollapsibleDescription>{LONG}</CollapsibleDescription>);
-
+    render(<CollapsibleSection>{LONG}</CollapsibleSection>);
     fireEvent.click(screen.getByTestId("collapsible-toggle"));
-
     expect(screen.getByTestId("collapsible-content")).not.toHaveClass("max-h-24");
   });
 
   it("removes the mask-image when expanded", () => {
     mockOverflow();
-    render(<CollapsibleDescription>{LONG}</CollapsibleDescription>);
-
+    render(<CollapsibleSection>{LONG}</CollapsibleSection>);
     fireEvent.click(screen.getByTestId("collapsible-toggle"));
-
     expect(screen.getByTestId("collapsible-content").style.maskImage).toBeFalsy();
   });
 
   it("switches the toggle label to collapseLabel when expanded", () => {
     mockOverflow();
-    render(<CollapsibleDescription>{LONG}</CollapsibleDescription>);
-
+    render(<CollapsibleSection>{LONG}</CollapsibleSection>);
     fireEvent.click(screen.getByTestId("collapsible-toggle"));
-
     expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Show less");
   });
 
   it("collapses back when the toggle is clicked again", () => {
     mockOverflow();
-    render(<CollapsibleDescription>{LONG}</CollapsibleDescription>);
-
+    render(<CollapsibleSection>{LONG}</CollapsibleSection>);
     fireEvent.click(screen.getByTestId("collapsible-toggle")); // expand
     fireEvent.click(screen.getByTestId("collapsible-toggle")); // collapse
-
     expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-24");
-    expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Read more");
+    expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Show more");
   });
 
   // ── Custom labels ──────────────────────────────────────────────────────────
@@ -176,79 +187,97 @@ describe("CollapsibleDescription", () => {
   it("uses a custom expandLabel", () => {
     mockOverflow();
     render(
-      <CollapsibleDescription expandLabel="See full review">{LONG}</CollapsibleDescription>,
+      <CollapsibleSection expandLabel="Show all genres">{LONG}</CollapsibleSection>,
     );
-    expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("See full review");
+    expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Show all genres");
   });
 
   it("uses a custom collapseLabel after expanding", () => {
     mockOverflow();
     render(
-      <CollapsibleDescription collapseLabel="Hide review">{LONG}</CollapsibleDescription>,
+      <CollapsibleSection collapseLabel="Hide genres">{LONG}</CollapsibleSection>,
     );
     fireEvent.click(screen.getByTestId("collapsible-toggle"));
-    expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Hide review");
+    expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Hide genres");
   });
 
   // ── Size prop ──────────────────────────────────────────────────────────────
 
+  it("applies max-h-8 for size='xs'", () => {
+    mockOverflow();
+    render(<CollapsibleSection size="xs">{LONG}</CollapsibleSection>);
+    expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-8");
+  });
+
   it("applies max-h-16 for size='sm'", () => {
     mockOverflow();
-    render(<CollapsibleDescription size="sm">{LONG}</CollapsibleDescription>);
+    render(<CollapsibleSection size="sm">{LONG}</CollapsibleSection>);
     expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-16");
   });
 
   it("applies max-h-24 for size='md' (default)", () => {
     mockOverflow();
-    render(<CollapsibleDescription>{LONG}</CollapsibleDescription>);
+    render(<CollapsibleSection>{LONG}</CollapsibleSection>);
     expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-24");
   });
 
   it("applies max-h-36 for size='lg'", () => {
     mockOverflow();
-    render(<CollapsibleDescription size="lg">{LONG}</CollapsibleDescription>);
+    render(<CollapsibleSection size="lg">{LONG}</CollapsibleSection>);
     expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-36");
   });
 
+  it("xs size works with chip children — toggle appears when chips overflow one row", () => {
+    mockOverflow();
+    render(
+      <CollapsibleSection size="xs" expandLabel="Show all genres" collapseLabel="Show less">
+        <div className="flex flex-wrap gap-1.5">
+          {GENRES.map((g) => (
+            <button key={g} type="button">{g}</button>
+          ))}
+        </div>
+      </CollapsibleSection>,
+    );
+    expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-8");
+    expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Show all genres");
+    fireEvent.click(screen.getByTestId("collapsible-toggle"));
+    expect(screen.getByTestId("collapsible-content")).not.toHaveClass("max-h-8");
+    expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Show less");
+  });
+
   it("re-evaluates overflow when size changes", () => {
-    // Start overflowing at sm, then switch to lg where the same content fits
     Object.defineProperty(HTMLElement.prototype, "scrollHeight", {
       configurable: true,
       get: () => 100,
     });
     Object.defineProperty(HTMLElement.prototype, "clientHeight", {
       configurable: true,
-      // sm clamps at 64px (max-h-16), lg clamps at 144px (max-h-36)
-      // We'll return the clamped height based on the rendered class
       get() {
         return (this as HTMLElement).classList.contains("max-h-16") ? 64 : 144;
       },
     });
 
     const { rerender } = render(
-      <CollapsibleDescription size="sm">{LONG}</CollapsibleDescription>,
+      <CollapsibleSection size="sm">{LONG}</CollapsibleSection>,
     );
     expect(screen.getByTestId("collapsible-toggle")).toBeInTheDocument();
 
-    // At lg, scrollHeight (100) < clientHeight (144) → no overflow
     act(() => {
-      rerender(<CollapsibleDescription size="lg">{LONG}</CollapsibleDescription>);
+      rerender(<CollapsibleSection size="lg">{LONG}</CollapsibleSection>);
     });
     expect(screen.queryByTestId("collapsible-toggle")).not.toBeInTheDocument();
   });
 
-  // ── Overflow re-check on children change ───────────────────────────────────
-
   it("re-evaluates overflow when children change from long to short", () => {
     mockOverflow();
     const { rerender } = render(
-      <CollapsibleDescription>{LONG}</CollapsibleDescription>,
+      <CollapsibleSection>{LONG}</CollapsibleSection>,
     );
     expect(screen.getByTestId("collapsible-toggle")).toBeInTheDocument();
 
     mockNoOverflow();
     act(() => {
-      rerender(<CollapsibleDescription>{SHORT}</CollapsibleDescription>);
+      rerender(<CollapsibleSection>{SHORT}</CollapsibleSection>);
     });
     expect(screen.queryByTestId("collapsible-toggle")).not.toBeInTheDocument();
   });

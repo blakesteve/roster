@@ -27,7 +27,7 @@ export * from './components/atoms/Textarea/textarea-variants';
 export * from './components/atoms/AvatarStrip/AvatarStrip';
 export * from './components/atoms/LiquidTabs/LiquidTabs';
 export * from './components/atoms/Tooltip/Tooltip';
-export * from './components/atoms/CollapsibleDescription/CollapsibleDescription';
+export * from './components/atoms/CollapsibleSection/CollapsibleSection';
 export * from './components/atoms/SegmentBar/SegmentBar';
 
 // --- MOLECULES ---

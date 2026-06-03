@@ -2,19 +2,20 @@ import * as React from "react";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "../../../lib/utils";
 
-export type CollapsibleDescriptionSize = "sm" | "md" | "lg";
+export type CollapsibleSectionSize = "xs" | "sm" | "md" | "lg";
 
-const MAX_HEIGHT: Record<CollapsibleDescriptionSize, string> = {
+const MAX_HEIGHT: Record<CollapsibleSectionSize, string> = {
+  xs: "max-h-8",    // single row of chips, tags, or badges
   sm: "max-h-16",   // ~3 lines at text-sm/leading-relaxed
   md: "max-h-24",   // ~4-5 lines
   lg: "max-h-36",   // ~6-7 lines
 };
 
-export interface CollapsibleDescriptionProps {
-  /** Content to display. Accepts a string or any React node. */
+export interface CollapsibleSectionProps {
+  /** Any content — prose, chips, images, card grids, etc. */
   children: React.ReactNode;
-  /** Controls how many lines are visible before the toggle appears. */
-  size?: CollapsibleDescriptionSize;
+  /** Controls how much is visible before the toggle appears. */
+  size?: CollapsibleSectionSize;
   /** Label for the expand button. */
   expandLabel?: string;
   /** Label for the collapse button. */
@@ -23,18 +24,13 @@ export interface CollapsibleDescriptionProps {
   className?: string;
 }
 
-/**
- * Clamps content to a fixed height and reveals a toggle when it overflows.
- * Uses CSS `mask-image` for the fade-out effect so it works on any background
- * without needing to know the background color.
- */
-export function CollapsibleDescription({
+export function CollapsibleSection({
   children,
   size = "md",
-  expandLabel = "Read more",
+  expandLabel = "Show more",
   collapseLabel = "Show less",
   className,
-}: CollapsibleDescriptionProps) {
+}: CollapsibleSectionProps) {
   const [expanded, setExpanded] = useState(false);
   const [clamped, setClamped] = useState(false);
   const ref = useRef<HTMLDivElement>(null);

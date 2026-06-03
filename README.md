@@ -82,7 +82,7 @@ function App() {
 | `Input` | Text input with label, error state, and icon slots |
 | `Link` | Styled anchor with variant support |
 | `AvatarStrip` | Stacked avatar row with overflow chip, dismiss button, trailing slot, and label area |
-| `CollapsibleDescription` | Clamped text block with fade and Read more / Show less toggle |
+| `CollapsibleSection` | Clamps any content (prose, chips, image grids) to a fixed height with a fade and expand/collapse toggle |
 | `LiquidTabs` | Controlled tab strip with a liquid sliding pill indicator — pill and filled variants |
 | `Select` | Dropdown selector |
 | `SegmentBar` | Proportional horizontal bar divided into colored segments with optional legend |
