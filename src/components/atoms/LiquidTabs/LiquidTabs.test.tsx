@@ -107,8 +107,8 @@ describe("LiquidTabs", () => {
 
   it("applies muted text color to inactive tabs", () => {
     render(<LiquidTabs tabs={THREE_TABS} activeTab="beta" onChange={vi.fn()} />);
-    expect(screen.getByTestId("liquid-tab-alpha")).toHaveClass("text-gray-500");
-    expect(screen.getByTestId("liquid-tab-gamma")).toHaveClass("text-gray-500");
+    expect(screen.getByTestId("liquid-tab-alpha")).toHaveClass("text-(--roster-lt-text-inactive)");
+    expect(screen.getByTestId("liquid-tab-gamma")).toHaveClass("text-(--roster-lt-text-inactive)");
   });
 
   // ── Variant: pill (default) ────────────────────────────────────────────────
