@@ -148,12 +148,13 @@ export function LiquidTabs({
       ref={containerRef}
       role="tablist"
       data-testid="liquid-tabs"
+      style={{ background: "var(--roster-lt-bg)", borderColor: "var(--roster-lt-border)" }}
       className={cn(
-        "relative flex",
+        "relative flex border",
         isFilled
-          ? "w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800"
+          ? "w-full overflow-hidden rounded-lg"
           : cn(
-              "gap-1 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 p-1",
+              "gap-1 rounded-xl p-1",
               fullWidth ? "w-full" : "w-fit",
             ),
         className,
@@ -165,10 +166,10 @@ export function LiquidTabs({
         aria-hidden
         data-testid="liquid-tabs-pill"
         className={cn(
-          "absolute rounded-lg bg-primary-500 dark:bg-primary-500",
+          "absolute rounded-lg",
           isFilled ? "top-0 bottom-0" : "top-1 bottom-1",
         )}
-        style={{ opacity: 0, left: 0, width: 0 }}
+        style={{ opacity: 0, left: 0, width: 0, background: "var(--roster-lt-pill)" }}
       />
 
       {tabs.map((tab) => {
@@ -188,14 +189,14 @@ export function LiquidTabs({
                     "flex-1 py-2",
                     isActive
                       ? "text-white"
-                      : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100",
+                      : "text-(--roster-lt-text-inactive) hover:text-(--roster-lt-text-hover)",
                   )
                 : cn(
                     "rounded-lg py-1.5",
                     fullWidth ? "flex-1" : "px-4",
                     isActive
                       ? "text-white"
-                      : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100",
+                      : "text-(--roster-lt-text-inactive) hover:text-(--roster-lt-text-hover)",
                   ),
             )}
           >

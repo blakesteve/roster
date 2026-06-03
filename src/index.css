@@ -118,3 +118,23 @@
   --color-white: var(--roster-white, #ffffff);
   --color-cream: var(--roster-cream, #f3eee3);
 }
+
+/* ── LiquidTabs component tokens ─────────────────────────────────────────────
+   Consumers without a .dark class (e.g. dark-first apps) can override these
+   in :root to match their own palette without needing the .dark toggle.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --roster-lt-bg:            #ffffff;
+  --roster-lt-border:        var(--color-gray-200);
+  --roster-lt-pill:          var(--color-primary-500);
+  --roster-lt-text-inactive: var(--color-gray-500);
+  --roster-lt-text-hover:    var(--color-gray-900);
+}
+
+.dark {
+  --roster-lt-bg:            var(--color-gray-800);
+  --roster-lt-border:        var(--color-gray-700);
+  --roster-lt-pill:          var(--color-primary-500);
+  --roster-lt-text-inactive: var(--color-gray-400);
+  --roster-lt-text-hover:    var(--color-gray-100);
+}
