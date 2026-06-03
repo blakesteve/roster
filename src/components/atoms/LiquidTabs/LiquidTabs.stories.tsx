@@ -115,6 +115,9 @@ const DualPreviewDecorator: Decorator = (Story) => (
 export const Playground: Story = {
   tags: ["!autodocs"],
   args: { variant: "pill", fullWidth: false } as LiquidTabsProps,
+  argTypes: {
+    variant: { control: false },
+  },
   render: (args) => {
     const [active, setActive] = useState("grid");
     return (
