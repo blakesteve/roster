@@ -19,7 +19,7 @@ export interface AvatarStripItem {
   label: string;
   /** Avatar image URL. Falls back to initials when omitted or when the image fails to load. */
   src?: string;
-  /** Background colour scheme for the initials avatar. Defaults to `"neutral"`. */
+  /** Background color scheme for the initials avatar. Defaults to `"neutral"`. */
   colorScheme?: AvatarStripColorScheme;
   /** When provided, the avatar is wrapped in an `<a>` tag with this href. */
   href?: string;
@@ -49,7 +49,7 @@ export interface AvatarStripProps {
   /** Rendered to the right of the avatar stack. Accepts any React node. */
   label?: ReactNode;
   /**
-   * Tailwind class that sets the ring colour around each avatar and the overflow chip.
+   * Tailwind class that sets the ring color around each avatar and the overflow chip.
    * Should match the background the strip is rendered on to produce the cutout stack effect.
    * Default: `"ring-white dark:ring-gray-900"`.
    */

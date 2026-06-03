@@ -39,8 +39,8 @@ const meta = {
           "`trailingSlot` renders inside the avatar stack after the overflow chip — use it for a ghost " +
           "CTA, an add-member button, or any custom element that should sit within the stacked row. " +
           "`label` renders to the right of the stack as a separate node — ideal for a one-liner description.\n\n" +
-          "### Ring colour\n" +
-          "The `ringClass` prop sets the ring colour around each avatar and the overflow chip. " +
+          "### Ring color\n" +
+          "The `ringClass` prop sets the ring color around each avatar and the overflow chip. " +
           "It should match the background the strip is rendered on to produce the cutout stack effect. " +
           "Default: `\"ring-white dark:ring-gray-900\"`.",
       },
@@ -80,7 +80,7 @@ const meta = {
     },
     ringClass: {
       control: "text",
-      description: "Tailwind ring colour class applied to each avatar and the overflow chip.",
+      description: "Tailwind ring color class applied to each avatar and the overflow chip.",
       table: { defaultValue: { summary: "ring-white dark:ring-gray-900" } },
     },
     className: {
