@@ -5,6 +5,7 @@ import {
   MenuItem,
   MenuItems,
   Popover,
+  PopoverBackdrop,
   PopoverButton,
   PopoverPanel,
   Transition,
@@ -415,6 +416,9 @@ const Navbar = ({
               </PopoverButton>
             </div>
           </div>
+
+          {/* Transparent backdrop — tapping outside the panel closes it on mobile */}
+          <PopoverBackdrop className="fixed inset-0 z-40 md:hidden" />
 
           {/* Mobile Menu Panel */}
           <Transition

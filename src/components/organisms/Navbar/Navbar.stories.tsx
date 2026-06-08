@@ -387,7 +387,7 @@ export const MobileView: Story = {
     docs: {
       description: {
         story:
-          "Demonstrates the responsive hamburger menu behavior on constrained viewports. The interactive theme toggle is injected directly into the slide-out menu.",
+          "Demonstrates the responsive hamburger menu behavior on constrained viewports. The interactive theme toggle is injected directly into the slide-out menu. Tapping anywhere outside the slide-out panel dismisses it via the transparent `PopoverBackdrop`.",
       },
     },
   },
