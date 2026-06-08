@@ -359,19 +359,16 @@ describe("Navbar Component", () => {
     expect(badges.length).toBeGreaterThan(0);
   });
 
-  it("closes the mobile panel when the backdrop is clicked outside the panel", async () => {
+  it("closes the mobile panel when tapping outside the panel", async () => {
     render(<Navbar {...defaultProps} />);
 
     const hamburger = screen.getByRole("button", { name: /open main menu/i });
     fireEvent.click(hamburger);
 
-    // Confirm panel is open
     await screen.findByRole("button", { name: /close menu/i });
+    expect(document.querySelector("[data-roster-mobile-panel]")).toBeInTheDocument();
 
-    // PopoverBackdrop renders as a fixed inset-0 overlay; clicking it closes the panel
-    const backdrop = document.querySelector(".fixed.inset-0");
-    expect(backdrop).toBeInTheDocument();
-    fireEvent.click(backdrop!);
+    fireEvent.pointerDown(document.body);
 
     await waitFor(() => {
       expect(screen.queryByRole("button", { name: /close menu/i })).not.toBeInTheDocument();

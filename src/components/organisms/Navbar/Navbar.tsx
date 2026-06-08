@@ -1,11 +1,10 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import {
   Menu,
   MenuButton,
   MenuItem,
   MenuItems,
   Popover,
-  PopoverBackdrop,
   PopoverButton,
   PopoverPanel,
   Transition,
@@ -92,6 +91,25 @@ export interface NavbarProps
    * rendered when the `user` prop is provided. Ignored when `actions` is set.
    */
   userMenuItems?: NavItem[];
+}
+
+// Mounts when the mobile panel is open. Listens for pointerdown on the document
+// (capture phase so it fires before any element's own handlers) and closes the
+// panel when the tap lands outside both the panel card and the hamburger toggle.
+function MobileOutsideClickListener({ close }: { close: () => void }) {
+  useEffect(() => {
+    const handlePointerDown = (e: PointerEvent) => {
+      const panel = document.querySelector("[data-roster-mobile-panel]");
+      const hamburger = document.querySelector("[data-roster-hamburger]");
+      const target = e.target as Node;
+      if (!panel?.contains(target) && !hamburger?.contains(target)) {
+        close();
+      }
+    };
+    document.addEventListener("pointerdown", handlePointerDown, { capture: true });
+    return () => document.removeEventListener("pointerdown", handlePointerDown, { capture: true });
+  }, [close]);
+  return null;
 }
 
 const Navbar = ({
@@ -387,7 +405,7 @@ const Navbar = ({
             </div>
 
             {/* Mobile Hamburger */}
-            <div className="flex md:hidden">
+            <div data-roster-hamburger className="flex md:hidden">
               <PopoverButton
                 className={cn(
                   "inline-flex items-center justify-center rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500",
@@ -417,8 +435,8 @@ const Navbar = ({
             </div>
           </div>
 
-          {/* Transparent backdrop — tapping outside the panel closes it on mobile */}
-          <PopoverBackdrop className="fixed inset-0 z-40 md:hidden" />
+          {/* Document-level listener: closes panel when tapping outside it */}
+          {open && <MobileOutsideClickListener close={close} />}
 
           {/* Mobile Menu Panel */}
           <Transition
@@ -434,7 +452,7 @@ const Navbar = ({
               focus
               className="absolute top-0 inset-x-0 z-50 origin-top-right transform p-2 transition md:hidden"
             >
-              <div className="rounded-lg shadow-lg ring-1 ring-black/5 dark:ring-white/10 divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
+              <div data-roster-mobile-panel className="rounded-lg shadow-lg ring-1 ring-black/5 dark:ring-white/10 divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
                 <div className="px-5 pt-5 pb-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">

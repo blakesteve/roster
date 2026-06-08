@@ -1,5 +1,5 @@
 import type { Preview } from '@storybook/react-vite'
-import { INITIAL_VIEWPORTS } from 'storybook/viewport';
+import { INITIAL_VIEWPORTS, MINIMAL_VIEWPORTS } from 'storybook/viewport';
 import '../src/index.css';
 import '../src/tokens.css';
 
@@ -12,7 +12,7 @@ const preview: Preview = {
       },
     },
     viewport: {
-      options: INITIAL_VIEWPORTS,
+      options: { ...MINIMAL_VIEWPORTS, ...INITIAL_VIEWPORTS },
     },
 
     a11y: {
