@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { Navbar, type NavbarProps } from "./Navbar";
 
@@ -357,6 +357,25 @@ describe("Navbar Component", () => {
 
     const badges = await screen.findAllByTestId("mobile-badge");
     expect(badges.length).toBeGreaterThan(0);
+  });
+
+  it("closes the mobile panel when the backdrop is clicked outside the panel", async () => {
+    render(<Navbar {...defaultProps} />);
+
+    const hamburger = screen.getByRole("button", { name: /open main menu/i });
+    fireEvent.click(hamburger);
+
+    // Confirm panel is open
+    await screen.findByRole("button", { name: /close menu/i });
+
+    // PopoverBackdrop renders as a fixed inset-0 overlay; clicking it closes the panel
+    const backdrop = document.querySelector(".fixed.inset-0");
+    expect(backdrop).toBeInTheDocument();
+    fireEvent.click(backdrop!);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: /close menu/i })).not.toBeInTheDocument();
+    });
   });
 
   it("renders and triggers the theme toggle in the mobile menu", async () => {
