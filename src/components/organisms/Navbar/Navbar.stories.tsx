@@ -380,14 +380,31 @@ export const MobileView: Story = {
       notificationCount: 2,
     },
   },
+  render: (args) => (
+    <div style={{ width: 375, maxWidth: "100%", position: "relative", margin: "0 auto" }}>
+      {/*
+        Scoped CSS that forces mobile Tailwind breakpoint classes regardless of viewport width.
+        md:flex  → desktop nav (must stay hidden)
+        md:hidden → hamburger + mobile panel items (must show)
+        max-md:hidden → desktop-only elements (must stay hidden)
+        .w-full.md:hidden → mobile action slot (block, not flex)
+      */}
+      <style>{`
+        .mobile-story .md\\:flex          { display: none  !important; }
+        .mobile-story .max-md\\:hidden    { display: none  !important; }
+        .mobile-story .md\\:hidden        { display: block !important; }
+        .mobile-story .flex.md\\:hidden   { display: flex  !important; }
+      `}</style>
+      <div className="mobile-story">
+        <InteractiveWrapper args={args} />
+      </div>
+    </div>
+  ),
   parameters: {
-    viewport: {
-      value: "mobile1",
-    },
     docs: {
       description: {
         story:
-          "Demonstrates the responsive hamburger menu behavior on constrained viewports. The interactive theme toggle is injected directly into the slide-out menu. Tapping anywhere outside the slide-out panel dismisses it via the transparent `PopoverBackdrop`.",
+          "Renders in a 375 px container with scoped CSS overrides that force Tailwind's mobile breakpoint classes — no viewport addon required, works on the Docs page too. Click the hamburger to open the panel; tapping anywhere outside dismisses it.",
       },
     },
   },
