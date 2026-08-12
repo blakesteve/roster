@@ -1,0 +1,22 @@
+/* Optional global reset.
+ *
+ * Roster's own stylesheet deliberately ships no preflight — a component
+ * library has no business resetting its host's document. Roster's components
+ * were authored against Tailwind's normalization though, so apps that use
+ * Roster WITHOUT Tailwind (or without any reset of their own) can opt in:
+ *
+ *   import "@blakesteve/roster/preflight.css";
+ *   import "@blakesteve/roster/style.css";
+ *
+ * Apps that already run Tailwind, or ship their own reset, should not import
+ * this — they already have one, and two resets is one too many.
+ *
+ * The reset is layered, and the layer order is declared in BOTH this file and
+ * index.css so it holds whichever is imported first. It has to be layered:
+ * left unlayered, preflight's `* { margin: 0 }` would outrank every layered
+ * utility Roster ships — `space-x-2` and friends would silently collapse.
+ */
+
+@layer roster-preflight, roster;
+
+@import "tailwindcss/preflight.css" layer(roster-preflight);
