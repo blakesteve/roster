@@ -30,6 +30,19 @@ Roster ships pre-compiled CSS, so you do not need Tailwind installed in your hos
 }
 ```
 
+`DataTable` additionally needs TanStack Table v9, declared as an **optional**
+peer. Install it only if you use `DataTable`; every other component works
+without it.
+
+```bash
+npm install @tanstack/react-table
+```
+
+It is a peer rather than a bundled dependency because v9 types column
+definitions against the feature set that built the table. Two copies of the
+package would mean two incompatible sets of those types, so roster and your
+app have to resolve the same one.
+
 ## Setup
 
 Import Roster's CSS once at the root of your application (`layout.tsx`, `main.tsx`, or `App.tsx`):
@@ -146,11 +159,38 @@ function App() {
 |---|---|
 | `ActionBar` | Sticky bottom action strip |
 | `Countdown` | Live countdown timer |
-| `DataTable` | Full-featured table with sorting and pagination via TanStack Table |
+| `DataTable` | Full-featured table with sorting and pagination via TanStack Table v9 (see [DataTable columns](#datatable-columns)) |
 | `Dialog` | Modal dialog |
 | `Footer` | Site footer |
 | `Navbar` | Responsive navigation bar with mobile slide-out |
 | `Table` | Static data table |
+
+### DataTable columns
+
+TanStack Table v9 types column definitions against the feature set that built
+the table. `DataTable` registers sorting and pagination and exports that set as
+`RosterTableFeatures`, so your columns name it:
+
+```tsx
+import { DataTable, type RosterTableFeatures } from "@blakesteve/roster";
+import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
+
+type Player = { name: string; points: number };
+
+const columns: ColumnDef<RosterTableFeatures, Player>[] = [
+  { accessorKey: "name", header: "Player" },
+  { accessorKey: "points", header: "Points" },
+];
+
+// Or, to keep each column's value type:
+const helper = createColumnHelper<RosterTableFeatures, Player>();
+```
+
+Upgrading from roster 2.x: `ColumnDef<Player, unknown>` becomes
+`ColumnDef<RosterTableFeatures, Player>`, and `DataTableProps` takes one type
+argument instead of two. A columns array is heterogeneous, so v9 types each
+entry's value as `unknown` and recovers the real type per column through
+`createColumnHelper`.
 
 ### Hooks
 

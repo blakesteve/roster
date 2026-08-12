@@ -1,5 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { DataTable, type DataTableProps } from "./DataTable";
+import {
+  DataTable,
+  type DataTableProps,
+  type RosterTableFeatures,
+} from "./DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "../../atoms/Badge/Badge";
 
@@ -28,7 +32,7 @@ const mockData: PickRecord[] = [
 ];
 
 // --- COLUMNS DEFINITION ---
-const columns: ColumnDef<PickRecord, unknown>[] = [
+const columns: ColumnDef<RosterTableFeatures, PickRecord>[] = [
   {
     accessorKey: "player",
     header: "Player",
@@ -146,12 +150,12 @@ type Story = StoryObj<typeof DataTable>;
 
 // Helper to safely bypass generic inference issues in Storybook without using "any"
 type DataTableStoryProps = Omit<
-  DataTableProps<PickRecord, unknown>,
+  DataTableProps<PickRecord>,
   "columns" | "data"
 >;
 
 const renderDataTable = (args: DataTableStoryProps) => (
-  <DataTable<PickRecord, unknown> columns={columns} data={mockData} {...args} />
+  <DataTable<PickRecord> columns={columns} data={mockData} {...args} />
 );
 
 export const DefaultTheme: Story = {
