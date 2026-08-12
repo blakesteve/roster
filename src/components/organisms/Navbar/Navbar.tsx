@@ -40,6 +40,16 @@ export interface NavbarProps
     React.HTMLAttributes<HTMLElement>,
     VariantProps<typeof navbarVariants> {
   logoSrc: string;
+  /**
+   * Size of the logo image. Accepts any CSS length (`"2.75rem"`, `44`).
+   * Defaults to `2rem` — the previous hard-coded `h-8 w-8`.
+   */
+  logoSize?: string | number;
+  /**
+   * Classes applied to the logo image. Replaces the default rounding, so a
+   * circular mark can pass `"rounded-full"` and a square one `""`.
+   */
+  logoClassName?: string;
   brandName: string;
   items: NavItem[];
   activePath?: string;
@@ -54,7 +64,15 @@ export interface NavbarProps
   onLogout?: () => void;
   onInboxClick?: () => void;
   onThemeToggle?: () => void;
-  themeMode?: "light" | "dark";
+  /**
+   * Which palette the nav paints itself with.
+   *
+   * `"auto"` follows the nearest ancestor carrying the `.dark` class, matching
+   * how the rest of Roster handles dark mode — use it in class-based dark apps
+   * so the nav does not need wiring into your theme state. Omit the prop
+   * entirely and the mode is inferred from `variant`, as before.
+   */
+  themeMode?: "light" | "dark" | "auto";
   notificationVariant?:
     | "primary"
     | "error"
@@ -64,6 +82,12 @@ export interface NavbarProps
     | "orange"
     | "teal"
     | "purple";
+  /**
+   * Fill style of the notification count badge. Defaults to `"solid"`, which
+   * is what the nav rendered before this was configurable. Use `"soft"` or
+   * `"outline"` where a solid dot competes with a busy or colored nav surface.
+   */
+  notificationFill?: "soft" | "light" | "solid" | "outline";
   /**
    * Custom content rendered in the right-side action area. When provided it
    * replaces the built-in user menu / "Log In" button on desktop and the user
@@ -93,6 +117,28 @@ export interface NavbarProps
   userMenuItems?: NavItem[];
 }
 
+/**
+ * Tracks the `.dark` class on <html> for `themeMode="auto"`. The DOM is the
+ * source of truth (that is where class-based dark mode lives), so this reads
+ * it rather than mirroring it into state. Returns false during SSR and the
+ * hydration pass, then syncs — the class cannot be known on the server.
+ */
+function useDarkClass(enabled: boolean) {
+  return React.useSyncExternalStore(
+    (onChange) => {
+      if (!enabled || typeof document === "undefined") return () => {};
+      const observer = new MutationObserver(onChange);
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+      return () => observer.disconnect();
+    },
+    () => enabled && document.documentElement.classList.contains("dark"),
+    () => false,
+  );
+}
+
 // Mounts when the mobile panel is open. Listens for pointerdown on the document
 // (capture phase so it fires before any element's own handlers) and closes the
 // panel when the tap lands outside both the panel card and the hamburger toggle.
@@ -114,6 +160,8 @@ function MobileOutsideClickListener({ close }: { close: () => void }) {
 
 const Navbar = ({
   logoSrc,
+  logoSize = "2rem",
+  logoClassName,
   brandName,
   items,
   activePath,
@@ -132,14 +180,25 @@ const Navbar = ({
   position = "sticky",
   themeMode,
   notificationVariant = "error",
+  notificationFill = "solid",
   ...props
 }: NavbarProps) => {
   const hasNotifications = (user?.notificationCount || 0) > 0;
 
+  // A bare number reads as px, matching how width/height attributes behave.
+  const logoDimension = typeof logoSize === "number" ? `${logoSize}px` : logoSize;
+  const logoStyle = { width: logoDimension, height: logoDimension };
+
+  const autoIsDark = useDarkClass(themeMode === "auto");
+
   // "default" for the light-mode assumption fallback
   const computedMode =
-    themeMode ??
-    (variant === "white" || variant === "default" ? "light" : "dark");
+    themeMode === "auto"
+      ? autoIsDark
+        ? "dark"
+        : "light"
+      : (themeMode ??
+        (variant === "white" || variant === "default" ? "light" : "dark"));
   const isDarkMode = computedMode === "dark";
 
   // Ensures default is treated as a dark surface when the app is in dark mode
@@ -194,7 +253,8 @@ const Navbar = ({
               <img
                 src={logoSrc}
                 alt={`${brandName} Logo`}
-                className="h-8 w-8 rounded-md"
+                style={logoStyle}
+                className={cn("shrink-0", logoClassName ?? "rounded-md")}
               />
               {brandElement ?? (
                 <span className="text-xl font-bold tracking-tight">
@@ -250,7 +310,7 @@ const Navbar = ({
                     {hasNotifications && (
                       <div className="absolute -top-1 -right-2">
                         <Badge
-                          fill="solid"
+                          fill={notificationFill}
                           size="xs"
                           statusBadge
                           variant={notificationVariant}
@@ -356,11 +416,14 @@ const Navbar = ({
                                   variant="neutral"
                                   underline="none"
                                   className={cn(
-                                    "block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 transition-colors",
+                                    "flex w-full items-center justify-between gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 transition-colors",
                                     focus && "bg-gray-50 dark:bg-gray-700",
                                   )}
                                 >
                                   {item.label}
+                                  {item.badge && (
+                                    <span className="inline-flex">{item.badge}</span>
+                                  )}
                                 </Link>
                               )}
                             </MenuItem>
@@ -459,7 +522,8 @@ const Navbar = ({
                       <img
                         src={logoSrc}
                         alt={brandName}
-                        className="h-8 w-8 rounded-md"
+                        style={logoStyle}
+                        className={cn("shrink-0", logoClassName ?? "rounded-md")}
                       />
                       {brandElement ?? (
                         <span className="font-bold text-gray-900 dark:text-white">
@@ -548,6 +612,9 @@ const Navbar = ({
                                 >
                                   {item.label}
                                 </span>
+                                {item.badge && (
+                                  <span className="ml-2 inline-flex">{item.badge}</span>
+                                )}
                               </Link>
                             );
                           })}
@@ -583,7 +650,7 @@ const Navbar = ({
                             className="w-full justify-between px-4 text-base font-medium hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
                             endIcon={
                               <Badge
-                                fill="solid"
+                                fill={notificationFill}
                                 size="xs"
                                 statusBadge
                                 variant={notificationVariant}

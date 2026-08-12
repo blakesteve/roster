@@ -5,9 +5,12 @@ export const navbarVariants = cva(
   {
     variants: {
       variant: {
-        // White in light mode, deep gray-950 in dark mode.
+        // Driven by --roster-nav-* so a themed app can retint the bar without
+        // selector overrides. The tokens themselves flip under `.dark`, so no
+        // dark: variants are needed here. Defaults match the previous
+        // white / gray-950 pair exactly.
         default:
-          "bg-white border-gray-200 text-gray-900 dark:bg-gray-950 dark:border-gray-800 dark:text-gray-100",
+          "bg-[var(--roster-nav-bg)] border-[var(--roster-nav-border)] text-[var(--roster-nav-text)]",
           
         // Slate: A solid mid-dark gray in light mode, drops to a moody gray in dark mode
         slate: 

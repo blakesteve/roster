@@ -608,3 +608,53 @@ export const WithUserMenuItems: Story = {
     },
   },
 };
+
+export const CustomLogoSize: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: defaultItems,
+    variant: "default",
+    activePath: "/schedule",
+    logoSize: "2.75rem",
+    logoClassName: "rounded-full",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`logoSize` accepts any CSS length (`\"2.75rem\"`) or a bare number read as pixels. `logoClassName` replaces the default rounding rather than adding to it, so a circular mark can pass `rounded-full` and a square one an empty string. Both default to the previous hard-coded `h-8 w-8 rounded-md`, so existing usage is unchanged.",
+      },
+    },
+  },
+};
+
+export const ThemeModeAuto: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: defaultItems,
+    variant: "default",
+    activePath: "/schedule",
+    user: mockUser,
+    themeMode: "auto",
+  },
+  render: (args) => (
+    <div className="dark">
+      <div className="bg-gray-950 min-h-75">
+        <Navbar {...args} />
+        <div className="p-12 text-center font-bold text-3xl text-gray-400 opacity-40">
+          Ancestor carries .dark
+        </div>
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`themeMode=\"auto\"` follows the nearest ancestor carrying the `.dark` class, so a class-based dark app does not have to wire the nav into its theme state. Without it the mode is inferred from `variant`, which renders near-black links on a black bar until `themeMode` is passed manually. This story sets `.dark` on a wrapper and passes no theme state at all.",
+      },
+    },
+  },
+};

@@ -38,12 +38,18 @@ describe("Navbar Component", () => {
     expect(logo).toHaveAttribute("src", "/logo.png");
   });
 
-  // Verifies  seamless base classes
-  it("applies the new 'default' seamless variant classes by default", () => {
+  // The default variant is driven by --roster-nav-* rather than literal
+  // colours, so a themed app can retint the bar without selector overrides.
+  // The token defaults resolve to the previous white / gray-950 pair.
+  it("applies the token-driven 'default' variant classes by default", () => {
     render(<Navbar {...defaultProps} />);
 
     const navElement = screen.getByRole("navigation");
-    expect(navElement).toHaveClass("bg-white", "dark:bg-gray-950");
+    expect(navElement).toHaveClass(
+      "bg-[var(--roster-nav-bg)]",
+      "border-[var(--roster-nav-border)]",
+      "text-[var(--roster-nav-text)]",
+    );
   });
 
   // The default variant in light mode uses the darker primary-600 text
