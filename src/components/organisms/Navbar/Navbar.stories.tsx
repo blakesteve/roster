@@ -66,7 +66,7 @@ By default, the Navbar renders with \`variant="default"\` and \`position="sticky
 The component supports multiple visual variants to suit different contexts. Additionally, if you pass a function to the \`onThemeToggle\` prop, the Navbar will automatically inject a Dark/Light mode toggle button into both the desktop dropdown and the mobile slide-out menu.
 
 **4. Custom Brand Element (brandElement prop)**
-Pass a React node to \`brandElement\` to replace the default brand name \`<span>\` with custom markup. The logo image is always rendered; this only controls the text element. Use this when you need mixed weights, colours, or other rich styling that a plain string cannot express.
+Pass a React node to \`brandElement\` to replace the default brand name \`<span>\` with custom markup. The logo image is always rendered; this only controls the text element. Use this when you need mixed weights, colors, or other rich styling that a plain string cannot express.
 \`\`\`tsx
 <Navbar
   brandElement={
@@ -107,7 +107,7 @@ Pass any React node to \`actions\` to fully replace the built-in user avatar men
 \`\`\`
 
 **8. Nav Item Badges (badge on NavItem)**
-Each object in the \`items\` array accepts an optional \`badge\` prop — any ReactNode rendered inline after the link text. Use it for "New" labels, notification counts, or status indicators. The badge renders in both the desktop nav and the mobile slide-out panel.
+Each object in the \`items\` array accepts an optional \`badge\` prop: any ReactNode rendered inline after the link text. Use it for "New" labels, notification counts, or status indicators. The badge renders in both the desktop nav and the mobile slide-out panel.
 \`\`\`tsx
 <Navbar
   items={[
@@ -122,7 +122,7 @@ Each object in the \`items\` array accepts an optional \`badge\` prop — any Re
 \`\`\`
 
 **9. Persistent Nav-Level Actions (navActions prop)**
-Use \`navActions\` to inject controls that should live between the nav links and the user menu — without replacing the built-in user menu. On desktop it renders inline; on mobile it renders above the nav links in the slide-out panel. The canonical use case is a search icon that expands into a search bar after the page's hero search scrolls above the fold.
+Use \`navActions\` to inject controls that should live between the nav links and the user menu, without replacing the built-in user menu. On desktop it renders inline; on mobile it renders above the nav links in the slide-out panel. The canonical use case is a search icon that expands into a search bar after the page's hero search scrolls above the fold.
 \`\`\`tsx
 <Navbar
   user={{ initials: "BS" }}
@@ -177,7 +177,7 @@ Use \`navActions\` to inject controls that should live between the nav links and
     navActions: {
       control: false,
       description:
-        "Extra content rendered between the nav links and the user menu on desktop; above the nav links in the mobile slide-out panel. Does not replace the user menu — use `actions` for full replacement.",
+        "Extra content rendered between the nav links and the user menu on desktop; above the nav links in the mobile slide-out panel. Does not replace the user menu; use `actions` for full replacement.",
     },
   },
   args: {
@@ -404,7 +404,7 @@ export const MobileView: Story = {
     docs: {
       description: {
         story:
-          "Renders in a 375 px container with scoped CSS overrides that force Tailwind's mobile breakpoint classes — no viewport addon required, works on the Docs page too. Click the hamburger to open the panel; tapping anywhere outside dismisses it.",
+          "Renders in a 375 px container with scoped CSS overrides that force Tailwind's mobile breakpoint classes, so no viewport addon is required and it works on the Docs page too. Click the hamburger to open the panel; tapping anywhere outside dismisses it.",
       },
     },
   },
@@ -417,14 +417,14 @@ export const GuestState: Story = {
     items: defaultItems,
     variant: "default",
     activePath: "/schedule",
-    // No `user` — renders the guest state with a Log In button
+    // No `user`, so this renders the guest state with a Log In button
     onLogin: () => alert("navigate to /auth"),
   },
   parameters: {
     docs: {
       description: {
         story:
-          "When no `user` is provided the Navbar renders a *Log In* button. Pass `onLogin` to make it functional — without it the button renders but does nothing. The same button is also surfaced in the mobile slide-out panel.",
+          "When no `user` is provided the Navbar renders a *Log In* button. Pass `onLogin` to make it functional; without it the button renders but does nothing. The same button is also surfaced in the mobile slide-out panel.",
       },
     },
   },
@@ -437,7 +437,7 @@ export const CustomActions: Story = {
     items: defaultItems,
     variant: "default",
     activePath: "/schedule",
-    // Intentionally no `user`, `onLogout`, or `onInboxClick` — actions replaces all of that
+    // Intentionally no `user`, `onLogout`, or `onInboxClick`: actions replaces all of that
     actions: (
       <div className="flex items-center gap-3">
         <a
@@ -459,7 +459,7 @@ export const CustomActions: Story = {
     docs: {
       description: {
         story:
-          "When the `actions` prop is provided it completely replaces the built-in user menu and *Log In* button on desktop, and the user section in the mobile slide-out panel. Use this to plug in any custom auth UI — framework links, OAuth buttons, loading skeletons — without forking the component.",
+          "When the `actions` prop is provided it completely replaces the built-in user menu and *Log In* button on desktop, and the user section in the mobile slide-out panel. Use this to plug in any custom auth UI (framework links, OAuth buttons, loading skeletons) without forking the component.",
       },
     },
   },
@@ -494,7 +494,7 @@ export const CustomBrandElement: Story = {
     docs: {
       description: {
         story:
-          "The `brandElement` prop replaces the plain brand name `<span>` with arbitrary markup, allowing mixed font weights, custom colours, and any other styling a string cannot express. The logo image is always rendered alongside it. Inline styles are used here to avoid conflicts with host-app CSS resets.",
+          "The `brandElement` prop replaces the plain brand name `<span>` with arbitrary markup, allowing mixed font weights, custom colors, and any other styling a string cannot express. The logo image is always rendered alongside it. Inline styles are used here to avoid conflicts with host-app CSS resets.",
       },
     },
   },
@@ -543,7 +543,7 @@ export const NavItemBadge: Story = {
     docs: {
       description: {
         story:
-          "Each `NavItem` accepts an optional `badge` prop — any ReactNode rendered inline after the link label. Use it for \"New\" labels, version tags, or status indicators. The badge appears in both the desktop nav and the mobile slide-out panel.",
+          "Each `NavItem` accepts an optional `badge` prop: any ReactNode rendered inline after the link label. Use it for \"New\" labels, version tags, or status indicators. The badge appears in both the desktop nav and the mobile slide-out panel.",
       },
     },
   },
@@ -589,6 +589,47 @@ export const NavActionsSlot: Story = {
   },
 };
 
+export const SlotClosesMobilePanel: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: defaultItems,
+    activePath: "/leagues",
+    variant: "default",
+    user: mockUser,
+    navActions: ({ close }: { close: () => void }) => (
+      <a
+        href="#help"
+        onClick={close}
+        className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-400"
+      >
+        Help
+      </a>
+    ),
+  },
+  render: (args) => (
+    <div style={{ width: 375, maxWidth: "100%", position: "relative", margin: "0 auto" }}>
+      <style>{`
+        .mobile-story .md\\:flex          { display: none  !important; }
+        .mobile-story .max-md\\:hidden    { display: none  !important; }
+        .mobile-story .md\\:hidden        { display: block !important; }
+        .mobile-story .flex.md\\:hidden   { display: flex  !important; }
+      `}</style>
+      <div className="mobile-story">
+        <InteractiveWrapper args={args} />
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The built-in nav items dismiss the mobile panel themselves, but `actions` and `navActions` hold content the nav cannot introspect — a router link in either one navigates with the nav still mounted in the layout, leaving the panel open over the new page. Two things fix that: the panel closes on its own whenever `activePath` changes, and both slots accept a function form that hands you `close`. This story uses the function form; open the hamburger and click **Help**.",
+      },
+    },
+  },
+};
+
 export const WithUserMenuItems: Story = {
   args: {
     logoSrc: mockLogo,
@@ -603,7 +644,7 @@ export const WithUserMenuItems: Story = {
     docs: {
       description: {
         story:
-          "Pass `userMenuItems` to inject role-gated links into the avatar dropdown on desktop (above Log Out) and into the mobile panel nav section (below the main items, separated by a divider). Items are only rendered when `user` is provided — they are silently ignored for guests. **Click the avatar** to see the Admin link in the dropdown.",
+          "Pass `userMenuItems` to inject role-gated links into the avatar dropdown on desktop (above Log Out) and into the mobile panel nav section (below the main items, separated by a divider). Items are only rendered when `user` is provided; they are silently ignored for guests. **Click the avatar** to see the Admin link in the dropdown.",
       },
     },
   },

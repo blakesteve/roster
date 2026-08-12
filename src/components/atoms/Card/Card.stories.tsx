@@ -245,3 +245,29 @@ export const AllVariantsMatrix: Story = {
     },
   },
 };
+
+export const LayoutClasses: Story = {
+  args: {
+    branded: true,
+    className: "flex flex-col gap-2 min-h-48",
+    children: (
+      <>
+        <h3 className="text-lg font-bold">Layout on the card itself</h3>
+        <p className="text-sm opacity-70">
+          The card is the flex container, so children lay out directly inside it.
+        </p>
+        <span className="mt-auto text-xs font-medium opacity-60">
+          Pinned to the bottom with mt-auto
+        </span>
+      </>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Layout passed through `className` (`flex`, `grid`, `gap-*`, and `mt-auto` on a child) applies to the element that actually contains the children. Children previously rendered inside a `relative z-0` wrapper, so these classes landed on the outer div and silently did nothing. The branded stripes still paint above content because the card is an `isolate` stacking context and they carry `z-10`.",
+      },
+    },
+  },
+};

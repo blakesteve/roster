@@ -11,7 +11,7 @@
 
    2. EVERYTHING IN `@layer roster`, registered on the first line. A consumer's
       own styles are then guaranteed to outrank ours no matter how specific
-      our selectors are — which is the right default for a library, and fixes
+      our selectors are. That is the right default for a library, and it fixes
       Roster's utilities silently beating host variants like `dark:hidden`.
 
    3. `@theme inline` so the palette is baked into the generated utilities
@@ -155,6 +155,37 @@
    on them here would leave LiquidTabs unstyled. Referencing the Roster
    tokens directly is also more honest: these are Roster's own variables, and
    a consumer retheming via `--roster-*` now reaches them without an alias. */
+/* ── Card & Footer surface tokens ────────────────────────────────────────────
+   Same reasoning as the nav tokens below: these surfaces were pinned to the
+   stone greys, so a tinted dark theme got muddy off-palette patches and had to
+   override per usage. Only the default variants (Card `white`, Footer
+   `default`) are tokenized. The other variants stay deliberately literal.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --roster-card-bg:       var(--roster-white, #ffffff);
+  --roster-card-border:   var(--roster-gray-200, #e7e5e4);
+  --roster-card-text:     var(--roster-gray-900, #1c1917);
+
+  --roster-footer-bg:     var(--roster-gray-50, #fafaf9);
+  --roster-footer-border: var(--roster-gray-200, #e7e5e4);
+  --roster-footer-text:   var(--roster-gray-500, #65635f);
+}
+
+.dark {
+  --roster-card-bg:       var(--roster-gray-900, #1c1917);
+  --roster-card-border:   var(--roster-gray-800, #292524);
+  --roster-card-text:     var(--roster-gray-100, #f5f5f4);
+
+  /* Half-transparent, matching the previous `dark:bg-gray-900/50`. */
+  --roster-footer-bg: color-mix(
+    in srgb,
+    var(--roster-gray-900, #1c1917) 50%,
+    transparent
+  );
+  --roster-footer-border: var(--roster-gray-800, #292524);
+  --roster-footer-text:   var(--roster-gray-400, #a8a29e);
+}
+
 /* ── Navbar surface tokens ───────────────────────────────────────────────────
    The nav's surfaces used to be hard-coded (`dark:bg-gray-950`, a near-black
    stone), so an app with a tinted dark theme had to fight it with

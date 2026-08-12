@@ -48,12 +48,14 @@ describe("Card Component", () => {
     expect(bottomStripe).toHaveStyle({ backgroundColor: customBottom });
   });
 
-  it("applies white (default) variant classes with deepened dark mode", () => {
+  // Surfaces are token-driven so themed apps can retint them; the token
+  // defaults resolve to the previous white / gray-900 pair.
+  it("applies token-driven white (default) variant classes", () => {
     const { container } = render(<Card>Content</Card>);
     expect(container.firstChild).toHaveClass(
-      "bg-white",
-      "dark:bg-gray-900",
-      "text-gray-900",
+      "bg-[var(--roster-card-bg)]",
+      "border-[var(--roster-card-border)]",
+      "text-[var(--roster-card-text)]",
     );
   });
 
@@ -94,5 +96,37 @@ describe("Card Component", () => {
   it("applies padding classes correctly", () => {
     const { container } = render(<Card padding="lg">Big Padding</Card>);
     expect(container.firstChild).toHaveClass("p-8");
+  });
+
+  // Regression: children used to render inside a `relative z-0` wrapper, so
+  // layout classes passed via className landed on the outer div and silently
+  // did nothing. Children must be direct descendants of the styled root.
+  it("renders children directly on the root so layout classes reach them", () => {
+    const { container } = render(
+      <Card className="flex gap-4">
+        <span data-testid="first">One</span>
+        <span data-testid="second">Two</span>
+      </Card>,
+    );
+
+    const root = container.firstChild as HTMLElement;
+    expect(root).toHaveClass("flex", "gap-4");
+    expect(screen.getByTestId("first").parentElement).toBe(root);
+    expect(screen.getByTestId("second").parentElement).toBe(root);
+  });
+
+  // The stripes are absolutely positioned at z-10 and the root is `isolate`,
+  // which is what keeps content beneath them now that the wrapper is gone.
+  it("keeps branded stripes above content without a wrapper", () => {
+    const { container } = render(
+      <Card branded>
+        <span data-testid="content">Body</span>
+      </Card>,
+    );
+
+    const root = container.firstChild as HTMLElement;
+    expect(root).toHaveClass("isolate");
+    expect(screen.getByTestId("content").parentElement).toBe(root);
+    expect(root.querySelectorAll("div.absolute.z-10")).toHaveLength(2);
   });
 });

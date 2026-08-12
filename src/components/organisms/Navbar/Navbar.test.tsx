@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { Navbar, type NavbarProps } from "./Navbar";
 
@@ -39,7 +39,7 @@ describe("Navbar Component", () => {
   });
 
   // The default variant is driven by --roster-nav-* rather than literal
-  // colours, so a themed app can retint the bar without selector overrides.
+  // colors, so a themed app can retint the bar without selector overrides.
   // The token defaults resolve to the previous white / gray-950 pair.
   it("applies the token-driven 'default' variant classes by default", () => {
     render(<Navbar {...defaultProps} />);
@@ -400,5 +400,133 @@ describe("Navbar Component", () => {
     fireEvent.click(themeToggleText);
 
     expect(onThemeToggle).toHaveBeenCalledTimes(1);
+  });
+});
+
+// The nav is mounted once in an app-wide layout, so a client-side navigation
+// does not unmount it. Anything that navigates from inside the open mobile
+// panel has to close the panel itself, or the new page renders underneath it.
+describe("Navbar mobile panel dismissal on navigation", () => {
+  const openPanel = async () => {
+    const hamburger = screen.getByRole("button", { name: /open main menu/i });
+    fireEvent.click(hamburger);
+    await waitFor(() => {
+      expect(hamburger).toHaveAttribute("aria-expanded", "true");
+    });
+  };
+
+  // aria-expanded on the hamburger is the authoritative open state. Node
+  // presence is not: HeadlessUI unmounts the panel under jsdom but keeps it
+  // mounted at opacity 0 in a real browser, so a querySelector check passes
+  // for the wrong reason there.
+  const expectPanelClosed = async () => {
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /open main menu/i }),
+      ).toHaveAttribute("aria-expanded", "false");
+    });
+  };
+
+  // Control: the built-in slots already wire close() themselves.
+  it("closes the panel when a built-in nav item is clicked", async () => {
+    render(<Navbar {...defaultProps} />);
+    await openPanel();
+
+    const panel = document.querySelector("[data-roster-mobile-panel]")!;
+    fireEvent.click(within(panel as HTMLElement).getByText("Leagues"));
+
+    await expectPanelClosed();
+  });
+
+  // A route change is the signal that a navigation happened, whatever caused
+  // it — including a link in a slot the nav cannot introspect.
+  it("closes the panel when activePath changes while it is open", async () => {
+    const { rerender } = render(
+      <Navbar {...defaultProps} navActions={<a href="/search">Search</a>} />,
+    );
+    await openPanel();
+
+    rerender(
+      <Navbar
+        {...defaultProps}
+        activePath="/leagues"
+        navActions={<a href="/search">Search</a>}
+      />,
+    );
+
+    await expectPanelClosed();
+  });
+
+  it("leaves the panel open when activePath is unchanged", async () => {
+    const { rerender } = render(<Navbar {...defaultProps} />);
+    await openPanel();
+
+    rerender(<Navbar {...defaultProps} user={mockUser} />);
+
+    // A re-render that is not a navigation must not dismiss the panel.
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /open main menu/i }),
+      ).toHaveAttribute("aria-expanded", "true");
+    });
+  });
+
+  it("gives navActions a close callback via the render-prop form", async () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        navActions={({ close }) => (
+          <a href="/search" onClick={close}>
+            Search
+          </a>
+        )}
+      />,
+    );
+    await openPanel();
+
+    const panel = document.querySelector("[data-roster-mobile-panel]")!;
+    fireEvent.click(within(panel as HTMLElement).getByText("Search"));
+
+    await expectPanelClosed();
+  });
+
+  it("gives actions a close callback via the render-prop form", async () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        actions={({ close }) => (
+          <a href="/account" onClick={close}>
+            My account
+          </a>
+        )}
+      />,
+    );
+    await openPanel();
+
+    const panel = document.querySelector("[data-roster-mobile-panel]")!;
+    fireEvent.click(within(panel as HTMLElement).getByText("My account"));
+
+    await expectPanelClosed();
+  });
+
+  // Desktop: HeadlessUI's Menu closes itself on MenuItem click. Pinned so the
+  // dropdown half of the "menus should close on navigate" report stays fixed.
+  it("closes the desktop user dropdown when a userMenuItem is clicked", async () => {
+    render(
+      <Navbar
+        {...defaultProps}
+        user={mockUser}
+        userMenuItems={[{ label: "Family area", path: "/family" }]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /user menu/i }));
+    const item = await screen.findByText("Family area");
+
+    fireEvent.click(item);
+
+    await waitFor(() => {
+      expect(screen.queryByText("Family area")).not.toBeInTheDocument();
+    });
   });
 });

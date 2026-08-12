@@ -2,16 +2,16 @@
 
 A production-grade atomic component library built with **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Vite**.
 
-Roster ships a curated set of accessible, theme-aware components organized around the Atomic Design methodology — atoms, molecules, and organisms — each with Storybook documentation and full test coverage.
+Roster ships a curated set of accessible, theme-aware components organized around the Atomic Design methodology (atoms, molecules, and organisms), each with Storybook documentation and full test coverage.
 
 ## Features
 
-- **Atomic Design** — components organized as atoms, molecules, and organisms
-- **TypeScript first** — fully typed props with exported variant types for maximum DX
-- **Adaptive dark mode** — class-based toggling (`.dark`) independent of OS preferences
-- **`"use client"` pre-bundled** — all outputs include the directive for seamless Next.js App Router integration
-- **Accessible** — interactive components powered by [`@headlessui/react`](https://headlessui.com) and [`@radix-ui`](https://radix-ui.com)
-- **Tree-shakeable** — import only what you need
+- **Atomic Design**: components organized as atoms, molecules, and organisms
+- **TypeScript first**: fully typed props with exported variant types for maximum DX
+- **Adaptive dark mode**: class-based toggling (`.dark`) independent of OS preferences
+- **`"use client"` pre-bundled**: all outputs include the directive for seamless Next.js App Router integration
+- **Accessible**: interactive components powered by [`@headlessui/react`](https://headlessui.com) and [`@radix-ui`](https://radix-ui.com)
+- **Tree-shakeable**: import only what you need
 
 ## Installation
 
@@ -19,7 +19,7 @@ Roster ships a curated set of accessible, theme-aware components organized aroun
 npm install @blakesteve/roster
 ```
 
-Roster ships pre-compiled CSS — you do not need Tailwind installed in your host app to use it.
+Roster ships pre-compiled CSS, so you do not need Tailwind installed in your host app to use it.
 
 ### Peer dependencies
 
@@ -35,7 +35,7 @@ Roster ships pre-compiled CSS — you do not need Tailwind installed in your hos
 Import Roster's CSS once at the root of your application (`layout.tsx`, `main.tsx`, or `App.tsx`):
 
 ```tsx
-// Compiled component styles — always required
+// Compiled component styles (always required)
 import "@blakesteve/roster/style.css";
 
 // Default design tokens (color palette, spacing, radius)
@@ -57,7 +57,7 @@ If your app uses Tailwind, import Roster's CSS **before** it:
 Roster ships its styles inside a `roster` cascade layer, and CSS orders layers
 by *first registration*. Importing Roster first places its layer beneath your
 app's own utilities, so your styles always win. Import it second and the
-opposite happens — Roster's `.block` starts beating your `dark:hidden`, and
+opposite happens: Roster's `.block` starts beating your `dark:hidden`, and
 variants fail silently with the rule present in the stylesheet.
 
 ### The global reset is opt-in
@@ -68,7 +68,7 @@ or box sizing.
 
 Roster's components do assume that normalization exists, though. If your app
 runs Tailwind, you already have it and there is nothing to do. If it does not,
-opt in — before the component styles:
+opt in, before the component styles:
 
 ```tsx
 import "@blakesteve/roster/preflight.css";
@@ -110,27 +110,30 @@ function App() {
 |---|---|
 | `Avatar` | User avatar with image, initials fallback, and optional popover |
 | `Badge` | Status label with semantic color schemes and fill variants |
-| `Button` | Primary interactive element — solid, soft, outline, ghost, link variants |
+| `Button` | Primary interactive element: solid, soft, outline, ghost, link variants |
 | `Card` | Bordered surface container |
 | `Checkbox` | Accessible checkbox with label support |
 | `Disclosure` | Show/hide toggle using HeadlessUI |
 | `Input` | Text input with label, error state, and icon slots |
 | `Link` | Styled anchor with variant support |
+| `PasswordInput` | Password field with a show/hide reveal toggle |
+| `Pill` | Inline phrase chrome: social proof, live state, applied filters |
 | `AvatarStrip` | Stacked avatar row with overflow chip, dismiss button, trailing slot, and label area |
 | `CollapsibleSection` | Clamps any content (prose, chips, image grids) to a fixed height with a fade and expand/collapse toggle |
-| `LiquidTabs` | Controlled tab strip with a liquid sliding pill indicator — pill and filled variants |
+| `LiquidTabs` | Controlled tab strip with a liquid sliding pill indicator: pill and filled variants |
 | `Select` | Dropdown selector |
 | `SegmentBar` | Proportional horizontal bar divided into colored segments with optional legend |
 | `Spinner` | Loading indicator |
 | `Switch` | Toggle switch |
 | `Textarea` | Multi-line text input |
-| `Tooltip` | Radix-powered tooltip — hover/focus on desktop, tap-to-toggle on mobile |
+| `Tooltip` | Radix-powered tooltip: hover/focus on desktop, tap-to-toggle on mobile |
 
 ### Molecules
 
 | Component | Description |
 |---|---|
 | `Accordion` | Collapsible content sections (single or multi-expand) |
+| `Alert` | Inline notice strip with optional title and dismiss |
 | `Breadcrumbs` | Navigation trail |
 | `CallToAction` | Prominent hero-style CTA block |
 | `EmptyState` | Zero-data placeholder with icon and action slot |
@@ -190,8 +193,9 @@ Output in `dist/`:
 |---|---|
 | `roster.es.js` | ES module bundle |
 | `roster.umd.js` | UMD bundle |
-| `roster.css` | Compiled component styles |
+| `roster.css` | Compiled component styles, in the `roster` cascade layer |
 | `tokens.css` | Design token CSS variables |
+| `preflight.css` | Optional global reset (see Setup) |
 | `index.d.ts` | TypeScript definitions |
 
 ## Contributing

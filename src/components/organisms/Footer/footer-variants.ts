@@ -5,9 +5,12 @@ export const footerVariants = cva(
   {
     variants: {
       variant: {
-        // Standard elevated surface that matches the app's default backgrounds
-        default: 
-          "bg-gray-50 text-gray-500 border-t border-gray-200 dark:bg-gray-900/50 dark:text-gray-400 dark:border-gray-800",
+        // Standard elevated surface that matches the app's default backgrounds.
+        // Driven by --roster-footer-* so themed apps can retint it; the tokens
+        // flip under `.dark` and reproduce the previous gray-50 / gray-900/50
+        // pair, alpha included.
+        default:
+          "bg-[var(--roster-footer-bg)] text-[var(--roster-footer-text)] border-t border-[var(--roster-footer-border)]",
         
         // Deep brand color for high contrast
         primary: 

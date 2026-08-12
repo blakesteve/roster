@@ -303,3 +303,29 @@ export const AllVariantsMatrix: Story = {
     },
   },
 };
+
+export const OnHardDarkSurface: Story = {
+  render: () => (
+    <div className="flex flex-col gap-6 rounded-xl bg-[#1a1410] p-8">
+      <p className="text-sm text-white/60">
+        A panel pinned dark that never carries the <code>.dark</code> class.
+      </p>
+      <div className="flex flex-wrap items-center gap-4">
+        <Button variant="ghost" colorScheme="primary">
+          Default, light hover
+        </Button>
+        <Button variant="ghost" colorScheme="primary" surface="dark">
+          surface=&quot;dark&quot;
+        </Button>
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Roster's dark styling keys off an ancestor carrying `.dark`. On a hard-coded dark panel that never carries it (a campfire overlay, a lantern-night backdrop), a ghost button falls back to its light styles and flashes a near-white hover. **Hover both buttons.** `surface=\"dark\"` forces the dark treatment without the app being in dark mode.",
+      },
+    },
+  },
+};

@@ -49,8 +49,13 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           />
         )}
 
-        {/* --- Content --- */}
-        <div className="relative z-0">{children}</div>
+        {/* Children render directly on the root so layout passed via
+            `className` (flex, grid, gap-*, and `mt-auto` on a child) applies
+            to the element that actually contains them. They used to sit in a
+            `relative z-0` wrapper, which meant those classes landed on the
+            outer div and silently did nothing. The stripes stay on top because
+            the root is `isolate` and they carry z-10. */}
+        {children}
 
         {/* --- Bottom Brand Stripe --- */}
         {branded && (
