@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
-import { Switch } from "./Switch";
+import { useState } from "react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Switch, type SwitchProps } from "./Switch";
 
 const meta = {
   title: "Atoms/Switch",
@@ -50,13 +50,19 @@ type Story = StoryObj<typeof Switch>;
 
 // --- Interactive Wrapper ---
 // Allows the switch to be toggled in Storybook while still respecting controls.
-const SwitchWithState = (args: any) => {
-  const [enabled, setEnabled] = useState(args.checked || false);
+// onChange is omitted: the wrapper owns it, so stories only pass the rest.
+const SwitchWithState = (args: Omit<SwitchProps, "onChange">) => {
+  const [enabled, setEnabled] = useState(args.checked ?? false);
 
-  // Sync internal state if the Storybook 'checked' control is changed by the user
-  useEffect(() => {
-    setEnabled(args.checked);
-  }, [args.checked]);
+  // Sync internal state when the Storybook 'checked' control changes. Adjusted
+  // during render rather than in an effect: React re-runs this component
+  // immediately without committing, so the switch never paints one frame in
+  // the stale position the way an effect would.
+  const [control, setControl] = useState(args.checked);
+  if (control !== args.checked) {
+    setControl(args.checked);
+    setEnabled(args.checked ?? false);
+  }
 
   return <Switch {...args} checked={enabled} onChange={setEnabled} />;
 };

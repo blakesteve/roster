@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { ErrorState } from "./ErrorState";
 import { Button } from "../../atoms/Button/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

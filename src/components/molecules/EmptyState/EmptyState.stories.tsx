@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { EmptyState } from "./EmptyState";
 import { Button } from "../../atoms/Button/Button";
 import { Link } from "../../atoms/Link/Link";
