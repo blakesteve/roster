@@ -35,9 +35,10 @@ describe("Footer Component", () => {
     render(<Footer data-testid="footer" />);
 
     const footerElement = screen.getByTestId("footer");
-    expect(footerElement).toHaveClass("bg-gray-50");
-    expect(footerElement).toHaveClass("text-gray-500");
-    expect(footerElement).toHaveClass("dark:bg-gray-900/50");
+    // Token-driven; defaults resolve to the previous gray-50 / gray-900\/50 pair.
+    expect(footerElement).toHaveClass("bg-[var(--roster-footer-bg)]");
+    expect(footerElement).toHaveClass("text-[var(--roster-footer-text)]");
+    expect(footerElement).toHaveClass("border-[var(--roster-footer-border)]");
   });
 
   it("applies the primary variant classes", () => {

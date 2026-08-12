@@ -2,12 +2,18 @@ import { cva } from "class-variance-authority";
 
 export const cardVariants = cva(
   // Base: relative and overflow-hidden are crucial for the branded stripes to clip.
-  "relative w-full overflow-hidden rounded-xl transition-all",
+  // `isolate` makes the card its own stacking context, so children stay beneath
+  // the z-10 stripes without needing a wrapper element around them. See Card.tsx.
+  "relative isolate w-full overflow-hidden rounded-xl transition-all",
   {
     variants: {
       variant: {
-        white: 
-          "bg-white border border-gray-200 text-gray-900 shadow-sm dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100",
+        // Driven by --roster-card-* so a themed app can retint the default
+        // surface without per-usage overrides. The tokens flip under `.dark`,
+        // so no dark: variants are needed. Defaults match the previous
+        // white / gray-900 pair exactly.
+        white:
+          "bg-[var(--roster-card-bg)] border border-[var(--roster-card-border)] text-[var(--roster-card-text)] shadow-sm",
         
         // crisp light mode (gray-50) and translucent stained-glass dark mode
         soft:  

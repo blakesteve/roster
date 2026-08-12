@@ -29,7 +29,7 @@ import { navbarVariants } from "./navbar-variants";
 export interface NavItem {
   label: string;
   path: string;
-  /** Optional badge rendered inline after the link label — any ReactNode.
+  /** Optional badge rendered inline after the link label. Any ReactNode.
    *  Use for "New" labels, notification counts, or status indicators.
    *  Appears in both the desktop nav and the mobile slide-out panel. */
   badge?: React.ReactNode;
@@ -42,7 +42,7 @@ export interface NavbarProps
   logoSrc: string;
   /**
    * Size of the logo image. Accepts any CSS length (`"2.75rem"`, `44`).
-   * Defaults to `2rem` — the previous hard-coded `h-8 w-8`.
+   * Defaults to `2rem`, the previous hard-coded `h-8 w-8`.
    */
   logoSize?: string | number;
   /**
@@ -68,7 +68,7 @@ export interface NavbarProps
    * Which palette the nav paints itself with.
    *
    * `"auto"` follows the nearest ancestor carrying the `.dark` class, matching
-   * how the rest of Roster handles dark mode — use it in class-based dark apps
+   * how the rest of Roster handles dark mode. Use it in class-based dark apps
    * so the nav does not need wiring into your theme state. Omit the prop
    * entirely and the mode is inferred from `variant`, as before.
    */
@@ -96,7 +96,7 @@ export interface NavbarProps
   actions?: React.ReactNode;
   /**
    * Replaces the default brand name `<span>` with arbitrary markup. Use this
-   * when you need mixed weights, colours, or other rich styling that a plain
+   * when you need mixed weights, colors, or other rich styling that a plain
    * string cannot express (e.g. bold "GAME" + thin "VERDICT").
    * The logo image is always rendered; this only affects the text element.
    */
@@ -105,7 +105,7 @@ export interface NavbarProps
    * Extra content rendered between the nav link list and the user menu / Log In
    * button on desktop, and above the nav links in the mobile slide-out panel.
    * Use this for persistent nav-level controls like a search toggle that should
-   * coexist with the built-in user menu. Does not replace the user menu —
+   * coexist with the built-in user menu. Does not replace the user menu;
    * see `actions` for full replacement.
    */
   navActions?: React.ReactNode;
@@ -121,7 +121,7 @@ export interface NavbarProps
  * Tracks the `.dark` class on <html> for `themeMode="auto"`. The DOM is the
  * source of truth (that is where class-based dark mode lives), so this reads
  * it rather than mirroring it into state. Returns false during SSR and the
- * hydration pass, then syncs — the class cannot be known on the server.
+ * hydration pass, then syncs. The class cannot be known on the server.
  */
 function useDarkClass(enabled: boolean) {
   return React.useSyncExternalStore(

@@ -17,6 +17,9 @@ export * from './components/atoms/Input/Input';
 export * from './components/atoms/Input/input-variants';
 export * from './components/atoms/Link/Link';
 export * from './components/atoms/Link/link-variants';
+export * from './components/atoms/PasswordInput/PasswordInput';
+export * from './components/atoms/Pill/Pill';
+export * from './components/atoms/Pill/pill-variants';
 export * from './components/atoms/Select/Select';
 export * from './components/atoms/Select/select-variants';
 export * from './components/atoms/Spinner/Spinner';
@@ -31,6 +34,8 @@ export * from './components/atoms/CollapsibleSection/CollapsibleSection';
 export * from './components/atoms/SegmentBar/SegmentBar';
 
 // --- MOLECULES ---
+export * from './components/molecules/Alert/Alert';
+export * from './components/molecules/Alert/alert-variants';
 export * from './components/molecules/Accordion/Accordion';
 export * from './components/molecules/Breadcrumbs/Breadcrumbs';
 export * from './components/molecules/Breadcrumbs/breadcrumb-variants';

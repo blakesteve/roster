@@ -39,7 +39,7 @@ describe("Navbar Component", () => {
   });
 
   // The default variant is driven by --roster-nav-* rather than literal
-  // colours, so a themed app can retint the bar without selector overrides.
+  // colors, so a themed app can retint the bar without selector overrides.
   // The token defaults resolve to the previous white / gray-950 pair.
   it("applies the token-driven 'default' variant classes by default", () => {
     render(<Navbar {...defaultProps} />);

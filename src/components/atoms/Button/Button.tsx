@@ -13,6 +13,16 @@ export interface ButtonProps
   isLoading?: boolean;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
+  /**
+   * Which surface the button sits on.
+   *
+   * Roster's dark styling keys off an ancestor carrying `.dark`, so a button
+   * placed on a hard-coded dark panel that never carries that class (a
+   * campfire overlay, a lantern-night backdrop) falls back to the LIGHT
+   * styles and flashes a near-white hover. Pass `surface="dark"` to force the
+   * dark treatment regardless of the app's theme.
+   */
+  surface?: "auto" | "dark";
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -25,6 +35,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       isLoading = false,
       startIcon,
       endIcon,
+      surface = "auto",
       disabled,
       children,
       ...props
@@ -37,6 +48,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <HeadlessButton
         className={cn(
           buttonVariants({ colorScheme, variant, size }),
+          // Roster's dark variant is `&:where(.dark, .dark *)`, so an element
+          // carrying `.dark` itself satisfies it. That is all forcing the
+          // dark surface requires.
+          surface === "dark" && "dark",
           className,
         )}
         ref={ref}
