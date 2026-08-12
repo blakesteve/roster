@@ -83,6 +83,12 @@ export interface NavbarProps
     | "teal"
     | "purple";
   /**
+   * Fill style of the notification count badge. Defaults to `"solid"`, which
+   * is what the nav rendered before this was configurable. Use `"soft"` or
+   * `"outline"` where a solid dot competes with a busy or colored nav surface.
+   */
+  notificationFill?: "soft" | "light" | "solid" | "outline";
+  /**
    * Custom content rendered in the right-side action area. When provided it
    * replaces the built-in user menu / "Log In" button on desktop and the user
    * section in the mobile panel, giving you full control over auth UI.
@@ -174,6 +180,7 @@ const Navbar = ({
   position = "sticky",
   themeMode,
   notificationVariant = "error",
+  notificationFill = "solid",
   ...props
 }: NavbarProps) => {
   const hasNotifications = (user?.notificationCount || 0) > 0;
@@ -303,7 +310,7 @@ const Navbar = ({
                     {hasNotifications && (
                       <div className="absolute -top-1 -right-2">
                         <Badge
-                          fill="solid"
+                          fill={notificationFill}
                           size="xs"
                           statusBadge
                           variant={notificationVariant}
@@ -409,11 +416,14 @@ const Navbar = ({
                                   variant="neutral"
                                   underline="none"
                                   className={cn(
-                                    "block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 transition-colors",
+                                    "flex w-full items-center justify-between gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 transition-colors",
                                     focus && "bg-gray-50 dark:bg-gray-700",
                                   )}
                                 >
                                   {item.label}
+                                  {item.badge && (
+                                    <span className="inline-flex">{item.badge}</span>
+                                  )}
                                 </Link>
                               )}
                             </MenuItem>
@@ -602,6 +612,9 @@ const Navbar = ({
                                 >
                                   {item.label}
                                 </span>
+                                {item.badge && (
+                                  <span className="ml-2 inline-flex">{item.badge}</span>
+                                )}
                               </Link>
                             );
                           })}
@@ -637,7 +650,7 @@ const Navbar = ({
                             className="w-full justify-between px-4 text-base font-medium hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
                             endIcon={
                               <Badge
-                                fill="solid"
+                                fill={notificationFill}
                                 size="xs"
                                 statusBadge
                                 variant={notificationVariant}
