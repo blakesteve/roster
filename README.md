@@ -43,6 +43,41 @@ import "@blakesteve/roster/style.css";
 import "@blakesteve/roster/tokens.css";
 ```
 
+### Import Roster before Tailwind
+
+If your app uses Tailwind, import Roster's CSS **before** it:
+
+```css
+/* globals.css */
+@import "@blakesteve/roster/tokens.css";
+@import "@blakesteve/roster/style.css";
+@import "tailwindcss";
+```
+
+Roster ships its styles inside a `roster` cascade layer, and CSS orders layers
+by *first registration*. Importing Roster first places its layer beneath your
+app's own utilities, so your styles always win. Import it second and the
+opposite happens — Roster's `.block` starts beating your `dark:hidden`, and
+variants fail silently with the rule present in the stylesheet.
+
+### The global reset is opt-in
+
+Roster ships **no** preflight. A component library has no business resetting
+its host's document, so importing Roster will not change your headings, lists,
+or box sizing.
+
+Roster's components do assume that normalization exists, though. If your app
+runs Tailwind, you already have it and there is nothing to do. If it does not,
+opt in — before the component styles:
+
+```tsx
+import "@blakesteve/roster/preflight.css";
+import "@blakesteve/roster/style.css";
+```
+
+Skip it and components render against browser defaults: serif type, bulleted
+lists, and `content-box` sizing.
+
 ## Quick start
 
 ```tsx

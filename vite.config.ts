@@ -26,6 +26,7 @@ export default defineConfig({
       entry: {
         roster: path.resolve(__dirname, 'src/index.ts'),
         tokens: path.resolve(__dirname, 'src/tokens.ts'),
+        preflight: path.resolve(__dirname, 'src/preflight.ts'),
       },
       name: 'Roster',
       fileName: (format, entryName) => `${entryName}.${format}.js`

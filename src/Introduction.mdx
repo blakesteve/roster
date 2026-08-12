@@ -21,43 +21,82 @@ It is built with **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Vite**
 ## 📦 Installation
 
 ```bash
-npm install roster
+npm install @blakesteve/roster
 # or
-yarn add roster
+yarn add @blakesteve/roster
 ```
 
 ### Peer Dependencies
 
-Roster relies on a few peer dependencies that must be installed in your host application:
+Roster needs React in your host application:
 
 ```json
 "peerDependencies": {
   "react": "^19.0.0",
-  "react-dom": "^19.0.0",
-  "tailwindcss": "^4.0.0"
+  "react-dom": "^19.0.0"
 }
 ```
+
+Tailwind is **not** required — Roster ships pre-compiled CSS.
 
 ## 💻 Usage
 
 ### 1. Import Styles
 
-Roster splits its CSS into two parts to give you ultimate flexibility over your theme. You must import the CSS at the root of your application (e.g., in `layout.tsx`, `main.tsx`, or `App.tsx`).
+Roster splits its CSS so you keep full control of your theme. Import it once at
+the root of your application (`layout.tsx`, `main.tsx`, or `App.tsx`).
 
-````tsx
-// 1. Required: The structural Tailwind utility classes
-import "roster/dist/roster.css";
+```tsx
+// Required: the compiled component styles
+import "@blakesteve/roster/style.css";
 
-// 2. Optional: The default MegaSquad color and theme tokens
-// (Omit this file if you are defining your own --roster-* variables in your app's global CSS)
-import "roster/dist/tokens.css";
+// Optional: the default design tokens
+// (Omit this if you define your own --roster-* variables in your global CSS)
+import "@blakesteve/roster/tokens.css";
+```
+
+#### Import Roster before Tailwind
+
+If your app uses Tailwind, Roster must come **first**:
+
+```css
+/* globals.css */
+@import "@blakesteve/roster/tokens.css";
+@import "@blakesteve/roster/style.css";
+@import "tailwindcss";
+```
+
+Roster's styles live in a `roster` cascade layer, and CSS orders layers by
+*first registration*. Importing Roster first puts its layer beneath your app's
+utilities, so your styles always win. Import it second and the reverse happens:
+Roster's `.block` starts beating your `dark:hidden`, and variants fail silently
+— the rule is right there in the stylesheet, and simply loses.
+
+#### The global reset is opt-in
+
+Roster ships **no preflight**. A component library has no business resetting its
+host's document, so importing Roster will not touch your headings, lists, or box
+sizing.
+
+Roster's components do assume that normalization exists. If your app runs
+Tailwind you already have it. If it does not — a plain Vite app, a Storybook, an
+app with no reset of its own — opt in, before the component styles:
+
+```tsx
+import "@blakesteve/roster/preflight.css";
+import "@blakesteve/roster/style.css";
+```
+
+Skip it and components render against browser defaults: serif type, bulleted
+lists, `content-box` sizing. This Storybook imports it for exactly that reason —
+see `.storybook/preview.ts`.
 
 ### 2. Import Components
 
 Now you can use the components anywhere in your app.
 
 ```tsx
-import { Button, Spinner } from "roster";
+import { Button, Spinner } from "@blakesteve/roster";
 
 function App() {
   return (
@@ -68,7 +107,7 @@ function App() {
       </Button>
 
       {/* Destructive Variant */}
-      <Button colorScheme="destructive" variant="outline">
+      <Button colorScheme="error" variant="outline">
         Delete Account
       </Button>
 
@@ -76,11 +115,11 @@ function App() {
       <Button isLoading>Processing...</Button>
 
       {/* Standalone Spinner */}
-      <Spinner size="lg" className="text-accent-500" />
+      <Spinner size="lg" />
     </div>
   );
 }
-````
+```
 
 ## 🎨 Development
 
@@ -108,8 +147,9 @@ This generates:
 
 - `dist/roster.es.js` (Main library ES Modules)
 - `dist/tokens.es.js` (Token injection script)
-- `dist/roster.css` (Compiled structural Tailwind styles)
+- `dist/roster.css` (Compiled component styles, in the `roster` cascade layer)
 - `dist/tokens.css` (Design token CSS variables)
+- `dist/preflight.css` (Optional global reset — see Import Styles above)
 - `dist/index.d.ts` (Type definitions)
 
 ## 📄 License
