@@ -589,6 +589,47 @@ export const NavActionsSlot: Story = {
   },
 };
 
+export const SlotClosesMobilePanel: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "MegaSquad",
+    items: defaultItems,
+    activePath: "/leagues",
+    variant: "default",
+    user: mockUser,
+    navActions: ({ close }: { close: () => void }) => (
+      <a
+        href="#help"
+        onClick={close}
+        className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-400"
+      >
+        Help
+      </a>
+    ),
+  },
+  render: (args) => (
+    <div style={{ width: 375, maxWidth: "100%", position: "relative", margin: "0 auto" }}>
+      <style>{`
+        .mobile-story .md\\:flex          { display: none  !important; }
+        .mobile-story .max-md\\:hidden    { display: none  !important; }
+        .mobile-story .md\\:hidden        { display: block !important; }
+        .mobile-story .flex.md\\:hidden   { display: flex  !important; }
+      `}</style>
+      <div className="mobile-story">
+        <InteractiveWrapper args={args} />
+      </div>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The built-in nav items dismiss the mobile panel themselves, but `actions` and `navActions` hold content the nav cannot introspect — a router link in either one navigates with the nav still mounted in the layout, leaving the panel open over the new page. Two things fix that: the panel closes on its own whenever `activePath` changes, and both slots accept a function form that hands you `close`. This story uses the function form; open the hamburger and click **Help**.",
+      },
+    },
+  },
+};
+
 export const WithUserMenuItems: Story = {
   args: {
     logoSrc: mockLogo,

@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useRef } from "react";
 import {
   Menu,
   MenuButton,
@@ -25,6 +25,19 @@ import { Badge } from "../../atoms/Badge/Badge";
 import { Avatar } from "../../atoms/Avatar/Avatar";
 import { Switch } from "../../atoms/Switch/Switch";
 import { navbarVariants } from "./navbar-variants";
+
+/**
+ * Content for a consumer-supplied slot. Pass a plain node, or a function that
+ * receives `close` so anything inside the slot can dismiss the mobile panel —
+ * needed when the slot holds a link, since the nav has no way to know a click
+ * on arbitrary content was a navigation.
+ */
+export type NavbarSlot =
+  | React.ReactNode
+  | ((props: { close: () => void }) => React.ReactNode);
+
+const renderSlot = (slot: NavbarSlot, close: () => void): React.ReactNode =>
+  typeof slot === "function" ? slot({ close }) : slot;
 
 export interface NavItem {
   label: string;
@@ -92,8 +105,11 @@ export interface NavbarProps
    * Custom content rendered in the right-side action area. When provided it
    * replaces the built-in user menu / "Log In" button on desktop and the user
    * section in the mobile panel, giving you full control over auth UI.
+   *
+   * Pass a function to receive `close` and dismiss the mobile panel from
+   * inside the slot: `actions={({ close }) => <Link onClick={close} … />}`.
    */
-  actions?: React.ReactNode;
+  actions?: NavbarSlot;
   /**
    * Replaces the default brand name `<span>` with arbitrary markup. Use this
    * when you need mixed weights, colors, or other rich styling that a plain
@@ -107,8 +123,11 @@ export interface NavbarProps
    * Use this for persistent nav-level controls like a search toggle that should
    * coexist with the built-in user menu. Does not replace the user menu;
    * see `actions` for full replacement.
+   *
+   * Pass a function to receive `close` and dismiss the mobile panel from
+   * inside the slot: `navActions={({ close }) => <Link onClick={close} … />}`.
    */
-  navActions?: React.ReactNode;
+  navActions?: NavbarSlot;
   /**
    * Auth-gated navigation items appended to the built-in user avatar dropdown
    * on desktop and to the nav section of the mobile slide-out panel. Only
@@ -155,6 +174,30 @@ function MobileOutsideClickListener({ close }: { close: () => void }) {
     document.addEventListener("pointerdown", handlePointerDown, { capture: true });
     return () => document.removeEventListener("pointerdown", handlePointerDown, { capture: true });
   }, [close]);
+  return null;
+}
+
+// Mounts when the mobile panel is open. The built-in nav items call close()
+// themselves, but `actions` / `navActions` hold arbitrary consumer content —
+// a router link in either one navigates with the nav still mounted in the
+// layout, leaving the panel open over the new page. Watching activePath
+// catches every such navigation without the consumer wiring anything up.
+// Only mounted while open, so the ref starts at the path the panel opened on
+// and close() never fires on mount.
+function CloseOnNavigation({
+  activePath,
+  close,
+}: {
+  activePath?: string;
+  close: () => void;
+}) {
+  const openedAt = useRef(activePath);
+  useEffect(() => {
+    if (openedAt.current !== activePath) {
+      openedAt.current = activePath;
+      close();
+    }
+  }, [activePath, close]);
   return null;
 }
 
@@ -235,7 +278,13 @@ const Navbar = ({
       className={cn("z-50", navbarVariants({ variant, position }), className)}
       {...props}
     >
-      {({ open, close }) => (
+      {({ open, close }) => {
+        // Resolved once so the desktop and mobile render sites agree, and so a
+        // function slot is only invoked once per render.
+        const resolvedActions = renderSlot(actions, close);
+        const resolvedNavActions = renderSlot(navActions, close);
+
+        return (
         <>
           <div className="container mx-auto flex items-center justify-between px-4 h-16">
             {/* Brand Logo */}
@@ -291,10 +340,10 @@ const Navbar = ({
               </div>
 
               {/* Extra nav-level actions between links and user menu (e.g. search toggle) */}
-              {navActions}
+              {resolvedNavActions}
 
               {/* User Menu / Custom Actions */}
-              {actions ?? (user ? (
+              {resolvedActions ?? (user ? (
                 <Menu as="div" className="relative ml-2">
                   <MenuButton className="relative flex rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ring-offset-transparent">
                     <span className="sr-only">Open user menu</span>
@@ -501,6 +550,9 @@ const Navbar = ({
           {/* Document-level listener: closes panel when tapping outside it */}
           {open && <MobileOutsideClickListener close={close} />}
 
+          {/* Closes the panel when a client-side navigation changes the route */}
+          {open && <CloseOnNavigation activePath={activePath} close={close} />}
+
           {/* Mobile Menu Panel */}
           <Transition
             as={Fragment}
@@ -543,8 +595,8 @@ const Navbar = ({
                     </div>
                   </div>
                   <div className="mt-6">
-                    {navActions && (
-                      <div className="mb-4">{navActions}</div>
+                    {resolvedNavActions && (
+                      <div className="mb-4">{resolvedNavActions}</div>
                     )}
                     <nav className="grid gap-y-4">
                       {items.map((item) => {
@@ -624,10 +676,10 @@ const Navbar = ({
                   </div>
                 </div>
 
-                {(user || actions || onLogin) && (
+                {(user || resolvedActions || onLogin) && (
                   <div className="py-6 px-5 space-y-4">
-                    {actions ? (
-                      actions
+                    {resolvedActions ? (
+                      resolvedActions
                     ) : !user && onLogin ? (
                       <Button
                         variant="solid"
@@ -721,7 +773,8 @@ const Navbar = ({
             </PopoverPanel>
           </Transition>
         </>
-      )}
+        );
+      }}
     </Popover>
   );
 };
