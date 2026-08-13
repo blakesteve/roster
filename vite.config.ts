@@ -32,13 +32,17 @@ export default defineConfig({
       fileName: (format, entryName) => `${entryName}.${format}.js`
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'tailwindcss'],
+      // @tanstack/react-table is an optional peer: v9's types are generic over
+      // the feature set, so consumer column defs must resolve against the same
+      // copy roster uses. Bundling it would give them two.
+      external: ['react', 'react-dom', 'tailwindcss', '@tanstack/react-table'],
       output: {
         banner: '"use client";',
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          tailwindcss: 'tailwindcss'
+          tailwindcss: 'tailwindcss',
+          '@tanstack/react-table': 'ReactTable'
         }
       }
     }

@@ -1,11 +1,15 @@
 import { useState } from "react";
 import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  getPaginationRowModel,
+  useTable,
+  tableFeatures,
+  rowSortingFeature,
+  rowPaginationFeature,
+  createSortedRowModel,
+  createPaginatedRowModel,
+  sortFns,
   flexRender,
   type ColumnDef,
+  type RowData,
   type SortingState,
 } from "@tanstack/react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -30,8 +34,39 @@ import {
   type TableProps,
 } from "../Table/Table";
 
-export interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+/**
+ * The feature set DataTable registers: sorting and pagination, plus the row
+ * models each one needs. v9 requires features to be declared up front, and it
+ * types column definitions against them, so consumers need this type to write
+ * their columns:
+ *
+ * ```ts
+ * const columns: ColumnDef<RosterTableFeatures, Person>[] = [...]
+ * // or
+ * const helper = createColumnHelper<RosterTableFeatures, Person>()
+ * ```
+ *
+ * Built statically at module scope, as v9 requires.
+ */
+const dataTableFeatures = tableFeatures({
+  rowSortingFeature,
+  rowPaginationFeature,
+  sortedRowModel: createSortedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  // The whole built-in registry, not a subset: DataTable is generic over
+  // consumer data, so auto sort detection has to be able to reach any of them.
+  sortFns,
+});
+
+export type RosterTableFeatures = typeof dataTableFeatures;
+
+/**
+ * `TValue` is gone from v8's `DataTableProps<TData, TValue>`: a columns array
+ * is heterogeneous, so v9 types each entry's value as `unknown` and recovers
+ * the real type per column through `createColumnHelper`.
+ */
+export interface DataTableProps<TData extends RowData> {
+  columns: ColumnDef<RosterTableFeatures, TData>[];
   data: TData[];
   className?: string;
   tableClassName?: string;
@@ -41,7 +76,7 @@ export interface DataTableProps<TData, TValue> {
   hoverable?: boolean;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends RowData>({
   columns,
   data,
   className,
@@ -50,22 +85,20 @@ export function DataTable<TData, TValue>({
   variant = "default",
   size = "md",
   hoverable = false,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
     },
     initialState: {
       pagination: {
+        pageIndex: 0,
         pageSize: 10,
       },
     },
@@ -117,12 +150,12 @@ export function DataTable<TData, TValue>({
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows?.length ? (
+            // No data-state on the row: row selection is not one of the
+            // registered features, and v8's getIsSelected() was always false
+            // here, so React omitted the attribute anyway.
             table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
+              <TableRow key={row.id}>
+                {row.getAllCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
@@ -151,7 +184,7 @@ export function DataTable<TData, TValue>({
         <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
           Page{" "}
           <strong className="text-gray-900 dark:text-gray-100">
-            {table.getState().pagination.pageIndex + 1}
+            {table.state.pagination.pageIndex + 1}
           </strong>{" "}
           of{" "}
           <strong className="text-gray-900 dark:text-gray-100">

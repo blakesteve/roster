@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import "@testing-library/jest-dom";
-import { DataTable } from "./DataTable";
+import { DataTable, type RosterTableFeatures } from "./DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 
 // --- MOCK SETUP ---
@@ -10,7 +10,7 @@ type TestUser = {
   name: string;
 };
 
-const columns: ColumnDef<TestUser, unknown>[] = [
+const columns: ColumnDef<RosterTableFeatures, TestUser>[] = [
   { accessorKey: "id", header: "ID" },
   { accessorKey: "name", header: "Name" },
 ];
