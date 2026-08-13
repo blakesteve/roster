@@ -14,6 +14,11 @@
       "import": "./dist/roster.es.js",
       "require": "./dist/roster.umd.js"
     },
+    "./data-table": {
+      "types": "./dist/data-table.d.ts",
+      "import": "./dist/data-table.es.js",
+      "require": "./dist/data-table.cjs.js"
+    },
     "./style.css": "./dist/roster.css",
     "./tokens.css": "./dist/tokens.css",
     "./preflight.css": "./dist/preflight.css"

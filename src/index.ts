@@ -57,7 +57,10 @@ export * from './components/organisms/Navbar/Navbar';
 export * from './components/organisms/Navbar/navbar-variants';
 export * from './components/organisms/Table/Table';
 export * from './components/organisms/Table/table-variants';
-export * from './components/organisms/DataTable/DataTable';
+/* DataTable is deliberately NOT exported here. It is the only component that
+   needs TanStack Table, and a static re-export would make that optional peer
+   mandatory for every consumer, tables or not. It ships from its own entry:
+   `@blakesteve/roster/data-table`. See src/data-table.ts. */
 
 // --- HOOKS ---
 export * from './hooks/useCountdown';
