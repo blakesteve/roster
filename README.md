@@ -110,6 +110,39 @@ import "@blakesteve/roster/style.css";
 Skip it and components render against browser defaults: serif type, bulleted
 lists, and `content-box` sizing.
 
+### Dark mode
+
+Every component reads a `.dark` class on an ancestor, so dark mode is whatever
+puts that class on your document root. `ThemeToggle` is the component that does
+it, and it persists the choice to `localStorage`:
+
+```tsx
+import { ThemeToggle } from "@blakesteve/roster";
+
+<ThemeToggle />;
+```
+
+A toggle alone cannot prevent a flash of the wrong theme on first paint, because
+the class has to be on `<html>` before React runs. Add a blocking script to your
+document head:
+
+```html
+<script>
+  try {
+    var s = localStorage.getItem("roster-theme");
+    var dark = s ? s === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    if (dark) document.documentElement.classList.add("dark");
+  } catch (e) {}
+</script>
+```
+
+If you pass a custom `storageKey`, change the script to match — a mismatch means
+the script and the toggle disagree, which shows up as a flash on every reload.
+
+`Navbar`'s `themeMode` prop is a different thing: it describes what palette the
+bar paints *itself* with. Pair them with `themeMode="auto"` and the nav follows
+whatever `ThemeToggle` sets.
+
 ## Quick start
 
 ```tsx
@@ -146,7 +179,10 @@ function App() {
 | `Card` | Bordered surface container |
 | `Checkbox` | Accessible checkbox with label support |
 | `Disclosure` | Show/hide toggle using HeadlessUI |
+| `Eyebrow` | Small tracked-out uppercase label above a heading or beside a rule |
+| `InlineCode` | Inline `<code>` for identifiers in running prose |
 | `Input` | Text input with label, error state, and icon slots |
+| `LabeledDivider` | Horizontal rule carrying a label, with an optional trailing count |
 | `Link` | Styled anchor with variant support |
 | `PasswordInput` | Password field with a show/hide reveal toggle |
 | `Pill` | Inline phrase chrome: social proof, live state, applied filters |
@@ -155,9 +191,11 @@ function App() {
 | `LiquidTabs` | Controlled tab strip with a liquid sliding pill indicator: pill and filled variants |
 | `Select` | Dropdown selector |
 | `SegmentBar` | Proportional horizontal bar divided into colored segments with optional legend |
+| `Stat` | A single figure with its label and, optionally, where the figure came from |
 | `Spinner` | Loading indicator |
 | `Switch` | Toggle switch |
 | `Textarea` | Multi-line text input |
+| `ThemeToggle` | Flips class-based dark mode on the document root and remembers the choice |
 | `Tooltip` | Radix-powered tooltip: hover/focus on desktop, tap-to-toggle on mobile |
 
 ### Molecules
@@ -168,9 +206,11 @@ function App() {
 | `Alert` | Inline notice strip with optional title and dismiss |
 | `Breadcrumbs` | Navigation trail |
 | `CallToAction` | Prominent hero-style CTA block |
+| `DescriptionList` | Label and value pairs as a real `<dl>`: inline, stacked, or split |
 | `EmptyState` | Zero-data placeholder with icon and action slot |
 | `ErrorState` | Error display with retry action |
 | `MatchupCard` | Head-to-head comparison card |
+| `Pullquote` | A line lifted out of prose, as `<figure>` + `<blockquote>` + `<figcaption>` |
 
 ### Organisms
 
@@ -216,6 +256,7 @@ entry's value as `unknown` and recovers the real type per column through
 | Hook | Description |
 |---|---|
 | `useCountdown` | Countdown timer logic without the UI |
+| `useKeySequence` | Fires a callback when a sequence of keys is typed in order. Ships `KONAMI_CODE` |
 
 ## Development
 

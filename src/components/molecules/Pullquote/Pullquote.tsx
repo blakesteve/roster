@@ -1,0 +1,51 @@
+import React from "react";
+import { type VariantProps } from "class-variance-authority";
+import { cn } from "../../../lib/utils";
+import { pullquoteVariants } from "./pullquote-variants";
+
+export interface PullquoteProps
+  extends
+    Omit<React.HTMLAttributes<HTMLElement>, "cite">,
+    VariantProps<typeof pullquoteVariants> {
+  children: React.ReactNode;
+  /**
+   * Attribution, rendered beneath the quote. Works as a source ("Why it took a
+   * while to spot") as well as a speaker.
+   */
+  cite?: React.ReactNode;
+  /** URL for the quote's source, passed to the underlying blockquote. */
+  citeUrl?: string;
+}
+
+/**
+ * A line lifted out of running prose and given room.
+ *
+ * Uses `<figure>` + `<blockquote>` + `<figcaption>` rather than a styled div:
+ * that is the pairing the HTML spec has for quote-with-attribution, and it
+ * keeps the citation associated with the quote for assistive tech.
+ */
+const Pullquote = React.forwardRef<HTMLElement, PullquoteProps>(
+  ({ children, cite, citeUrl, variant, colorScheme, className, ...props }, ref) => (
+    <figure
+      ref={ref}
+      className={cn(pullquoteVariants({ variant, colorScheme }), className)}
+      {...props}
+    >
+      <blockquote
+        cite={citeUrl}
+        className="m-0 max-w-[48ch] text-[1.03125rem] leading-[1.5] text-gray-900 dark:text-gray-100"
+      >
+        {children}
+      </blockquote>
+      {cite && (
+        <figcaption className="mt-[7px] font-mono text-[0.625rem] uppercase leading-none tracking-[0.14em] text-gray-500 dark:text-gray-400">
+          {cite}
+        </figcaption>
+      )}
+    </figure>
+  ),
+);
+
+Pullquote.displayName = "Pullquote";
+
+export { Pullquote };
