@@ -27,6 +27,8 @@ export default defineConfig({
         roster: path.resolve(__dirname, 'src/index.ts'),
         tokens: path.resolve(__dirname, 'src/tokens.ts'),
         preflight: path.resolve(__dirname, 'src/preflight.ts'),
+        // Separate entry so the TanStack import stays out of the main bundle.
+        'data-table': path.resolve(__dirname, 'src/data-table.ts'),
       },
       name: 'Roster',
       fileName: (format, entryName) => `${entryName}.${format}.js`

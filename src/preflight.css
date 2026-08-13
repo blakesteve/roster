@@ -17,6 +17,6 @@
  * utility Roster ships — `space-x-2` and friends would silently collapse.
  */
 
-@layer roster-preflight, roster;
+@layer roster-preflight, theme, base, components, roster, utilities;
 
 @import "tailwindcss/preflight.css" layer(roster-preflight);

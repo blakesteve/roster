@@ -8,7 +8,10 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
-export default defineConfig([globalIgnores(['dist']), {
+// Build artifacts. Both are gitignored, but flat config does not read
+// .gitignore, so anyone who runs `npm run build-storybook` before `npm run
+// lint` would otherwise get dozens of errors out of bundled vendor code.
+export default defineConfig([globalIgnores(['dist', 'storybook-static']), {
   files: ['**/*.{ts,tsx}'],
   extends: [
     js.configs.recommended,

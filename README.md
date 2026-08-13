@@ -31,11 +31,17 @@ Roster ships pre-compiled CSS, so you do not need Tailwind installed in your hos
 ```
 
 `DataTable` additionally needs TanStack Table v9, declared as an **optional**
-peer. Install it only if you use `DataTable`; every other component works
-without it.
+peer. It ships from its own entry point so that peer stays genuinely optional:
+importing anything from `@blakesteve/roster` never pulls TanStack in, because a
+bundler resolves imports before it tree-shakes. Install it only if you use
+`DataTable`; every other component works without it.
 
 ```bash
 npm install @tanstack/react-table
+```
+
+```tsx
+import { DataTable, type RosterTableFeatures } from "@blakesteve/roster/data-table";
 ```
 
 It is a peer rather than a bundled dependency because v9 types column
@@ -56,9 +62,10 @@ import "@blakesteve/roster/style.css";
 import "@blakesteve/roster/tokens.css";
 ```
 
-### Import Roster before Tailwind
+### Cascade layers
 
-If your app uses Tailwind, import Roster's CSS **before** it:
+Roster ships its styles inside a `roster` cascade layer and declares the full
+layer order in its own stylesheet, so importing it is normally enough:
 
 ```css
 /* globals.css */
@@ -67,11 +74,23 @@ If your app uses Tailwind, import Roster's CSS **before** it:
 @import "tailwindcss";
 ```
 
-Roster ships its styles inside a `roster` cascade layer, and CSS orders layers
-by *first registration*. Importing Roster first places its layer beneath your
-app's own utilities, so your styles always win. Import it second and the
-opposite happens: Roster's `.block` starts beating your `dark:hidden`, and
-variants fail silently with the rule present in the stylesheet.
+The order Roster declares is:
+
+```css
+@layer roster-preflight, theme, base, components, roster, utilities;
+```
+
+`roster` has to sit in that exact slot. **Above `base`**, because Tailwind's
+preflight resets `*{margin:0;padding:0;border:0 solid}` — put Roster below it
+and that reset outranks Roster's own spacing and border utilities, silently
+stripping padding off buttons and turning `border-transparent` into a visible
+1px line. **Below `utilities`**, so your app's classes and variants such as
+`dark:hidden` still win.
+
+Layers are ordered by *first registration*, so importing Roster before Tailwind
+is the reliable arrangement. If you would rather not depend on import order at
+all, declare the same line yourself at the top of your global stylesheet and it
+holds regardless.
 
 ### The global reset is opt-in
 
@@ -159,7 +178,7 @@ function App() {
 |---|---|
 | `ActionBar` | Sticky bottom action strip |
 | `Countdown` | Live countdown timer |
-| `DataTable` | Full-featured table with sorting and pagination via TanStack Table v9 (see [DataTable columns](#datatable-columns)) |
+| `DataTable` | Full-featured table with sorting and pagination via TanStack Table v9. Imported from `@blakesteve/roster/data-table` (see [DataTable columns](#datatable-columns)) |
 | `Dialog` | Modal dialog |
 | `Footer` | Site footer |
 | `Navbar` | Responsive navigation bar with mobile slide-out |
@@ -172,7 +191,7 @@ the table. `DataTable` registers sorting and pagination and exports that set as
 `RosterTableFeatures`, so your columns name it:
 
 ```tsx
-import { DataTable, type RosterTableFeatures } from "@blakesteve/roster";
+import { DataTable, type RosterTableFeatures } from "@blakesteve/roster/data-table";
 import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
 
 type Player = { name: string; points: number };
@@ -233,6 +252,7 @@ Output in `dist/`:
 |---|---|
 | `roster.es.js` | ES module bundle |
 | `roster.umd.js` | UMD bundle |
+| `data-table.es.js` | DataTable entry, keeping the TanStack import out of the main bundle |
 | `roster.css` | Compiled component styles, in the `roster` cascade layer |
 | `tokens.css` | Design token CSS variables |
 | `preflight.css` | Optional global reset (see Setup) |

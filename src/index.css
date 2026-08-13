@@ -21,7 +21,15 @@
       Consumers still retheme through the `--roster-*` variables.
    --------------------------------------------------------------------------- */
 
-@layer roster-preflight, roster;
+/* The full layer order, declared up front so it does not depend on when each
+   file happens to load. `roster` has to sit ABOVE `base`, or Tailwind's
+   preflight (`*{margin:0;padding:0;border:0 solid}`) outranks Roster's own
+   spacing and border utilities and silently erases them; and BELOW
+   `utilities`, so the consuming app's classes and variants still win.
+   Tailwind's four names are listed here deliberately: in a host that runs
+   Tailwind they get filled, and in one that does not they stay empty and
+   harmless. */
+@layer roster-preflight, theme, base, components, roster, utilities;
 
 @import "tailwindcss/theme.css" layer(roster);
 @import "tailwindcss/utilities.css" layer(roster);
