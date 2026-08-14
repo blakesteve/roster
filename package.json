@@ -1,6 +1,6 @@
 {
   "name": "@blakesteve/roster",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "A production-grade atomic component library: accessible, theme-aware, and documented in Storybook. React 19, TypeScript, Tailwind CSS v4.",
   "keywords": [
     "react",
