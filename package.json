@@ -1,6 +1,28 @@
 {
   "name": "@blakesteve/roster",
   "version": "4.2.0",
+  "description": "A production-grade atomic component library: accessible, theme-aware, and documented in Storybook. React 19, TypeScript, Tailwind CSS v4.",
+  "keywords": [
+    "react",
+    "component-library",
+    "design-system",
+    "design-tokens",
+    "tailwindcss",
+    "typescript",
+    "storybook",
+    "accessible",
+    "atomic-design"
+  ],
+  "license": "MIT",
+  "author": "Blake Ball (https://blakeb.dev)",
+  "homepage": "https://roster-tan.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blakesteve/roster.git"
+  },
+  "bugs": {
+    "url": "https://github.com/blakesteve/roster/issues"
+  },
   "type": "module",
   "files": [
     "dist"
