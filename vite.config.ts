@@ -29,6 +29,9 @@ export default defineConfig({
         preflight: path.resolve(__dirname, 'src/preflight.ts'),
         // Separate entry so the TanStack import stays out of the main bundle.
         'data-table': path.resolve(__dirname, 'src/data-table.ts'),
+        // Separate entry so `cn` escapes the main bundle's "use client"
+        // directive and stays callable from a server component.
+        utils: path.resolve(__dirname, 'src/utils.ts'),
       },
       name: 'Roster',
       fileName: (format, entryName) => `${entryName}.${format}.js`
@@ -39,7 +42,16 @@ export default defineConfig({
       // copy roster uses. Bundling it would give them two.
       external: ['react', 'react-dom', 'tailwindcss', '@tanstack/react-table'],
       output: {
-        banner: '"use client";',
+        // Only the entries that actually contain components. It used to be
+        // applied to every chunk, which marked `cn` and the CSS shims as client
+        // references too — importing `cn` from the root and calling it inside a
+        // React Server Component typechecked and then threw at render. Shared
+        // chunks deliberately go unstamped: the directive belongs on the module
+        // boundary a consumer imports, not on its implementation details.
+        banner: (chunk) =>
+          chunk.isEntry && (chunk.name === 'roster' || chunk.name === 'data-table')
+            ? '"use client";'
+            : '',
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',

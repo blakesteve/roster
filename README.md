@@ -143,6 +143,27 @@ the script and the toggle disagree, which shows up as a flash on every reload.
 bar paints *itself* with. Pair them with `themeMode="auto"` and the nav follows
 whatever `ThemeToggle` sets.
 
+### Components that render links
+
+`Breadcrumbs` renders a plain `<a>` by default, which is right for a static
+page and wrong inside a router — every hop becomes a full page load. Pass your
+router's link component instead:
+
+```tsx
+import NextLink from "next/link";
+
+<Breadcrumbs linkComponent={NextLink} items={items} />;
+```
+
+In an app with React Server Components, do that from a client component.
+`linkComponent` is a function, and functions do not cross the RSC boundary —
+passing it from a server component fails the render with *Functions cannot be
+passed directly to Client Components*. A small `"use client"` wrapper binds it
+once, and the pages that use the wrapper stay server-rendered.
+
+`Eyebrow` takes the other approach: `as` accepts any element and the props
+follow it, so `<Eyebrow as="a" href="/work">` works, as does `as={NextLink}`.
+
 ## Quick start
 
 ```tsx
@@ -179,7 +200,7 @@ function App() {
 | `Card` | Bordered surface container |
 | `Checkbox` | Accessible checkbox with label support |
 | `Disclosure` | Show/hide toggle using HeadlessUI |
-| `Eyebrow` | Small tracked-out uppercase label above a heading or beside a rule |
+| `Eyebrow` | Small tracked-out uppercase label above a heading or beside a rule; polymorphic via `as` |
 | `InlineCode` | Inline `<code>` for identifiers in running prose |
 | `Input` | Text input with label, error state, and icon slots |
 | `LabeledDivider` | Horizontal rule carrying a label, with an optional trailing count |
@@ -195,7 +216,7 @@ function App() {
 | `Spinner` | Loading indicator |
 | `Switch` | Toggle switch |
 | `Textarea` | Multi-line text input |
-| `ThemeToggle` | Flips class-based dark mode on the document root and remembers the choice |
+| `ThemeToggle` | Flips class-based dark mode on the document root and remembers the choice; labels and icons are configurable |
 | `Tooltip` | Radix-powered tooltip: hover/focus on desktop, tap-to-toggle on mobile |
 
 ### Molecules
@@ -204,7 +225,7 @@ function App() {
 |---|---|
 | `Accordion` | Collapsible content sections (single or multi-expand) |
 | `Alert` | Inline notice strip with optional title and dismiss |
-| `Breadcrumbs` | Navigation trail |
+| `Breadcrumbs` | Navigation trail; pass `linkComponent` to keep navigation client-side |
 | `CallToAction` | Prominent hero-style CTA block |
 | `DescriptionList` | Label and value pairs as a real `<dl>`: inline, stacked, or split |
 | `EmptyState` | Zero-data placeholder with icon and action slot |
@@ -250,6 +271,19 @@ Upgrading from roster 2.x: `ColumnDef<Player, unknown>` becomes
 argument instead of two. A columns array is heterogeneous, so v9 types each
 entry's value as `unknown` and recovers the real type per column through
 `createColumnHelper`.
+
+### Server components
+
+The main entry carries a `"use client"` directive, because nearly everything in
+it is interactive. That is correct for components and wrong for a plain
+function, so `cn` ships from its own entry with no directive:
+
+```tsx
+import { cn } from "@blakesteve/roster/utils";
+```
+
+Importing `cn` from the package root still works on the client. In a React
+Server Component it typechecks and then throws at render — use `/utils` there.
 
 ### Hooks
 

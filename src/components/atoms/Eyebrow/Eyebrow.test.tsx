@@ -50,3 +50,46 @@ describe("Eyebrow Component", () => {
     expect(screen.getByTestId("eb")).toHaveAttribute("title", "hint");
   });
 });
+
+describe("Eyebrow polymorphism", () => {
+  // The whole point of `as`: props follow the element. Before this, `as="a"`
+  // typechecked but `href` did not, so consumers wrapped an Eyebrow in an
+  // anchor and moved the hover to a `group`.
+  it("renders an anchor with an href", () => {
+    render(
+      <Eyebrow as="a" href="/work">
+        Work
+      </Eyebrow>,
+    );
+    const link = screen.getByRole("link", { name: "Work" });
+    expect(link).toHaveAttribute("href", "/work");
+    expect(link).toHaveClass("font-mono", "uppercase");
+  });
+
+  it("carries element-specific props through", () => {
+    render(
+      <Eyebrow as="a" href="https://example.com" target="_blank" rel="noreferrer">
+        External
+      </Eyebrow>,
+    );
+    expect(screen.getByRole("link")).toHaveAttribute("target", "_blank");
+  });
+
+  it("renders a label with htmlFor", () => {
+    const { container } = render(
+      <Eyebrow as="label" htmlFor="field">
+        Field
+      </Eyebrow>,
+    );
+    expect(container.querySelector("label")).toHaveAttribute("for", "field");
+  });
+
+  it("keeps variants working on a swapped element", () => {
+    render(
+      <Eyebrow as="a" href="/x" tone="primary" size="md">
+        Tinted
+      </Eyebrow>,
+    );
+    expect(screen.getByRole("link")).toHaveClass("text-primary-600", "text-xs");
+  });
+})

@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
-import { Breadcrumbs } from "./Breadcrumbs";
+import { describe, it, expect, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { Breadcrumbs, type BreadcrumbLinkProps } from "./Breadcrumbs";
 import "@testing-library/jest-dom";
 
 describe("Breadcrumbs Molecule", () => {
@@ -83,3 +84,128 @@ describe("Breadcrumbs Molecule", () => {
     expect(screen.getAllByTestId("custom-sep")).toHaveLength(2);
   });
 });
+
+describe("Breadcrumbs flexibility", () => {
+  // The blocker for every router-based consumer: rendering plain anchors turns
+  // each hop into a full page load. blakeb.dev kept a hand-rolled breadcrumb
+  // rather than lose client-side navigation.
+  it("renders crumbs through a supplied link component", async () => {
+    const navigate = vi.fn();
+    function RouterLink({ href, children, ...rest }: BreadcrumbLinkProps) {
+      return (
+        <a
+          href={href}
+          onClick={(event) => {
+            event.preventDefault();
+            navigate(href);
+          }}
+          {...rest}
+        >
+          {children}
+        </a>
+      );
+    }
+
+    render(
+      <Breadcrumbs
+        linkComponent={RouterLink}
+        items={[
+          { label: "Work", href: "/work" },
+          { label: "Game Verdict", href: "/work/game-verdict" },
+        ]}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("link", { name: "Work" }));
+    expect(navigate).toHaveBeenCalledWith("/work");
+  });
+
+  it("routes the home icon through the same component", () => {
+    const RouterLink = vi.fn(({ href, children }: BreadcrumbLinkProps) => (
+      <a href={href}>{children}</a>
+    ));
+
+    render(
+      <Breadcrumbs
+        showHomeIcon
+        linkComponent={RouterLink}
+        items={[{ label: "Work", href: "/work" }]}
+      />,
+    );
+    expect(RouterLink).toHaveBeenCalled();
+  });
+
+  it("points the home icon wherever homeHref says", () => {
+    render(
+      <Breadcrumbs showHomeIcon homeHref="/dashboard" items={[{ label: "Now" }]} />,
+    );
+    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute(
+      "href",
+      "/dashboard",
+    );
+  });
+
+  it("still uses a plain anchor when no link component is given", () => {
+    render(<Breadcrumbs items={[{ label: "Work", href: "/work" }, { label: "Now" }]} />);
+    expect(screen.getByRole("link", { name: "Work" })).toHaveAttribute("href", "/work");
+  });
+
+  it("accepts a node for a label", () => {
+    render(<Breadcrumbs items={[{ label: <em>Italic</em>, href: "/x" }, { label: "Now" }]} />);
+    expect(screen.getByText("Italic").tagName).toBe("EM");
+  });
+
+  it("renders a crumb without an href as plain text", () => {
+    render(
+      <Breadcrumbs
+        items={[{ label: "Unlinked" }, { label: "Work", href: "/work" }, { label: "Now" }]}
+      />,
+    );
+    expect(screen.queryByRole("link", { name: "Unlinked" })).toBeNull();
+    expect(screen.getByText("Unlinked")).toBeInTheDocument();
+  });
+
+  it("marks only the last crumb as the current page", () => {
+    const { container } = render(
+      <Breadcrumbs items={[{ label: "Unlinked" }, { label: "Now" }]} />,
+    );
+    const current = container.querySelectorAll('[aria-current="page"]');
+    expect(current).toHaveLength(1);
+    expect(current[0]).toHaveTextContent("Now");
+  });
+
+  it("tints the current crumb with currentClassName", () => {
+    render(
+      <Breadcrumbs
+        currentClassName="text-[var(--world)]"
+        items={[{ label: "Work", href: "/work" }, { label: "Now" }]}
+      />,
+    );
+    expect(screen.getByText("Now")).toHaveClass("text-[var(--world)]");
+  });
+
+  it("applies a per-item className", () => {
+    render(
+      <Breadcrumbs
+        items={[{ label: "Work", href: "/work", className: "custom" }, { label: "Now" }]}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "Work" })).toHaveClass("custom");
+  });
+
+  // The old implementation keyed on href, which is now optional and may repeat.
+  it("renders repeated and missing hrefs without collapsing crumbs", () => {
+    render(
+      <Breadcrumbs
+        items={[
+          { label: "A", href: "/x" },
+          { label: "B", href: "/x" },
+          { label: "C" },
+        ]}
+      />,
+    );
+    ["A", "B", "C"].forEach((label) =>
+      expect(screen.getByText(label)).toBeInTheDocument(),
+    );
+  });
+})

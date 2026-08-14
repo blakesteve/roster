@@ -81,3 +81,55 @@ describe("ThemeToggle Component", () => {
     expect(screen.getByRole("button")).toHaveTextContent("Light");
   });
 });
+
+describe("ThemeToggle labels and icons", () => {
+  beforeEach(() => {
+    document.documentElement.classList.remove("dark");
+    localStorage.clear();
+  });
+
+  // These exist because blakeb.dev's two states are "Press sheet" and
+  // "Blueline"; a hardcoded "Light"/"Dark" made the component unusable there.
+  it("takes a custom visible label for each state", async () => {
+    render(<ThemeToggle showLabel lightLabel="Press sheet" darkLabel="Blueline" />);
+    expect(screen.getByRole("button")).toHaveTextContent("Press sheet");
+
+    await userEvent.click(screen.getByRole("button"));
+    expect(screen.getByRole("button")).toHaveTextContent("Blueline");
+  });
+
+  it("takes nodes, not just strings", () => {
+    render(<ThemeToggle showLabel lightLabel={<em>Day</em>} />);
+    expect(screen.getByText("Day").tagName).toBe("EM");
+  });
+
+  it("keeps the visible label independent of the accessible name", async () => {
+    render(
+      <ThemeToggle
+        showLabel
+        lightLabel="Press sheet"
+        toDarkLabel="Switch to the blueline proof"
+      />,
+    );
+    const button = screen.getByRole("button", { name: "Switch to the blueline proof" });
+    expect(button).toHaveTextContent("Press sheet");
+  });
+
+  it("takes a custom icon for each state", async () => {
+    render(
+      <ThemeToggle
+        lightIcon={<span data-testid="to-dark">◐</span>}
+        darkIcon={<span data-testid="to-light">◑</span>}
+      />,
+    );
+    expect(screen.getByTestId("to-dark")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button"));
+    expect(screen.getByTestId("to-light")).toBeInTheDocument();
+  });
+
+  it("still defaults to Light and Dark", () => {
+    render(<ThemeToggle showLabel />);
+    expect(screen.getByRole("button")).toHaveTextContent("Light");
+  });
+})

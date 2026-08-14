@@ -161,9 +161,7 @@ export const PolymorphicAs: Story = {
         <dt>
           <Eyebrow>Rendered inside a dt</Eyebrow>
         </dt>
-        <dd className="m-0 text-sm text-gray-900 dark:text-gray-100">
-          Value
-        </dd>
+        <dd className="m-0 text-sm text-gray-900 dark:text-gray-100">Value</dd>
       </dl>
       <Eyebrow as="p" className="m-0">
         Rendered as a paragraph
@@ -176,6 +174,45 @@ export const PolymorphicAs: Story = {
       description: {
         story:
           "`as` swaps the element without touching the styling, for when the surrounding markup wants something specific — a `<dt>`, a `<legend>`, a `<figcaption>`. Reach for it when the semantics demand it, not for looks.",
+      },
+    },
+  },
+};
+
+export const AsALink: Story = {
+  args: { children: "placeholder" },
+  render: () => (
+    <div className="flex flex-col items-start gap-4">
+      <Eyebrow as="a" href="#" className="no-underline hover:!text-primary-600">
+        gameverdict.app
+      </Eyebrow>
+      <Eyebrow
+        as="a"
+        href="https://example.com"
+        target="_blank"
+        rel="noreferrer"
+        tone="primary"
+        className="no-underline hover:underline"
+      >
+        Opens in a new tab
+      </Eyebrow>
+      <Eyebrow as="label" htmlFor="demo-field">
+        A field label
+      </Eyebrow>
+      <input
+        id="demo-field"
+        className="rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+      />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          "Props follow the element. `as=\"a\"` accepts `href`, `target`, and `rel`; `as=\"label\"` accepts `htmlFor`.",
+          "",
+          "This is newer than it should be. The first version typed props as `HTMLAttributes<HTMLElement>` regardless of `as`, so `as=\"a\"` typechecked and `href` did not — consumers ended up nesting an Eyebrow inside an anchor and moving the hover onto a `group` wrapper. `as` now means what it says.",
+        ].join("\n"),
       },
     },
   },
