@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Breadcrumbs } from "./Breadcrumbs";
+import { Breadcrumbs, type BreadcrumbLinkProps } from "./Breadcrumbs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
@@ -132,6 +132,140 @@ export const InverseOnDark: Story = {
       description: {
         story:
           "Use `variant='inverse'` when placing breadcrumbs inside dark headers, hero sections, or sidebars regardless of the overall app theme. The links default to a muted light-gray and illuminate to pure white on hover.",
+      },
+    },
+  },
+};
+
+// --- 5. Routing ---
+export const WithRouterLink: Story = {
+  render: () => {
+    /* Stands in for next/link or React Router's Link. The real thing has the
+       same call signature, which is the point: `href`, `className`, children. */
+    function RouterLink({ href, className, children, ...rest }: BreadcrumbLinkProps) {
+      return (
+        <a
+          href={href}
+          className={className}
+          onClick={(event) => {
+            event.preventDefault();
+            alert(`Client-side navigation to ${href} — no page load.`);
+          }}
+          {...rest}
+        >
+          {children}
+        </a>
+      );
+    }
+
+    return (
+      <Breadcrumbs
+        linkComponent={RouterLink}
+        showHomeIcon
+        items={[
+          { label: "Work", href: "/work" },
+          { label: "Game Verdict" },
+        ]}
+      />
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          "`linkComponent` renders every crumb that has an `href`, including the home icon.",
+          "",
+          "```tsx",
+          'import NextLink from "next/link";',
+          "",
+          "<Breadcrumbs linkComponent={NextLink} items={items} />",
+          "```",
+          "",
+          "Without it the component falls back to a plain `<a>`, which is correct for a static page and wrong inside a router: every hop becomes a full page load. blakeb.dev hand-rolled its breadcrumb rather than pay that, which is why this prop exists.",
+          "",
+          "**In an app with React Server Components, pass it from a client component.** `linkComponent` is a function, and functions do not cross the RSC boundary — doing this from a server component fails the render with *Functions cannot be passed directly to Client Components*. A four-line wrapper is enough, and the pages using it stay server-rendered:",
+          "",
+          "```tsx",
+          '"use client";',
+          "",
+          'import { Breadcrumbs } from "@blakesteve/roster";',
+          'import NextLink from "next/link";',
+          "",
+          "export function AppBreadcrumbs(props) {",
+          "  return <Breadcrumbs linkComponent={NextLink} {...props} />;",
+          "}",
+          "```",
+        ].join("\n"),
+      },
+    },
+  },
+};
+
+export const CurrentPageAccent: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <Breadcrumbs
+        currentClassName="!text-primary-600 dark:!text-primary-400"
+        items={[{ label: "Work", href: "/work" }, { label: "Game Verdict" }]}
+      />
+      <Breadcrumbs
+        currentClassName="!text-success-600 dark:!text-success-400"
+        items={[{ label: "Work", href: "/work" }, { label: "Roster" }]}
+      />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`currentClassName` tints the last crumb only. Useful when each page carries its own accent and the trail should pick it up, as blakeb.dev's case studies do.",
+      },
+    },
+  },
+};
+
+export const UnlinkedCrumbs: Story = {
+  render: () => (
+    <Breadcrumbs
+      items={[
+        { label: "Archive", href: "/archive" },
+        { label: "2026" },
+        { label: "Game Verdict" },
+      ]}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`href` is optional. A crumb without one renders as plain text — for a grouping level that names a section but has no page of its own. Only the last crumb gets `aria-current=\"page\"`.",
+      },
+    },
+  },
+};
+
+export const NodeLabels: Story = {
+  render: () => (
+    <Breadcrumbs
+      items={[
+        {
+          label: (
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-block size-1.5 rounded-full bg-success-500" />
+              Live
+            </span>
+          ),
+          href: "/live",
+        },
+        { label: "Game Verdict" },
+      ]}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`label` takes a node, so a crumb can carry a status dot, an icon, or its own emphasis.",
       },
     },
   },

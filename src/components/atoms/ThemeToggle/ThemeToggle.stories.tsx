@@ -35,6 +35,8 @@ const meta = {
   },
   argTypes: {
     showLabel: { control: "boolean" },
+    lightLabel: { control: "text" },
+    darkLabel: { control: "text" },
     storageKey: { control: "text" },
     toDarkLabel: { control: "text" },
     toLightLabel: { control: "text" },
@@ -139,15 +141,48 @@ export const CustomStorageKey: Story = {
 
 export const CustomLabels: Story = {
   args: {
-    toDarkLabel: "Turn the lights off",
-    toLightLabel: "Turn the lights back on",
     showLabel: true,
+    lightLabel: "Press sheet",
+    darkLabel: "Blueline",
+    toDarkLabel: "Switch to the blueline proof",
+    toLightLabel: "Switch back to the press sheet",
   },
   parameters: {
     docs: {
       description: {
+        story: [
+          "Four independent labels, because the visible text and the accessible name are answering different questions.",
+          "",
+          "`lightLabel` / `darkLabel` are what the button *shows*, and they name the current state. `toDarkLabel` / `toLightLabel` are what a screen reader *announces*, and they name the destination, because a button's accessible name should describe what pressing it does.",
+          "",
+          "The values here are blakeb.dev's, whose two states are a press sheet and a blueline proof rather than light and dark. That site is the reason these props exist: a hardcoded \"Light\"/\"Dark\" meant adopting the component would have cost the metaphor the whole site is built on.",
+        ].join("\n"),
+      },
+    },
+  },
+};
+
+export const CustomIcons: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-3">
+      <ThemeToggle
+        showLabel
+        lightLabel="Press sheet"
+        darkLabel="Blueline"
+        lightIcon={<span aria-hidden="true">\u25D0</span>}
+        darkIcon={<span aria-hidden="true">\u25D1</span>}
+      />
+      <ThemeToggle
+        lightIcon={<span aria-hidden="true">\u2600</span>}
+        darkIcon={<span aria-hidden="true">\u263D</span>}
+      />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
         story:
-          "`toDarkLabel` and `toLightLabel` set the accessible name in each state. Worth setting if your product has a voice, and worth translating if it has more than one language.",
+          "`lightIcon` and `darkIcon` replace the default moon and sun with any node. Mark them `aria-hidden`: the button is already named by its `aria-label`, so an announced icon is just noise.",
       },
     },
   },

@@ -61,15 +61,21 @@ export const buttonVariants = cva(
       { variant: "outline", colorScheme: "error",   className: "border-error-600 text-error-600 hover:bg-error-50 dark:border-error-500 dark:text-error-400 dark:hover:bg-error-500/10" },
       { variant: "outline", colorScheme: "neutral", className: "border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800/50" },
 
-      // --- GHOST VARIANTS (Adaptive Text + Transparent Hover) ---
-      { variant: "ghost", colorScheme: "primary", className: "text-primary-600 hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-500/10" },
-      { variant: "ghost", colorScheme: "orange",  className: "text-orange-600 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-500/10" },
-      { variant: "ghost", colorScheme: "teal",    className: "text-teal-600 hover:bg-teal-100 dark:text-teal-400 dark:hover:bg-teal-500/10" },
-      { variant: "ghost", colorScheme: "purple",  className: "text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-500/10" },
-      { variant: "ghost", colorScheme: "amber",   className: "text-amber-600 hover:bg-amber-100 dark:text-amber-400 dark:hover:bg-amber-500/10" },
-      { variant: "ghost", colorScheme: "success", className: "text-success-600 hover:bg-success-50 dark:text-success-400 dark:hover:bg-success-500/10" },
-      { variant: "ghost", colorScheme: "error",   className: "text-error-600 hover:bg-error-50 dark:text-error-400 dark:hover:bg-error-500/10" },
-      { variant: "ghost", colorScheme: "neutral", className: "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/50" },
+      // --- GHOST VARIANTS (Adaptive Text + Translucent Hover) ---
+      // Translucent rather than a solid tint step. A ghost button sits directly
+      // on the host's own background, and a solid `bg-*-50` silently disappears
+      // wherever that background happens to equal the step it names — which is
+      // exactly what happened to blakeb.dev, whose paper is the same value it
+      // maps `--roster-gray-100` to. An alpha wash darkens or lightens whatever
+      // is actually behind it, so it reads on any surface.
+      { variant: "ghost", colorScheme: "primary", className: "text-primary-600 hover:bg-primary-500/10 dark:text-primary-400 dark:hover:bg-primary-400/15" },
+      { variant: "ghost", colorScheme: "orange",  className: "text-orange-600 hover:bg-orange-500/10 dark:text-orange-400 dark:hover:bg-orange-400/15" },
+      { variant: "ghost", colorScheme: "teal",    className: "text-teal-600 hover:bg-teal-500/10 dark:text-teal-400 dark:hover:bg-teal-400/15" },
+      { variant: "ghost", colorScheme: "purple",  className: "text-purple-600 hover:bg-purple-500/10 dark:text-purple-400 dark:hover:bg-purple-400/15" },
+      { variant: "ghost", colorScheme: "amber",   className: "text-amber-600 hover:bg-amber-500/10 dark:text-amber-400 dark:hover:bg-amber-400/15" },
+      { variant: "ghost", colorScheme: "success", className: "text-success-600 hover:bg-success-500/10 dark:text-success-400 dark:hover:bg-success-400/15" },
+      { variant: "ghost", colorScheme: "error",   className: "text-error-600 hover:bg-error-500/10 dark:text-error-400 dark:hover:bg-error-400/15" },
+      { variant: "ghost", colorScheme: "neutral", className: "text-gray-600 hover:bg-gray-500/10 dark:text-gray-400 dark:hover:bg-gray-400/15" },
 
       // --- LINK VARIANTS (Adaptive Text Only + Underline) ---
       { variant: "link", colorScheme: "primary", className: "text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300" },

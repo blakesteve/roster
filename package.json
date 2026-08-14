@@ -19,6 +19,11 @@
       "import": "./dist/data-table.es.js",
       "require": "./dist/data-table.cjs.js"
     },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.es.js",
+      "require": "./dist/utils.cjs.js"
+    },
     "./style.css": "./dist/roster.css",
     "./tokens.css": "./dist/tokens.css",
     "./preflight.css": "./dist/preflight.css"

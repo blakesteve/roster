@@ -66,6 +66,21 @@ export interface ThemeToggleProps
   onThemeChange?: (mode: "light" | "dark") => void;
   /** Renders the current mode beside the icon. */
   showLabel?: boolean;
+  /**
+   * Visible text when the page is light, if `showLabel` is set. Names the
+   * CURRENT state, not the destination — the accessible label does the
+   * opposite, because a button's name should say what pressing it does.
+   *
+   * Both take nodes, so a product with its own vocabulary for the two states
+   * ("Press sheet" / "Blueline", "Day" / "Night") can say so.
+   */
+  lightLabel?: React.ReactNode;
+  /** Visible text when the page is dark, if `showLabel` is set. */
+  darkLabel?: React.ReactNode;
+  /** Icon shown when the page is light. Defaults to a moon. */
+  lightIcon?: React.ReactNode;
+  /** Icon shown when the page is dark. Defaults to a sun. */
+  darkIcon?: React.ReactNode;
   /** Accessible label offering to switch to dark. */
   toDarkLabel?: string;
   /** Accessible label offering to switch back to light. */
@@ -78,6 +93,10 @@ const ThemeToggle = React.forwardRef<HTMLButtonElement, ThemeToggleProps>(
       storageKey = DEFAULT_STORAGE_KEY,
       onThemeChange,
       showLabel = false,
+      lightLabel = "Light",
+      darkLabel = "Dark",
+      lightIcon,
+      darkIcon,
       toDarkLabel = "Switch to dark mode",
       toLightLabel = "Switch to light mode",
       variant = "ghost",
@@ -111,15 +130,17 @@ const ThemeToggle = React.forwardRef<HTMLButtonElement, ThemeToggleProps>(
         aria-pressed={isDark}
         aria-label={isDark ? toLightLabel : toDarkLabel}
         startIcon={
-          <FontAwesomeIcon
-            icon={isDark ? faSun : faMoon}
-            className="h-3.5 w-3.5"
-            aria-hidden="true"
-          />
+          (isDark ? darkIcon : lightIcon) ?? (
+            <FontAwesomeIcon
+              icon={isDark ? faSun : faMoon}
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            />
+          )
         }
         {...props}
       >
-        {showLabel ? (isDark ? "Dark" : "Light") : null}
+        {showLabel ? (isDark ? darkLabel : lightLabel) : null}
       </Button>
     );
   },
