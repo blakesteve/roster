@@ -44,7 +44,7 @@ export const Playground: Story = {
 export const Sizes: Story = {
   args: { value: "0", label: "placeholder" },
   render: () => (
-    <div className="flex flex-wrap items-end gap-10">
+    <div className="rst:flex rst:flex-wrap rst:items-end rst:gap-10">
       <Stat size="sm" value="12" label="Small" />
       <Stat size="md" value="1,573" label="Medium — the default" />
       <Stat size="lg" value="98%" label="Large" />
@@ -63,7 +63,7 @@ export const Sizes: Story = {
 export const ColorSchemes: Story = {
   args: { value: "0", label: "placeholder" },
   render: () => (
-    <div className="flex flex-wrap gap-10">
+    <div className="rst:flex rst:flex-wrap rst:gap-10">
       <Stat colorScheme="neutral" value="1,573" label="Neutral" />
       <Stat colorScheme="primary" value="1,573" label="Primary" />
       <Stat colorScheme="success" value="+18%" label="Success" />
@@ -84,7 +84,7 @@ export const ColorSchemes: Story = {
 export const WithSource: Story = {
   args: { value: "0", label: "placeholder" },
   render: () => (
-    <dl className="m-0 flex flex-wrap gap-x-10 gap-y-6">
+    <dl className="rst:m-0 rst:flex rst:flex-wrap rst:gap-x-10 rst:gap-y-6">
       <Stat value="1,573" label="Verdicts cast" source="live · Supabase" />
       <Stat value="40" label="Components" source="live · package exports" />
       <Stat value="64%" label="Prefer controller" source="of all verdicts" />
@@ -104,7 +104,7 @@ export const WithSource: Story = {
 export const WithoutSource: Story = {
   args: { value: "0", label: "placeholder" },
   render: () => (
-    <dl className="m-0 flex flex-wrap gap-x-10 gap-y-6">
+    <dl className="rst:m-0 rst:flex rst:flex-wrap rst:gap-x-10 rst:gap-y-6">
       <Stat value="16" label="Years shipping" />
       <Stat value="6" label="Projects" />
       <Stat value="1" label="Component library" />
@@ -123,7 +123,7 @@ export const WithoutSource: Story = {
 export const InheritsColor: Story = {
   args: { value: "0", label: "placeholder" },
   render: () => (
-    <div className="flex flex-wrap gap-10 text-purple-600 dark:text-purple-400">
+    <div className="rst:flex rst:flex-wrap rst:gap-10 rst:text-purple-600 rst:dark:text-purple-400">
       <Stat colorScheme="current" value="1,573" label="Verdicts" />
       <Stat colorScheme="current" value="64%" label="Controller" />
     </div>
@@ -141,11 +141,11 @@ export const InheritsColor: Story = {
 export const NodeValues: Story = {
   args: { value: "0", label: "placeholder" },
   render: () => (
-    <dl className="m-0 flex flex-wrap gap-x-10 gap-y-6">
+    <dl className="rst:m-0 rst:flex rst:flex-wrap rst:gap-x-10 rst:gap-y-6">
       <Stat
         value={
           <>
-            1,573<span className="text-base opacity-50">+</span>
+            1,573<span className="rst:text-base rst:opacity-50">+</span>
           </>
         }
         label="Verdicts"
@@ -153,7 +153,7 @@ export const NodeValues: Story = {
       <Stat
         value={
           <>
-            2.1<span className="text-base opacity-50">s</span>
+            2.1<span className="rst:text-base rst:opacity-50">s</span>
           </>
         }
         label="Largest paint"
@@ -174,7 +174,7 @@ export const DarkMode: Story = {
   args: { value: "0", label: "placeholder" },
   render: () => (
     <div className="dark">
-      <dl className="m-0 flex flex-wrap gap-x-10 gap-y-6 rounded-xl bg-gray-950 p-6">
+      <dl className="rst:m-0 rst:flex rst:flex-wrap rst:gap-x-10 rst:gap-y-6 rst:rounded-xl rst:bg-gray-950 rst:p-6">
         <Stat value="1,573" label="Verdicts cast" source="live · Supabase" />
         <Stat colorScheme="primary" value="40" label="Components" />
         <Stat colorScheme="success" value="+18%" label="Week over week" />

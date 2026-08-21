@@ -10,7 +10,7 @@ describe("Badge Component", () => {
 
     expect(textNode).toBeInTheDocument();
     // Ensures the text is wrapped in the truncation span
-    expect(textNode).toHaveClass("truncate", "min-w-0");
+    expect(textNode).toHaveClass("rst:truncate", "rst:min-w-0");
   });
 
   it("applies the default solid variant classes", () => {
@@ -19,7 +19,7 @@ describe("Badge Component", () => {
     const badge = container.firstChild as HTMLElement;
 
     // Testing default fill: solid
-    expect(badge).toHaveClass("bg-primary-500", "text-white");
+    expect(badge).toHaveClass("rst:bg-primary-500", "rst:text-white");
   });
 
   it("applies light variant classes with the new crisp colors", () => {
@@ -32,9 +32,9 @@ describe("Badge Component", () => {
 
     // Testing the new crisp pastel light variant (no more /30 opacity)
     expect(badge).toHaveClass(
-      "bg-success-100",
-      "border-success-300",
-      "text-success-800",
+      "rst:bg-success-100",
+      "rst:border-success-300",
+      "rst:text-success-800",
     );
   });
 
@@ -46,7 +46,7 @@ describe("Badge Component", () => {
     );
     const badge = container.firstChild as HTMLElement;
 
-    expect(badge).toHaveClass("bg-error-500", "text-white");
+    expect(badge).toHaveClass("rst:bg-error-500", "rst:text-white");
   });
 
   it("applies outline variant classes", () => {
@@ -59,9 +59,9 @@ describe("Badge Component", () => {
 
     // ✨ Verifying neutral outline colors
     expect(badge).toHaveClass(
-      "bg-transparent",
-      "border-gray-500",
-      "text-gray-600",
+      "rst:bg-transparent",
+      "rst:border-gray-500",
+      "rst:text-gray-600",
     );
   });
 
@@ -74,9 +74,9 @@ describe("Badge Component", () => {
     expect(iconElement).toBeInTheDocument();
     // Check that the icon wrapper has shrink-0 to prevent crushing
     expect(iconElement.parentElement).toHaveClass(
-      "shrink-0",
-      "flex",
-      "items-center",
+      "rst:shrink-0",
+      "rst:flex",
+      "rst:items-center",
     );
   });
 
@@ -84,6 +84,6 @@ describe("Badge Component", () => {
     const { container } = render(<Badge statusBadge>99</Badge>);
     const badge = container.firstChild as HTMLElement;
 
-    expect(badge).toHaveClass("rounded-full", "justify-center");
+    expect(badge).toHaveClass("rst:rounded-full", "rst:justify-center");
   });
 });

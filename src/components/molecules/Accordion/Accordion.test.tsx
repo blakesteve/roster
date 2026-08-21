@@ -56,11 +56,11 @@ describe("Accordion Molecule", () => {
     );
 
     // For 3 items, there should be exactly 2 dividers
-    const dividers = container.querySelectorAll(".h-px");
+    const dividers = container.querySelectorAll(".rst\\:h-px");
     expect(dividers.length).toBe(2);
 
     // Verify our new dark mode implementation is present
-    expect(dividers[0]).toHaveClass("bg-gray-200/50", "dark:bg-gray-700/50");
+    expect(dividers[0]).toHaveClass("rst:bg-gray-200/50", "rst:dark:bg-gray-700/50");
   });
 
   it("opens specific items on initial render via defaultOpenIds", () => {

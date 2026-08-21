@@ -1,24 +1,24 @@
 import { cva } from "class-variance-authority";
 
 export const linkVariants = cva(
-  "inline-flex items-center gap-1.5 font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400 rounded-sm cursor-pointer",
+  "rst:inline-flex rst:items-center rst:gap-1.5 rst:font-semibold rst:transition-colors rst:focus:outline-none rst:focus-visible:ring-2 rst:focus-visible:ring-primary-500 rst:dark:focus-visible:ring-primary-400 rst:rounded-sm rst:cursor-pointer",
   {
     variants: {
       variant: {
-        primary: "text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300",
-        neutral: "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100",
-        danger:  "text-error-600 hover:text-error-700 dark:text-error-500 dark:hover:text-error-400",
-        white:   "text-gray-200 hover:text-white dark:text-gray-300 dark:hover:text-white",
+        primary: "rst:text-primary-600 rst:hover:text-primary-700 rst:dark:text-primary-400 rst:dark:hover:text-primary-300",
+        neutral: "rst:text-gray-600 rst:hover:text-gray-900 rst:dark:text-gray-400 rst:dark:hover:text-gray-100",
+        danger:  "rst:text-error-600 rst:hover:text-error-700 rst:dark:text-error-500 rst:dark:hover:text-error-400",
+        white:   "rst:text-gray-200 rst:hover:text-white rst:dark:text-gray-300 rst:dark:hover:text-white",
       },
       underline: {
-        always: "underline underline-offset-4",
-        hover:  "no-underline hover:underline underline-offset-4",
-        none:   "no-underline",
+        always: "rst:underline rst:underline-offset-4",
+        hover:  "rst:no-underline rst:hover:underline rst:underline-offset-4",
+        none:   "rst:no-underline",
       },
       size: {
-        sm: "text-xs",
-        md: "text-sm",
-        lg: "text-base",
+        sm: "rst:text-xs",
+        md: "rst:text-sm",
+        lg: "rst:text-base",
       },
     },
     defaultVariants: {

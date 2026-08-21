@@ -58,15 +58,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const DualPreviewDecorator: Decorator = (Story) => (
-  <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
-    <div className="light flex-1 bg-white p-12 relative flex flex-col items-center justify-center">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest z-10">
+  <div className="rst:flex rst:w-full rst:rounded-xl rst:overflow-hidden rst:border rst:border-gray-200 rst:dark:border-gray-800 rst:shadow-sm">
+    <div className="light rst:flex-1 rst:bg-white rst:p-12 rst:relative rst:flex rst:flex-col rst:items-center rst:justify-center">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest rst:z-10">
         Light Mode
       </p>
       <Story />
     </div>
-    <div className="dark flex-1 bg-gray-950 p-12 relative flex flex-col items-center justify-center border-l border-gray-200 dark:border-gray-800">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest z-10">
+    <div className="dark rst:flex-1 rst:bg-gray-950 rst:p-12 rst:relative rst:flex rst:flex-col rst:items-center rst:justify-center rst:border-l rst:border-gray-200 rst:dark:border-gray-800">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest rst:z-10">
         Dark Mode
       </p>
       <Story />
@@ -123,7 +123,7 @@ export const Square: Story = {
 
 export const Sizes: Story = {
   render: () => (
-    <div className="flex items-end gap-4">
+    <div className="rst:flex rst:items-end rst:gap-4">
       <Avatar initials="XS" size="xs" colorScheme="neutral" />
       <Avatar initials="SM" size="sm" colorScheme="teal" />
       <Avatar initials="MD" size="md" colorScheme="primary" />
@@ -147,7 +147,7 @@ const ALL_COLOR_SCHEMES: NonNullable<AvatarProps["colorScheme"]>[] = [
 
 export const AllVariantsMatrix: Story = {
   render: () => (
-    <div className="flex flex-wrap gap-4 justify-center">
+    <div className="rst:flex rst:flex-wrap rst:gap-4 rst:justify-center">
       {ALL_COLOR_SCHEMES.map((color) => (
         <Avatar
           key={color}

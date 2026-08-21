@@ -34,16 +34,16 @@ const Switch = ({
   return (
     <Field
       as="div"
-      className={cn("flex items-center justify-between gap-4", className)}
+      className={cn("rst:flex rst:items-center rst:justify-between rst:gap-4", className)}
     >
       {(label || description) && (
-        <span className="flex flex-col">
+        <span className="rst:flex rst:flex-col">
           {label && (
             <Label
               passive
               className={cn(
-                "text-sm font-medium text-gray-900 dark:text-gray-100",
-                disabled && "opacity-50",
+                "rst:text-sm rst:font-medium rst:text-gray-900 rst:dark:text-gray-100",
+                disabled && "rst:opacity-50",
               )}
             >
               {label}
@@ -52,8 +52,8 @@ const Switch = ({
           {description && (
             <Description
               className={cn(
-                "text-xs text-gray-500 dark:text-gray-400",
-                disabled && "opacity-50",
+                "rst:text-xs rst:text-gray-500 rst:dark:text-gray-400",
+                disabled && "rst:opacity-50",
               )}
             >
               {description}

@@ -24,11 +24,11 @@ describe("Footer Component", () => {
   });
 
   it("applies custom classNames passed to it", () => {
-    render(<Footer data-testid="footer" className="mt-12 opacity-50" />);
+    render(<Footer data-testid="footer" className="rst:mt-12 rst:opacity-50" />);
 
     const footerElement = screen.getByTestId("footer");
-    expect(footerElement).toHaveClass("mt-12");
-    expect(footerElement).toHaveClass("opacity-50");
+    expect(footerElement).toHaveClass("rst:mt-12");
+    expect(footerElement).toHaveClass("rst:opacity-50");
   });
 
   it("applies the default variant classes when no variant is specified", () => {
@@ -36,27 +36,27 @@ describe("Footer Component", () => {
 
     const footerElement = screen.getByTestId("footer");
     // Token-driven; defaults resolve to the previous gray-50 / gray-900\/50 pair.
-    expect(footerElement).toHaveClass("bg-[var(--roster-footer-bg)]");
-    expect(footerElement).toHaveClass("text-[var(--roster-footer-text)]");
-    expect(footerElement).toHaveClass("border-[var(--roster-footer-border)]");
+    expect(footerElement).toHaveClass("rst:bg-[var(--roster-footer-bg)]");
+    expect(footerElement).toHaveClass("rst:text-[var(--roster-footer-text)]");
+    expect(footerElement).toHaveClass("rst:border-[var(--roster-footer-border)]");
   });
 
   it("applies the primary variant classes", () => {
     render(<Footer data-testid="footer" variant="primary" />);
 
     const footerElement = screen.getByTestId("footer");
-    expect(footerElement).toHaveClass("bg-primary-900");
-    expect(footerElement).toHaveClass("text-primary-200");
-    expect(footerElement).toHaveClass("dark:bg-primary-950");
+    expect(footerElement).toHaveClass("rst:bg-primary-900");
+    expect(footerElement).toHaveClass("rst:text-primary-200");
+    expect(footerElement).toHaveClass("rst:dark:bg-primary-950");
   });
 
   it("applies the transparent variant classes", () => {
     render(<Footer data-testid="footer" variant="transparent" />);
 
     const footerElement = screen.getByTestId("footer");
-    expect(footerElement).toHaveClass("bg-transparent");
-    expect(footerElement).toHaveClass("text-gray-500");
-    expect(footerElement).toHaveClass("dark:text-gray-400");
+    expect(footerElement).toHaveClass("rst:bg-transparent");
+    expect(footerElement).toHaveClass("rst:text-gray-500");
+    expect(footerElement).toHaveClass("rst:dark:text-gray-400");
   });
 
   it("renders footer links when provided", () => {

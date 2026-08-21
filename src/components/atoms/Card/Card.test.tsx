@@ -16,18 +16,18 @@ describe("Card Component", () => {
   it("renders brand stripes when branded prop is true", () => {
     const { container } = render(<Card branded>Content</Card>);
 
-    const topStripe = container.querySelector(".bg-orange-500");
-    const bottomStripe = container.querySelector(".bg-primary-500");
+    const topStripe = container.querySelector(".rst\\:bg-orange-500");
+    const bottomStripe = container.querySelector(".rst\\:bg-primary-500");
 
     expect(topStripe).toBeInTheDocument();
-    expect(topStripe).toHaveClass("absolute", "top-0", "inset-x-0", "h-1");
+    expect(topStripe).toHaveClass("rst:absolute", "rst:top-0", "rst:inset-x-0", "rst:h-1");
 
     expect(bottomStripe).toBeInTheDocument();
     expect(bottomStripe).toHaveClass(
-      "absolute",
-      "bottom-0",
-      "inset-x-0",
-      "h-1",
+      "rst:absolute",
+      "rst:bottom-0",
+      "rst:inset-x-0",
+      "rst:h-1",
     );
   });
 
@@ -41,8 +41,8 @@ describe("Card Component", () => {
       </Card>,
     );
 
-    const topStripe = container.querySelector(".absolute.top-0");
-    const bottomStripe = container.querySelector(".absolute.bottom-0");
+    const topStripe = container.querySelector(".rst\\:absolute.rst\\:top-0");
+    const bottomStripe = container.querySelector(".rst\\:absolute.rst\\:bottom-0");
 
     expect(topStripe).toHaveStyle({ backgroundColor: customTop });
     expect(bottomStripe).toHaveStyle({ backgroundColor: customBottom });
@@ -53,49 +53,49 @@ describe("Card Component", () => {
   it("applies token-driven white (default) variant classes", () => {
     const { container } = render(<Card>Content</Card>);
     expect(container.firstChild).toHaveClass(
-      "bg-[var(--roster-card-bg)]",
-      "border-[var(--roster-card-border)]",
-      "text-[var(--roster-card-text)]",
+      "rst:bg-[var(--roster-card-bg)]",
+      "rst:border-[var(--roster-card-border)]",
+      "rst:text-[var(--roster-card-text)]",
     );
   });
 
   it("applies soft variant classes with crisp light mode and translucent dark mode", () => {
     const { container } = render(<Card variant="soft">Content</Card>);
     expect(container.firstChild).toHaveClass(
-      "bg-gray-50",
-      "dark:bg-gray-900/40",
+      "rst:bg-gray-50",
+      "rst:dark:bg-gray-900/40",
     );
   });
 
   it("applies slate variant classes", () => {
     const { container } = render(<Card variant="slate">Content</Card>);
     expect(container.firstChild).toHaveClass(
-      "bg-gray-700",
-      "dark:bg-gray-800",
-      "text-gray-100",
+      "rst:bg-gray-700",
+      "rst:dark:bg-gray-800",
+      "rst:text-gray-100",
     );
   });
 
   it("applies primary variant classes matching solid buttons", () => {
     const { container } = render(<Card variant="primary">Content</Card>);
     expect(container.firstChild).toHaveClass(
-      "bg-primary-600",
-      "border-primary-700",
+      "rst:bg-primary-600",
+      "rst:border-primary-700",
     );
   });
 
   it("applies glass variant classes correctly", () => {
     const { container } = render(<Card variant="glass">Content</Card>);
     expect(container.firstChild).toHaveClass(
-      "bg-white/50",
-      "backdrop-blur-md",
-      "dark:bg-gray-950/50",
+      "rst:bg-white/50",
+      "rst:backdrop-blur-md",
+      "rst:dark:bg-gray-950/50",
     );
   });
 
   it("applies padding classes correctly", () => {
     const { container } = render(<Card padding="lg">Big Padding</Card>);
-    expect(container.firstChild).toHaveClass("p-8");
+    expect(container.firstChild).toHaveClass("rst:p-8");
   });
 
   // Regression: children used to render inside a `relative z-0` wrapper, so
@@ -103,14 +103,14 @@ describe("Card Component", () => {
   // did nothing. Children must be direct descendants of the styled root.
   it("renders children directly on the root so layout classes reach them", () => {
     const { container } = render(
-      <Card className="flex gap-4">
+      <Card className="rst:flex rst:gap-4">
         <span data-testid="first">One</span>
         <span data-testid="second">Two</span>
       </Card>,
     );
 
     const root = container.firstChild as HTMLElement;
-    expect(root).toHaveClass("flex", "gap-4");
+    expect(root).toHaveClass("rst:flex", "rst:gap-4");
     expect(screen.getByTestId("first").parentElement).toBe(root);
     expect(screen.getByTestId("second").parentElement).toBe(root);
   });
@@ -125,8 +125,8 @@ describe("Card Component", () => {
     );
 
     const root = container.firstChild as HTMLElement;
-    expect(root).toHaveClass("isolate");
+    expect(root).toHaveClass("rst:isolate");
     expect(screen.getByTestId("content").parentElement).toBe(root);
-    expect(root.querySelectorAll("div.absolute.z-10")).toHaveLength(2);
+    expect(root.querySelectorAll("div.rst\\:absolute.rst\\:z-10")).toHaveLength(2);
   });
 });

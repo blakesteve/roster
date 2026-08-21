@@ -22,13 +22,13 @@ export interface LabeledDividerProps
  */
 const LabeledDivider = React.forwardRef<HTMLDivElement, LabeledDividerProps>(
   ({ label, trailing, align = "start", className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex items-center gap-3", className)} {...props}>
+    <div ref={ref} className={cn("rst:flex rst:items-center rst:gap-3", className)} {...props}>
       {align === "end" && (
-        <span role="presentation" className="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
+        <span role="presentation" className="rst:h-px rst:flex-1 rst:bg-gray-200 rst:dark:bg-gray-800" />
       )}
       <Eyebrow>{label}</Eyebrow>
       {align === "start" && (
-        <span role="presentation" className="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
+        <span role="presentation" className="rst:h-px rst:flex-1 rst:bg-gray-200 rst:dark:bg-gray-800" />
       )}
       {trailing && <Eyebrow>{trailing}</Eyebrow>}
     </div>

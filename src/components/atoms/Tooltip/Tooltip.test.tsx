@@ -135,18 +135,18 @@ describe("Tooltip Component", () => {
   it("applies dark variant classes by default", () => {
     renderTooltip({ defaultOpen: true });
     const content = screen.getByTestId("tooltip-content");
-    expect(content).toHaveClass("bg-zinc-900", "text-zinc-100");
+    expect(content).toHaveClass("rst:bg-zinc-900", "rst:text-zinc-100");
   });
 
   it("applies light variant classes when variant is 'light'", () => {
     renderTooltip({ variant: "light", defaultOpen: true });
     const content = screen.getByTestId("tooltip-content");
-    expect(content).toHaveClass("bg-white", "text-zinc-900");
+    expect(content).toHaveClass("rst:bg-white", "rst:text-zinc-900");
   });
 
   it("does not apply dark classes when variant is 'light'", () => {
     renderTooltip({ variant: "light", defaultOpen: true });
-    expect(screen.getByTestId("tooltip-content")).not.toHaveClass("bg-zinc-900");
+    expect(screen.getByTestId("tooltip-content")).not.toHaveClass("rst:bg-zinc-900");
   });
 
   // ── Placement ──────────────────────────────────────────────────────────────
@@ -182,7 +182,7 @@ describe("Tooltip Component", () => {
   it("preserves base classes alongside a custom className", () => {
     renderTooltip({ className: "my-override", defaultOpen: true });
     const content = screen.getByTestId("tooltip-content");
-    expect(content).toHaveClass("rounded-lg", "my-override");
+    expect(content).toHaveClass("rst:rounded-lg", "my-override");
   });
 
   // ── ReactNode content ──────────────────────────────────────────────────────
@@ -213,11 +213,11 @@ describe("Tooltip Component", () => {
   it("applies the base structural classes to the content bubble", () => {
     renderTooltip({ defaultOpen: true });
     const content = screen.getByTestId("tooltip-content");
-    expect(content).toHaveClass("z-50", "rounded-lg", "px-3", "py-2", "text-xs");
+    expect(content).toHaveClass("rst:z-50", "rst:rounded-lg", "rst:px-3", "rst:py-2", "rst:text-xs");
   });
 
   it("applies the enter animation class", () => {
     renderTooltip({ defaultOpen: true });
-    expect(screen.getByTestId("tooltip-content")).toHaveClass("animate-in");
+    expect(screen.getByTestId("tooltip-content")).toHaveClass("rst:animate-in");
   });
 });

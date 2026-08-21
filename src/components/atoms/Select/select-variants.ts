@@ -1,23 +1,23 @@
 import { cva } from "class-variance-authority";
 
 export const selectTriggerVariants = cva(
-  "relative w-full cursor-pointer rounded-md py-2.5 pl-4 pr-10 text-left text-sm font-medium shadow-sm ring-1 ring-inset transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 sm:leading-6",
+  "rst:relative rst:w-full rst:cursor-pointer rst:rounded-md rst:py-2.5 rst:pl-4 rst:pr-10 rst:text-left rst:text-sm rst:font-medium rst:shadow-sm rst:ring-1 rst:ring-inset rst:transition-all rst:focus:outline-none rst:focus:ring-2 rst:focus:ring-primary-500 rst:dark:focus:ring-primary-400 rst:sm:leading-6",
   {
     variants: {
       variant: {
         white:
-          "bg-white text-gray-900 ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-100 dark:ring-gray-700 dark:hover:bg-gray-700",
+          "rst:bg-white rst:text-gray-900 rst:ring-gray-300 rst:hover:bg-gray-50 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:ring-gray-700 rst:dark:hover:bg-gray-700",
         soft:
-          "bg-gray-100 text-gray-900 ring-transparent hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700",
+          "rst:bg-gray-100 rst:text-gray-900 rst:ring-transparent rst:hover:bg-gray-200 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:hover:bg-gray-700",
         slate:
-          "bg-gray-700 text-gray-100 ring-transparent hover:bg-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800",
+          "rst:bg-gray-700 rst:text-gray-100 rst:ring-transparent rst:hover:bg-gray-600 rst:dark:bg-gray-900 rst:dark:text-gray-100 rst:dark:hover:bg-gray-800",
         outline:
-          "bg-transparent text-gray-900 ring-gray-300 hover:bg-gray-50 dark:ring-gray-700 dark:text-gray-100 dark:hover:bg-gray-800/50",
+          "rst:bg-transparent rst:text-gray-900 rst:ring-gray-300 rst:hover:bg-gray-50 rst:dark:ring-gray-700 rst:dark:text-gray-100 rst:dark:hover:bg-gray-800/50",
         ghost:
-          "bg-transparent text-gray-700 ring-transparent hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+          "rst:bg-transparent rst:text-gray-700 rst:ring-transparent rst:hover:bg-gray-100 rst:hover:text-gray-900 rst:dark:text-gray-300 rst:dark:hover:bg-gray-800 rst:dark:hover:text-gray-100",
       },
       error: {
-        true: "ring-error-500 text-error-600 focus:ring-error-500 dark:ring-error-500 dark:text-error-400 dark:focus:ring-error-400",
+        true: "rst:ring-error-500 rst:text-error-600 rst:focus:ring-error-500 rst:dark:ring-error-500 rst:dark:text-error-400 rst:dark:focus:ring-error-400",
         false: "",
       },
     },

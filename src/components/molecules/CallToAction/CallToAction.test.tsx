@@ -42,7 +42,7 @@ describe("CallToAction Molecule", () => {
         title="Embedded Component"
         description={
           <div data-testid="complex-node">
-            <span className="font-bold">Rich Text</span>
+            <span className="rst:font-bold">Rich Text</span>
             <button>Embedded Button</button>
           </div>
         }
@@ -90,8 +90,8 @@ describe("CallToAction Molecule", () => {
 
     expect(screen.getByTestId("test-icon")).toBeInTheDocument();
     expect(screen.getByTestId("test-icon").parentElement).toHaveClass(
-      "shrink-0",
-      "text-current",
+      "rst:shrink-0",
+      "rst:text-current",
     );
   });
 
@@ -102,19 +102,19 @@ describe("CallToAction Molecule", () => {
 
     // Light mode check
     expect(container.firstChild).toHaveClass(
-      "bg-primary-50",
-      "text-primary-900",
+      "rst:bg-primary-50",
+      "rst:text-primary-900",
     );
 
     expect(container.firstChild).toHaveClass(
-      "dark:bg-primary-900/30",
-      "dark:text-primary-200",
+      "rst:dark:bg-primary-900/30",
+      "rst:dark:text-primary-200",
     );
 
     rerender(<CallToAction title="Error Test" variant="error" />);
     expect(container.firstChild).toHaveClass(
-      "bg-error-50",
-      "dark:bg-error-900/30",
+      "rst:bg-error-50",
+      "rst:dark:bg-error-900/30",
     );
   });
 
@@ -124,8 +124,8 @@ describe("CallToAction Molecule", () => {
     );
 
     expect(container.firstChild).toHaveClass(
-      "bg-amber-50",
-      "dark:bg-amber-900/30",
+      "rst:bg-amber-50",
+      "rst:dark:bg-amber-900/30",
     );
   });
 
@@ -136,8 +136,8 @@ describe("CallToAction Molecule", () => {
     );
 
     expect(container.firstChild).toHaveClass(
-      "bg-success-50",
-      "dark:bg-success-900/30",
+      "rst:bg-success-50",
+      "rst:dark:bg-success-900/30",
     );
   });
 
@@ -146,8 +146,8 @@ describe("CallToAction Molecule", () => {
     const { container } = render(<CallToAction title="Info" variant="info" />);
 
     expect(container.firstChild).toHaveClass(
-      "bg-blue-50",
-      "dark:bg-blue-900/30",
+      "rst:bg-blue-50",
+      "rst:dark:bg-blue-900/30",
     );
   });
 
@@ -162,11 +162,11 @@ describe("CallToAction Molecule", () => {
 
   it("merges custom classNames with variants", () => {
     const { container } = render(
-      <CallToAction title="Custom" className="my-custom-class" />,
+      <CallToAction title="Custom" className="rst:my-custom-class" />,
     );
 
-    expect(container.firstChild).toHaveClass("my-custom-class");
+    expect(container.firstChild).toHaveClass("rst:my-custom-class");
     // Should still have base variants
-    expect(container.firstChild).toHaveClass("relative", "flex", "rounded-lg");
+    expect(container.firstChild).toHaveClass("rst:relative", "rst:flex", "rst:rounded-lg");
   });
 });

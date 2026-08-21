@@ -69,20 +69,20 @@ type Story = StoryObj<typeof meta>;
 // ─── Decorators ──────────────────────────────────────────────────────────────
 
 const DualPreviewDecorator: Decorator = (Story) => (
-  <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
-    <div className="light flex-1 bg-white p-8 relative min-w-0">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+  <div className="rst:flex rst:w-full rst:rounded-xl rst:overflow-hidden rst:border rst:border-gray-200 rst:dark:border-gray-800 rst:shadow-sm">
+    <div className="light rst:flex-1 rst:bg-white rst:p-8 rst:relative rst:min-w-0">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest">
         Light Mode
       </p>
-      <div className="mt-4">
+      <div className="rst:mt-4">
         <Story />
       </div>
     </div>
-    <div className="dark flex-1 bg-gray-950 p-8 relative border-l border-gray-200 dark:border-gray-800 min-w-0">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+    <div className="dark rst:flex-1 rst:bg-gray-950 rst:p-8 rst:relative rst:border-l rst:border-gray-200 rst:dark:border-gray-800 rst:min-w-0">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest">
         Dark Mode
       </p>
-      <div className="mt-4">
+      <div className="rst:mt-4">
         <Story />
       </div>
     </div>
@@ -108,7 +108,7 @@ export const Playground: Story = {
   },
   render: (args) => (
     <CollapsibleSection {...args}>
-      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+      <p className="rst:text-sm rst:text-gray-600 rst:dark:text-gray-400 rst:leading-relaxed">
         {LONG_TEXT}
       </p>
     </CollapsibleSection>
@@ -128,7 +128,7 @@ export const ProseContent: Story = {
   },
   render: (args) => (
     <CollapsibleSection {...args}>
-      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+      <p className="rst:text-sm rst:text-gray-600 rst:dark:text-gray-400 rst:leading-relaxed">
         {LONG_TEXT}
       </p>
     </CollapsibleSection>
@@ -152,12 +152,12 @@ export const ChipRow: Story = {
   },
   render: (args) => (
     <CollapsibleSection {...args}>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="rst:flex rst:flex-wrap rst:gap-1.5">
         {GENRES.map((genre) => (
           <button
             key={genre}
             type="button"
-            className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer"
+            className="rst:rounded-lg rst:border rst:border-gray-200 rst:dark:border-gray-700 rst:px-3 rst:py-1.5 rst:text-xs rst:font-medium rst:text-gray-600 rst:dark:text-gray-400 rst:hover:border-gray-400 rst:dark:hover:border-gray-500 rst:transition-colors rst:cursor-pointer"
           >
             {genre}
           </button>
@@ -180,7 +180,7 @@ export const NoClamp: Story = {
   },
   render: (args) => (
     <CollapsibleSection {...args}>
-      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+      <p className="rst:text-sm rst:text-gray-600 rst:dark:text-gray-400 rst:leading-relaxed">
         {SHORT_TEXT}
       </p>
     </CollapsibleSection>
@@ -190,20 +190,20 @@ export const NoClamp: Story = {
 export const Sizes: Story = {
   args: { size: "md" } as CollapsibleSectionProps,
   render: () => (
-    <div className="flex flex-col gap-8 max-w-xl">
+    <div className="rst:flex rst:flex-col rst:gap-8 rst:max-w-xl">
       {(["xs", "sm", "md", "lg"] as const).map((size) => (
         <div key={size}>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest rst:mb-2">
             size=&quot;{size}&quot;
           </p>
           {size === "xs" ? (
             <CollapsibleSection size="xs" expandLabel="Show all genres" collapseLabel="Show less">
-              <div className="flex flex-wrap gap-1.5">
+              <div className="rst:flex rst:flex-wrap rst:gap-1.5">
                 {GENRES.map((genre) => (
                   <button
                     key={genre}
                     type="button"
-                    className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 cursor-pointer"
+                    className="rst:rounded-lg rst:border rst:border-gray-200 rst:dark:border-gray-700 rst:px-3 rst:py-1.5 rst:text-xs rst:font-medium rst:text-gray-600 rst:dark:text-gray-400 rst:cursor-pointer"
                   >
                     {genre}
                   </button>
@@ -212,7 +212,7 @@ export const Sizes: Story = {
             </CollapsibleSection>
           ) : (
             <CollapsibleSection size={size}>
-              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              <p className="rst:text-sm rst:text-gray-600 rst:dark:text-gray-400 rst:leading-relaxed">
                 {LONG_TEXT}
               </p>
             </CollapsibleSection>
@@ -236,7 +236,7 @@ export const RichContent: Story = {
   args: { size: "md" } as CollapsibleSectionProps,
   render: () => (
     <CollapsibleSection size="md">
-      <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+      <div className="rst:space-y-2 rst:text-sm rst:text-gray-600 rst:dark:text-gray-400 rst:leading-relaxed">
         <p>
           The combat system has been completely overhauled. Enemies react dynamically
           to your playstyle, requiring constant adaptation mid-fight.
@@ -280,7 +280,7 @@ export const CustomLabels: Story = {
   },
   render: (args) => (
     <CollapsibleSection {...args}>
-      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+      <p className="rst:text-sm rst:text-gray-600 rst:dark:text-gray-400 rst:leading-relaxed">
         {LONG_TEXT}
       </p>
     </CollapsibleSection>

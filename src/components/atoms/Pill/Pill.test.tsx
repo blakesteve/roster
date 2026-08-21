@@ -23,8 +23,8 @@ describe("Pill Component", () => {
     });
 
     it("merges a custom className with the variant classes", () => {
-      const { container } = render(<Pill className="ml-4">Spaced</Pill>);
-      expect(container.firstChild).toHaveClass("ml-4", "rounded-full");
+      const { container } = render(<Pill className="rst:ml-4">Spaced</Pill>);
+      expect(container.firstChild).toHaveClass("rst:ml-4", "rst:rounded-full");
     });
 
     it("passes arbitrary props through to the root", () => {
@@ -39,26 +39,26 @@ describe("Pill Component", () => {
     it("defaults to the neutral soft small combination", () => {
       const { container } = render(<Pill>Default</Pill>);
       expect(container.firstChild).toHaveClass(
-        "bg-gray-100",
-        "text-gray-700",
-        "text-xs",
+        "rst:bg-gray-100",
+        "rst:text-gray-700",
+        "rst:text-xs",
       );
     });
 
     it("is always fully rounded", () => {
       const { container } = render(<Pill variant="solid" size="md">Round</Pill>);
-      expect(container.firstChild).toHaveClass("rounded-full");
+      expect(container.firstChild).toHaveClass("rst:rounded-full");
     });
   });
 
   describe("color schemes", () => {
     const schemes = [
-      ["primary", "bg-primary-50"],
-      ["success", "bg-success-50"],
-      ["error", "bg-error-50"],
-      ["amber", "bg-amber-50"],
-      ["info", "bg-info-50"],
-      ["neutral", "bg-gray-100"],
+      ["primary", "rst:bg-primary-50"],
+      ["success", "rst:bg-success-50"],
+      ["error", "rst:bg-error-50"],
+      ["amber", "rst:bg-amber-50"],
+      ["info", "rst:bg-info-50"],
+      ["neutral", "rst:bg-gray-100"],
     ] as const;
 
     it.each(schemes)("applies the %s soft scheme", (scheme, expected) => {
@@ -73,9 +73,9 @@ describe("Pill Component", () => {
         <Pill variant="outline" colorScheme="success">Outline</Pill>,
       );
       expect(container.firstChild).toHaveClass(
-        "bg-transparent",
-        "border",
-        "border-success-300",
+        "rst:bg-transparent",
+        "rst:border",
+        "rst:border-success-300",
       );
     });
 
@@ -83,7 +83,7 @@ describe("Pill Component", () => {
       const { container } = render(
         <Pill variant="solid" colorScheme="error">Solid</Pill>,
       );
-      expect(container.firstChild).toHaveClass("bg-error-500", "text-white");
+      expect(container.firstChild).toHaveClass("rst:bg-error-500", "rst:text-white");
     });
 
     // Amber is light enough that white text on it fails contrast.
@@ -91,33 +91,33 @@ describe("Pill Component", () => {
       const { container } = render(
         <Pill variant="solid" colorScheme="amber">Warning</Pill>,
       );
-      expect(container.firstChild).toHaveClass("text-amber-950");
+      expect(container.firstChild).toHaveClass("rst:text-amber-950");
     });
   });
 
   describe("sizes", () => {
     it("applies small sizing by default", () => {
       const { container } = render(<Pill>Small</Pill>);
-      expect(container.firstChild).toHaveClass("text-xs", "px-2.5");
+      expect(container.firstChild).toHaveClass("rst:text-xs", "rst:px-2.5");
     });
 
     it("applies medium sizing", () => {
       const { container } = render(<Pill size="md">Medium</Pill>);
-      expect(container.firstChild).toHaveClass("text-sm", "px-3");
+      expect(container.firstChild).toHaveClass("rst:text-sm", "rst:px-3");
     });
   });
 
   describe("dot", () => {
     it("renders no dot by default", () => {
       const { container } = render(<Pill>No dot</Pill>);
-      expect(container.querySelectorAll("span.rounded-full")).toHaveLength(1);
+      expect(container.querySelectorAll("span.rst\\:rounded-full")).toHaveLength(1);
     });
 
     it("renders a dot in the scheme color when dot is set", () => {
       const { container } = render(
         <Pill dot colorScheme="success">Live</Pill>,
       );
-      expect(container.querySelector(".bg-success-500")).toBeInTheDocument();
+      expect(container.querySelector(".rst\\:bg-success-500")).toBeInTheDocument();
     });
 
     // On a filled pill the scheme color would disappear into the background.
@@ -125,12 +125,12 @@ describe("Pill Component", () => {
       const { container } = render(
         <Pill dot variant="solid" colorScheme="success">Live</Pill>,
       );
-      expect(container.querySelector(".bg-current")).toBeInTheDocument();
+      expect(container.querySelector(".rst\\:bg-current")).toBeInTheDocument();
     });
 
     it("scales the dot with the pill size", () => {
       const { container } = render(<Pill dot size="md">Live</Pill>);
-      expect(container.querySelector(".size-2")).toBeInTheDocument();
+      expect(container.querySelector(".rst\\:size-2")).toBeInTheDocument();
     });
 
     it("hides the dot from assistive tech", () => {
@@ -142,7 +142,7 @@ describe("Pill Component", () => {
   describe("pulse", () => {
     it("renders a pulsing ring alongside the dot", () => {
       const { container } = render(<Pill dot pulse>Live now</Pill>);
-      expect(container.querySelector(".motion-safe\\:animate-ping")).toBeInTheDocument();
+      expect(container.querySelector(".rst\\:motion-safe\\:animate-ping")).toBeInTheDocument();
     });
 
     // Motion is gated on motion-safe so reduced-motion users get a static dot
@@ -151,12 +151,12 @@ describe("Pill Component", () => {
       const { container } = render(
         <Pill dot pulse colorScheme="error">Live now</Pill>,
       );
-      expect(container.querySelectorAll(".bg-error-500").length).toBeGreaterThanOrEqual(1);
+      expect(container.querySelectorAll(".rst\\:bg-error-500").length).toBeGreaterThanOrEqual(1);
     });
 
     it("does not pulse without a dot", () => {
       const { container } = render(<Pill pulse>No dot</Pill>);
-      expect(container.querySelector(".motion-safe\\:animate-ping")).toBeNull();
+      expect(container.querySelector(".rst\\:motion-safe\\:animate-ping")).toBeNull();
     });
   });
 

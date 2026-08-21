@@ -25,17 +25,17 @@ const EmptyState = ({
   return (
     <div className={cn(emptyStateVariants({ variant }), className)} {...props}>
       {icon && (
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-          <div className="h-6 w-6 [&>svg]:h-full [&>svg]:w-full">{icon}</div>
+        <div className="rst:mb-4 rst:flex rst:h-12 rst:w-12 rst:items-center rst:justify-center rst:rounded-full rst:bg-gray-100 rst:text-gray-400">
+          <div className="rst:h-6 rst:w-6 rst:[&>svg]:h-full rst:[&>svg]:w-full">{icon}</div>
         </div>
       )}
 
-      <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+      <h3 className="rst:text-lg rst:font-semibold rst:text-gray-900">{title}</h3>
       {description && (
-        <p className="mt-1 max-w-sm text-sm text-gray-500">{description}</p>
+        <p className="rst:mt-1 rst:max-w-sm rst:text-sm rst:text-gray-500">{description}</p>
       )}
 
-      {action && <div className="mt-6">{action}</div>}
+      {action && <div className="rst:mt-6">{action}</div>}
     </div>
   );
 };

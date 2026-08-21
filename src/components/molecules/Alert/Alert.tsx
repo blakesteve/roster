@@ -71,16 +71,16 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         {icon === undefined ? (
           <FontAwesomeIcon
             icon={DEFAULT_ICONS[colorScheme ?? "error"]}
-            className="mt-0.5 h-4 w-4 shrink-0"
+            className="rst:mt-0.5 rst:h-4 rst:w-4 rst:shrink-0"
             aria-hidden="true"
           />
         ) : (
           icon
         )}
 
-        <div className="min-w-0 flex-1">
-          {title && <p className="font-semibold">{title}</p>}
-          <div className={cn("min-w-0", title && "mt-0.5 opacity-90")}>
+        <div className="rst:min-w-0 rst:flex-1">
+          {title && <p className="rst:font-semibold">{title}</p>}
+          <div className={cn("rst:min-w-0", title && "rst:mt-0.5 rst:opacity-90")}>
             {children}
           </div>
         </div>
@@ -90,9 +90,9 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
             type="button"
             onClick={onDismiss}
             aria-label={dismissLabel}
-            className="-m-1 shrink-0 rounded p-1 opacity-60 transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-current"
+            className="rst:-m-1 rst:shrink-0 rst:rounded rst:p-1 rst:opacity-60 rst:transition-opacity rst:hover:opacity-100 rst:focus:outline-none rst:focus-visible:ring-2 rst:focus-visible:ring-current"
           >
-            <FontAwesomeIcon icon={faXmark} className="h-3.5 w-3.5" aria-hidden="true" />
+            <FontAwesomeIcon icon={faXmark} className="rst:h-3.5 rst:w-3.5" aria-hidden="true" />
           </button>
         )}
       </div>

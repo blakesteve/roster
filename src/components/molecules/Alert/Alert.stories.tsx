@@ -56,7 +56,7 @@ export const Dismissible: Story = {
 export const AllSchemes: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-col gap-3">
+    <div className="rst:flex rst:flex-col rst:gap-3">
       <Alert colorScheme="error">Something went wrong.</Alert>
       <Alert colorScheme="success">Your changes were saved.</Alert>
       <Alert colorScheme="amber">This will archive 42 records.</Alert>
@@ -71,7 +71,7 @@ export const DarkMode: Story = {
   args: { children: "placeholder" },
   render: () => (
     <div className="dark">
-      <div className="flex flex-col gap-3 rounded-xl bg-gray-950 p-6">
+      <div className="rst:flex rst:flex-col rst:gap-3 rst:rounded-xl rst:bg-gray-950 rst:p-6">
         <Alert colorScheme="error">Something went wrong.</Alert>
         <Alert colorScheme="success">Your changes were saved.</Alert>
         <Alert colorScheme="info">Scoring runs nightly at 2am UTC.</Alert>

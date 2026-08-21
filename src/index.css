@@ -31,7 +31,7 @@
    harmless. */
 @layer roster-preflight, theme, base, components, roster, utilities;
 
-@import "tailwindcss/theme.css" layer(roster);
+@import "tailwindcss/theme.css" layer(roster) prefix(rst);
 @import "tailwindcss/utilities.css" layer(roster);
 @custom-variant dark (&:where(.dark, .dark *));
 

@@ -70,7 +70,7 @@ export const NoLeagues: Story = {
     variant: "dashed",
     icon: <FontAwesomeIcon icon={faTrophy} />,
     action: (
-      <div className="flex gap-3">
+      <div className="rst:flex rst:gap-3">
         <Button variant="solid" colorScheme="primary">
           Create League
         </Button>

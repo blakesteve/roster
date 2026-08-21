@@ -69,7 +69,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
         error={error}
         errorMessage={errorMessage}
         // Edge renders its own reveal control, which would sit next to ours.
-        className={cn("[&_input::-ms-reveal]:hidden", props.className)}
+        className={cn("rst:[&_input::-ms-reveal]:hidden", props.className)}
         endIcon={
           revealable ? (
             <button
@@ -79,15 +79,15 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
               aria-label={revealed ? hideLabel : showLabel}
               aria-pressed={revealed}
               className={cn(
-                "-m-1 flex items-center rounded p-1 transition-opacity",
-                "opacity-70 hover:opacity-100",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400",
-                disabled && "cursor-not-allowed opacity-40 hover:opacity-40",
+                "rst:-m-1 rst:flex rst:items-center rst:rounded rst:p-1 rst:transition-opacity",
+                "rst:opacity-70 rst:hover:opacity-100",
+                "rst:focus:outline-none rst:focus-visible:ring-2 rst:focus-visible:ring-primary-500 rst:dark:focus-visible:ring-primary-400",
+                disabled && "rst:cursor-not-allowed rst:opacity-40 rst:hover:opacity-40",
               )}
             >
               <FontAwesomeIcon
                 icon={revealed ? faEyeSlash : faEye}
-                className="h-4 w-4"
+                className="rst:h-4 rst:w-4"
                 aria-hidden="true"
               />
             </button>

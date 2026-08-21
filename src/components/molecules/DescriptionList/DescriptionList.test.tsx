@@ -34,30 +34,30 @@ describe("DescriptionList Component", () => {
 
   it("defaults to the inline grid layout", () => {
     const { container } = render(<DescriptionList items={items} />);
-    expect(container.firstChild).toHaveClass("grid", "grid-cols-[auto_1fr]");
+    expect(container.firstChild).toHaveClass("rst:grid", "rst:grid-cols-[auto_1fr]");
   });
 
   // `contents` is what lets dt and dd act as direct grid children while
   // staying grouped in the markup.
   it("uses display:contents row wrappers in the inline layout", () => {
     const { container } = render(<DescriptionList items={items} />);
-    expect(container.querySelectorAll(".contents")).toHaveLength(3);
+    expect(container.querySelectorAll(".rst\\:contents")).toHaveLength(3);
   });
 
   it("stacks terms above descriptions in the stacked layout", () => {
     const { container } = render(<DescriptionList items={items} layout="stacked" />);
-    expect(container.firstChild).toHaveClass("flex", "flex-col");
-    expect(container.querySelectorAll(".contents")).toHaveLength(0);
+    expect(container.firstChild).toHaveClass("rst:flex", "rst:flex-col");
+    expect(container.querySelectorAll(".rst\\:contents")).toHaveLength(0);
   });
 
   it("right-aligns descriptions in the split layout", () => {
     const { container } = render(<DescriptionList items={items} layout="split" />);
-    expect(container.querySelector("dd")).toHaveClass("text-right", "tabular-nums");
+    expect(container.querySelector("dd")).toHaveClass("rst:text-right", "rst:tabular-nums");
   });
 
   it("adds no dividers by default", () => {
     const { container } = render(<DescriptionList items={items} layout="stacked" />);
-    expect(container.querySelectorAll(".border-b")).toHaveLength(0);
+    expect(container.querySelectorAll(".rst\\:border-b")).toHaveLength(0);
   });
 
   // Every row but the last, so the list does not end on a stray rule.
@@ -65,7 +65,7 @@ describe("DescriptionList Component", () => {
     const { container } = render(
       <DescriptionList items={items} layout="stacked" dividers />,
     );
-    expect(container.querySelectorAll(".border-b")).toHaveLength(2);
+    expect(container.querySelectorAll(".rst\\:border-b")).toHaveLength(2);
   });
 
   it("accepts nodes for terms and descriptions", () => {

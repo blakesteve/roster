@@ -29,32 +29,32 @@ const CallToAction = ({
 }: CallToActionProps) => {
   return (
     <div className={cn(ctaVariants({ variant }), className)} {...props}>
-      <div className="flex items-start gap-4">
-        {icon && <div className="mt-1 shrink-0 text-current">{icon}</div>}
-        <div className="flex flex-col gap-1.5 w-full">
-          <h3 className="text-lg font-bold leading-tight tracking-tight text-current">
+      <div className="rst:flex rst:items-start rst:gap-4">
+        {icon && <div className="rst:mt-1 rst:shrink-0 rst:text-current">{icon}</div>}
+        <div className="rst:flex rst:flex-col rst:gap-1.5 rst:w-full">
+          <h3 className="rst:text-lg rst:font-bold rst:leading-tight rst:tracking-tight rst:text-current">
             {title}
           </h3>
           {description && (
-            <div className="max-w-prose text-sm leading-relaxed text-current opacity-90 dark:opacity-80">
+            <div className="rst:max-w-prose rst:text-sm rst:leading-relaxed rst:text-current rst:opacity-90 rst:dark:opacity-80">
               {description}
             </div>
           )}
         </div>
       </div>
 
-      {action && <div className="shrink-0 pt-2 md:pt-0">{action}</div>}
+      {action && <div className="rst:shrink-0 rst:pt-2 rst:md:pt-0">{action}</div>}
 
       {onDismiss && (
-        <div className="absolute right-2 top-2">
+        <div className="rst:absolute rst:right-2 rst:top-2">
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 rounded-full p-0 opacity-60 hover:opacity-100 dark:hover:bg-black/20"
+            className="rst:h-8 rst:w-8 rst:rounded-full rst:p-0 rst:opacity-60 rst:hover:opacity-100 rst:dark:hover:bg-black/20"
             onClick={onDismiss}
             aria-label="Dismiss"
           >
-            <FontAwesomeIcon icon={faXmark} className="h-4 w-4" />
+            <FontAwesomeIcon icon={faXmark} className="rst:h-4 rst:w-4" />
           </Button>
         </div>
       )}

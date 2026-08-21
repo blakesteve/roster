@@ -55,7 +55,7 @@ export function Tooltip({
         <RadixTooltip.Trigger asChild onClick={handleClick}>
           {/* Focusable span keeps keyboard accessibility for any child type */}
           <span
-            className="inline-flex items-center cursor-default"
+            className="rst:inline-flex rst:items-center rst:cursor-default"
             tabIndex={0}
             data-testid="tooltip-trigger"
           >
@@ -70,21 +70,21 @@ export function Tooltip({
             collisionPadding={8}
             data-testid="tooltip-content"
             className={cn(
-              "z-50 max-w-60 rounded-lg px-3 py-2 text-xs leading-snug shadow-xl",
-              "animate-in fade-in-0 zoom-in-95",
-              "data-[side=bottom]:slide-in-from-top-2",
-              "data-[side=top]:slide-in-from-bottom-2",
-              "data-[side=left]:slide-in-from-right-2",
-              "data-[side=right]:slide-in-from-left-2",
+              "rst:z-50 rst:max-w-60 rst:rounded-lg rst:px-3 rst:py-2 rst:text-xs rst:leading-snug rst:shadow-xl",
+              "rst:animate-in rst:fade-in-0 rst:zoom-in-95",
+              "rst:data-[side=bottom]:slide-in-from-top-2",
+              "rst:data-[side=top]:slide-in-from-bottom-2",
+              "rst:data-[side=left]:slide-in-from-right-2",
+              "rst:data-[side=right]:slide-in-from-left-2",
               variant === "dark"
-                ? "bg-zinc-900 text-zinc-100 ring-1 ring-white/10"
-                : "bg-white text-zinc-900 ring-1 ring-zinc-200",
+                ? "rst:bg-zinc-900 rst:text-zinc-100 rst:ring-1 rst:ring-white/10"
+                : "rst:bg-white rst:text-zinc-900 rst:ring-1 rst:ring-zinc-200",
               className,
             )}
           >
             {content}
             <RadixTooltip.Arrow
-              className={variant === "dark" ? "fill-zinc-900" : "fill-white"}
+              className={variant === "dark" ? "rst:fill-zinc-900" : "rst:fill-white"}
               width={12}
               height={6}
             />

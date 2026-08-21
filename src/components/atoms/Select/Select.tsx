@@ -47,9 +47,9 @@ const Select = ({
   const selectedOption = options.find((opt) => opt.value === value);
 
   return (
-    <Field className={cn("flex flex-col gap-1.5", className)}>
+    <Field className={cn("rst:flex rst:flex-col rst:gap-1.5", className)}>
       {label && (
-        <Label className="block text-sm font-medium text-inherit text-left">
+        <Label className="rst:block rst:text-sm rst:font-medium rst:text-inherit rst:text-left">
           {label}
         </Label>
       )}
@@ -59,22 +59,22 @@ const Select = ({
         onChange={onChange}
         disabled={disabled}
       >
-        <div className="relative">
+        <div className="rst:relative">
           <ListboxButton
             className={cn(selectTriggerVariants({ variant, error }))}
           >
             <span
               className={cn(
-                "block truncate",
-                !selectedOption && "text-gray-500 dark:text-gray-400",
+                "rst:block rst:truncate",
+                !selectedOption && "rst:text-gray-500 rst:dark:text-gray-400",
               )}
             >
               {selectedOption ? selectedOption.label : placeholder}
             </span>
-            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+            <span className="rst:pointer-events-none rst:absolute rst:inset-y-0 rst:right-0 rst:flex rst:items-center rst:pr-3">
               <FontAwesomeIcon
                 icon={faChevronDown}
-                className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500"
+                className="rst:h-3.5 rst:w-3.5 rst:text-gray-400 rst:dark:text-gray-500"
                 aria-hidden="true"
               />
             </span>
@@ -82,15 +82,15 @@ const Select = ({
 
           <Transition
             as={Fragment}
-            leave="transition ease-in duration-100"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
+            leave="rst:transition rst:ease-in rst:duration-100"
+            leaveFrom="rst:opacity-100"
+            leaveTo="rst:opacity-0"
           >
             <ListboxOptions
               anchor="bottom start"
               className={cn(
-                "w-(--button-width) z-50 rounded-md bg-white dark:bg-gray-800 py-1 text-base shadow-lg ring-1 ring-black/5 dark:ring-gray-700 focus:outline-none sm:text-sm",
-                "[--anchor-gap:4px]",
+                "rst:w-(--button-width) rst:z-50 rst:rounded-md rst:bg-white rst:dark:bg-gray-800 rst:py-1 rst:text-base rst:shadow-lg rst:ring-1 rst:ring-black/5 rst:dark:ring-gray-700 rst:focus:outline-none rst:sm:text-sm",
+                "rst:[--anchor-gap:4px]",
               )}
             >
               {options.map((option) => (
@@ -99,20 +99,20 @@ const Select = ({
                   value={option.value}
                   disabled={option.disabled}
                   className={cn(
-                    "group relative cursor-default select-none py-2.5 pl-4 pr-9 transition-colors",
-                    "text-gray-900 dark:text-gray-100",
-                    "data-focus:bg-primary-100 data-focus:text-primary-900",
-                    "dark:data-focus:bg-primary-900/30 dark:data-focus:text-primary-100",
-                    "data-selected:bg-gray-50 dark:data-selected:bg-gray-700/50",
-                    "data-disabled:opacity-50 data-disabled:cursor-not-allowed",
+                    "rst:group rst:relative rst:cursor-default rst:select-none rst:py-2.5 rst:pl-4 rst:pr-9 rst:transition-colors",
+                    "rst:text-gray-900 rst:dark:text-gray-100",
+                    "rst:data-focus:bg-primary-100 rst:data-focus:text-primary-900",
+                    "rst:dark:data-focus:bg-primary-900/30 rst:dark:data-focus:text-primary-100",
+                    "rst:data-selected:bg-gray-50 rst:dark:data-selected:bg-gray-700/50",
+                    "rst:data-disabled:opacity-50 rst:data-disabled:cursor-not-allowed",
                   )}
                 >
-                  <span className="block truncate font-normal group-data-selected:font-semibold">
+                  <span className="rst:block rst:truncate rst:font-normal rst:group-data-selected:font-semibold">
                     {option.label}
                   </span>
 
-                  <span className="absolute inset-y-0 right-0 hidden items-center pr-4 text-primary-600 dark:text-primary-400 group-data-selected:flex">
-                    <FontAwesomeIcon icon={faCheck} className="h-3.5 w-3.5" />
+                  <span className="rst:absolute rst:inset-y-0 rst:right-0 rst:hidden rst:items-center rst:pr-4 rst:text-primary-600 rst:dark:text-primary-400 rst:group-data-selected:flex">
+                    <FontAwesomeIcon icon={faCheck} className="rst:h-3.5 rst:w-3.5" />
                   </span>
                 </ListboxOption>
               ))}

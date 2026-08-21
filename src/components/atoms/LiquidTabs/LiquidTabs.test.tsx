@@ -102,13 +102,13 @@ describe("LiquidTabs", () => {
 
   it("applies text-white to the active tab", () => {
     render(<LiquidTabs tabs={THREE_TABS} activeTab="beta" onChange={vi.fn()} />);
-    expect(screen.getByTestId("liquid-tab-beta")).toHaveClass("text-white");
+    expect(screen.getByTestId("liquid-tab-beta")).toHaveClass("rst:text-white");
   });
 
   it("applies muted text color to inactive tabs", () => {
     render(<LiquidTabs tabs={THREE_TABS} activeTab="beta" onChange={vi.fn()} />);
-    expect(screen.getByTestId("liquid-tab-alpha")).toHaveClass("text-(--roster-lt-text-inactive)");
-    expect(screen.getByTestId("liquid-tab-gamma")).toHaveClass("text-(--roster-lt-text-inactive)");
+    expect(screen.getByTestId("liquid-tab-alpha")).toHaveClass("rst:text-(--roster-lt-text-inactive)");
+    expect(screen.getByTestId("liquid-tab-gamma")).toHaveClass("rst:text-(--roster-lt-text-inactive)");
   });
 
   // ── Variant: pill (default) ────────────────────────────────────────────────
@@ -116,20 +116,20 @@ describe("LiquidTabs", () => {
   it("applies pill container classes by default", () => {
     render(<LiquidTabs tabs={TWO_TABS} activeTab="card" onChange={vi.fn()} />);
     const container = screen.getByTestId("liquid-tabs");
-    expect(container).toHaveClass("rounded-xl");
-    expect(container).toHaveClass("p-1");
+    expect(container).toHaveClass("rst:rounded-xl");
+    expect(container).toHaveClass("rst:p-1");
   });
 
   it("defaults to w-fit in pill variant", () => {
     render(<LiquidTabs tabs={TWO_TABS} activeTab="card" onChange={vi.fn()} />);
-    expect(screen.getByTestId("liquid-tabs")).toHaveClass("w-fit");
+    expect(screen.getByTestId("liquid-tabs")).toHaveClass("rst:w-fit");
   });
 
   it("applies w-full when fullWidth is true in pill variant", () => {
     render(
       <LiquidTabs tabs={TWO_TABS} activeTab="card" onChange={vi.fn()} fullWidth />,
     );
-    expect(screen.getByTestId("liquid-tabs")).toHaveClass("w-full");
+    expect(screen.getByTestId("liquid-tabs")).toHaveClass("rst:w-full");
   });
 
   it("applies flex-1 to pill buttons when fullWidth is true", () => {
@@ -137,14 +137,14 @@ describe("LiquidTabs", () => {
       <LiquidTabs tabs={TWO_TABS} activeTab="card" onChange={vi.fn()} fullWidth />,
     );
     screen.getAllByRole("tab").forEach((btn) => {
-      expect(btn).toHaveClass("flex-1");
+      expect(btn).toHaveClass("rst:flex-1");
     });
   });
 
   it("applies px-4 to pill buttons when fullWidth is false", () => {
     render(<LiquidTabs tabs={TWO_TABS} activeTab="card" onChange={vi.fn()} />);
     screen.getAllByRole("tab").forEach((btn) => {
-      expect(btn).toHaveClass("px-4");
+      expect(btn).toHaveClass("rst:px-4");
     });
   });
 
@@ -155,16 +155,16 @@ describe("LiquidTabs", () => {
       <LiquidTabs tabs={TWO_TABS} activeTab="card" onChange={vi.fn()} variant="filled" />,
     );
     const container = screen.getByTestId("liquid-tabs");
-    expect(container).toHaveClass("w-full");
-    expect(container).toHaveClass("overflow-hidden");
-    expect(container).toHaveClass("rounded-lg");
+    expect(container).toHaveClass("rst:w-full");
+    expect(container).toHaveClass("rst:overflow-hidden");
+    expect(container).toHaveClass("rst:rounded-lg");
   });
 
   it("does not apply pill padding in filled variant", () => {
     render(
       <LiquidTabs tabs={TWO_TABS} activeTab="card" onChange={vi.fn()} variant="filled" />,
     );
-    expect(screen.getByTestId("liquid-tabs")).not.toHaveClass("p-1");
+    expect(screen.getByTestId("liquid-tabs")).not.toHaveClass("rst:p-1");
   });
 
   it("applies flex-1 to filled buttons", () => {
@@ -172,7 +172,7 @@ describe("LiquidTabs", () => {
       <LiquidTabs tabs={TWO_TABS} activeTab="card" onChange={vi.fn()} variant="filled" />,
     );
     screen.getAllByRole("tab").forEach((btn) => {
-      expect(btn).toHaveClass("flex-1");
+      expect(btn).toHaveClass("rst:flex-1");
     });
   });
 
@@ -184,10 +184,10 @@ describe("LiquidTabs", () => {
         tabs={TWO_TABS}
         activeTab="card"
         onChange={vi.fn()}
-        className="my-custom-class"
+        className="rst:my-custom-class"
       />,
     );
-    expect(screen.getByTestId("liquid-tabs")).toHaveClass("my-custom-class");
+    expect(screen.getByTestId("liquid-tabs")).toHaveClass("rst:my-custom-class");
   });
 
   // ── Label render function ──────────────────────────────────────────────────

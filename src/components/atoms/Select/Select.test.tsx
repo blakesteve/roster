@@ -101,7 +101,7 @@ describe("Select Component", () => {
     );
 
     const trigger = screen.getByRole("button", { name: /variant test/i });
-    expect(trigger).toHaveClass("bg-gray-700", "dark:bg-gray-900");
+    expect(trigger).toHaveClass("rst:bg-gray-700", "rst:dark:bg-gray-900");
 
     rerender(
       <Select
@@ -112,6 +112,6 @@ describe("Select Component", () => {
         error={true}
       />,
     );
-    expect(trigger).toHaveClass("ring-error-500", "text-error-600");
+    expect(trigger).toHaveClass("rst:ring-error-500", "rst:text-error-600");
   });
 });

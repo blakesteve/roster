@@ -26,13 +26,13 @@ export interface StatProps
  */
 const Stat = React.forwardRef<HTMLDivElement, StatProps>(
   ({ value, label, source, size, colorScheme, className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex flex-col gap-[3px]", className)} {...props}>
-      <dd className={cn("m-0", statValueVariants({ size, colorScheme }))}>{value}</dd>
+    <div ref={ref} className={cn("rst:flex rst:flex-col rst:gap-[3px]", className)} {...props}>
+      <dd className={cn("rst:m-0", statValueVariants({ size, colorScheme }))}>{value}</dd>
       <dt>
         <Eyebrow size="xs">{label}</Eyebrow>
       </dt>
       {source && (
-        <span className="font-mono text-[0.53125rem] leading-none tracking-[0.06em] text-gray-500 opacity-75 dark:text-gray-400">
+        <span className="rst:font-mono rst:text-[0.53125rem] rst:leading-none rst:tracking-[0.06em] rst:text-gray-500 rst:opacity-75 rst:dark:text-gray-400">
           {source}
         </span>
       )}

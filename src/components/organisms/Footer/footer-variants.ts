@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const footerVariants = cva(
-  "w-full py-6 mt-auto transition-colors duration-200",
+  "rst:w-full rst:py-6 rst:mt-auto rst:transition-colors rst:duration-200",
   {
     variants: {
       variant: {
@@ -10,15 +10,15 @@ export const footerVariants = cva(
         // flip under `.dark` and reproduce the previous gray-50 / gray-900/50
         // pair, alpha included.
         default:
-          "bg-[var(--roster-footer-bg)] text-[var(--roster-footer-text)] border-t border-[var(--roster-footer-border)]",
+          "rst:bg-[var(--roster-footer-bg)] rst:text-[var(--roster-footer-text)] rst:border-t rst:border-[var(--roster-footer-border)]",
         
         // Deep brand color for high contrast
         primary: 
-          "bg-primary-900 text-primary-200 dark:bg-primary-950 dark:text-primary-400",
+          "rst:bg-primary-900 rst:text-primary-200 rst:dark:bg-primary-950 rst:dark:text-primary-400",
         
         // No background or border, text adapts to whatever surface it's placed on
         transparent: 
-          "bg-transparent text-gray-500 dark:text-gray-400",
+          "rst:bg-transparent rst:text-gray-500 rst:dark:text-gray-400",
       },
     },
     defaultVariants: {

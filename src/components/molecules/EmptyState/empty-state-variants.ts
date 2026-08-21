@@ -1,12 +1,12 @@
 import { cva } from "class-variance-authority";
 
 export const emptyStateVariants = cva(
-  "flex flex-col items-center justify-center text-center p-8 rounded-lg transition-colors",
+  "rst:flex rst:flex-col rst:items-center rst:justify-center rst:text-center rst:p-8 rst:rounded-lg rst:transition-colors",
   {
     variants: {
       variant: {
-        dashed: "border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100/50",
-        simple: "border-transparent bg-transparent p-0",
+        dashed: "rst:border-2 rst:border-dashed rst:border-gray-300 rst:bg-gray-50 rst:hover:bg-gray-100/50",
+        simple: "rst:border-transparent rst:bg-transparent rst:p-0",
       },
     },
     defaultVariants: {

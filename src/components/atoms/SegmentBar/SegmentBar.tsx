@@ -44,13 +44,13 @@ export function SegmentBar({
   const visibleSegments = segments.filter((s) => s.value > 0);
 
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
+    <div className={cn("rst:flex rst:flex-col rst:gap-1.5", className)}>
       {/* Bar track */}
       <div
         data-testid="segment-bar-track"
         className={cn(
-          "flex w-full overflow-hidden rounded-full",
-          size === "sm" ? "h-1.5" : "h-2",
+          "rst:flex rst:w-full rst:overflow-hidden rst:rounded-full",
+          size === "sm" ? "rst:h-1.5" : "rst:h-2",
         )}
       >
         {visibleSegments.map((segment) => {
@@ -60,7 +60,7 @@ export function SegmentBar({
             <div
               key={segment.key}
               data-testid={`segment-${segment.key}`}
-              className="transition-[width]"
+              className="rst:transition-[width]"
               style={{ width: `${pct}%`, backgroundColor: segment.color }}
               title={`${segment.label}: ${Math.round(pct)}%`}
             />
@@ -72,22 +72,22 @@ export function SegmentBar({
       {showLegend && (
         <div
           data-testid="segment-bar-legend"
-          className="flex flex-wrap gap-x-3 gap-y-0.5"
+          className="rst:flex rst:flex-wrap rst:gap-x-3 rst:gap-y-0.5"
         >
           {visibleSegments.map((segment) => {
             const pct = Math.round((segment.value / total) * 100);
             return (
               <span
                 key={segment.key}
-                className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400"
+                className="rst:flex rst:items-center rst:gap-1.5 rst:text-xs rst:text-gray-600 rst:dark:text-gray-400"
               >
                 <span
-                  className="h-2 w-2 flex-none rounded-full"
+                  className="rst:h-2 rst:w-2 rst:flex-none rst:rounded-full"
                   style={{ backgroundColor: segment.color }}
                   aria-hidden="true"
                 />
                 {segment.label}
-                <span className="opacity-60">{pct}%</span>
+                <span className="rst:opacity-60">{pct}%</span>
               </span>
             );
           })}

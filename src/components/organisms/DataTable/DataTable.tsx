@@ -105,7 +105,7 @@ export function DataTable<TData extends RowData>({
   });
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
+    <div className={cn("rst:flex rst:flex-col rst:gap-4", className)}>
       <Table
         variant={variant}
         size={size}
@@ -121,9 +121,9 @@ export function DataTable<TData extends RowData>({
                     {header.isPlaceholder ? null : (
                       <div
                         className={cn(
-                          "flex items-center gap-2 transition-opacity",
+                          "rst:flex rst:items-center rst:gap-2 rst:transition-opacity",
                           header.column.getCanSort() &&
-                            "cursor-pointer select-none opacity-80 hover:opacity-100",
+                            "rst:cursor-pointer rst:select-none rst:opacity-80 rst:hover:opacity-100",
                         )}
                         onClick={header.column.getToggleSortingHandler()}
                       >
@@ -132,7 +132,7 @@ export function DataTable<TData extends RowData>({
                           header.getContext(),
                         )}
                         {header.column.getCanSort() && (
-                          <span className="w-4 flex justify-center text-primary-500">
+                          <span className="rst:w-4 rst:flex rst:justify-center rst:text-primary-500">
                             {header.column.getIsSorted() === "asc" ? (
                               <FontAwesomeIcon icon={faCaretUp} />
                             ) : header.column.getIsSorted() === "desc" ? (
@@ -166,7 +166,7 @@ export function DataTable<TData extends RowData>({
             <TableRow>
               <TableCell
                 colSpan={columns.length}
-                className="h-24 text-center text-gray-500 dark:text-gray-400 italic"
+                className="rst:h-24 rst:text-center rst:text-gray-500 rst:dark:text-gray-400 rst:italic"
               >
                 No results found.
               </TableCell>
@@ -177,21 +177,21 @@ export function DataTable<TData extends RowData>({
 
       <div
         className={cn(
-          "flex flex-col sm:flex-row items-center justify-between gap-4 px-2",
+          "rst:flex rst:flex-col rst:sm:flex-row rst:items-center rst:justify-between rst:gap-4 rst:px-2",
           paginationClassName,
         )}
       >
-        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+        <div className="rst:text-sm rst:font-medium rst:text-gray-500 rst:dark:text-gray-400">
           Page{" "}
-          <strong className="text-gray-900 dark:text-gray-100">
+          <strong className="rst:text-gray-900 rst:dark:text-gray-100">
             {table.state.pagination.pageIndex + 1}
           </strong>{" "}
           of{" "}
-          <strong className="text-gray-900 dark:text-gray-100">
+          <strong className="rst:text-gray-900 rst:dark:text-gray-100">
             {table.getPageCount()}
           </strong>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="rst:flex rst:items-center rst:space-x-2">
           <Button
             variant="outline"
             colorScheme="neutral"

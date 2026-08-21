@@ -46,9 +46,9 @@ describe("Navbar Component", () => {
 
     const navElement = screen.getByRole("navigation");
     expect(navElement).toHaveClass(
-      "bg-[var(--roster-nav-bg)]",
-      "border-[var(--roster-nav-border)]",
-      "text-[var(--roster-nav-text)]",
+      "rst:bg-[var(--roster-nav-bg)]",
+      "rst:border-[var(--roster-nav-border)]",
+      "rst:text-[var(--roster-nav-text)]",
     );
   });
 
@@ -59,9 +59,9 @@ describe("Navbar Component", () => {
     const activeLink = screen.getByText("Leagues");
     const linkElement = activeLink.closest("a");
 
-    expect(linkElement).toHaveClass("text-primary-600");
-    expect(linkElement).toHaveClass("dark:text-primary-600");
-    expect(linkElement).toHaveClass("font-semibold");
+    expect(linkElement).toHaveClass("rst:text-primary-600");
+    expect(linkElement).toHaveClass("rst:dark:text-primary-600");
+    expect(linkElement).toHaveClass("rst:font-semibold");
   });
 
   // Proves that the "slate" variant flips the links to light text (primary-400)
@@ -71,9 +71,9 @@ describe("Navbar Component", () => {
     const activeLink = screen.getByText("Leagues");
     const linkElement = activeLink.closest("a");
 
-    expect(linkElement).toHaveClass("text-primary-400");
-    expect(linkElement).toHaveClass("dark:text-primary-400");
-    expect(linkElement).toHaveClass("font-semibold");
+    expect(linkElement).toHaveClass("rst:text-primary-400");
+    expect(linkElement).toHaveClass("rst:dark:text-primary-400");
+    expect(linkElement).toHaveClass("rst:font-semibold");
   });
 
   it("displays the user initials and notification count when a user is provided", () => {

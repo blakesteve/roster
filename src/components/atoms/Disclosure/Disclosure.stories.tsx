@@ -16,15 +16,15 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="p-8 space-y-12">
-        <div className="light bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+      <div className="rst:p-8 rst:space-y-12">
+        <div className="light rst:bg-white rst:p-6 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:mb-6 rst:uppercase rst:tracking-widest">
             Light Mode Preview
           </p>
           <Story />
         </div>
-        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
-          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+        <div className="dark rst:bg-gray-950 rst:p-6 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:mb-6 rst:uppercase rst:tracking-widest">
             Dark Mode Preview
           </p>
           <Story />
@@ -81,9 +81,9 @@ export const Slate: Story = {
     title: "Draft Settings",
     defaultOpen: true,
     children: (
-      <div className="space-y-2">
-        <p className="font-semibold text-inherit">Pick Timer: 60s</p>
-        <p className="text-inherit opacity-80">Auto-pick enabled</p>
+      <div className="rst:space-y-2">
+        <p className="rst:font-semibold rst:text-inherit">Pick Timer: 60s</p>
+        <p className="rst:text-inherit rst:opacity-80">Auto-pick enabled</p>
       </div>
     ),
   },
@@ -96,7 +96,7 @@ export const Outline: Story = {
   args: {
     variant: "outline",
     title: (
-      <div className="flex items-center gap-2">
+      <div className="rst:flex rst:items-center rst:gap-2">
         <span>Subscription</span>
         <Badge variant="success" size="xs">
           ACTIVE

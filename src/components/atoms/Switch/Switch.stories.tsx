@@ -102,28 +102,28 @@ export const DangerZone: Story = {
 // 4. Sizes Showcase
 export const Sizes: Story = {
   render: () => (
-    <div className="flex flex-col gap-6 p-4 border border-gray-200 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-gray-900 transition-colors">
+    <div className="rst:flex rst:flex-col rst:gap-6 rst:p-4 rst:border rst:border-gray-200 rst:dark:border-gray-800 rst:rounded-lg rst:bg-gray-50 rst:dark:bg-gray-900 rst:transition-colors">
       <SwitchWithState
         label="Extra Small Switch"
         description="Designed specifically for dense dropdowns and inline text."
         size="xs"
         checked={true}
       />
-      <hr className="border-gray-200 dark:border-gray-800" />
+      <hr className="rst:border-gray-200 rst:dark:border-gray-800" />
       <SwitchWithState
         label="Small Switch"
         description="Fits in dense toolbars."
         size="sm"
         checked={true}
       />
-      <hr className="border-gray-200 dark:border-gray-800" />
+      <hr className="rst:border-gray-200 rst:dark:border-gray-800" />
       <SwitchWithState
         label="Medium Switch"
         description="The default size for forms."
         size="md"
         checked={true}
       />
-      <hr className="border-gray-200 dark:border-gray-800" />
+      <hr className="rst:border-gray-200 rst:dark:border-gray-800" />
       <SwitchWithState
         label="Large Switch"
         description="High visibility for mobile touch targets."

@@ -13,33 +13,33 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 
 const dialogVariants = cva(
-  "relative w-full transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all border",
+  "rst:relative rst:w-full rst:transform rst:overflow-hidden rst:rounded-2xl rst:p-6 rst:text-left rst:align-middle rst:shadow-xl rst:transition-all rst:border",
   {
     variants: {
       size: {
-        xs: "max-w-xs",
-        sm: "max-w-sm",
-        md: "max-w-md",
-        lg: "max-w-lg",
-        xl: "max-w-xl",
-        "2xl": "max-w-2xl",
-        "3xl": "max-w-3xl",
-        full: "max-w-[95vw] m-4",
+        xs: "rst:max-w-xs",
+        sm: "rst:max-w-sm",
+        md: "rst:max-w-md",
+        lg: "rst:max-w-lg",
+        xl: "rst:max-w-xl",
+        "2xl": "rst:max-w-2xl",
+        "3xl": "rst:max-w-3xl",
+        full: "rst:max-w-[95vw] rst:m-4",
       },
       variant: {
         white:
-          "bg-white border-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100",
+          "rst:bg-white rst:border-gray-200 rst:text-gray-900 rst:dark:bg-gray-800 rst:dark:border-gray-700 rst:dark:text-gray-100",
         slate:
-          "bg-gray-700 border-gray-600 text-gray-100 dark:bg-gray-900 dark:border-gray-800",
+          "rst:bg-gray-700 rst:border-gray-600 rst:text-gray-100 rst:dark:bg-gray-900 rst:dark:border-gray-800",
         primary:
-          "bg-primary-700 border-primary-600 text-white dark:bg-primary-950 dark:border-primary-900",
+          "rst:bg-primary-700 rst:border-primary-600 rst:text-white rst:dark:bg-primary-950 rst:dark:border-primary-900",
         glass:
-          "bg-white/80 border-white/20 backdrop-blur-xl text-gray-900 dark:bg-slate-900/80 dark:border-slate-700/50 dark:text-white shadow-2xl dark:shadow-black/50",
+          "rst:bg-white/80 rst:border-white/20 rst:backdrop-blur-xl rst:text-gray-900 rst:dark:bg-slate-900/80 rst:dark:border-slate-700/50 rst:dark:text-white rst:shadow-2xl rst:dark:shadow-black/50",
       },
       status: {
         default: "",
-        destructive: "border-t-4 border-t-error-500",
-        success: "border-t-4 border-t-success-500",
+        destructive: "rst:border-t-4 rst:border-t-error-500",
+        success: "rst:border-t-4 rst:border-t-success-500",
       },
     },
     defaultVariants: {
@@ -50,12 +50,12 @@ const dialogVariants = cva(
   },
 );
 
-const titleVariants = cva("text-xl font-bold leading-6 text-inherit");
+const titleVariants = cva("rst:text-xl rst:font-bold rst:leading-6 rst:text-inherit");
 
-const descriptionVariants = cva("mt-1 text-sm text-inherit opacity-75");
+const descriptionVariants = cva("rst:mt-1 rst:text-sm rst:text-inherit rst:opacity-75");
 
 const closeVariants = cva(
-  "inline-flex rounded-md bg-transparent text-inherit opacity-50 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-opacity",
+  "rst:inline-flex rst:rounded-md rst:bg-transparent rst:text-inherit rst:opacity-50 rst:hover:opacity-100 rst:focus:outline-none rst:focus:ring-2 rst:focus:ring-primary-500 rst:focus:ring-offset-2 rst:transition-opacity",
 );
 
 export interface DialogProps extends VariantProps<typeof dialogVariants> {
@@ -80,35 +80,35 @@ const Dialog = ({
 }: DialogProps) => {
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <HeadlessDialog as="div" className="relative z-50" onClose={onClose}>
+      <HeadlessDialog as="div" className="rst:relative rst:z-50" onClose={onClose}>
         <TransitionChild
           as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
+          enter="rst:ease-out rst:duration-300"
+          enterFrom="rst:opacity-0"
+          enterTo="rst:opacity-100"
+          leave="rst:ease-in rst:duration-200"
+          leaveFrom="rst:opacity-100"
+          leaveTo="rst:opacity-0"
         >
           <DialogBackdrop
             className={cn(
-              "fixed inset-0 transition-opacity",
+              "rst:fixed rst:inset-0 rst:transition-opacity",
               variant === "glass"
-                ? "bg-slate-900/40 dark:bg-black/60"
-                : "bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm",
+                ? "rst:bg-slate-900/40 rst:dark:bg-black/60"
+                : "rst:bg-slate-900/60 rst:dark:bg-black/80 rst:backdrop-blur-sm",
             )}
           />
         </TransitionChild>
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+        <div className="rst:fixed rst:inset-0 rst:overflow-y-auto">
+          <div className="rst:flex rst:min-h-full rst:items-center rst:justify-center rst:p-4 rst:text-center">
             <TransitionChild
               as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
+              enter="rst:ease-out rst:duration-300"
+              enterFrom="rst:opacity-0 rst:scale-95"
+              enterTo="rst:opacity-100 rst:scale-100"
+              leave="rst:ease-in rst:duration-200"
+              leaveFrom="rst:opacity-100 rst:scale-100"
+              leaveTo="rst:opacity-0 rst:scale-95"
             >
               <DialogPanel
                 className={cn(
@@ -116,7 +116,7 @@ const Dialog = ({
                   className,
                 )}
               >
-                <div className="flex items-start justify-between">
+                <div className="rst:flex rst:items-start rst:justify-between">
                   <div>
                     <DialogTitle as="h2" className={cn(titleVariants())}>
                       {title}
@@ -126,19 +126,19 @@ const Dialog = ({
                     )}
                   </div>
 
-                  <div className="ml-4 flex shrink-0">
+                  <div className="rst:ml-4 rst:flex rst:shrink-0">
                     <button
                       type="button"
                       onClick={onClose}
                       className={cn(closeVariants())}
                       aria-label="Close dialog"
                     >
-                      <FontAwesomeIcon icon={faXmark} className="h-5 w-5" />
+                      <FontAwesomeIcon icon={faXmark} className="rst:h-5 rst:w-5" />
                     </button>
                   </div>
                 </div>
 
-                <div className="mt-6">{children}</div>
+                <div className="rst:mt-6">{children}</div>
               </DialogPanel>
             </TransitionChild>
           </div>

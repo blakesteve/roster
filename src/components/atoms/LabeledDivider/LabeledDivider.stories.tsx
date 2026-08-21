@@ -36,7 +36,7 @@ export const Playground: Story = {
 export const WithTrailing: Story = {
   args: { label: "placeholder" },
   render: () => (
-    <div className="flex max-w-lg flex-col gap-6">
+    <div className="rst:flex rst:max-w-lg rst:flex-col rst:gap-6">
       <LabeledDivider label="Selected work" trailing="6 projects" />
       <LabeledDivider label="Writing" trailing="2026" />
       <LabeledDivider label="Components" trailing="40 exported" />
@@ -55,7 +55,7 @@ export const WithTrailing: Story = {
 export const Alignment: Story = {
   args: { label: "placeholder" },
   render: () => (
-    <div className="flex max-w-lg flex-col gap-6">
+    <div className="rst:flex rst:max-w-lg rst:flex-col rst:gap-6">
       <LabeledDivider align="start" label="Label first" trailing="12" />
       <LabeledDivider align="end" label="Rule first" trailing="12" />
     </div>
@@ -73,16 +73,16 @@ export const Alignment: Story = {
 export const SeparatingSections: Story = {
   args: { label: "placeholder" },
   render: () => (
-    <div className="flex max-w-lg flex-col gap-4">
+    <div className="rst:flex rst:max-w-lg rst:flex-col rst:gap-4">
       <LabeledDivider label="2026" trailing="3 projects" />
-      <ul className="m-0 flex list-none flex-col gap-2 p-0 text-sm text-gray-900 dark:text-gray-100">
+      <ul className="rst:m-0 rst:flex rst:list-none rst:flex-col rst:gap-2 rst:p-0 rst:text-sm rst:text-gray-900 rst:dark:text-gray-100">
         <li>Game Verdict — controller versus keyboard, settled</li>
         <li>Roster — the library this component ships in</li>
         <li>blakeb.dev — the portfolio it was extracted from</li>
       </ul>
 
       <LabeledDivider label="2025" trailing="2 projects" />
-      <ul className="m-0 flex list-none flex-col gap-2 p-0 text-sm text-gray-900 dark:text-gray-100">
+      <ul className="rst:m-0 rst:flex rst:list-none rst:flex-col rst:gap-2 rst:p-0 rst:text-sm rst:text-gray-900 rst:dark:text-gray-100">
         <li>MegaSquad — bracket pools that survive a bad Thursday</li>
         <li>InnerSquad — the quieter sibling</li>
       </ul>
@@ -101,21 +101,21 @@ export const SeparatingSections: Story = {
 export const InAPanel: Story = {
   args: { label: "placeholder" },
   render: () => (
-    <div className="max-w-sm rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+    <div className="rst:max-w-sm rst:rounded-lg rst:border rst:border-gray-200 rst:p-4 rst:dark:border-gray-800">
       <LabeledDivider label="Stack" />
-      <dl className="m-0 mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
-        <dt className="font-mono uppercase tracking-wide text-gray-500 dark:text-gray-400">
+      <dl className="rst:m-0 rst:mt-3 rst:grid rst:grid-cols-[auto_1fr] rst:gap-x-3 rst:gap-y-1 rst:text-xs">
+        <dt className="rst:font-mono rst:uppercase rst:tracking-wide rst:text-gray-500 rst:dark:text-gray-400">
           Framework
         </dt>
-        <dd className="m-0 text-gray-900 dark:text-gray-100">Next.js 16</dd>
-        <dt className="font-mono uppercase tracking-wide text-gray-500 dark:text-gray-400">
+        <dd className="rst:m-0 rst:text-gray-900 rst:dark:text-gray-100">Next.js 16</dd>
+        <dt className="rst:font-mono rst:uppercase rst:tracking-wide rst:text-gray-500 rst:dark:text-gray-400">
           Data
         </dt>
-        <dd className="m-0 text-gray-900 dark:text-gray-100">Supabase</dd>
-        <dt className="font-mono uppercase tracking-wide text-gray-500 dark:text-gray-400">
+        <dd className="rst:m-0 rst:text-gray-900 rst:dark:text-gray-100">Supabase</dd>
+        <dt className="rst:font-mono rst:uppercase rst:tracking-wide rst:text-gray-500 rst:dark:text-gray-400">
           Host
         </dt>
-        <dd className="m-0 text-gray-900 dark:text-gray-100">Vercel</dd>
+        <dd className="rst:m-0 rst:text-gray-900 rst:dark:text-gray-100">Vercel</dd>
       </dl>
     </div>
   ),
@@ -132,7 +132,7 @@ export const InAPanel: Story = {
 export const LongLabels: Story = {
   args: { label: "placeholder" },
   render: () => (
-    <div className="flex max-w-xs flex-col gap-6">
+    <div className="rst:flex rst:max-w-xs rst:flex-col rst:gap-6">
       <LabeledDivider label="Everything shipped in 2026" trailing="12" />
       <LabeledDivider label="Short" trailing="Also short" />
     </div>
@@ -151,7 +151,7 @@ export const DarkMode: Story = {
   args: { label: "placeholder" },
   render: () => (
     <div className="dark">
-      <div className="flex flex-col gap-6 rounded-xl bg-gray-950 p-6">
+      <div className="rst:flex rst:flex-col rst:gap-6 rst:rounded-xl rst:bg-gray-950 rst:p-6">
         <LabeledDivider label="Selected work" trailing="6 projects" />
         <LabeledDivider align="end" label="Archive" />
       </div>

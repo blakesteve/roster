@@ -40,8 +40,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {branded && (
           <div
             className={cn(
-              "absolute top-0 inset-x-0 h-1 z-10",
-              !brandColorTop && "bg-orange-500",
+              "rst:absolute rst:top-0 rst:inset-x-0 rst:h-1 rst:z-10",
+              !brandColorTop && "rst:bg-orange-500",
             )}
             style={
               brandColorTop ? { backgroundColor: brandColorTop } : undefined
@@ -61,8 +61,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {branded && (
           <div
             className={cn(
-              "absolute bottom-0 inset-x-0 h-1 z-10",
-              !brandColorBottom && "bg-primary-500",
+              "rst:absolute rst:bottom-0 rst:inset-x-0 rst:h-1 rst:z-10",
+              !brandColorBottom && "rst:bg-primary-500",
             )}
             style={
               brandColorBottom

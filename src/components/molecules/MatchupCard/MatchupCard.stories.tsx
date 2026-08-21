@@ -46,7 +46,7 @@ The **MatchupCard** is a highly flexible molecule designed to display head-to-he
   },
   decorators: [
     (Story) => (
-      <div className="p-8 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 min-w-87.5 flex justify-center">
+      <div className="rst:p-8 rst:bg-white rst:dark:bg-slate-900 rst:rounded-xl rst:shadow-sm rst:border rst:border-gray-100 rst:dark:border-slate-800 rst:min-w-87.5 rst:flex rst:justify-center">
         <Story />
       </div>
     ),
@@ -178,13 +178,13 @@ export const UpcomingWithBettingOdds: Story = {
       ...mockAwayTeam,
       // Demonstrating that accessory accepts raw React Nodes for custom styling
       accessory: (
-        <span className="text-error-500 font-medium tracking-wide">+150</span>
+        <span className="rst:text-error-500 rst:font-medium rst:tracking-wide">+150</span>
       ),
     },
     homeTeam: {
       ...mockHomeTeam,
       accessory: (
-        <span className="text-success-500 font-medium tracking-wide">-200</span>
+        <span className="rst:text-success-500 rst:font-medium rst:tracking-wide">-200</span>
       ),
     },
   },

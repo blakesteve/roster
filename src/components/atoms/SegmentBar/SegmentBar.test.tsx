@@ -91,12 +91,12 @@ describe("SegmentBar", () => {
 
   it("applies h-2 class for size='md' (default)", () => {
     render(<SegmentBar segments={TWO_WAY} />);
-    expect(screen.getByTestId("segment-bar-track")).toHaveClass("h-2");
+    expect(screen.getByTestId("segment-bar-track")).toHaveClass("rst:h-2");
   });
 
   it("applies h-1.5 class for size='sm'", () => {
     render(<SegmentBar segments={TWO_WAY} size="sm" />);
-    expect(screen.getByTestId("segment-bar-track")).toHaveClass("h-1.5");
+    expect(screen.getByTestId("segment-bar-track")).toHaveClass("rst:h-1.5");
   });
 
   // ── Legend ────────────────────────────────────────────────────────────────
@@ -143,9 +143,9 @@ describe("SegmentBar", () => {
 
   it("applies className to the outer wrapper", () => {
     const { container } = render(
-      <SegmentBar segments={TWO_WAY} className="my-custom-class" />,
+      <SegmentBar segments={TWO_WAY} className="rst:my-custom-class" />,
     );
-    expect(container.firstChild).toHaveClass("my-custom-class");
+    expect(container.firstChild).toHaveClass("rst:my-custom-class");
   });
 
   // ── Edge cases ─────────────────────────────────────────────────────────────

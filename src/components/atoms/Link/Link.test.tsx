@@ -79,7 +79,7 @@ describe("Link Atom", () => {
     const link = screen.getByTestId("custom-link");
 
     expect(link).toHaveAttribute("href", "/dashboard");
-    expect(link).toHaveClass("text-primary-600", "dark:text-primary-400");
+    expect(link).toHaveClass("rst:text-primary-600", "rst:dark:text-primary-400");
 
     expect(link).toHaveTextContent("Polymorphic (Mock)");
   });
@@ -93,7 +93,7 @@ describe("Link Atom", () => {
     );
     let link = screen.getByRole("link", { name: "Delete" });
 
-    expect(link).toHaveClass("text-error-600", "dark:text-error-500");
+    expect(link).toHaveClass("rst:text-error-600", "rst:dark:text-error-500");
 
     rerender(
       <Link href="#" variant="white">
@@ -102,6 +102,6 @@ describe("Link Atom", () => {
     );
     link = screen.getByRole("link", { name: "MegaSquad Dark" });
 
-    expect(link).toHaveClass("text-gray-200", "dark:text-gray-300");
+    expect(link).toHaveClass("rst:text-gray-200", "rst:dark:text-gray-300");
   });
 });

@@ -135,9 +135,9 @@ export const WhiteStandard: Story = {
     variant: "white",
     status: "default",
     children: (
-      <div className="mt-4 flex flex-col gap-4 text-left">
+      <div className="rst:mt-4 rst:flex rst:flex-col rst:gap-4 rst:text-left">
         <Input placeholder="Enter email address..." />
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="rst:flex rst:justify-end rst:gap-3 rst:pt-2">
           <Button variant="outline" colorScheme="neutral">
             Cancel
           </Button>
@@ -167,10 +167,10 @@ export const SlateMoody: Story = {
     variant: "slate",
     status: "default",
     children: (
-      <div className="mt-6 flex justify-end gap-3">
+      <div className="rst:mt-6 rst:flex rst:justify-end rst:gap-3">
         <Button
           variant="outline"
-          className="text-white border-gray-500 hover:bg-gray-600"
+          className="rst:text-white rst:border-gray-500 rst:hover:bg-gray-600"
         >
           Remind Me Later
         </Button>
@@ -199,10 +199,10 @@ export const PrimaryBrand: Story = {
     variant: "primary",
     status: "default",
     children: (
-      <div className="mt-6 flex justify-end gap-3">
+      <div className="rst:mt-6 rst:flex rst:justify-end rst:gap-3">
         <Button
           variant="solid"
-          className="bg-white text-primary-700 hover:bg-gray-100"
+          className="rst:bg-white rst:text-primary-700 rst:hover:bg-gray-100"
         >
           Let's Go!
         </Button>
@@ -229,7 +229,7 @@ export const DestructiveAction: Story = {
     variant: "white",
     status: "destructive",
     children: (
-      <div className="mt-6 flex justify-end gap-3">
+      <div className="rst:mt-6 rst:flex rst:justify-end rst:gap-3">
         <Button variant="outline" colorScheme="neutral">
           Cancel
         </Button>
@@ -258,11 +258,11 @@ export const SuccessSlate: Story = {
     variant: "slate",
     status: "success",
     children: (
-      <div className="mt-6 flex justify-end gap-3">
+      <div className="rst:mt-6 rst:flex rst:justify-end rst:gap-3">
         <Button
           variant="solid"
           colorScheme="success"
-          className="w-full justify-center"
+          className="rst:w-full rst:justify-center"
         >
           View Receipt
         </Button>
@@ -288,11 +288,11 @@ export const GlassEffect: Story = {
     variant: "glass",
     status: "default",
     children: (
-      <div className="mt-6 flex flex-col gap-3">
+      <div className="rst:mt-6 rst:flex rst:flex-col rst:gap-3">
         <Button
           variant="solid"
           colorScheme="primary"
-          className="w-full justify-center"
+          className="rst:w-full rst:justify-center"
         >
           Upgrade Now
         </Button>
@@ -309,7 +309,7 @@ export const GlassEffect: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="p-24 bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-900 dark:via-purple-900 dark:to-slate-900 rounded-xl flex justify-center transition-colors">
+      <div className="rst:p-24 rst:bg-linear-to-br rst:from-indigo-500 rst:via-purple-500 rst:to-pink-500 rst:dark:from-indigo-900 rst:dark:via-purple-900 rst:dark:to-slate-900 rst:rounded-xl rst:flex rst:justify-center rst:transition-colors">
         <Story />
       </div>
     ),

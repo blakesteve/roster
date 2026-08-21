@@ -42,7 +42,7 @@ export const Playground: Story = {
 export const AllSchemes: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="rst:flex rst:flex-wrap rst:items-center rst:gap-2">
       <Pill colorScheme="primary">Primary</Pill>
       <Pill colorScheme="success">Success</Pill>
       <Pill colorScheme="error">Error</Pill>
@@ -56,10 +56,10 @@ export const AllSchemes: Story = {
 export const Variants: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-col gap-4">
+    <div className="rst:flex rst:flex-col rst:gap-4">
       {(["soft", "outline", "solid"] as const).map((variant) => (
-        <div key={variant} className="flex flex-wrap items-center gap-2">
-          <span className="w-16 text-xs opacity-60">{variant}</span>
+        <div key={variant} className="rst:flex rst:flex-wrap rst:items-center rst:gap-2">
+          <span className="rst:w-16 rst:text-xs rst:opacity-60">{variant}</span>
           <Pill variant={variant} colorScheme="primary">Primary</Pill>
           <Pill variant={variant} colorScheme="success">Success</Pill>
           <Pill variant={variant} colorScheme="error">Error</Pill>
@@ -82,7 +82,7 @@ export const Variants: Story = {
 export const Sizes: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="rst:flex rst:flex-wrap rst:items-center rst:gap-3">
       <Pill size="sm">Small</Pill>
       <Pill size="md">Medium</Pill>
       <Pill size="sm" dot colorScheme="success">Small with dot</Pill>
@@ -94,7 +94,7 @@ export const Sizes: Story = {
 export const StatusDot: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="rst:flex rst:flex-wrap rst:items-center rst:gap-2">
       <Pill dot colorScheme="success">Online</Pill>
       <Pill dot colorScheme="amber">Away</Pill>
       <Pill dot colorScheme="neutral">Offline</Pill>
@@ -115,7 +115,7 @@ export const StatusDot: Story = {
 export const LivePulse: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="rst:flex rst:flex-wrap rst:items-center rst:gap-3">
       <Pill dot pulse colorScheme="error">Live now</Pill>
       <Pill dot pulse colorScheme="success" size="md">12 watching</Pill>
       <Pill dot pulse variant="solid" colorScheme="error">On air</Pill>
@@ -134,14 +134,14 @@ export const LivePulse: Story = {
 export const WithLeadingIcon: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-wrap items-center gap-2">
-      <Pill leadingIcon={<FontAwesomeIcon icon={faBolt} className="h-3 w-3" />}>
+    <div className="rst:flex rst:flex-wrap rst:items-center rst:gap-2">
+      <Pill leadingIcon={<FontAwesomeIcon icon={faBolt} className="rst:h-3 rst:w-3" />}>
         Fast pick
       </Pill>
       <Pill
         size="md"
         colorScheme="primary"
-        leadingIcon={<FontAwesomeIcon icon={faBolt} className="h-3.5 w-3.5" />}
+        leadingIcon={<FontAwesomeIcon icon={faBolt} className="rst:h-3.5 rst:w-3.5" />}
       >
         Streak x4
       </Pill>
@@ -160,7 +160,7 @@ export const WithLeadingIcon: Story = {
 export const InContext: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="max-w-md space-y-3 text-sm">
+    <div className="rst:max-w-md rst:space-y-3 rst:text-sm">
       <p>
         Hades II is currently{" "}
         <Pill dot colorScheme="success">64% controller</Pill> across 1,573
@@ -186,16 +186,16 @@ export const InContext: Story = {
 export const VersusBadge: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
+    <div className="rst:flex rst:flex-col rst:gap-6">
+      <div className="rst:flex rst:items-center rst:gap-3">
         <Pill dot colorScheme="success">3 friends voted</Pill>
-        <span className="text-xs opacity-60">
+        <span className="rst:text-xs rst:opacity-60">
           Pill: standalone, reads as a phrase
         </span>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="rst:flex rst:items-center rst:gap-3">
         <Badge variant="success">Active</Badge>
-        <span className="text-xs opacity-60">
+        <span className="rst:text-xs rst:opacity-60">
           Badge: a label attached to something
         </span>
       </div>
@@ -215,7 +215,7 @@ export const DarkMode: Story = {
   args: { children: "placeholder" },
   render: () => (
     <div className="dark">
-      <div className="flex flex-wrap items-center gap-2 rounded-xl bg-gray-950 p-6">
+      <div className="rst:flex rst:flex-wrap rst:items-center rst:gap-2 rst:rounded-xl rst:bg-gray-950 rst:p-6">
         <Pill colorScheme="primary">Primary</Pill>
         <Pill colorScheme="success" dot>Online</Pill>
         <Pill colorScheme="error" variant="outline">Error</Pill>

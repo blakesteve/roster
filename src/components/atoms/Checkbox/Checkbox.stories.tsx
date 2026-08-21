@@ -66,15 +66,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const DualPreviewDecorator: Decorator = (Story) => (
-  <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
-    <div className="light flex-1 bg-gray-50 p-12 relative flex flex-col items-center justify-center">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest z-10">
+  <div className="rst:flex rst:w-full rst:rounded-xl rst:overflow-hidden rst:border rst:border-gray-200 rst:dark:border-gray-800 rst:shadow-sm">
+    <div className="light rst:flex-1 rst:bg-gray-50 rst:p-12 rst:relative rst:flex rst:flex-col rst:items-center rst:justify-center">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest rst:z-10">
         Light Mode
       </p>
       <Story />
     </div>
-    <div className="dark flex-1 bg-gray-950 p-12 relative flex flex-col items-center justify-center border-l border-gray-200 dark:border-gray-800">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest z-10">
+    <div className="dark rst:flex-1 rst:bg-gray-950 rst:p-12 rst:relative rst:flex rst:flex-col rst:items-center rst:justify-center rst:border-l rst:border-gray-200 rst:dark:border-gray-800">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest rst:z-10">
         Dark Mode
       </p>
       <Story />
@@ -131,7 +131,7 @@ export const SoftVariant: Story = {
 
 export const Sizes: Story = {
   render: () => (
-    <div className="flex items-center gap-6">
+    <div className="rst:flex rst:items-center rst:gap-6">
       <InteractiveCheckbox size="sm" colorScheme="neutral" checked={true} />
       <InteractiveCheckbox size="md" colorScheme="primary" checked={true} />
       <InteractiveCheckbox size="lg" colorScheme="teal" checked={true} />
@@ -171,14 +171,14 @@ export const WithLabel: Story = {
   render: () => {
     const [checked, setChecked] = useState(false);
     return (
-      <Field className="flex items-center gap-3 cursor-pointer group">
+      <Field className="rst:flex rst:items-center rst:gap-3 rst:cursor-pointer rst:group">
         <Checkbox
           checked={checked}
           onChange={setChecked}
           colorScheme="success"
-          className="group-hover:ring-2 ring-success-500/20 ring-offset-1 dark:ring-offset-gray-950 transition-all"
+          className="rst:group-hover:ring-2 rst:ring-success-500/20 rst:ring-offset-1 rst:dark:ring-offset-gray-950 rst:transition-all"
         />
-        <Label className="text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer select-none">
+        <Label className="rst:text-sm rst:font-medium rst:text-gray-900 rst:dark:text-gray-100 rst:cursor-pointer rst:select-none">
           I agree to the Terms of Service
         </Label>
       </Field>
@@ -197,7 +197,7 @@ export const WithLabel: Story = {
 
 export const Disabled: Story = {
   render: () => (
-    <div className="flex gap-6">
+    <div className="rst:flex rst:gap-6">
       <Checkbox disabled checked={false} />
       <Checkbox disabled checked={true} colorScheme="primary" />
     </div>
@@ -228,24 +228,24 @@ const ALL_VARIANTS: NonNullable<CheckboxProps["variant"]>[] = ["solid", "soft"];
 
 export const AllVariantsMatrix: Story = {
   render: () => (
-    <div className="flex flex-col gap-10 w-full max-w-4xl mx-auto">
+    <div className="rst:flex rst:flex-col rst:gap-10 rst:w-full rst:max-w-4xl rst:mx-auto">
       {ALL_VARIANTS.map((variant) => (
-        <div key={variant} className="flex flex-col gap-4">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-gray-800 pb-2">
+        <div key={variant} className="rst:flex rst:flex-col rst:gap-4">
+          <h3 className="rst:text-sm rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest rst:border-b rst:border-gray-200 rst:dark:border-gray-800 rst:pb-2">
             Variant: {variant}
           </h3>
-          <div className="flex flex-wrap gap-8">
+          <div className="rst:flex rst:flex-wrap rst:gap-8">
             {ALL_COLOR_SCHEMES.map((color) => (
               <div
                 key={`${variant}-${color}`}
-                className="flex flex-col items-center gap-2"
+                className="rst:flex rst:flex-col rst:items-center rst:gap-2"
               >
                 <InteractiveCheckbox
                   variant={variant}
                   colorScheme={color}
                   checked={true}
                 />
-                <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                <span className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400 rst:capitalize">
                   {color}
                 </span>
               </div>

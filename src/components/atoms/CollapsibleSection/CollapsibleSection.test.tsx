@@ -90,7 +90,7 @@ describe("CollapsibleSection", () => {
   it("renders ReactNode children — chip buttons", () => {
     render(
       <CollapsibleSection size="xs">
-        <div className="flex flex-wrap gap-1.5">
+        <div className="rst:flex rst:flex-wrap rst:gap-1.5">
           {GENRES.map((g) => (
             <button key={g} type="button">{g}</button>
           ))}
@@ -103,9 +103,9 @@ describe("CollapsibleSection", () => {
 
   it("applies className to the outer wrapper", () => {
     const { container } = render(
-      <CollapsibleSection className="custom-wrapper">{SHORT}</CollapsibleSection>,
+      <CollapsibleSection className="rst:custom-wrapper">{SHORT}</CollapsibleSection>,
     );
-    expect(container.firstChild).toHaveClass("custom-wrapper");
+    expect(container.firstChild).toHaveClass("rst:custom-wrapper");
   });
 
   // ── No overflow ────────────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ describe("CollapsibleSection", () => {
   it("applies the max-height class when collapsed", () => {
     mockOverflow();
     render(<CollapsibleSection>{LONG}</CollapsibleSection>);
-    expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-24");
+    expect(screen.getByTestId("collapsible-content")).toHaveClass("rst:max-h-24");
   });
 
   it("applies mask-image style when clamped and collapsed", () => {
@@ -156,7 +156,7 @@ describe("CollapsibleSection", () => {
     mockOverflow();
     render(<CollapsibleSection>{LONG}</CollapsibleSection>);
     fireEvent.click(screen.getByTestId("collapsible-toggle"));
-    expect(screen.getByTestId("collapsible-content")).not.toHaveClass("max-h-24");
+    expect(screen.getByTestId("collapsible-content")).not.toHaveClass("rst:max-h-24");
   });
 
   it("removes the mask-image when expanded", () => {
@@ -178,7 +178,7 @@ describe("CollapsibleSection", () => {
     render(<CollapsibleSection>{LONG}</CollapsibleSection>);
     fireEvent.click(screen.getByTestId("collapsible-toggle")); // expand
     fireEvent.click(screen.getByTestId("collapsible-toggle")); // collapse
-    expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-24");
+    expect(screen.getByTestId("collapsible-content")).toHaveClass("rst:max-h-24");
     expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Show more");
   });
 
@@ -206,42 +206,42 @@ describe("CollapsibleSection", () => {
   it("applies max-h-8 for size='xs'", () => {
     mockOverflow();
     render(<CollapsibleSection size="xs">{LONG}</CollapsibleSection>);
-    expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-8");
+    expect(screen.getByTestId("collapsible-content")).toHaveClass("rst:max-h-8");
   });
 
   it("applies max-h-16 for size='sm'", () => {
     mockOverflow();
     render(<CollapsibleSection size="sm">{LONG}</CollapsibleSection>);
-    expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-16");
+    expect(screen.getByTestId("collapsible-content")).toHaveClass("rst:max-h-16");
   });
 
   it("applies max-h-24 for size='md' (default)", () => {
     mockOverflow();
     render(<CollapsibleSection>{LONG}</CollapsibleSection>);
-    expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-24");
+    expect(screen.getByTestId("collapsible-content")).toHaveClass("rst:max-h-24");
   });
 
   it("applies max-h-36 for size='lg'", () => {
     mockOverflow();
     render(<CollapsibleSection size="lg">{LONG}</CollapsibleSection>);
-    expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-36");
+    expect(screen.getByTestId("collapsible-content")).toHaveClass("rst:max-h-36");
   });
 
   it("xs size works with chip children — toggle appears when chips overflow one row", () => {
     mockOverflow();
     render(
       <CollapsibleSection size="xs" expandLabel="Show all genres" collapseLabel="Show less">
-        <div className="flex flex-wrap gap-1.5">
+        <div className="rst:flex rst:flex-wrap rst:gap-1.5">
           {GENRES.map((g) => (
             <button key={g} type="button">{g}</button>
           ))}
         </div>
       </CollapsibleSection>,
     );
-    expect(screen.getByTestId("collapsible-content")).toHaveClass("max-h-8");
+    expect(screen.getByTestId("collapsible-content")).toHaveClass("rst:max-h-8");
     expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Show all genres");
     fireEvent.click(screen.getByTestId("collapsible-toggle"));
-    expect(screen.getByTestId("collapsible-content")).not.toHaveClass("max-h-8");
+    expect(screen.getByTestId("collapsible-content")).not.toHaveClass("rst:max-h-8");
     expect(screen.getByTestId("collapsible-toggle")).toHaveTextContent("Show less");
   });
 
@@ -253,7 +253,7 @@ describe("CollapsibleSection", () => {
     Object.defineProperty(HTMLElement.prototype, "clientHeight", {
       configurable: true,
       get() {
-        return (this as HTMLElement).classList.contains("max-h-16") ? 64 : 144;
+        return (this as HTMLElement).classList.contains("rst:max-h-16") ? 64 : 144;
       },
     });
 

@@ -31,7 +31,7 @@ describe("Alert Component", () => {
 
   it("applies the color scheme classes", () => {
     const { container } = render(<Alert colorScheme="success">Saved</Alert>);
-    expect(container.firstChild).toHaveClass("border-success-500", "bg-success-50");
+    expect(container.firstChild).toHaveClass("rst:border-success-500", "rst:bg-success-50");
   });
 
   it("renders no dismiss button unless onDismiss is provided", () => {

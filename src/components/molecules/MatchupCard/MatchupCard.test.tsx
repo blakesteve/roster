@@ -57,13 +57,13 @@ describe("MatchupCard Component", () => {
     const homeLogo = screen.getByAltText("Home Team");
 
     // Home team is the winner (isWinner: true)
-    expect(homeLogo).toHaveClass("ring-success-500");
+    expect(homeLogo).toHaveClass("rst:ring-success-500");
 
     // Away team is the loser (isWinner: false).
     // The grayscale class is applied to the wrapper, which is the parent of the logo
-    const awayWrapper = awayLogo.closest("div.flex.items-center.gap-2");
-    expect(awayWrapper).toHaveClass("opacity-50");
-    expect(awayWrapper).toHaveClass("grayscale");
+    const awayWrapper = awayLogo.closest("div.rst\\:flex.rst\\:items-center.rst\\:gap-2");
+    expect(awayWrapper).toHaveClass("rst:opacity-50");
+    expect(awayWrapper).toHaveClass("rst:grayscale");
   });
 
   it("renders a tied game correctly when isTie is true", () => {
@@ -80,12 +80,12 @@ describe("MatchupCard Component", () => {
     const homeLogo = screen.getByAltText("Home Team");
 
     // Both logos should have the neutral tie ring
-    expect(awayLogo).toHaveClass("ring-gray-400");
-    expect(homeLogo).toHaveClass("ring-gray-400");
+    expect(awayLogo).toHaveClass("rst:ring-gray-400");
+    expect(homeLogo).toHaveClass("rst:ring-gray-400");
 
     // Neither should have the loser grayscale wrapper
-    const awayWrapper = awayLogo.closest("div.flex.items-center.gap-2");
-    expect(awayWrapper).not.toHaveClass("grayscale");
+    const awayWrapper = awayLogo.closest("div.rst\\:flex.rst\\:items-center.rst\\:gap-2");
+    expect(awayWrapper).not.toHaveClass("rst:grayscale");
   });
 
   it("allows clicking the card and triggers the onClick handler", () => {

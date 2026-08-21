@@ -29,6 +29,6 @@ describe("EmptyState Molecule", () => {
   it("applies variant classes", () => {
     const { container } = render(<EmptyState title="Test" variant="dashed" />);
     // Check for the border-dashed class on the container
-    expect(container.firstChild).toHaveClass("border-dashed");
+    expect(container.firstChild).toHaveClass("rst:border-dashed");
   });
 });

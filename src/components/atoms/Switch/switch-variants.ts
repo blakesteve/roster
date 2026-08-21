@@ -1,20 +1,20 @@
 import { cva } from "class-variance-authority";
 
 export const switchTrackVariants = cva(
-  "group relative inline-flex shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+  "rst:group rst:relative rst:inline-flex rst:shrink-0 rst:cursor-pointer rst:rounded-full rst:border-2 rst:border-transparent rst:transition-colors rst:duration-200 rst:ease-in-out rst:focus:outline-none rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:disabled:cursor-not-allowed rst:disabled:opacity-50",
   {
     variants: {
       variant: {
-        primary: "bg-gray-200 dark:bg-gray-700 data-[checked]:bg-primary-500 focus-visible:ring-primary-500",
-        success: "bg-gray-200 dark:bg-gray-700 data-[checked]:bg-green-500 focus-visible:ring-green-500",
-        danger:  "bg-gray-200 dark:bg-gray-700 data-[checked]:bg-error-500 focus-visible:ring-error-500",
-        neutral: "bg-gray-200 dark:bg-gray-700 data-[checked]:bg-gray-600 dark:data-[checked]:bg-gray-500 focus-visible:ring-gray-600",
+        primary: "rst:bg-gray-200 rst:dark:bg-gray-700 rst:data-[checked]:bg-primary-500 rst:focus-visible:ring-primary-500",
+        success: "rst:bg-gray-200 rst:dark:bg-gray-700 rst:data-[checked]:bg-green-500 rst:focus-visible:ring-green-500",
+        danger:  "rst:bg-gray-200 rst:dark:bg-gray-700 rst:data-[checked]:bg-error-500 rst:focus-visible:ring-error-500",
+        neutral: "rst:bg-gray-200 rst:dark:bg-gray-700 rst:data-[checked]:bg-gray-600 rst:dark:data-[checked]:bg-gray-500 rst:focus-visible:ring-gray-600",
       },
       size: {
-        xs: "h-4 w-7",
-        sm: "h-5 w-9",
-        md: "h-6 w-11",
-        lg: "h-7 w-14",
+        xs: "rst:h-4 rst:w-7",
+        sm: "rst:h-5 rst:w-9",
+        md: "rst:h-6 rst:w-11",
+        lg: "rst:h-7 rst:w-14",
       },
     },
     defaultVariants: {
@@ -25,14 +25,14 @@ export const switchTrackVariants = cva(
 );
 
 export const switchThumbVariants = cva(
-  "pointer-events-none inline-block rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out transform",
+  "rst:pointer-events-none rst:inline-block rst:rounded-full rst:bg-white rst:shadow rst:ring-0 rst:transition rst:duration-200 rst:ease-in-out rst:transform",
   {
     variants: {
       size: {
-        xs: "h-3 w-3 translate-x-0 group-data-[checked]:translate-x-3",
-        sm: "h-4 w-4 translate-x-0 group-data-[checked]:translate-x-4",
-        md: "h-5 w-5 translate-x-0 group-data-[checked]:translate-x-5",
-        lg: "h-6 w-6 translate-x-0 group-data-[checked]:translate-x-7",
+        xs: "rst:h-3 rst:w-3 rst:translate-x-0 rst:group-data-[checked]:translate-x-3",
+        sm: "rst:h-4 rst:w-4 rst:translate-x-0 rst:group-data-[checked]:translate-x-4",
+        md: "rst:h-5 rst:w-5 rst:translate-x-0 rst:group-data-[checked]:translate-x-5",
+        lg: "rst:h-6 rst:w-6 rst:translate-x-0 rst:group-data-[checked]:translate-x-7",
       },
     },
     defaultVariants: {

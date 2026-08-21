@@ -1,22 +1,22 @@
 import { cva } from "class-variance-authority";
 
 export const ctaVariants = cva(
-  "relative flex flex-col gap-4 overflow-hidden rounded-lg border p-6 shadow-sm transition-all md:flex-row md:items-center md:justify-between",
+  "rst:relative rst:flex rst:flex-col rst:gap-4 rst:overflow-hidden rst:rounded-lg rst:border rst:p-6 rst:shadow-sm rst:transition-all rst:md:flex-row rst:md:items-center rst:md:justify-between",
   {
     variants: {
       variant: {
         primary: 
-          "border-primary-200 bg-primary-50 text-primary-900 dark:border-primary-800 dark:bg-primary-900/30 dark:text-primary-200", 
+          "rst:border-primary-200 rst:bg-primary-50 rst:text-primary-900 rst:dark:border-primary-800 rst:dark:bg-primary-900/30 rst:dark:text-primary-200", 
         neutral: 
-          "border-gray-200 bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100", 
+          "rst:border-gray-200 rst:bg-white rst:text-gray-900 rst:dark:border-gray-700 rst:dark:bg-gray-800 rst:dark:text-gray-100", 
         warning: 
-          "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-200", 
+          "rst:border-amber-200 rst:bg-amber-50 rst:text-amber-900 rst:dark:border-amber-800 rst:dark:bg-amber-900/30 rst:dark:text-amber-200", 
         error: 
-          "border-error-200 bg-error-50 text-error-900 dark:border-error-800 dark:bg-error-900/30 dark:text-error-200", 
+          "rst:border-error-200 rst:bg-error-50 rst:text-error-900 rst:dark:border-error-800 rst:dark:bg-error-900/30 rst:dark:text-error-200", 
         success:
-          "border-success-200 bg-success-50 text-success-900 dark:border-success-800 dark:bg-success-900/30 dark:text-success-200",
+          "rst:border-success-200 rst:bg-success-50 rst:text-success-900 rst:dark:border-success-800 rst:dark:bg-success-900/30 rst:dark:text-success-200",
         info:
-          "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-200",
+          "rst:border-blue-200 rst:bg-blue-50 rst:text-blue-900 rst:dark:border-blue-800 rst:dark:bg-blue-900/30 rst:dark:text-blue-200",
       },
     },
     defaultVariants: {

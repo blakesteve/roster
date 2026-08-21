@@ -133,7 +133,7 @@ const ThemeToggle = React.forwardRef<HTMLButtonElement, ThemeToggleProps>(
           (isDark ? darkIcon : lightIcon) ?? (
             <FontAwesomeIcon
               icon={isDark ? faSun : faMoon}
-              className="h-3.5 w-3.5"
+              className="rst:h-3.5 rst:w-3.5"
               aria-hidden="true"
             />
           )

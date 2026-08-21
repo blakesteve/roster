@@ -12,17 +12,17 @@ describe("InlineCode Component", () => {
 
   it("defaults to primary with no surface", () => {
     const { container } = render(<InlineCode>x</InlineCode>);
-    expect(container.firstChild).toHaveClass("text-primary-600", "font-mono");
-    expect(container.firstChild).not.toHaveClass("bg-gray-100");
+    expect(container.firstChild).toHaveClass("rst:text-primary-600", "rst:font-mono");
+    expect(container.firstChild).not.toHaveClass("rst:bg-gray-100");
   });
 
   it("applies the soft surface", () => {
     const { container } = render(<InlineCode surface="soft">x</InlineCode>);
-    expect(container.firstChild).toHaveClass("bg-gray-100", "rounded");
+    expect(container.firstChild).toHaveClass("rst:bg-gray-100", "rst:rounded");
   });
 
   it("can inherit the surrounding color", () => {
     const { container } = render(<InlineCode colorScheme="current">x</InlineCode>);
-    expect(container.firstChild).toHaveClass("text-current");
+    expect(container.firstChild).toHaveClass("rst:text-current");
   });
 });

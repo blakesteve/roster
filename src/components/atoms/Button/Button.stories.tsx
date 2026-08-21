@@ -81,15 +81,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const DualPreviewDecorator: Decorator = (Story) => (
-  <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
-    <div className="light flex-1 bg-white p-12 relative flex flex-col items-center justify-center">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest z-10">
+  <div className="rst:flex rst:w-full rst:rounded-xl rst:overflow-hidden rst:border rst:border-gray-200 rst:dark:border-gray-800 rst:shadow-sm">
+    <div className="light rst:flex-1 rst:bg-white rst:p-12 rst:relative rst:flex rst:flex-col rst:items-center rst:justify-center">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest rst:z-10">
         Light Mode
       </p>
       <Story />
     </div>
-    <div className="dark flex-1 bg-gray-950 p-12 relative flex flex-col items-center justify-center border-l border-gray-200 dark:border-gray-800">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest z-10">
+    <div className="dark rst:flex-1 rst:bg-gray-950 rst:p-12 rst:relative rst:flex rst:flex-col rst:items-center rst:justify-center rst:border-l rst:border-gray-200 rst:dark:border-gray-800">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest rst:z-10">
         Dark Mode
       </p>
       <Story />
@@ -162,7 +162,7 @@ export const Ghost: Story = {
 
 export const Sizes: Story = {
   render: () => (
-    <div className="flex flex-wrap items-end justify-center gap-4">
+    <div className="rst:flex rst:flex-wrap rst:items-end rst:justify-center rst:gap-4">
       <Button size="xs">Extra Small</Button>
       <Button size="sm">Small</Button>
       <Button size="default">Default</Button>
@@ -185,7 +185,7 @@ export const Sizes: Story = {
 
 export const WithIcons: Story = {
   render: () => (
-    <div className="flex flex-wrap justify-center gap-4">
+    <div className="rst:flex rst:flex-wrap rst:justify-center rst:gap-4">
       <Button startIcon={<FontAwesomeIcon icon={faPlus} />}>
         Create League
       </Button>
@@ -272,13 +272,13 @@ const ALL_VARIANTS: NonNullable<ButtonProps["variant"]>[] = [
 
 export const AllVariantsMatrix: Story = {
   render: () => (
-    <div className="flex flex-col gap-12 w-full max-w-4xl mx-auto">
+    <div className="rst:flex rst:flex-col rst:gap-12 rst:w-full rst:max-w-4xl rst:mx-auto">
       {ALL_VARIANTS.map((variant) => (
-        <div key={variant} className="flex flex-col gap-4">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 dark:border-gray-800 pb-2">
+        <div key={variant} className="rst:flex rst:flex-col rst:gap-4">
+          <h3 className="rst:text-sm rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest rst:border-b rst:border-gray-200 rst:dark:border-gray-800 rst:pb-2">
             Variant: {variant}
           </h3>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="rst:flex rst:flex-wrap rst:justify-center rst:gap-4">
             {ALL_COLOR_SCHEMES.map((color) => (
               <Button
                 key={`${variant}-${color}`}
@@ -306,11 +306,11 @@ export const AllVariantsMatrix: Story = {
 
 export const OnHardDarkSurface: Story = {
   render: () => (
-    <div className="flex flex-col gap-6 rounded-xl bg-[#1a1410] p-8">
-      <p className="text-sm text-white/60">
+    <div className="rst:flex rst:flex-col rst:gap-6 rst:rounded-xl rst:bg-[#1a1410] rst:p-8">
+      <p className="rst:text-sm rst:text-white/60">
         A panel pinned dark that never carries the <code>.dark</code> class.
       </p>
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="rst:flex rst:flex-wrap rst:items-center rst:gap-4">
         <Button variant="ghost" colorScheme="primary">
           Default, light hover
         </Button>

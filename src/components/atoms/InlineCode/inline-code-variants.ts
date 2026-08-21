@@ -6,16 +6,16 @@ import { cva } from "class-variance-authority";
  * Sized at 0.8125rem rather than 1em on purpose: a monospace face at the same
  * nominal size as the surrounding text always reads a notch too large.
  */
-export const inlineCodeVariants = cva("font-mono text-[0.8125rem]", {
+export const inlineCodeVariants = cva("rst:font-mono rst:text-[0.8125rem]", {
   variants: {
     colorScheme: {
-      primary: "text-primary-600 dark:text-primary-400",
-      neutral: "text-gray-800 dark:text-gray-200",
-      current: "text-current",
+      primary: "rst:text-primary-600 rst:dark:text-primary-400",
+      neutral: "rst:text-gray-800 rst:dark:text-gray-200",
+      current: "rst:text-current",
     },
     surface: {
       none: "",
-      soft: "rounded bg-gray-100 px-1 py-0.5 dark:bg-gray-800",
+      soft: "rst:rounded rst:bg-gray-100 rst:px-1 rst:py-0.5 rst:dark:bg-gray-800",
     },
   },
   defaultVariants: { colorScheme: "primary", surface: "none" },

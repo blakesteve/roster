@@ -37,15 +37,15 @@ The \`CallToAction\` is a high-visibility banner used to nudge users toward spec
   },
   decorators: [
     (Story) => (
-      <div className="p-8 space-y-12">
-        <div className="light bg-gray-50 p-8 rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+      <div className="rst:p-8 rst:space-y-12">
+        <div className="light rst:bg-gray-50 rst:p-8 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:mb-6 rst:uppercase rst:tracking-widest">
             Light Mode Preview
           </p>
           <Story />
         </div>
-        <div className="dark bg-gray-950 p-8 rounded-xl border border-gray-800 shadow-xl">
-          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+        <div className="dark rst:bg-gray-950 rst:p-8 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:mb-6 rst:uppercase rst:tracking-widest">
             Dark Mode Preview
           </p>
           <Story />
@@ -88,13 +88,13 @@ export const RichTitleWithBadge: Story = {
   args: {
     variant: "primary",
     title: (
-      <span className="flex flex-wrap items-center gap-2.5">
+      <span className="rst:flex rst:flex-wrap rst:items-center rst:gap-2.5">
         Quick Vote
         <Badge
           variant="primary"
           fill="light"
           size="xs"
-          leftIcon={<FontAwesomeIcon icon={faBolt} className="h-2.5 w-2.5" />}
+          leftIcon={<FontAwesomeIcon icon={faBolt} className="rst:h-2.5 rst:w-2.5" />}
         >
           New
         </Badge>
@@ -102,7 +102,7 @@ export const RichTitleWithBadge: Story = {
     ),
     description:
       "Rate games one-by-one — takes 5 seconds per game. Skip what you haven't played, vote on what you have.",
-    icon: <FontAwesomeIcon icon={faTrophy} className="h-6 w-6" />,
+    icon: <FontAwesomeIcon icon={faTrophy} className="rst:h-6 rst:w-6" />,
     action: (
       <Button variant="solid" colorScheme="primary">
         Start voting
@@ -129,7 +129,7 @@ export const PicksOpen: Story = {
     description:
       "The 2026 Season is finally here. Submit your spread picks before kickoff on Thursday night to be eligible for the Weekly Jackpot.",
     variant: "primary",
-    icon: <FontAwesomeIcon icon={faTrophy} className="h-5 w-5" />,
+    icon: <FontAwesomeIcon icon={faTrophy} className="rst:h-5 rst:w-5" />,
     action: (
       <Button variant="solid" colorScheme="primary">
         Make Your Picks
@@ -146,20 +146,20 @@ export const RichDescriptionEmbedded: Story = {
   args: {
     title: "NFL Season is coming soon!",
     variant: "primary",
-    icon: <FontAwesomeIcon icon={faTrophy} className="h-5 w-5" />,
+    icon: <FontAwesomeIcon icon={faTrophy} className="rst:h-5 rst:w-5" />,
     description: (
-      <div className="flex flex-col gap-4 mt-2">
+      <div className="rst:flex rst:flex-col rst:gap-4 rst:mt-2">
         <span>
           First game expected on September 4th. Get your squad together and
           create a NFL league. Once games are available, the schedule will
           automatically populate.
         </span>
-        <div className="bg-black/5 dark:bg-black/20 p-4 rounded-xl border border-black/10 dark:border-white/10 self-start">
+        <div className="rst:bg-black/5 rst:dark:bg-black/20 rst:p-4 rst:rounded-xl rst:border rst:border-black/10 rst:dark:border-white/10 rst:self-start">
           <Countdown
             targetDate={new Date(new Date().setDate(new Date().getDate() + 14))} // 14 days from now
             size="sm"
             variant="neutral" // Instructs the text to inherit the CTA's color!
-            className="text-left"
+            className="rst:text-left"
           />
         </div>
       </div>
@@ -189,7 +189,7 @@ export const SuccessState: Story = {
     description:
       "You are locked in for Week 5 across all 3 of your active leagues. Good luck!",
     variant: "success",
-    icon: <FontAwesomeIcon icon={faCheckDouble} className="h-5 w-5" />,
+    icon: <FontAwesomeIcon icon={faCheckDouble} className="rst:h-5 rst:w-5" />,
     action: (
       <Button variant="outline" colorScheme="success" size="sm">
         Review Picks
@@ -207,7 +207,7 @@ export const LockWarning: Story = {
     description:
       "The early window games lock in 30 minutes. 4 of your picks are still pending.",
     variant: "warning",
-    icon: <FontAwesomeIcon icon={faTriangleExclamation} className="h-5 w-5" />,
+    icon: <FontAwesomeIcon icon={faTriangleExclamation} className="rst:h-5 rst:w-5" />,
     action: (
       <Button variant="outline" colorScheme="amber">
         Finish Picks
@@ -225,7 +225,7 @@ export const InfoMessage: Story = {
     description:
       "We've updated how tie-breakers are calculated for the playoffs. Check out the new rules before making your wildcard picks.",
     variant: "info",
-    icon: <FontAwesomeIcon icon={faInfoCircle} className="h-5 w-5" />,
+    icon: <FontAwesomeIcon icon={faInfoCircle} className="rst:h-5 rst:w-5" />,
     action: (
       <Button variant="ghost" colorScheme="primary" size="sm">
         Read Rules
@@ -243,7 +243,7 @@ export const ScoreSyncError: Story = {
     description:
       "We are experiencing a delay receiving data from the provider. Picks are safe, but scores may lag by 5-10 minutes.",
     variant: "error",
-    icon: <FontAwesomeIcon icon={faTriangleExclamation} className="h-5 w-5" />,
+    icon: <FontAwesomeIcon icon={faTriangleExclamation} className="rst:h-5 rst:w-5" />,
     action: (
       <Button variant="outline" colorScheme="error" size="sm">
         View Status Page
@@ -267,9 +267,9 @@ export const WithPersistenceLogic: Story = {
 
     if (!isVisible) {
       return (
-        <div className="p-12 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-lg text-center">
+        <div className="rst:p-12 rst:border-2 rst:border-dashed rst:border-gray-200 rst:dark:border-gray-800 rst:rounded-lg rst:text-center">
           <Button variant="ghost" onClick={() => setIsVisible(true)} size="sm">
-            <FontAwesomeIcon icon={faCircleCheck} className="mr-2" />
+            <FontAwesomeIcon icon={faCircleCheck} className="rst:mr-2" />
             Reset Banner Visibility
           </Button>
         </div>
@@ -281,7 +281,7 @@ export const WithPersistenceLogic: Story = {
         title="New Feature: Survivor Pools"
         description="We've added Survivor Pools to MegaSquad! Survive the longest without a loss to win the pot."
         variant="neutral"
-        icon={<FontAwesomeIcon icon={faInfoCircle} className="h-5 w-5" />}
+        icon={<FontAwesomeIcon icon={faInfoCircle} className="rst:h-5 rst:w-5" />}
         onDismiss={handleDismiss}
         action={
           <Button variant="outline" colorScheme="neutral" size="sm">

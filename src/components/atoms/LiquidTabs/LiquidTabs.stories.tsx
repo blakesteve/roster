@@ -94,15 +94,15 @@ const THEME_TABS: TabItem[] = [
 // ─── Decorators ──────────────────────────────────────────────────────────────
 
 const DualPreviewDecorator: Decorator = (Story) => (
-  <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
-    <div className="light flex-1 bg-white p-8 relative flex flex-col items-center justify-center min-w-0">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+  <div className="rst:flex rst:w-full rst:rounded-xl rst:overflow-hidden rst:border rst:border-gray-200 rst:dark:border-gray-800 rst:shadow-sm">
+    <div className="light rst:flex-1 rst:bg-white rst:p-8 rst:relative rst:flex rst:flex-col rst:items-center rst:justify-center rst:min-w-0">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest">
         Light Mode
       </p>
       <Story />
     </div>
-    <div className="dark flex-1 bg-gray-950 p-8 relative flex flex-col items-center justify-center border-l border-gray-200 dark:border-gray-800 min-w-0">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+    <div className="dark rst:flex-1 rst:bg-gray-950 rst:p-8 rst:relative rst:flex rst:flex-col rst:items-center rst:justify-center rst:border-l rst:border-gray-200 rst:dark:border-gray-800 rst:min-w-0">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest">
         Dark Mode
       </p>
       <Story />
@@ -169,7 +169,7 @@ export const FilledVariant: Story = {
   render: () => {
     const [active, setActive] = useState("card");
     return (
-      <div className="w-64">
+      <div className="rst:w-64">
         <LiquidTabs
           tabs={EMBED_TABS}
           activeTab={active}
@@ -196,7 +196,7 @@ export const FullWidth: Story = {
   render: () => {
     const [active, setActive] = useState("grid");
     return (
-      <div className="w-72">
+      <div className="rst:w-72">
         <LiquidTabs
           tabs={VIEW_TABS}
           activeTab={active}
@@ -225,9 +225,9 @@ export const BothVariantsSideBySide: Story = {
     const [activePill, setActivePill] = useState("dark");
     const [activeFilled, setActiveFilled] = useState("dark");
     return (
-      <div className="flex flex-col gap-6 w-64">
+      <div className="rst:flex rst:flex-col rst:gap-6 rst:w-64">
         <div>
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:dark:text-gray-500 rst:uppercase rst:tracking-widest rst:mb-2">
             pill (default)
           </p>
           <LiquidTabs
@@ -239,7 +239,7 @@ export const BothVariantsSideBySide: Story = {
           />
         </div>
         <div>
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:dark:text-gray-500 rst:uppercase rst:tracking-widest rst:mb-2">
             filled
           </p>
           <LiquidTabs
@@ -272,8 +272,8 @@ export const RenderFunctionLabels: Story = {
       {
         id: "grid",
         label: (isActive) => (
-          <span className="flex items-center gap-1.5">
-            <FontAwesomeIcon icon={faTableCells} className="h-3 w-3" />
+          <span className="rst:flex rst:items-center rst:gap-1.5">
+            <FontAwesomeIcon icon={faTableCells} className="rst:h-3 rst:w-3" />
             {isActive && "Grid"}
           </span>
         ),
@@ -281,8 +281,8 @@ export const RenderFunctionLabels: Story = {
       {
         id: "list",
         label: (isActive) => (
-          <span className="flex items-center gap-1.5">
-            <FontAwesomeIcon icon={faList} className="h-3 w-3" />
+          <span className="rst:flex rst:items-center rst:gap-1.5">
+            <FontAwesomeIcon icon={faList} className="rst:h-3 rst:w-3" />
             {isActive && "List"}
           </span>
         ),
@@ -290,8 +290,8 @@ export const RenderFunctionLabels: Story = {
       {
         id: "chart",
         label: (isActive) => (
-          <span className="flex items-center gap-1.5">
-            <FontAwesomeIcon icon={faChartBar} className="h-3 w-3" />
+          <span className="rst:flex rst:items-center rst:gap-1.5">
+            <FontAwesomeIcon icon={faChartBar} className="rst:h-3 rst:w-3" />
             {isActive && "Chart"}
           </span>
         ),
@@ -321,8 +321,8 @@ export const WithBadgeLabels: Story = {
       {
         id: "preview",
         label: (
-          <span className="flex items-center gap-1.5">
-            <FontAwesomeIcon icon={faEye} className="h-3 w-3" />
+          <span className="rst:flex rst:items-center rst:gap-1.5">
+            <FontAwesomeIcon icon={faEye} className="rst:h-3 rst:w-3" />
             Preview
           </span>
         ),
@@ -330,8 +330,8 @@ export const WithBadgeLabels: Story = {
       {
         id: "code",
         label: (
-          <span className="flex items-center gap-1.5">
-            <FontAwesomeIcon icon={faCode} className="h-3 w-3" />
+          <span className="rst:flex rst:items-center rst:gap-1.5">
+            <FontAwesomeIcon icon={faCode} className="rst:h-3 rst:w-3" />
             Code
           </span>
         ),
@@ -339,8 +339,8 @@ export const WithBadgeLabels: Story = {
       {
         id: "reviews",
         label: (
-          <span className="flex items-center gap-2">
-            <FontAwesomeIcon icon={faStar} className="h-3 w-3" />
+          <span className="rst:flex rst:items-center rst:gap-2">
+            <FontAwesomeIcon icon={faStar} className="rst:h-3 rst:w-3" />
             Reviews
             <Badge variant="primary" fill="soft" size="xs">4</Badge>
           </span>
@@ -380,20 +380,20 @@ export const ManyTabs: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="flex flex-col gap-4 w-full">
-        <div className="light bg-white rounded-xl border border-gray-200 p-6 relative">
-          <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+      <div className="rst:flex rst:flex-col rst:gap-4 rst:w-full">
+        <div className="light rst:bg-white rst:rounded-xl rst:border rst:border-gray-200 rst:p-6 rst:relative">
+          <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest">
             Light Mode
           </p>
-          <div className="mt-4">
+          <div className="rst:mt-4">
             <Story />
           </div>
         </div>
-        <div className="dark bg-gray-950 rounded-xl border border-gray-800 p-6 relative">
-          <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+        <div className="dark rst:bg-gray-950 rst:rounded-xl rst:border rst:border-gray-800 rst:p-6 rst:relative">
+          <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest">
             Dark Mode
           </p>
-          <div className="mt-4">
+          <div className="rst:mt-4">
             <Story />
           </div>
         </div>

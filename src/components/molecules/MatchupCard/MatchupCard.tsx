@@ -12,25 +12,25 @@ export interface TeamMatchupData {
   accessory?: React.ReactNode;
 }
 
-const teamWrapperVariants = cva("flex items-center gap-2 transition-all", {
+const teamWrapperVariants = cva("rst:flex rst:items-center rst:gap-2 rst:transition-all", {
   variants: {
     state: {
       default: "",
       winner: "",
-      loser: "opacity-50 grayscale",
+      loser: "rst:opacity-50 rst:grayscale",
       tie: "",
     },
   },
   defaultVariants: { state: "default" },
 });
 
-const logoVariants = cva("h-8 w-8 object-contain transition-all rounded-full", {
+const logoVariants = cva("rst:h-8 rst:w-8 rst:object-contain rst:transition-all rst:rounded-full", {
   variants: {
     state: {
       default: "",
-      winner: "ring-2 ring-success-500 bg-success-200/25",
+      winner: "rst:ring-2 rst:ring-success-500 rst:bg-success-200/25",
       loser: "",
-      tie: "ring-2 ring-gray-400",
+      tie: "rst:ring-2 rst:ring-gray-400",
     },
   },
   defaultVariants: { state: "default" },
@@ -71,33 +71,33 @@ const MatchupCard = React.forwardRef<HTMLButtonElement, MatchupCardProps>(
         ref={ref}
         type="button"
         className={cn(
-          "flex items-center gap-3 rounded-lg p-2 text-left transition hover:bg-gray-100 dark:hover:bg-slate-800",
+          "rst:flex rst:items-center rst:gap-3 rst:rounded-lg rst:p-2 rst:text-left rst:transition rst:hover:bg-gray-100 rst:dark:hover:bg-slate-800",
           className,
         )}
         {...props}
       >
         {/* --- AWAY TEAM --- */}
         <div className={teamWrapperVariants({ state: awayState })}>
-          <div className="relative">
+          <div className="rst:relative">
             <img
               src={awayTeam.logoSrc}
               alt={awayTeam.name || `Team ${awayTeam.id}`}
               className={logoVariants({ state: awayState })}
             />
           </div>
-          <div className="flex flex-col items-end">
+          <div className="rst:flex rst:flex-col rst:items-end">
             {awayTeam.accessory && (
               <span
                 className={cn(
-                  "text-sm text-gray-800 dark:text-gray-300",
-                  awayTeam.isWinner && "font-bold",
+                  "rst:text-sm rst:text-gray-800 rst:dark:text-gray-300",
+                  awayTeam.isWinner && "rst:font-bold",
                 )}
               >
                 {awayTeam.accessory}
               </span>
             )}
             {isCompleted && awayTeam.score !== undefined && (
-              <span className="text-xs font-mono font-semibold text-gray-900 dark:text-white">
+              <span className="rst:text-xs rst:font-mono rst:font-semibold rst:text-gray-900 rst:dark:text-white">
                 {awayTeam.score}
               </span>
             )}
@@ -105,30 +105,30 @@ const MatchupCard = React.forwardRef<HTMLButtonElement, MatchupCardProps>(
         </div>
 
         {/* --- SEPARATOR --- */}
-        <span className="text-xs font-medium text-gray-500 self-center px-1">
+        <span className="rst:text-xs rst:font-medium rst:text-gray-500 rst:self-center rst:px-1">
           {isCompleted ? "-" : "@"}
         </span>
 
         {/* --- HOME TEAM --- */}
         <div className={teamWrapperVariants({ state: homeState })}>
-          <div className="flex flex-col items-start">
+          <div className="rst:flex rst:flex-col rst:items-start">
             {homeTeam.accessory && (
               <span
                 className={cn(
-                  "text-sm text-gray-800 dark:text-gray-300",
-                  homeTeam.isWinner && "font-bold",
+                  "rst:text-sm rst:text-gray-800 rst:dark:text-gray-300",
+                  homeTeam.isWinner && "rst:font-bold",
                 )}
               >
                 {homeTeam.accessory}
               </span>
             )}
             {isCompleted && homeTeam.score !== undefined && (
-              <span className="text-xs font-mono font-semibold text-gray-900 dark:text-white">
+              <span className="rst:text-xs rst:font-mono rst:font-semibold rst:text-gray-900 rst:dark:text-white">
                 {homeTeam.score}
               </span>
             )}
           </div>
-          <div className="relative">
+          <div className="rst:relative">
             <img
               src={homeTeam.logoSrc}
               alt={homeTeam.name || `Team ${homeTeam.id}`}

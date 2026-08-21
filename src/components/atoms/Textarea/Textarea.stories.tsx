@@ -26,20 +26,20 @@ It matches the exact visual style and dark mode resilience of the \`Input\` and 
   },
   decorators: [
     (Story) => (
-      <div className="p-8 space-y-12 w-full max-w-4xl mx-auto">
-        <div className="light bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+      <div className="rst:p-8 rst:space-y-12 rst:w-full rst:max-w-4xl rst:mx-auto">
+        <div className="light rst:bg-gray-50 rst:p-6 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:mb-6 rst:uppercase rst:tracking-widest">
             Light Mode Preview
           </p>
-          <div className="max-w-md mx-auto">
+          <div className="rst:max-w-md rst:mx-auto">
             <Story />
           </div>
         </div>
-        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
-          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+        <div className="dark rst:bg-gray-950 rst:p-6 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:mb-6 rst:uppercase rst:tracking-widest">
             Dark Mode Preview
           </p>
-          <div className="max-w-md mx-auto">
+          <div className="rst:max-w-md rst:mx-auto">
             <Story />
           </div>
         </div>
@@ -180,7 +180,7 @@ const ControlledExample = () => {
   const limit = 100;
 
   return (
-    <div className="w-full space-y-4 p-4 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-gray-900 shadow-sm transition-colors">
+    <div className="rst:w-full rst:space-y-4 rst:p-4 rst:border rst:border-gray-200 rst:dark:border-gray-800 rst:rounded-lg rst:bg-white rst:dark:bg-gray-900 rst:shadow-sm rst:transition-colors">
       <Textarea
         label="Tweet your pick"
         variant="outline"
@@ -192,7 +192,7 @@ const ControlledExample = () => {
         helperText={`${value.length}/${limit} characters`}
         errorMessage={value.length > limit ? "Too long!" : undefined}
       />
-      <div className="flex justify-end">
+      <div className="rst:flex rst:justify-end">
         <Button size="sm" disabled={value.length === 0 || value.length > limit}>
           Post
         </Button>

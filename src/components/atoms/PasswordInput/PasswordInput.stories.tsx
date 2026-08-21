@@ -111,7 +111,7 @@ export const Disabled: Story = {
 export const Variants: Story = {
   args: { label: "Password" },
   render: () => (
-    <div className="flex max-w-sm flex-col gap-4">
+    <div className="rst:flex rst:max-w-sm rst:flex-col rst:gap-4">
       {(["outline", "white", "soft", "ghost"] as const).map((variant) => (
         <PasswordInput
           key={variant}
@@ -130,7 +130,7 @@ export const Controlled: Story = {
     const [revealed, setRevealed] = useState(false);
 
     return (
-      <div className="flex max-w-sm flex-col gap-3">
+      <div className="rst:flex rst:max-w-sm rst:flex-col rst:gap-3">
         <PasswordInput
           label="Password"
           defaultValue="hunter2"
@@ -160,7 +160,7 @@ export const InASignInForm: Story = {
 
     return (
       <form
-        className="flex max-w-sm flex-col gap-4"
+        className="rst:flex rst:max-w-sm rst:flex-col rst:gap-4"
         onSubmit={(e) => {
           e.preventDefault();
           setSubmitted(true);
@@ -176,7 +176,7 @@ export const InASignInForm: Story = {
           Sign in
         </Button>
         {submitted && (
-          <p className="text-sm text-success-600 dark:text-success-400">
+          <p className="rst:text-sm rst:text-success-600 rst:dark:text-success-400">
             Submitted, and only by the button.
           </p>
         )}
@@ -197,7 +197,7 @@ export const DarkMode: Story = {
   args: { label: "Password" },
   render: () => (
     <div className="dark">
-      <div className="flex max-w-sm flex-col gap-4 rounded-xl bg-gray-950 p-6">
+      <div className="rst:flex rst:max-w-sm rst:flex-col rst:gap-4 rst:rounded-xl rst:bg-gray-950 rst:p-6">
         <PasswordInput label="Password" placeholder="••••••••" />
         <PasswordInput
           label="New password"
