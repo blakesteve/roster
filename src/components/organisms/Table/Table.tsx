@@ -75,7 +75,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn("[&_tr:last-child]:border-0", className)}
+    className={cn("rst:[&_tr:last-child]:border-0", className)}
     {...props}
   />
 ));
@@ -91,7 +91,7 @@ const TableFooter = React.forwardRef<
       ref={ref}
       className={cn(
         tableHeaderVariants({ variant }),
-        "border-t font-medium [&>tr]:last:border-b-0",
+        "rst:border-t rst:font-medium rst:[&>tr]:last:border-b-0",
         className,
       )}
       {...props}
@@ -152,7 +152,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-sm text-gray-500 dark:text-gray-400", className)}
+    className={cn("rst:mt-4 rst:text-sm rst:text-gray-500 rst:dark:text-gray-400", className)}
     {...props}
   />
 ));

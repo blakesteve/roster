@@ -20,13 +20,13 @@ describe("Input Component", () => {
     expect(screen.getByText("Invalid input")).toBeInTheDocument();
 
     const input = screen.getByRole("textbox");
-    expect(input).toHaveClass("border-error-500", "dark:border-error-500");
+    expect(input).toHaveClass("rst:border-error-500", "rst:dark:border-error-500");
   });
 
   it("applies error styles when the boolean error prop is true", () => {
     render(<Input error={true} />);
     const input = screen.getByRole("textbox");
-    expect(input).toHaveClass("border-error-500", "dark:border-error-500");
+    expect(input).toHaveClass("rst:border-error-500", "rst:dark:border-error-500");
   });
 
   it("renders icons when provided and applies correct icon variants", () => {
@@ -35,8 +35,8 @@ describe("Input Component", () => {
     );
     expect(screen.getByTestId("icon")).toBeInTheDocument();
 
-    const iconWrapper = container.querySelector(".left-3");
-    expect(iconWrapper).toHaveClass("text-gray-300", "dark:text-gray-500");
+    const iconWrapper = container.querySelector(".rst\\:left-3");
+    expect(iconWrapper).toHaveClass("rst:text-gray-300", "rst:dark:text-gray-500");
   });
 
   it("applies variant classes correctly to the input", () => {
@@ -44,13 +44,13 @@ describe("Input Component", () => {
     let input = screen.getByRole("textbox");
 
     // Checks the soft variant (including dark mode)
-    expect(input).toHaveClass("bg-gray-100", "dark:bg-gray-800");
+    expect(input).toHaveClass("rst:bg-gray-100", "rst:dark:bg-gray-800");
 
     rerender(<Input variant="slate" />);
     input = screen.getByRole("textbox");
 
     // Checks our new slate variant (including dark mode)
-    expect(input).toHaveClass("bg-gray-700", "dark:bg-gray-900");
+    expect(input).toHaveClass("rst:bg-gray-700", "rst:dark:bg-gray-900");
   });
 
   it("disables input when disabled prop is set", () => {

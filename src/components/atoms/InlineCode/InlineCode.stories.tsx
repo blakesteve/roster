@@ -38,17 +38,17 @@ export const Playground: Story = {
 export const ColorSchemes: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-col gap-3 text-sm text-gray-700 dark:text-gray-300">
-      <p className="m-0">
+    <div className="rst:flex rst:flex-col rst:gap-3 rst:text-sm rst:text-gray-700 rst:dark:text-gray-300">
+      <p className="rst:m-0">
         Primary: pass <InlineCode>themeMode=&quot;auto&quot;</InlineCode> to the
         navbar.
       </p>
-      <p className="m-0">
+      <p className="rst:m-0">
         Neutral:{" "}
         <InlineCode colorScheme="neutral">themeMode=&quot;auto&quot;</InlineCode>{" "}
         stays inside the sentence.
       </p>
-      <p className="m-0 text-purple-600 dark:text-purple-400">
+      <p className="rst:m-0 rst:text-purple-600 rst:dark:text-purple-400">
         Current:{" "}
         <InlineCode colorScheme="current">themeMode=&quot;auto&quot;</InlineCode>{" "}
         inherits the paragraph.
@@ -68,12 +68,12 @@ export const ColorSchemes: Story = {
 export const Surfaces: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-col gap-3 text-sm text-gray-700 dark:text-gray-300">
-      <p className="m-0">
+    <div className="rst:flex rst:flex-col rst:gap-3 rst:text-sm rst:text-gray-700 rst:dark:text-gray-300">
+      <p className="rst:m-0">
         None: the file lives at <InlineCode>src/index.css</InlineCode> and is
         imported for you.
       </p>
-      <p className="m-0">
+      <p className="rst:m-0">
         Soft: the file lives at{" "}
         <InlineCode surface="soft">src/index.css</InlineCode> and is imported for
         you.
@@ -93,15 +93,15 @@ export const Surfaces: Story = {
 export const InProse: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="max-w-prose space-y-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-      <p className="m-0">
+    <div className="rst:max-w-prose rst:space-y-3 rst:text-sm rst:leading-relaxed rst:text-gray-700 rst:dark:text-gray-300">
+      <p className="rst:m-0">
         Roster wraps its own output in{" "}
         <InlineCode>@layer roster</InlineCode>, declared between{" "}
         <InlineCode>components</InlineCode> and <InlineCode>utilities</InlineCode>
         . That ordering is why your app&apos;s utilities still win, and why
         importing Roster before or after Tailwind stopped mattering.
       </p>
-      <p className="m-0">
+      <p className="rst:m-0">
         The reset is opt-in from{" "}
         <InlineCode>@blakesteve/roster/preflight.css</InlineCode>, so a host app
         with its own normalize is not fighting a second one.
@@ -121,8 +121,8 @@ export const InProse: Story = {
 export const LongIdentifiers: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="max-w-[22rem] text-sm text-gray-700 dark:text-gray-300">
-      <p className="m-0">
+    <div className="rst:max-w-[22rem] rst:text-sm rst:text-gray-700 rst:dark:text-gray-300">
+      <p className="rst:m-0">
         Deep paths such as{" "}
         <InlineCode>src/components/molecules/DescriptionList/DescriptionList.tsx</InlineCode>{" "}
         wrap at the container edge rather than forcing a horizontal scrollbar.
@@ -143,16 +143,16 @@ export const DarkMode: Story = {
   args: { children: "placeholder" },
   render: () => (
     <div className="dark">
-      <div className="space-y-3 rounded-xl bg-gray-950 p-6 text-sm text-gray-300">
-        <p className="m-0">
+      <div className="rst:space-y-3 rst:rounded-xl rst:bg-gray-950 rst:p-6 rst:text-sm rst:text-gray-300">
+        <p className="rst:m-0">
           Primary <InlineCode>useKeySequence</InlineCode> in a sentence.
         </p>
-        <p className="m-0">
+        <p className="rst:m-0">
           Neutral{" "}
           <InlineCode colorScheme="neutral">useKeySequence</InlineCode> in a
           sentence.
         </p>
-        <p className="m-0">
+        <p className="rst:m-0">
           Soft surface{" "}
           <InlineCode surface="soft">useKeySequence</InlineCode> in a sentence.
         </p>

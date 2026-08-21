@@ -17,15 +17,15 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="p-8 space-y-12">
-        <div className="light bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+      <div className="rst:p-8 rst:space-y-12">
+        <div className="light rst:bg-gray-50 rst:p-6 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:mb-6 rst:uppercase rst:tracking-widest">
             Light Mode Preview
           </p>
           <Story />
         </div>
-        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
-          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+        <div className="dark rst:bg-gray-950 rst:p-6 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:mb-6 rst:uppercase rst:tracking-widest">
             Dark Mode Preview
           </p>
           <Story />
@@ -88,7 +88,7 @@ const richItems = [
   {
     id: 1,
     title: (
-      <div className="flex items-center justify-between w-full pr-4">
+      <div className="rst:flex rst:items-center rst:justify-between rst:w-full rst:pr-4">
         <span>Payment Method</span>
         <Badge variant="success" size="xs">
           ACTIVE
@@ -96,13 +96,13 @@ const richItems = [
       </div>
     ),
     content: (
-      <div className="space-y-4">
-        <p className="text-inherit opacity-80">Visa ending in 4242</p>
-        <div className="flex gap-2">
+      <div className="rst:space-y-4">
+        <p className="rst:text-inherit rst:opacity-80">Visa ending in 4242</p>
+        <div className="rst:flex rst:gap-2">
           <Button
             size="sm"
             variant="outline"
-            className="border-current text-inherit hover:bg-current/10"
+            className="rst:border-current rst:text-inherit rst:hover:bg-current/10"
           >
             Edit
           </Button>
@@ -116,13 +116,13 @@ const richItems = [
   {
     id: 2,
     title: (
-      <div className="flex items-center justify-between w-full pr-4">
+      <div className="rst:flex rst:items-center rst:justify-between rst:w-full rst:pr-4">
         <span>Billing History</span>
-        <span className="text-inherit opacity-60 font-normal">3 Invoices</span>
+        <span className="rst:text-inherit rst:opacity-60 rst:font-normal">3 Invoices</span>
       </div>
     ),
     content: (
-      <ul className="list-disc pl-5 text-inherit opacity-80 space-y-1">
+      <ul className="rst:list-disc rst:pl-5 rst:text-inherit rst:opacity-80 rst:space-y-1">
         <li>Jan 2026 - $12.00</li>
         <li>Dec 2025 - $12.00</li>
         <li>Nov 2025 - $12.00</li>

@@ -59,17 +59,17 @@ describe("Countdown Component", () => {
     // Test Default (Gradient)
     const { rerender } = render(<Countdown targetDate={targetDate} />);
     let dayNumber = screen.getByText("01");
-    expect(dayNumber).toHaveClass("bg-gradient-to-br", "from-primary-700");
+    expect(dayNumber).toHaveClass("rst:bg-gradient-to-br", "rst:from-primary-700");
 
     // Test Primary Variant
     rerender(<Countdown targetDate={targetDate} variant="primary" />);
     dayNumber = screen.getByText("01");
-    expect(dayNumber).toHaveClass("text-primary-600", "dark:text-primary-400");
+    expect(dayNumber).toHaveClass("rst:text-primary-600", "rst:dark:text-primary-400");
 
     // Test Neutral Variant
     rerender(<Countdown targetDate={targetDate} variant="neutral" />);
     dayNumber = screen.getByText("01");
-    expect(dayNumber).toHaveClass("text-gray-900", "dark:text-gray-100");
+    expect(dayNumber).toHaveClass("rst:text-gray-900", "rst:dark:text-gray-100");
   });
 
   // Ensures native dark mode inheritance is working
@@ -79,8 +79,8 @@ describe("Countdown Component", () => {
 
     // The root div should explicitly define the baseline text colors
     expect(container.firstChild).toHaveClass(
-      "text-gray-900",
-      "dark:text-gray-100",
+      "rst:text-gray-900",
+      "rst:dark:text-gray-100",
     );
   });
 

@@ -96,20 +96,20 @@ type Story = StoryObj<typeof meta>;
 // ─── Decorators ──────────────────────────────────────────────────────────────
 
 const DualPreviewDecorator: Decorator = (Story) => (
-  <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
-    <div className="light flex-1 bg-white p-8 relative min-w-0">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+  <div className="rst:flex rst:w-full rst:rounded-xl rst:overflow-hidden rst:border rst:border-gray-200 rst:dark:border-gray-800 rst:shadow-sm">
+    <div className="light rst:flex-1 rst:bg-white rst:p-8 rst:relative rst:min-w-0">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest">
         Light Mode
       </p>
-      <div className="mt-4">
+      <div className="rst:mt-4">
         <Story />
       </div>
     </div>
-    <div className="dark flex-1 bg-gray-950 p-8 relative border-l border-gray-200 dark:border-gray-800 min-w-0">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+    <div className="dark rst:flex-1 rst:bg-gray-950 rst:p-8 rst:relative rst:border-l rst:border-gray-200 rst:dark:border-gray-800 rst:min-w-0">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest">
         Dark Mode
       </p>
-      <div className="mt-4">
+      <div className="rst:mt-4">
         <Story />
       </div>
     </div>
@@ -123,7 +123,7 @@ export const Playground: Story = {
   args: {
     items: TEAM,
     maxDisplay: 5,
-    label: <p className="text-xs text-gray-500 dark:text-gray-400">8 people in this group</p>,
+    label: <p className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">8 people in this group</p>,
   } as typeof AvatarStrip extends (props: infer P) => unknown ? P : never,
   decorators: [DualPreviewDecorator],
 };
@@ -134,8 +134,8 @@ export const Basic: Story = {
     <AvatarStrip
       items={FEW}
       label={
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          <span className="font-medium text-gray-700 dark:text-gray-300">3</span> other players prefer Controller
+        <p className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">
+          <span className="rst:font-medium rst:text-gray-700 rst:dark:text-gray-300">3</span> other players prefer Controller
         </p>
       }
     />
@@ -156,8 +156,8 @@ export const WithOverflow: Story = {
     <AvatarStrip
       items={TEAM}
       label={
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          <span className="font-medium text-gray-700 dark:text-gray-300">8</span> team members
+        <p className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">
+          <span className="rst:font-medium rst:text-gray-700 rst:dark:text-gray-300">8</span> team members
         </p>
       }
     />
@@ -181,8 +181,8 @@ export const AccurateTotalCount: Story = {
       items={TEAM}
       totalCount={142}
       label={
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          <span className="font-medium text-gray-700 dark:text-gray-300">142</span> people agree
+        <p className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">
+          <span className="rst:font-medium rst:text-gray-700 rst:dark:text-gray-300">142</span> people agree
         </p>
       }
     />
@@ -206,7 +206,7 @@ export const WithExcludeKey: Story = {
       items={TEAM}
       excludeKey="u3"
       label={
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">
           Others who voted — you&apos;re already counted
         </p>
       }
@@ -231,7 +231,7 @@ export const WithDismiss: Story = {
       items={FEW}
       onDismiss={() => alert("dismissed")}
       label={
-        <p className="text-xs text-gray-500 dark:text-gray-400">3 players voted</p>
+        <p className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">3 players voted</p>
       }
     />
   ),
@@ -255,14 +255,14 @@ export const WithTrailingSlot: Story = {
       trailingSlot={
         <span
           title="Create an account to appear here"
-          className="relative flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 ring-2 ring-white dark:ring-gray-900 cursor-pointer hover:border-primary-400 transition-colors"
+          className="rst:relative rst:flex rst:h-6 rst:w-6 rst:items-center rst:justify-center rst:rounded-full rst:border rst:border-dashed rst:border-gray-300 rst:dark:border-gray-700 rst:bg-gray-100 rst:dark:bg-gray-800 rst:ring-2 rst:ring-white rst:dark:ring-gray-900 rst:cursor-pointer rst:hover:border-primary-400 rst:transition-colors"
         >
-          <span className="text-[9px] font-bold text-gray-400 dark:text-gray-600 select-none">+</span>
+          <span className="rst:text-[9px] rst:font-bold rst:text-gray-400 rst:dark:text-gray-600 rst:select-none">+</span>
         </span>
       }
       label={
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          <span className="text-primary-500 dark:text-primary-400 font-medium cursor-pointer hover:opacity-80 transition-opacity">
+        <p className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">
+          <span className="rst:text-primary-500 rst:dark:text-primary-400 rst:font-medium rst:cursor-pointer rst:hover:opacity-80 rst:transition-opacity">
             Join
           </span>{" "}
           to appear here
@@ -290,14 +290,14 @@ export const TrailingSlotOnly: Story = {
       trailingSlot={
         <span
           title="Create an account to appear here"
-          className="relative flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 ring-2 ring-white dark:ring-gray-900 cursor-pointer"
+          className="rst:relative rst:flex rst:h-6 rst:w-6 rst:items-center rst:justify-center rst:rounded-full rst:border rst:border-dashed rst:border-gray-300 rst:dark:border-gray-700 rst:bg-gray-100 rst:dark:bg-gray-800 rst:ring-2 rst:ring-white rst:dark:ring-gray-900 rst:cursor-pointer"
         >
-          <span className="text-[9px] font-bold text-gray-400 dark:text-gray-600 select-none">+</span>
+          <span className="rst:text-[9px] rst:font-bold rst:text-gray-400 rst:dark:text-gray-600 rst:select-none">+</span>
         </span>
       }
       label={
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          <span className="text-primary-500 dark:text-primary-400 font-medium cursor-pointer">Join</span>{" "}
+        <p className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">
+          <span className="rst:text-primary-500 rst:dark:text-primary-400 rst:font-medium rst:cursor-pointer">Join</span>{" "}
           to appear here
         </p>
       }
@@ -321,7 +321,7 @@ export const LinkedAvatars: Story = {
     <AvatarStrip
       items={TEAM.slice(0, 4)}
       label={
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">
           Hover to scale · click to navigate
         </p>
       }

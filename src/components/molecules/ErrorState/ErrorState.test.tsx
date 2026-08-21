@@ -40,6 +40,6 @@ describe("ErrorState Molecule", () => {
       <ErrorState description="test" variant="card" />,
     );
     // Check for the error background color
-    expect(container.firstChild).toHaveClass("bg-error-50");
+    expect(container.firstChild).toHaveClass("rst:bg-error-50");
   });
 });

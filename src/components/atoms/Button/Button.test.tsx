@@ -42,12 +42,12 @@ describe("Button Component", () => {
 
     const spinner = screen.getByRole("status");
     expect(spinner).toBeInTheDocument();
-    expect(spinner).toHaveClass("border-current");
+    expect(spinner).toHaveClass("rst:border-current");
 
     expect(spinner.parentElement).toHaveClass(
-      "shrink-0",
-      "flex",
-      "items-center",
+      "rst:shrink-0",
+      "rst:flex",
+      "rst:items-center",
     );
 
     try {
@@ -81,8 +81,8 @@ describe("Button Component", () => {
     expect(endIcon).toBeInTheDocument();
     expect(screen.getByText("Content")).toBeInTheDocument();
 
-    expect(startIcon.parentElement).toHaveClass("shrink-0", "inline-flex");
-    expect(endIcon.parentElement).toHaveClass("shrink-0", "inline-flex");
+    expect(startIcon.parentElement).toHaveClass("rst:shrink-0", "rst:inline-flex");
+    expect(endIcon.parentElement).toHaveClass("rst:shrink-0", "rst:inline-flex");
   });
 
   it("applies outline variant and color scheme classes correctly", () => {
@@ -94,7 +94,7 @@ describe("Button Component", () => {
 
     const button = screen.getByRole("button", { name: /error button/i });
 
-    expect(button).toHaveClass("border", "border-error-600", "text-error-600");
+    expect(button).toHaveClass("rst:border", "rst:border-error-600", "rst:text-error-600");
   });
 
   it("applies soft variant classes with the light mode colors", () => {
@@ -106,7 +106,7 @@ describe("Button Component", () => {
 
     const button = screen.getByRole("button", { name: /soft teal/i });
 
-    expect(button).toHaveClass("bg-teal-100", "text-teal-800");
+    expect(button).toHaveClass("rst:bg-teal-100", "rst:text-teal-800");
   });
 
   it("applies the correct scale classes for the xs size", () => {
@@ -114,7 +114,7 @@ describe("Button Component", () => {
 
     const button = screen.getByRole("button", { name: /tiny button/i });
 
-    expect(button).toHaveClass("h-7", "px-2", "text-xs");
+    expect(button).toHaveClass("rst:h-7", "rst:px-2", "rst:text-xs");
   });
 
   it("forwards refs to the HTML element", () => {

@@ -88,20 +88,20 @@ type Story = StoryObj<typeof meta>;
 // ─── Decorators ──────────────────────────────────────────────────────────────
 
 const DualPreviewDecorator: Decorator = (Story) => (
-  <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
-    <div className="light flex-1 bg-white p-8 relative">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+  <div className="rst:flex rst:w-full rst:rounded-xl rst:overflow-hidden rst:border rst:border-gray-200 rst:dark:border-gray-800 rst:shadow-sm">
+    <div className="light rst:flex-1 rst:bg-white rst:p-8 rst:relative">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest">
         Light Mode
       </p>
-      <div className="mt-4 max-w-sm">
+      <div className="rst:mt-4 rst:max-w-sm">
         <Story />
       </div>
     </div>
-    <div className="dark flex-1 bg-gray-950 p-8 relative border-l border-gray-200 dark:border-gray-800">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+    <div className="dark rst:flex-1 rst:bg-gray-950 rst:p-8 rst:relative rst:border-l rst:border-gray-200 rst:dark:border-gray-800">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest">
         Dark Mode
       </p>
-      <div className="mt-4 max-w-sm">
+      <div className="rst:mt-4 rst:max-w-sm">
         <Story />
       </div>
     </div>
@@ -197,10 +197,10 @@ export const NoLegend: Story = {
 export const Sizes: Story = {
   args: { segments: INPUT_METHOD, size: "md" },
   render: () => (
-    <div className="flex flex-col gap-6 max-w-sm">
+    <div className="rst:flex rst:flex-col rst:gap-6 rst:max-w-sm">
       {(["sm", "md"] as const).map((size) => (
         <div key={size}>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest rst:mb-2">
             size=&quot;{size}&quot;
           </p>
           <SegmentBar segments={INPUT_METHOD} size={size} />

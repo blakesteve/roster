@@ -69,11 +69,11 @@ const columns: ColumnDef<RosterTableFeatures, PickRecord>[] = [
   },
   {
     accessorKey: "points",
-    header: () => <div className="text-right">Points Earned</div>,
+    header: () => <div className="rst:text-right">Points Earned</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("points"));
       return (
-        <div className="text-right font-medium text-gray-900 dark:text-gray-100">
+        <div className="rst:text-right rst:font-medium rst:text-gray-900 rst:dark:text-gray-100">
           {amount}
         </div>
       );
@@ -124,18 +124,18 @@ The **DataTable** is a smart, fully-featured data grid powered by \`@tanstack/re
   },
   decorators: [
     (Story) => (
-      <div className="p-8 space-y-12 w-full max-w-5xl mx-auto">
+      <div className="rst:p-8 rst:space-y-12 rst:w-full rst:max-w-5xl rst:mx-auto">
         {/* Light Mode Preview */}
-        <div className="light bg-white p-8 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-4">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+        <div className="light rst:bg-white rst:p-8 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm rst:flex rst:flex-col rst:gap-4">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest">
             Light Mode Preview
           </p>
           <Story />
         </div>
 
         {/* Dark Mode Preview */}
-        <div className="dark bg-gray-950 p-8 rounded-xl border border-gray-800 shadow-xl flex flex-col gap-4">
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+        <div className="dark rst:bg-gray-950 rst:p-8 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl rst:flex rst:flex-col rst:gap-4">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest">
             Dark Mode Preview
           </p>
           <Story />

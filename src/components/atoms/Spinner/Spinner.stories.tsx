@@ -15,20 +15,20 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="p-8 space-y-12">
-        <div className="light bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+      <div className="rst:p-8 rst:space-y-12">
+        <div className="light rst:bg-gray-50 rst:p-6 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:mb-6 rst:uppercase rst:tracking-widest">
             Light Mode Preview
           </p>
-          <div className="flex justify-center">
+          <div className="rst:flex rst:justify-center">
             <Story />
           </div>
         </div>
-        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
-          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+        <div className="dark rst:bg-gray-950 rst:p-6 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:mb-6 rst:uppercase rst:tracking-widest">
             Dark Mode Preview
           </p>
-          <div className="flex justify-center">
+          <div className="rst:flex rst:justify-center">
             <Story />
           </div>
         </div>
@@ -76,28 +76,28 @@ export const Playground: Story = {
 // --- Static Examples ---
 export const Animations: Story = {
   render: () => (
-    <div className="flex items-end gap-10">
-      <div className="flex flex-col items-center gap-3">
+    <div className="rst:flex rst:items-end rst:gap-10">
+      <div className="rst:flex rst:flex-col rst:items-center rst:gap-3">
         <Spinner animation="classic" size="lg" variant="primary" />
-        <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
+        <span className="rst:text-xs rst:font-mono rst:text-gray-500 rst:dark:text-gray-400">
           classic
         </span>
       </div>
-      <div className="flex flex-col items-center gap-3">
+      <div className="rst:flex rst:flex-col rst:items-center rst:gap-3">
         <Spinner animation="half" size="lg" variant="primary" />
-        <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
+        <span className="rst:text-xs rst:font-mono rst:text-gray-500 rst:dark:text-gray-400">
           half
         </span>
       </div>
-      <div className="flex flex-col items-center gap-3">
+      <div className="rst:flex rst:flex-col rst:items-center rst:gap-3">
         <Spinner animation="dashed" size="lg" variant="primary" />
-        <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
+        <span className="rst:text-xs rst:font-mono rst:text-gray-500 rst:dark:text-gray-400">
           dashed
         </span>
       </div>
-      <div className="flex flex-col items-center gap-3">
+      <div className="rst:flex rst:flex-col rst:items-center rst:gap-3">
         <Spinner animation="dotted" size="lg" variant="primary" />
-        <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
+        <span className="rst:text-xs rst:font-mono rst:text-gray-500 rst:dark:text-gray-400">
           dotted
         </span>
       </div>
@@ -115,22 +115,22 @@ export const Animations: Story = {
 
 export const Sizes: Story = {
   render: () => (
-    <div className="flex items-end gap-8">
-      <div className="flex flex-col items-center gap-3">
+    <div className="rst:flex rst:items-end rst:gap-8">
+      <div className="rst:flex rst:flex-col rst:items-center rst:gap-3">
         <Spinner size="sm" variant="neutral" />
-        <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
+        <span className="rst:text-xs rst:font-mono rst:text-gray-500 rst:dark:text-gray-400">
           sm
         </span>
       </div>
-      <div className="flex flex-col items-center gap-3">
+      <div className="rst:flex rst:flex-col rst:items-center rst:gap-3">
         <Spinner size="md" variant="neutral" />
-        <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
+        <span className="rst:text-xs rst:font-mono rst:text-gray-500 rst:dark:text-gray-400">
           md
         </span>
       </div>
-      <div className="flex flex-col items-center gap-3">
+      <div className="rst:flex rst:flex-col rst:items-center rst:gap-3">
         <Spinner size="lg" variant="neutral" />
-        <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
+        <span className="rst:text-xs rst:font-mono rst:text-gray-500 rst:dark:text-gray-400">
           lg
         </span>
       </div>
@@ -148,28 +148,28 @@ export const Sizes: Story = {
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex items-center gap-8 bg-gray-200 dark:bg-gray-800 p-6 rounded-lg">
-      <div className="flex flex-col items-center gap-3">
+    <div className="rst:flex rst:items-center rst:gap-8 rst:bg-gray-200 rst:dark:bg-gray-800 rst:p-6 rst:rounded-lg">
+      <div className="rst:flex rst:flex-col rst:items-center rst:gap-3">
         <Spinner variant="primary" size="lg" />
-        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+        <span className="rst:text-xs rst:font-medium rst:text-gray-700 rst:dark:text-gray-300">
           Primary
         </span>
       </div>
-      <div className="flex flex-col items-center gap-3">
+      <div className="rst:flex rst:flex-col rst:items-center rst:gap-3">
         <Spinner variant="neutral" size="lg" />
-        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+        <span className="rst:text-xs rst:font-medium rst:text-gray-700 rst:dark:text-gray-300">
           Neutral
         </span>
       </div>
-      <div className="flex flex-col items-center gap-3">
+      <div className="rst:flex rst:flex-col rst:items-center rst:gap-3">
         <Spinner variant="danger" size="lg" />
-        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+        <span className="rst:text-xs rst:font-medium rst:text-gray-700 rst:dark:text-gray-300">
           Danger
         </span>
       </div>
-      <div className="flex flex-col items-center gap-3">
+      <div className="rst:flex rst:flex-col rst:items-center rst:gap-3">
         <Spinner variant="white" size="lg" />
-        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+        <span className="rst:text-xs rst:font-medium rst:text-gray-700 rst:dark:text-gray-300">
           White
         </span>
       </div>

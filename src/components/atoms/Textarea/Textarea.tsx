@@ -36,9 +36,9 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     const hasError = !!errorMessage || error;
 
     return (
-      <Field className={cn("w-full space-y-1.5", className)}>
+      <Field className={cn("rst:w-full rst:space-y-1.5", className)}>
         {label && (
-          <Label className="block text-sm font-medium leading-none text-gray-900 dark:text-gray-100 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-left">
+          <Label className="rst:block rst:text-sm rst:font-medium rst:leading-none rst:text-gray-900 rst:dark:text-gray-100 rst:peer-disabled:cursor-not-allowed rst:peer-disabled:opacity-70 rst:text-left">
             {label}
           </Label>
         )}
@@ -53,10 +53,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         {(helperText || errorMessage) && (
           <Description
             className={cn(
-              "text-xs text-left",
+              "rst:text-xs rst:text-left",
               hasError
-                ? "text-error-600 dark:text-error-400 font-medium"
-                : "text-gray-500 dark:text-gray-400",
+                ? "rst:text-error-600 rst:dark:text-error-400 rst:font-medium"
+                : "rst:text-gray-500 rst:dark:text-gray-400",
             )}
           >
             {errorMessage || helperText}

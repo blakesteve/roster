@@ -16,7 +16,7 @@ interface CountdownItemProps extends VariantProps<
 }
 
 const CountdownItem = ({ value, label, size, variant }: CountdownItemProps) => (
-  <div className="flex flex-col items-center">
+  <div className="rst:flex rst:flex-col rst:items-center">
     <span className={cn(countdownNumberVariants({ size, variant }))}>
       {String(value).padStart(2, "0")}
     </span>
@@ -56,12 +56,12 @@ const Countdown = React.forwardRef<HTMLDivElement, CountdownProps>(
           <div
             ref={ref}
             className={cn(
-              "font-bold w-full text-center text-gray-900 dark:text-gray-100",
+              "rst:font-bold rst:w-full rst:text-center rst:text-gray-900 rst:dark:text-gray-100",
               className,
             )}
             {...props}
           >
-            <h3 className={cn(countdownTitleVariants({ size }), "mb-0")}>
+            <h3 className={cn(countdownTitleVariants({ size }), "rst:mb-0")}>
               {completionText}
             </h3>
           </div>
@@ -74,7 +74,7 @@ const Countdown = React.forwardRef<HTMLDivElement, CountdownProps>(
       <div
         ref={ref}
         className={cn(
-          "font-bold w-full text-center text-gray-900 dark:text-gray-100",
+          "rst:font-bold rst:w-full rst:text-center rst:text-gray-900 rst:dark:text-gray-100",
           className,
         )}
         {...props}
@@ -82,7 +82,7 @@ const Countdown = React.forwardRef<HTMLDivElement, CountdownProps>(
         {title && (
           <h3 className={cn(countdownTitleVariants({ size }))}>{title}</h3>
         )}
-        <div className="flex justify-center gap-4 sm:gap-6 md:gap-8">
+        <div className="rst:flex rst:justify-center rst:gap-4 rst:sm:gap-6 rst:md:gap-8">
           <CountdownItem
             value={days}
             label="Days"

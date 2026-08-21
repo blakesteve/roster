@@ -59,13 +59,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {isLoading && (
-          <span className="mr-2 flex shrink-0 items-center">
+          <span className="rst:mr-2 rst:flex rst:shrink-0 rst:items-center">
             <Spinner size="sm" variant="current" />
           </span>
         )}
 
         {!isLoading && startIcon && (
-          <span className="mr-2 inline-flex shrink-0 items-center">
+          <span className="rst:mr-2 rst:inline-flex rst:shrink-0 rst:items-center">
             {startIcon}
           </span>
         )}
@@ -73,7 +73,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
 
         {!isLoading && endIcon && (
-          <span className="ml-2 inline-flex shrink-0 items-center">
+          <span className="rst:ml-2 rst:inline-flex rst:shrink-0 rst:items-center">
             {endIcon}
           </span>
         )}

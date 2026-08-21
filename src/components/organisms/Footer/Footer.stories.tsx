@@ -39,23 +39,23 @@ A minimal, structural component designed to anchor the bottom of a page or layou
   },
   decorators: [
     (Story) => (
-      <div className="p-8 space-y-12 w-full max-w-4xl mx-auto">
-        <div className="light bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col min-h-75">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest absolute">
+      <div className="rst:p-8 rst:space-y-12 rst:w-full rst:max-w-4xl rst:mx-auto">
+        <div className="light rst:bg-white rst:p-6 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm rst:flex rst:flex-col rst:min-h-75">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest rst:absolute">
             Light Mode Preview
           </p>
-          <div className="grow flex items-center justify-center text-gray-400 text-sm italic">
+          <div className="rst:grow rst:flex rst:items-center rst:justify-center rst:text-gray-400 rst:text-sm rst:italic">
             Page Content Area
           </div>
           {/* mt-auto in the Footer will naturally push it to the bottom of this flex-col wrapper */}
           <Story />
         </div>
 
-        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl flex flex-col min-h-75">
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest absolute">
+        <div className="dark rst:bg-gray-950 rst:p-6 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl rst:flex rst:flex-col rst:min-h-75">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest rst:absolute">
             Dark Mode Preview
           </p>
-          <div className="grow flex items-center justify-center text-gray-600 text-sm italic">
+          <div className="rst:grow rst:flex rst:items-center rst:justify-center rst:text-gray-600 rst:text-sm rst:italic">
             Page Content Area
           </div>
           <Story />
@@ -138,9 +138,9 @@ export const TransparentTheme: Story = {
   // Overriding the default dual-decorator to show it off against a vibrant background
   decorators: [
     (Story) => (
-      <div className="p-8 w-full max-w-4xl mx-auto">
-        <div className="bg-linear-to-br from-indigo-900 via-purple-900 to-black p-6 rounded-xl shadow-xl flex flex-col min-h-75 dark">
-          <div className="grow flex items-center justify-center text-white/50 text-sm italic">
+      <div className="rst:p-8 rst:w-full rst:max-w-4xl rst:mx-auto">
+        <div className="rst:bg-linear-to-br rst:from-indigo-900 rst:via-purple-900 rst:to-black rst:p-6 rst:rounded-xl rst:shadow-xl rst:flex rst:flex-col rst:min-h-75 dark">
+          <div className="rst:grow rst:flex rst:items-center rst:justify-center rst:text-white/50 rst:text-sm rst:italic">
             Immersive Content Area
           </div>
           <Story />

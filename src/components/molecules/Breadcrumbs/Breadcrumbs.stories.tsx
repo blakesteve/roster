@@ -17,20 +17,20 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="p-8 space-y-12 w-full max-w-4xl mx-auto">
-        <div className="light bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+      <div className="rst:p-8 rst:space-y-12 rst:w-full rst:max-w-4xl rst:mx-auto">
+        <div className="light rst:bg-gray-50 rst:p-6 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:mb-6 rst:uppercase rst:tracking-widest">
             Light Mode Preview
           </p>
-          <div className="max-w-xl">
+          <div className="rst:max-w-xl">
             <Story />
           </div>
         </div>
-        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
-          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+        <div className="dark rst:bg-gray-950 rst:p-6 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:mb-6 rst:uppercase rst:tracking-widest">
             Dark Mode Preview
           </p>
-          <div className="max-w-xl">
+          <div className="rst:max-w-xl">
             <Story />
           </div>
         </div>
@@ -77,13 +77,13 @@ export const Playground: Story = {
 // --- 2. All Variants Showcase ---
 export const AllVariants: Story = {
   render: () => (
-    <div className="space-y-6">
+    <div className="rst:space-y-6">
       <div>
-        <p className="text-xs font-mono text-gray-400 mb-2">default</p>
+        <p className="rst:text-xs rst:font-mono rst:text-gray-400 rst:mb-2">default</p>
         <Breadcrumbs items={sampleItems} variant="default" showHomeIcon />
       </div>
       <div>
-        <p className="text-xs font-mono text-gray-400 mb-2">primary</p>
+        <p className="rst:text-xs rst:font-mono rst:text-gray-400 rst:mb-2">primary</p>
         <Breadcrumbs items={sampleItems} variant="primary" showHomeIcon />
       </div>
     </div>
@@ -106,7 +106,7 @@ export const ChevronSeparator: Story = {
     separator: (
       <FontAwesomeIcon
         icon={faChevronRight}
-        className="h-2.5 w-2.5 text-gray-400 dark:text-gray-600 transition-colors"
+        className="rst:h-2.5 rst:w-2.5 rst:text-gray-400 rst:dark:text-gray-600 rst:transition-colors"
       />
     ),
   },
@@ -123,7 +123,7 @@ export const ChevronSeparator: Story = {
 // --- 4. Inverse (Dark Backgrounds) ---
 export const InverseOnDark: Story = {
   render: () => (
-    <div className="bg-slate-900 dark:bg-slate-950 p-6 rounded-md border border-slate-700 shadow-inner">
+    <div className="rst:bg-slate-900 rst:dark:bg-slate-950 rst:p-6 rst:rounded-md rst:border rst:border-slate-700 rst:shadow-inner">
       <Breadcrumbs items={sampleItems} variant="inverse" showHomeIcon />
     </div>
   ),
@@ -203,7 +203,7 @@ export const WithRouterLink: Story = {
 
 export const CurrentPageAccent: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
+    <div className="rst:flex rst:flex-col rst:gap-4">
       <Breadcrumbs
         currentClassName="!text-primary-600 dark:!text-primary-400"
         items={[{ label: "Work", href: "/work" }, { label: "Game Verdict" }]}
@@ -250,8 +250,8 @@ export const NodeLabels: Story = {
       items={[
         {
           label: (
-            <span className="inline-flex items-center gap-1.5">
-              <span className="inline-block size-1.5 rounded-full bg-success-500" />
+            <span className="rst:inline-flex rst:items-center rst:gap-1.5">
+              <span className="rst:inline-block rst:size-1.5 rst:rounded-full rst:bg-success-500" />
               Live
             </span>
           ),

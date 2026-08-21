@@ -9,24 +9,24 @@ import { cva } from "class-variance-authority";
  * rather than prose, which is the whole job.
  */
 export const eyebrowVariants = cva(
-  "font-mono uppercase leading-none",
+  "rst:font-mono rst:uppercase rst:leading-none",
   {
     variants: {
       size: {
-        xs: "text-[0.625rem] tracking-[0.16em]",
-        sm: "text-[0.6875rem] tracking-[0.14em]",
-        md: "text-xs tracking-[0.12em]",
+        xs: "rst:text-[0.625rem] rst:tracking-[0.16em]",
+        sm: "rst:text-[0.6875rem] rst:tracking-[0.14em]",
+        md: "rst:text-xs rst:tracking-[0.12em]",
       },
       tone: {
-        faint: "text-gray-500 dark:text-gray-400",
-        default: "text-gray-700 dark:text-gray-300",
-        strong: "text-gray-900 dark:text-gray-100",
-        primary: "text-primary-600 dark:text-primary-400",
+        faint: "rst:text-gray-500 rst:dark:text-gray-400",
+        default: "rst:text-gray-700 rst:dark:text-gray-300",
+        strong: "rst:text-gray-900 rst:dark:text-gray-100",
+        primary: "rst:text-primary-600 rst:dark:text-primary-400",
       },
       weight: {
-        normal: "font-normal",
-        medium: "font-medium",
-        semibold: "font-semibold",
+        normal: "rst:font-normal",
+        medium: "rst:font-medium",
+        semibold: "rst:font-semibold",
       },
     },
     defaultVariants: { size: "xs", tone: "faint", weight: "normal" },

@@ -35,30 +35,30 @@ const ActionBar = forwardRef<HTMLDivElement, ActionBarProps>(
         className={cn(actionBarVariants({ variant, position }), className)}
         {...props}
       >
-        <div className="container mx-auto p-4">
-          <div className="flex justify-between items-center">
+        <div className="rst:container rst:mx-auto rst:p-4">
+          <div className="rst:flex rst:justify-between rst:items-center">
             {/* Left Content */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-2">
-              {title && <span className="font-semibold text-lg">{title}</span>}
+            <div className="rst:flex rst:flex-col rst:sm:flex-row rst:sm:items-center rst:gap-x-4 rst:gap-y-2">
+              {title && <span className="rst:font-semibold rst:text-lg">{title}</span>}
               {badge && (
-                <div className="max-w-44 sm:max-w-max mr-2">{badge}</div>
+                <div className="rst:max-w-44 rst:sm:max-w-max rst:mr-2">{badge}</div>
               )}
             </div>
 
             {/* Right Actions */}
-            {actions && <div className="flex gap-2">{actions}</div>}
+            {actions && <div className="rst:flex rst:gap-2">{actions}</div>}
           </div>
 
           {/* Subtitle */}
           {subtitle && (
-            <div className="text-sm opacity-80 mt-1 font-medium">
+            <div className="rst:text-sm rst:opacity-80 rst:mt-1 rst:font-medium">
               {subtitle}
             </div>
           )}
 
           {/* Bottom Tray */}
           {children && (
-            <div className="flex flex-wrap items-center mt-4 pt-4 border-t border-black/10 dark:border-white/10 gap-y-2">
+            <div className="rst:flex rst:flex-wrap rst:items-center rst:mt-4 rst:pt-4 rst:border-t rst:border-black/10 rst:dark:border-white/10 rst:gap-y-2">
               {children}
             </div>
           )}

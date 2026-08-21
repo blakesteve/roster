@@ -1,23 +1,23 @@
 import { cva } from "class-variance-authority";
 
 export const actionBarVariants = cva(
-  "w-full z-40 shadow-lg backdrop-blur-md transition-all",
+  "rst:w-full rst:z-40 rst:shadow-lg rst:backdrop-blur-md rst:transition-all",
   {
     variants: {
       variant: {
         default:
-          "bg-white/50 border-gray-200 text-gray-900 dark:bg-gray-950/50 dark:border-gray-800 dark:text-gray-100",
+          "rst:bg-white/50 rst:border-gray-200 rst:text-gray-900 rst:dark:bg-gray-950/50 rst:dark:border-gray-800 rst:dark:text-gray-100",
         soft: 
-          "bg-gray-50/50 border-gray-200 text-gray-900 dark:bg-gray-900/50 dark:border-gray-800 dark:text-gray-100",
+          "rst:bg-gray-50/50 rst:border-gray-200 rst:text-gray-900 rst:dark:bg-gray-900/50 rst:dark:border-gray-800 rst:dark:text-gray-100",
         primary:
-          "bg-primary-700/50 border-primary-800 text-white dark:bg-primary-950/50 dark:border-primary-900 dark:text-primary-50",
+          "rst:bg-primary-700/50 rst:border-primary-800 rst:text-white rst:dark:bg-primary-950/50 rst:dark:border-primary-900 rst:dark:text-primary-50",
         transparent:
-          "bg-transparent border-transparent text-gray-900 dark:text-gray-100 shadow-none",
+          "rst:bg-transparent rst:border-transparent rst:text-gray-900 rst:dark:text-gray-100 rst:shadow-none",
       },
       position: {
-        top: "sticky top-0 border-b",
-        bottom: "sticky bottom-0 border-t", 
-        static: "relative border-y",
+        top: "rst:sticky rst:top-0 rst:border-b",
+        bottom: "rst:sticky rst:bottom-0 rst:border-t", 
+        static: "rst:relative rst:border-y",
       },
     },
     defaultVariants: {

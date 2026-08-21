@@ -1,20 +1,20 @@
 import { cva } from "class-variance-authority";
 
 export const disclosureTriggerVariants = cva(
-  "group flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/75 cursor-pointer z-10 relative",
+  "rst:group rst:flex rst:w-full rst:items-center rst:justify-between rst:px-4 rst:py-3 rst:text-left rst:text-sm rst:font-medium rst:transition-all rst:focus:outline-none rst:focus-visible:ring-2 rst:focus-visible:ring-primary-500/75 rst:cursor-pointer rst:z-10 rst:relative",
   {
     variants: {
       variant: {
         white:
-          "bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700",
+          "rst:bg-white rst:text-gray-900 rst:hover:bg-gray-50 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:hover:bg-gray-700",
         soft: 
-          "bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700",
+          "rst:bg-gray-100 rst:text-gray-900 rst:hover:bg-gray-200 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:hover:bg-gray-700",
         slate:
-          "bg-gray-700 text-gray-100 hover:bg-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800",
+          "rst:bg-gray-700 rst:text-gray-100 rst:hover:bg-gray-600 rst:dark:bg-gray-900 rst:dark:text-gray-100 rst:dark:hover:bg-gray-800",
         outline:
-          "bg-transparent border border-gray-200 text-gray-900 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800/50",
+          "rst:bg-transparent rst:border rst:border-gray-200 rst:text-gray-900 rst:hover:bg-gray-50 rst:dark:border-gray-700 rst:dark:text-gray-100 rst:dark:hover:bg-gray-800/50",
         ghost:
-          "bg-transparent text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+          "rst:bg-transparent rst:text-gray-700 rst:hover:bg-gray-100 rst:hover:text-gray-900 rst:dark:text-gray-300 rst:dark:hover:bg-gray-800 rst:dark:hover:text-gray-100",
       },
     },
     defaultVariants: {
@@ -24,16 +24,16 @@ export const disclosureTriggerVariants = cva(
 );
 
 export const disclosureContentVariants = cva(
-  "px-4 pb-4 pt-2 text-sm transition-colors",
+  "rst:px-4 rst:pb-4 rst:pt-2 rst:text-sm rst:transition-colors",
   {
     variants: {
       variant: {
-        white: "bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-        soft: "bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-300",
-        slate: "bg-gray-700 text-gray-200 dark:bg-gray-900 dark:text-gray-300",
+        white: "rst:bg-white rst:text-gray-700 rst:dark:bg-gray-800 rst:dark:text-gray-300",
+        soft: "rst:bg-gray-100 rst:text-gray-700 rst:dark:bg-gray-800/50 rst:dark:text-gray-300",
+        slate: "rst:bg-gray-700 rst:text-gray-200 rst:dark:bg-gray-900 rst:dark:text-gray-300",
         outline:
-          "bg-transparent border-x border-b border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-400",
-        ghost: "bg-transparent text-gray-600 dark:text-gray-400",
+          "rst:bg-transparent rst:border-x rst:border-b rst:border-gray-200 rst:text-gray-600 rst:dark:border-gray-700 rst:dark:text-gray-400",
+        ghost: "rst:bg-transparent rst:text-gray-600 rst:dark:text-gray-400",
       },
     },
     defaultVariants: {

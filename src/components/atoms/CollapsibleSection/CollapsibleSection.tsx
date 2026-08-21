@@ -5,10 +5,10 @@ import { cn } from "../../../lib/utils";
 export type CollapsibleSectionSize = "xs" | "sm" | "md" | "lg";
 
 const MAX_HEIGHT: Record<CollapsibleSectionSize, string> = {
-  xs: "max-h-8",    // single row of chips, tags, or badges
-  sm: "max-h-16",   // ~3 lines at text-sm/leading-relaxed
-  md: "max-h-24",   // ~4-5 lines
-  lg: "max-h-36",   // ~6-7 lines
+  xs: "rst:max-h-8",    // single row of chips, tags, or badges
+  sm: "rst:max-h-16",   // ~3 lines at text-sm/leading-relaxed
+  md: "rst:max-h-24",   // ~4-5 lines
+  lg: "rst:max-h-36",   // ~6-7 lines
 };
 
 export interface CollapsibleSectionProps {
@@ -47,7 +47,7 @@ export function CollapsibleSection({
       <div
         ref={ref}
         data-testid="collapsible-content"
-        className={cn(!expanded && MAX_HEIGHT[size], !expanded && "overflow-hidden")}
+        className={cn(!expanded && MAX_HEIGHT[size], !expanded && "rst:overflow-hidden")}
         style={
           !expanded && clamped
             ? {
@@ -66,7 +66,7 @@ export function CollapsibleSection({
           type="button"
           data-testid="collapsible-toggle"
           onClick={() => setExpanded((e) => !e)}
-          className="mt-2 text-xs font-medium text-primary-500 dark:text-primary-400 hover:opacity-80 transition-opacity cursor-pointer"
+          className="rst:mt-2 rst:text-xs rst:font-medium rst:text-primary-500 rst:dark:text-primary-400 rst:hover:opacity-80 rst:transition-opacity rst:cursor-pointer"
         >
           {expanded ? collapseLabel : expandLabel}
         </button>

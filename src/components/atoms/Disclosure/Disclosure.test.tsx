@@ -87,28 +87,28 @@ describe("Disclosure Atom", () => {
     );
 
     const button = screen.getByRole("button", { name: "Variant Test" });
-    expect(button).toHaveClass("bg-gray-700", "dark:bg-gray-900");
+    expect(button).toHaveClass("rst:bg-gray-700", "rst:dark:bg-gray-900");
 
     rerender(
       <Disclosure title="Variant Test" variant="soft">
         Content
       </Disclosure>,
     );
-    expect(button).toHaveClass("bg-gray-100", "dark:bg-gray-800");
+    expect(button).toHaveClass("rst:bg-gray-100", "rst:dark:bg-gray-800");
   });
 
   it("merges custom classNames correctly", () => {
     const { container } = render(
-      <Disclosure title="Class Merge" className="my-custom-wrapper-class">
+      <Disclosure title="Class Merge" className="rst:my-custom-wrapper-class">
         Content
       </Disclosure>,
     );
 
     expect(container.firstChild).toHaveClass(
-      "my-custom-wrapper-class",
-      "w-full",
-      "flex",
-      "flex-col",
+      "rst:my-custom-wrapper-class",
+      "rst:w-full",
+      "rst:flex",
+      "rst:flex-col",
     );
   });
 
@@ -122,8 +122,8 @@ describe("Disclosure Atom", () => {
     const button = screen.getByRole("button", { name: "Outline Open" });
     // Verifies the fix that prevents double-thick borders between trigger and content
     expect(button).toHaveClass(
-      "border-b-transparent",
-      "dark:border-b-transparent",
+      "rst:border-b-transparent",
+      "rst:dark:border-b-transparent",
     );
   });
 });

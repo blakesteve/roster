@@ -47,11 +47,11 @@ const Accordion = ({
   };
 
   return (
-    <div className={cn("w-full space-y-1", className)}>
+    <div className={cn("rst:w-full rst:space-y-1", className)}>
       {items.map((item, index) => (
-        <div key={item.id} className="relative">
+        <div key={item.id} className="rst:relative">
           {showDividers && index > 0 && (
-            <div className="mx-4 h-px bg-gray-200/50 dark:bg-gray-700/50 transition-colors mb-1" />
+            <div className="rst:mx-4 rst:h-px rst:bg-gray-200/50 rst:dark:bg-gray-700/50 rst:transition-colors rst:mb-1" />
           )}
 
           <Disclosure

@@ -30,17 +30,17 @@ describe("Stat Component", () => {
   // A row of figures that does not line up on the digits looks broken.
   it("uses tabular numerals", () => {
     const { container } = render(<Stat value="42" label="Things" />);
-    expect(container.querySelector("dd")).toHaveClass("tabular-nums");
+    expect(container.querySelector("dd")).toHaveClass("rst:tabular-nums");
   });
 
   it("applies the color scheme to the value", () => {
     const { container } = render(<Stat value="42" label="Things" colorScheme="primary" />);
-    expect(container.querySelector("dd")).toHaveClass("text-primary-600");
+    expect(container.querySelector("dd")).toHaveClass("rst:text-primary-600");
   });
 
   it("applies sizes", () => {
     const { container } = render(<Stat value="42" label="Things" size="sm" />);
-    expect(container.querySelector("dd")).toHaveClass("text-xl");
+    expect(container.querySelector("dd")).toHaveClass("rst:text-xl");
   });
 
   it("accepts nodes for value and label", () => {

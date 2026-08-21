@@ -36,26 +36,26 @@ const DescriptionList = React.forwardRef<HTMLDListElement, DescriptionListProps>
     >
       {items.map((item, index) => {
         const last = index === items.length - 1;
-        const rule = dividers && !last ? "border-b border-gray-200 pb-1.5 dark:border-gray-800" : "";
+        const rule = dividers && !last ? "rst:border-b rst:border-gray-200 rst:pb-1.5 rst:dark:border-gray-800" : "";
 
         if (layout === "stacked") {
           return (
-            <div key={index} className={cn("flex flex-col gap-0.5", rule)}>
-              <dt className="font-mono uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">
+            <div key={index} className={cn("rst:flex rst:flex-col rst:gap-0.5", rule)}>
+              <dt className="rst:font-mono rst:uppercase rst:tracking-[0.08em] rst:text-gray-500 rst:dark:text-gray-400">
                 {item.term}
               </dt>
-              <dd className="m-0 text-gray-900 dark:text-gray-100">{item.description}</dd>
+              <dd className="rst:m-0 rst:text-gray-900 rst:dark:text-gray-100">{item.description}</dd>
             </div>
           );
         }
 
         if (layout === "split") {
           return (
-            <div key={index} className={cn("flex items-baseline justify-between gap-4", rule)}>
-              <dt className="font-mono uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">
+            <div key={index} className={cn("rst:flex rst:items-baseline rst:justify-between rst:gap-4", rule)}>
+              <dt className="rst:font-mono rst:uppercase rst:tracking-[0.08em] rst:text-gray-500 rst:dark:text-gray-400">
                 {item.term}
               </dt>
-              <dd className="m-0 text-right tabular-nums text-gray-900 dark:text-gray-100">
+              <dd className="rst:m-0 rst:text-right rst:tabular-nums rst:text-gray-900 rst:dark:text-gray-100">
                 {item.description}
               </dd>
             </div>
@@ -63,11 +63,11 @@ const DescriptionList = React.forwardRef<HTMLDListElement, DescriptionListProps>
         }
 
         return (
-          <div key={index} className={cn("contents", rule)}>
-            <dt className="whitespace-nowrap font-mono uppercase tracking-[0.08em] text-gray-500 dark:text-gray-400">
+          <div key={index} className={cn("rst:contents", rule)}>
+            <dt className="rst:whitespace-nowrap rst:font-mono rst:uppercase rst:tracking-[0.08em] rst:text-gray-500 rst:dark:text-gray-400">
               {item.term}
             </dt>
-            <dd className="m-0 text-gray-900 dark:text-gray-100">{item.description}</dd>
+            <dd className="rst:m-0 rst:text-gray-900 rst:dark:text-gray-100">{item.description}</dd>
           </div>
         );
       })}

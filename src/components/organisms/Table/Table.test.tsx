@@ -44,18 +44,18 @@ describe("Table Primitives", () => {
 
   it("applies custom classes using the cn utility", () => {
     render(
-      <Table className="custom-table-class">
+      <Table className="rst:custom-table-class">
         <TableBody>
-          <TableRow className="custom-row-class">
-            <TableCell className="custom-cell-class">Data</TableCell>
+          <TableRow className="rst:custom-row-class">
+            <TableCell className="rst:custom-cell-class">Data</TableCell>
           </TableRow>
         </TableBody>
       </Table>,
     );
 
-    expect(screen.getByRole("table")).toHaveClass("custom-table-class");
-    expect(screen.getByRole("row")).toHaveClass("custom-row-class");
-    expect(screen.getByRole("cell")).toHaveClass("custom-cell-class");
+    expect(screen.getByRole("table")).toHaveClass("rst:custom-table-class");
+    expect(screen.getByRole("row")).toHaveClass("rst:custom-row-class");
+    expect(screen.getByRole("cell")).toHaveClass("rst:custom-cell-class");
   });
 
   // Context Propagation Tests
@@ -83,14 +83,14 @@ describe("Table Primitives", () => {
     const td = screen.getByRole("cell");
 
     // Default variant assertions
-    expect(wrapper).toHaveClass("border-gray-200");
-    expect(thead).toHaveClass("bg-gray-50");
-    expect(tbodyRow).toHaveClass("bg-white");
+    expect(wrapper).toHaveClass("rst:border-gray-200");
+    expect(thead).toHaveClass("rst:bg-gray-50");
+    expect(tbodyRow).toHaveClass("rst:bg-white");
 
     // Default size assertions ("md")
-    expect(table).toHaveClass("text-sm");
-    expect(th).toHaveClass("h-12", "px-4");
-    expect(td).toHaveClass("p-4");
+    expect(table).toHaveClass("rst:text-sm");
+    expect(th).toHaveClass("rst:h-12", "rst:px-4");
+    expect(td).toHaveClass("rst:p-4");
   });
 
   it("propagates the 'primary' variant and 'hoverable' states to children", () => {
@@ -115,15 +115,15 @@ describe("Table Primitives", () => {
     const tbodyRow = table.querySelector("tbody tr");
     const th = screen.getByRole("columnheader");
 
-    expect(wrapper).toHaveClass("border-primary-200");
-    expect(thead).toHaveClass("bg-primary-50");
-    expect(th).toHaveClass("text-primary-800");
+    expect(wrapper).toHaveClass("rst:border-primary-200");
+    expect(thead).toHaveClass("rst:bg-primary-50");
+    expect(th).toHaveClass("rst:text-primary-800");
 
     // Asserts compound variant injected by hoverable={true}
     expect(tbodyRow).toHaveClass(
-      "border-primary-100",
-      "cursor-pointer",
-      "hover:bg-primary-50/50",
+      "rst:border-primary-100",
+      "rst:cursor-pointer",
+      "rst:hover:bg-primary-50/50",
     );
   });
 
@@ -138,7 +138,7 @@ describe("Table Primitives", () => {
       </Table>,
     );
 
-    expect(screen.getByRole("table")).toHaveClass("text-xs");
-    expect(screen.getByRole("cell")).toHaveClass("p-3");
+    expect(screen.getByRole("table")).toHaveClass("rst:text-xs");
+    expect(screen.getByRole("cell")).toHaveClass("rst:p-3");
   });
 });

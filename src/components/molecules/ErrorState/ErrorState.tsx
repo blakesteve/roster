@@ -29,28 +29,28 @@ const ErrorState = ({
 }: ErrorStateProps) => {
   return (
     <div className={cn(errorStateVariants({ variant }), className)} {...props}>
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-error-100 text-error-600">
-        <div className="h-6 w-6 flex items-center justify-center">
+      <div className="rst:mb-4 rst:flex rst:h-12 rst:w-12 rst:items-center rst:justify-center rst:rounded-full rst:bg-error-100 rst:text-error-600">
+        <div className="rst:h-6 rst:w-6 rst:flex rst:items-center rst:justify-center">
           {icon || (
             <FontAwesomeIcon
               icon={faTriangleExclamation}
-              className="h-full w-full"
+              className="rst:h-full rst:w-full"
             />
           )}
         </div>
       </div>
 
-      <h3 className="text-lg font-bold tracking-tight">{title}</h3>
+      <h3 className="rst:text-lg rst:font-bold rst:tracking-tight">{title}</h3>
       <p
         className={cn(
-          "mt-2 text-sm leading-relaxed",
-          variant === "card" ? "text-error-800/80" : "text-gray-500",
+          "rst:mt-2 rst:text-sm rst:leading-relaxed",
+          variant === "card" ? "rst:text-error-800/80" : "rst:text-gray-500",
         )}
       >
         {description}
       </p>
 
-      <div className="mt-6">
+      <div className="rst:mt-6">
         {action ? (
           action
         ) : onRetry ? (

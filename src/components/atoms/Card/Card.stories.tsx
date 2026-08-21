@@ -61,20 +61,20 @@ type Story = StoryObj<typeof meta>;
 
 // Side-by-side decorator (using gray-100 in light mode so White cards pop!)
 const DualPreviewDecorator: Decorator = (Story) => (
-  <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
-    <div className="light flex-1 bg-gray-100 p-12 relative flex flex-col items-center justify-center">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest z-10">
+  <div className="rst:flex rst:w-full rst:rounded-xl rst:overflow-hidden rst:border rst:border-gray-200 rst:dark:border-gray-800 rst:shadow-sm">
+    <div className="light rst:flex-1 rst:bg-gray-100 rst:p-12 rst:relative rst:flex rst:flex-col rst:items-center rst:justify-center">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest rst:z-10">
         Light Mode
       </p>
-      <div className="w-full max-w-sm">
+      <div className="rst:w-full rst:max-w-sm">
         <Story />
       </div>
     </div>
-    <div className="dark flex-1 bg-gray-950 p-12 relative flex flex-col items-center justify-center border-l border-gray-200 dark:border-gray-800">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest z-10">
+    <div className="dark rst:flex-1 rst:bg-gray-950 rst:p-12 rst:relative rst:flex rst:flex-col rst:items-center rst:justify-center rst:border-l rst:border-gray-200 rst:dark:border-gray-800">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest rst:z-10">
         Dark Mode
       </p>
-      <div className="w-full max-w-sm">
+      <div className="rst:w-full rst:max-w-sm">
         <Story />
       </div>
     </div>
@@ -83,9 +83,9 @@ const DualPreviewDecorator: Decorator = (Story) => (
 
 // Helper to provide consistent dummy content inside the cards
 const SampleContent = () => (
-  <div className="flex flex-col gap-2">
-    <h3 className="text-lg font-bold">Weekly Performance</h3>
-    <p className="text-sm opacity-80 leading-relaxed">
+  <div className="rst:flex rst:flex-col rst:gap-2">
+    <h3 className="rst:text-lg rst:font-bold">Weekly Performance</h3>
+    <p className="rst:text-sm rst:opacity-80 rst:leading-relaxed">
       Your picks are looking solid this week. You are currently in the top 10%
       of your primary league.
     </p>
@@ -153,14 +153,14 @@ export const Glassmorphism: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="flex w-full rounded-xl overflow-hidden shadow-sm">
-        <div className="light flex-1 bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 p-12 relative flex justify-center">
-          <div className="w-full max-w-sm">
+      <div className="rst:flex rst:w-full rst:rounded-xl rst:overflow-hidden rst:shadow-sm">
+        <div className="light rst:flex-1 rst:bg-linear-to-br rst:from-indigo-500 rst:via-purple-500 rst:to-pink-500 rst:p-12 rst:relative rst:flex rst:justify-center">
+          <div className="rst:w-full rst:max-w-sm">
             <Story />
           </div>
         </div>
-        <div className="dark flex-1 bg-linear-to-br from-indigo-900 via-purple-900 to-black p-12 relative flex justify-center border-l border-white/10">
-          <div className="w-full max-w-sm">
+        <div className="dark rst:flex-1 rst:bg-linear-to-br rst:from-indigo-900 rst:via-purple-900 rst:to-black rst:p-12 rst:relative rst:flex rst:justify-center rst:border-l rst:border-white/10">
+          <div className="rst:w-full rst:max-w-sm">
             <Story />
           </div>
         </div>
@@ -186,9 +186,9 @@ export const CustomBrandedColors: Story = {
     brandColorTop: "#34D399", // A custom Emerald green
     brandColorBottom: "#F472B6", // A custom Pink
     children: (
-      <div className="flex flex-col gap-2">
-        <h3 className="text-lg font-bold">Custom Brand Alliance</h3>
-        <p className="text-sm opacity-80 leading-relaxed">
+      <div className="rst:flex rst:flex-col rst:gap-2">
+        <h3 className="rst:text-lg rst:font-bold">Custom Brand Alliance</h3>
+        <p className="rst:text-sm rst:opacity-80 rst:leading-relaxed">
           This card demonstrates using completely custom colors for the top
           (#34D399) and bottom (#F472B6) brand stripes, overriding the default
           theme colors.
@@ -222,14 +222,14 @@ export const AllVariantsMatrix: Story = {
     children: <></>,
   },
   render: () => (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="rst:flex rst:flex-col rst:gap-6 rst:w-full">
       {ALL_VARIANTS.map((variant) => (
         <Card key={variant} variant={variant} padding="md">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-sm font-bold uppercase tracking-widest opacity-50">
+          <div className="rst:flex rst:flex-col rst:gap-1">
+            <h3 className="rst:text-sm rst:font-bold rst:uppercase rst:tracking-widest rst:opacity-50">
               Variant
             </h3>
-            <p className="text-lg font-semibold capitalize">{variant}</p>
+            <p className="rst:text-lg rst:font-semibold rst:capitalize">{variant}</p>
           </div>
         </Card>
       ))}
@@ -252,11 +252,11 @@ export const LayoutClasses: Story = {
     className: "flex flex-col gap-2 min-h-48",
     children: (
       <>
-        <h3 className="text-lg font-bold">Layout on the card itself</h3>
-        <p className="text-sm opacity-70">
+        <h3 className="rst:text-lg rst:font-bold">Layout on the card itself</h3>
+        <p className="rst:text-sm rst:opacity-70">
           The card is the flex container, so children lay out directly inside it.
         </p>
-        <span className="mt-auto text-xs font-medium opacity-60">
+        <span className="rst:mt-auto rst:text-xs rst:font-medium rst:opacity-60">
           Pinned to the bottom with mt-auto
         </span>
       </>

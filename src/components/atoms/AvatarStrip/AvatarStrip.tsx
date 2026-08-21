@@ -51,7 +51,13 @@ export interface AvatarStripProps {
   /**
    * Tailwind class that sets the ring color around each avatar and the overflow chip.
    * Should match the background the strip is rendered on to produce the cutout stack effect.
-   * Default: `"ring-white dark:ring-gray-900"`.
+   *
+   * Pass your own classes unprefixed, exactly as you write them in your app —
+   * they land in your `utilities` layer and win, which is the point of the prop.
+   * Only Roster's default carries the `rst:` prefix, so a host that happens to
+   * use `ring-white` itself cannot silently repaint the strip.
+   *
+   * Default: `"rst:ring-white rst:dark:ring-gray-900"`.
    */
   ringClass?: string;
   /** Extra classes applied to the outermost `<div>`. */
@@ -72,7 +78,7 @@ export function AvatarStrip({
   onDismiss,
   trailingSlot,
   label,
-  ringClass = "ring-white dark:ring-gray-900",
+  ringClass = "rst:ring-white rst:dark:ring-gray-900",
   className,
 }: AvatarStripProps) {
   const visible = items
@@ -89,7 +95,7 @@ export function AvatarStrip({
   return (
     <div
       data-testid="avatar-strip"
-      className={cn("flex items-center gap-3", className)}
+      className={cn("rst:flex rst:items-center rst:gap-3", className)}
     >
       {onDismiss && (
         <button
@@ -97,7 +103,7 @@ export function AvatarStrip({
           onClick={onDismiss}
           aria-label="Dismiss"
           data-testid="avatar-strip-dismiss"
-          className="shrink-0 text-gray-400/50 dark:text-gray-500/50 hover:text-gray-400 dark:hover:text-gray-500 transition-colors cursor-pointer"
+          className="rst:shrink-0 rst:text-gray-400/50 rst:dark:text-gray-500/50 rst:hover:text-gray-400 rst:dark:hover:text-gray-500 rst:transition-colors rst:cursor-pointer"
         >
           ✕
         </button>
@@ -106,7 +112,7 @@ export function AvatarStrip({
       {/* Avatar stack */}
       <div
         data-testid="avatar-strip-stack"
-        className="flex items-center -space-x-2"
+        className="rst:flex rst:items-center rst:-space-x-2"
       >
         {visible.map((item) => {
           const avatar = (
@@ -119,7 +125,7 @@ export function AvatarStrip({
           );
 
           const wrapperClass = cn(
-            "relative inline-flex h-6 w-6 rounded-full ring-2 transition-transform hover:z-10 hover:scale-110",
+            "rst:relative rst:inline-flex rst:h-6 rst:w-6 rst:rounded-full rst:ring-2 rst:transition-transform rst:hover:z-10 rst:hover:scale-110",
             ringClass,
           );
 
@@ -150,11 +156,11 @@ export function AvatarStrip({
             title={`${overflow} more`}
             data-testid="avatar-strip-overflow"
             className={cn(
-              "relative flex h-6 w-6 items-center justify-center rounded-full bg-gray-500/10 ring-2",
+              "rst:relative rst:flex rst:h-6 rst:w-6 rst:items-center rst:justify-center rst:rounded-full rst:bg-gray-500/10 rst:ring-2",
               ringClass,
             )}
           >
-            <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 select-none">
+            <span className="rst:text-[9px] rst:font-bold rst:text-gray-500 rst:dark:text-gray-400 rst:select-none">
               +{overflow}
             </span>
           </div>

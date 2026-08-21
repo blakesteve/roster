@@ -22,27 +22,27 @@ describe("Eyebrow Component", () => {
 
   it("is uppercase and monospace", () => {
     const { container } = render(<Eyebrow>Label</Eyebrow>);
-    expect(container.firstChild).toHaveClass("uppercase", "font-mono");
+    expect(container.firstChild).toHaveClass("rst:uppercase", "rst:font-mono");
   });
 
   it("defaults to the faint tone at the smallest size", () => {
     const { container } = render(<Eyebrow>Label</Eyebrow>);
-    expect(container.firstChild).toHaveClass("text-gray-500", "tracking-[0.16em]");
+    expect(container.firstChild).toHaveClass("rst:text-gray-500", "rst:tracking-[0.16em]");
   });
 
   it("applies the primary tone", () => {
     const { container } = render(<Eyebrow tone="primary">Label</Eyebrow>);
-    expect(container.firstChild).toHaveClass("text-primary-600");
+    expect(container.firstChild).toHaveClass("rst:text-primary-600");
   });
 
   it("applies sizes", () => {
     const { container } = render(<Eyebrow size="md">Label</Eyebrow>);
-    expect(container.firstChild).toHaveClass("text-xs");
+    expect(container.firstChild).toHaveClass("rst:text-xs");
   });
 
   it("merges a custom className", () => {
-    const { container } = render(<Eyebrow className="mb-2">Label</Eyebrow>);
-    expect(container.firstChild).toHaveClass("mb-2", "uppercase");
+    const { container } = render(<Eyebrow className="rst:mb-2">Label</Eyebrow>);
+    expect(container.firstChild).toHaveClass("rst:mb-2", "rst:uppercase");
   });
 
   it("passes props through", () => {
@@ -63,7 +63,7 @@ describe("Eyebrow polymorphism", () => {
     );
     const link = screen.getByRole("link", { name: "Work" });
     expect(link).toHaveAttribute("href", "/work");
-    expect(link).toHaveClass("font-mono", "uppercase");
+    expect(link).toHaveClass("rst:font-mono", "rst:uppercase");
   });
 
   it("carries element-specific props through", () => {
@@ -90,6 +90,6 @@ describe("Eyebrow polymorphism", () => {
         Tinted
       </Eyebrow>,
     );
-    expect(screen.getByRole("link")).toHaveClass("text-primary-600", "text-xs");
+    expect(screen.getByRole("link")).toHaveClass("rst:text-primary-600", "rst:text-xs");
   });
 })

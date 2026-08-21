@@ -17,7 +17,7 @@ const InteractiveWrapper = ({
   return (
     <div className={isDark ? "dark" : ""}>
       <div
-        className={`relative w-full transition-colors duration-300 ${className}`}
+        className={`rst:relative rst:w-full rst:transition-colors rst:duration-300 ${className}`}
       >
         <Navbar
           {...args}
@@ -25,7 +25,7 @@ const InteractiveWrapper = ({
           onThemeToggle={() => setIsDark(!isDark)}
         />
         {children || (
-          <div className="p-12 text-center opacity-30 font-bold text-3xl text-gray-500 dark:text-gray-400">
+          <div className="rst:p-12 rst:text-center rst:opacity-30 rst:font-bold rst:text-3xl rst:text-gray-500 rst:dark:text-gray-400">
             Page Content Area
           </div>
         )}
@@ -326,10 +326,10 @@ export const Transparent: Story = {
   render: (args) => (
     <InteractiveWrapper
       args={args}
-      className="bg-linear-to-br from-indigo-900 via-purple-900 to-black min-h-125"
+      className="rst:bg-linear-to-br rst:from-indigo-900 rst:via-purple-900 rst:to-black rst:min-h-125"
     >
-      <div className="pt-32 px-8 text-white text-center">
-        <h1 className="text-5xl font-extrabold tracking-tight">
+      <div className="rst:pt-32 rst:px-8 rst:text-white rst:text-center">
+        <h1 className="rst:text-5xl rst:font-extrabold rst:tracking-tight">
           Enter the Arena
         </h1>
       </div>
@@ -395,7 +395,7 @@ export const MobileView: Story = {
         .mobile-story .md\\:hidden        { display: block !important; }
         .mobile-story .flex.md\\:hidden   { display: flex  !important; }
       `}</style>
-      <div className="mobile-story">
+      <div className="rst:mobile-story">
         <InteractiveWrapper args={args} />
       </div>
     </div>
@@ -439,16 +439,16 @@ export const CustomActions: Story = {
     activePath: "/schedule",
     // Intentionally no `user`, `onLogout`, or `onInboxClick`: actions replaces all of that
     actions: (
-      <div className="flex items-center gap-3">
+      <div className="rst:flex rst:items-center rst:gap-3">
         <a
           href="/login"
-          className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+          className="rst:text-sm rst:text-gray-600 rst:dark:text-gray-300 rst:hover:text-gray-900 rst:dark:hover:text-white rst:transition-colors"
         >
           Sign In
         </a>
         <a
           href="/signup"
-          className="rounded-md bg-primary-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-primary-700 transition-colors"
+          className="rst:rounded-md rst:bg-primary-600 rst:px-4 rst:py-1.5 rst:text-sm rst:font-semibold rst:text-white rst:hover:bg-primary-700 rst:transition-colors"
         >
           Get Started
         </a>
@@ -483,10 +483,10 @@ export const CustomBrandElement: Story = {
   render: (args) => (
     <InteractiveWrapper
       args={args}
-      className="bg-linear-to-br from-indigo-950 via-zinc-900 to-black min-h-125"
+      className="rst:bg-linear-to-br rst:from-indigo-950 rst:via-zinc-900 rst:to-black rst:min-h-125"
     >
-      <div className="pt-32 px-8 text-white text-center">
-        <h1 className="text-5xl font-extrabold tracking-tight opacity-30">Page Content</h1>
+      <div className="rst:pt-32 rst:px-8 rst:text-white rst:text-center">
+        <h1 className="rst:text-5xl rst:font-extrabold rst:tracking-tight rst:opacity-30">Page Content</h1>
       </div>
     </InteractiveWrapper>
   ),
@@ -560,10 +560,10 @@ export const NavActionsSlot: Story = {
     navActions: (
       <button
         aria-label="Search"
-        className="flex h-8 w-8 items-center justify-center rounded-full text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+        className="rst:flex rst:h-8 rst:w-8 rst:items-center rst:justify-center rst:rounded-full rst:text-gray-300 rst:hover:bg-white/10 rst:hover:text-white rst:transition-colors"
         onClick={() => alert("search clicked")}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="rst:h-4 rst:w-4" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
         </svg>
       </button>
@@ -572,10 +572,10 @@ export const NavActionsSlot: Story = {
   render: (args) => (
     <InteractiveWrapper
       args={args}
-      className="bg-linear-to-br from-indigo-950 via-zinc-900 to-black min-h-125"
+      className="rst:bg-linear-to-br rst:from-indigo-950 rst:via-zinc-900 rst:to-black rst:min-h-125"
     >
-      <div className="pt-32 px-8 text-white text-center">
-        <h1 className="text-5xl font-extrabold tracking-tight opacity-30">Page Content</h1>
+      <div className="rst:pt-32 rst:px-8 rst:text-white rst:text-center">
+        <h1 className="rst:text-5xl rst:font-extrabold rst:tracking-tight rst:opacity-30">Page Content</h1>
       </div>
     </InteractiveWrapper>
   ),
@@ -601,7 +601,7 @@ export const SlotClosesMobilePanel: Story = {
       <a
         href="#help"
         onClick={close}
-        className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-400"
+        className="rst:text-sm rst:font-medium rst:text-primary-600 rst:hover:underline rst:dark:text-primary-400"
       >
         Help
       </a>
@@ -615,7 +615,7 @@ export const SlotClosesMobilePanel: Story = {
         .mobile-story .md\\:hidden        { display: block !important; }
         .mobile-story .flex.md\\:hidden   { display: flex  !important; }
       `}</style>
-      <div className="mobile-story">
+      <div className="rst:mobile-story">
         <InteractiveWrapper args={args} />
       </div>
     </div>
@@ -682,9 +682,9 @@ export const ThemeModeAuto: Story = {
   },
   render: (args) => (
     <div className="dark">
-      <div className="bg-gray-950 min-h-75">
+      <div className="rst:bg-gray-950 rst:min-h-75">
         <Navbar {...args} />
-        <div className="p-12 text-center font-bold text-3xl text-gray-400 opacity-40">
+        <div className="rst:p-12 rst:text-center rst:font-bold rst:text-3xl rst:text-gray-400 rst:opacity-40">
           Ancestor carries .dark
         </div>
       </div>

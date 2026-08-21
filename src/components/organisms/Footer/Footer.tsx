@@ -43,22 +43,22 @@ const Footer = React.forwardRef<HTMLElement, FooterProps>(
         className={cn(footerVariants({ variant }), className)}
         {...props}
       >
-        <div className="container mx-auto px-4 flex flex-col items-center gap-2">
+        <div className="rst:container rst:mx-auto rst:px-4 rst:flex rst:flex-col rst:items-center rst:gap-2">
           {links && links.length > 0 && (
-            <nav aria-label="Footer navigation" className="flex flex-wrap justify-center gap-x-5 gap-y-1">
+            <nav aria-label="Footer navigation" className="rst:flex rst:flex-wrap rst:justify-center rst:gap-x-5 rst:gap-y-1">
               {links.map((link) => (
                 <LinkEl
                   key={link.href}
                   href={link.href}
                   to={link.href}
-                  className="text-sm text-inherit opacity-70 hover:opacity-100 transition-opacity"
+                  className="rst:text-sm rst:text-inherit rst:opacity-70 rst:hover:opacity-100 rst:transition-opacity"
                 >
                   {link.label}
                 </LinkEl>
               ))}
             </nav>
           )}
-          <p className="text-center text-sm font-medium text-inherit">
+          <p className="rst:text-center rst:text-sm rst:font-medium rst:text-inherit">
             © {currentYear} {companyName}, All rights reserved.
           </p>
         </div>

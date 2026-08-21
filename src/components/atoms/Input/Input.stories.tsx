@@ -17,20 +17,20 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="p-8 space-y-12">
-        <div className="light bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 mb-6 uppercase tracking-widest">
+      <div className="rst:p-8 rst:space-y-12">
+        <div className="light rst:bg-gray-50 rst:p-6 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:mb-6 rst:uppercase rst:tracking-widest">
             Light Mode Preview
           </p>
-          <div className="max-w-md">
+          <div className="rst:max-w-md">
             <Story />
           </div>
         </div>
-        <div className="dark bg-gray-950 p-6 rounded-xl border border-gray-800 shadow-xl">
-          <p className="text-[10px] font-bold text-gray-500 mb-6 uppercase tracking-widest">
+        <div className="dark rst:bg-gray-950 rst:p-6 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:mb-6 rst:uppercase rst:tracking-widest">
             Dark Mode Preview
           </p>
-          <div className="max-w-md">
+          <div className="rst:max-w-md">
             <Story />
           </div>
         </div>
@@ -69,7 +69,7 @@ export const WhiteWithEmail: Story = {
     type: "email",
     label: "Email Address",
     placeholder: "user@megasquad.com",
-    startIcon: <FontAwesomeIcon icon={faEnvelope} className="h-4 w-4" />,
+    startIcon: <FontAwesomeIcon icon={faEnvelope} className="rst:h-4 rst:w-4" />,
     helperText: "We'll never share your email.",
     variant: "white",
   },
@@ -82,7 +82,7 @@ export const SoftSearch: Story = {
   args: {
     placeholder: "Search players...",
     variant: "soft",
-    startIcon: <FontAwesomeIcon icon={faSearch} className="h-4 w-4" />,
+    startIcon: <FontAwesomeIcon icon={faSearch} className="rst:h-4 rst:w-4" />,
   },
 };
 
@@ -94,7 +94,7 @@ export const MegaSquadSlate: Story = {
     variant: "slate",
     label: "Filter Roster",
     placeholder: "Filter by name...",
-    startIcon: <FontAwesomeIcon icon={faSearch} className="h-4 w-4" />,
+    startIcon: <FontAwesomeIcon icon={faSearch} className="rst:h-4 rst:w-4" />,
   },
 };
 
@@ -107,8 +107,8 @@ export const PasswordAction: Story = {
     label: "Password",
     defaultValue: "Secret123",
     endIcon: (
-      <button className="opacity-70 hover:opacity-100 transition-opacity focus:outline-none">
-        <FontAwesomeIcon icon={faEye} className="h-4 w-4" />
+      <button className="rst:opacity-70 rst:hover:opacity-100 rst:transition-opacity rst:focus:outline-none">
+        <FontAwesomeIcon icon={faEye} className="rst:h-4 rst:w-4" />
       </button>
     ),
     variant: "outline",

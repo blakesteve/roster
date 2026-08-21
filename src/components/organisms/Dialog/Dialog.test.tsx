@@ -51,45 +51,45 @@ describe("Dialog Component", () => {
     render(<Dialog {...defaultProps} />);
 
     const title = await screen.findByText("Test Dialog");
-    const panel = title.closest(".rounded-2xl");
+    const panel = title.closest(".rst\\:rounded-2xl");
 
     // Checks base light mode and native dark mode classes
-    expect(panel).toHaveClass("bg-white", "dark:bg-gray-800");
+    expect(panel).toHaveClass("rst:bg-white", "rst:dark:bg-gray-800");
 
     // Checks that typography correctly uses inheritance now instead of hardcoded colors
-    expect(title).toHaveClass("text-inherit");
+    expect(title).toHaveClass("rst:text-inherit");
   });
 
   it("applies the correct classes for the Destructive Status", async () => {
     render(<Dialog {...defaultProps} status="destructive" />);
 
     const title = await screen.findByText("Test Dialog");
-    const panel = title.closest(".rounded-2xl");
+    const panel = title.closest(".rst\\:rounded-2xl");
 
     // Check for the semantic top border
-    expect(panel).toHaveClass("border-t-error-500");
+    expect(panel).toHaveClass("rst:border-t-error-500");
 
     // Typography should still inherit from the base variant
-    expect(title).toHaveClass("text-inherit");
+    expect(title).toHaveClass("rst:text-inherit");
   });
 
   it("applies the correct classes for the Slate Variant", async () => {
     render(<Dialog {...defaultProps} variant="slate" />);
 
     const title = await screen.findByText("Test Dialog");
-    const panel = title.closest(".rounded-2xl");
+    const panel = title.closest(".rst\\:rounded-2xl");
 
-    expect(panel).toHaveClass("bg-gray-700", "dark:bg-gray-900");
+    expect(panel).toHaveClass("rst:bg-gray-700", "rst:dark:bg-gray-900");
   });
 
   it("applies the correct classes for the Glass Variant", async () => {
     render(<Dialog {...defaultProps} variant="glass" />);
 
     const title = await screen.findByText("Test Dialog");
-    const panel = title.closest(".rounded-2xl");
+    const panel = title.closest(".rst\\:rounded-2xl");
 
     // The panel should have the blur and semi-transparent backgrounds for both themes
-    expect(panel).toHaveClass("backdrop-blur-xl");
-    expect(panel).toHaveClass("bg-white/80", "dark:bg-slate-900/80");
+    expect(panel).toHaveClass("rst:backdrop-blur-xl");
+    expect(panel).toHaveClass("rst:bg-white/80", "rst:dark:bg-slate-900/80");
   });
 });

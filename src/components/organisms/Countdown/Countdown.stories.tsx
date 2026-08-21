@@ -69,23 +69,23 @@ const CustomTimer = () => {
   },
   decorators: [
     (Story) => (
-      <div className="p-8 space-y-12 w-full max-w-4xl mx-auto">
+      <div className="rst:p-8 rst:space-y-12 rst:w-full rst:max-w-4xl rst:mx-auto">
         {/* Light Mode Preview */}
-        <div className="light bg-white p-8 rounded-xl border border-gray-100 shadow-sm flex flex-col relative min-h-50">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest absolute top-4 left-4">
+        <div className="light rst:bg-white rst:p-8 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm rst:flex rst:flex-col rst:relative rst:min-h-50">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest rst:absolute rst:top-4 rst:left-4">
             Light Mode Preview
           </p>
-          <div className="grow flex items-center justify-center mt-6">
+          <div className="rst:grow rst:flex rst:items-center rst:justify-center rst:mt-6">
             <Story />
           </div>
         </div>
 
         {/* Dark Mode Preview */}
-        <div className="dark bg-gray-950 p-8 rounded-xl border border-gray-800 shadow-xl flex flex-col relative min-h-50">
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest absolute top-4 left-4">
+        <div className="dark rst:bg-gray-950 rst:p-8 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl rst:flex rst:flex-col rst:relative rst:min-h-50">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest rst:absolute rst:top-4 rst:left-4">
             Dark Mode Preview
           </p>
-          <div className="grow flex items-center justify-center mt-6">
+          <div className="rst:grow rst:flex rst:items-center rst:justify-center rst:mt-6">
             <Story />
           </div>
         </div>
@@ -173,8 +173,8 @@ export const HeroLarge: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="p-8 w-full max-w-5xl mx-auto">
-        <div className="dark p-16 bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 flex justify-center bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+      <div className="rst:p-8 rst:w-full rst:max-w-5xl rst:mx-auto">
+        <div className="dark rst:p-16 rst:bg-slate-900 rst:rounded-3xl rst:shadow-2xl rst:border rst:border-slate-800 rst:flex rst:justify-center rst:bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
           <Story />
         </div>
       </div>
@@ -216,8 +216,8 @@ export const EventCompleted: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="p-8 w-full max-w-4xl mx-auto">
-        <div className="bg-error-50 dark:bg-error-900/20 border-2 border-error-200 dark:border-error-800 rounded-xl p-12 flex justify-center text-error-900 dark:text-error-100">
+      <div className="rst:p-8 rst:w-full rst:max-w-4xl rst:mx-auto">
+        <div className="rst:bg-error-50 rst:dark:bg-error-900/20 rst:border-2 rst:border-error-200 rst:dark:border-error-800 rst:rounded-xl rst:p-12 rst:flex rst:justify-center rst:text-error-900 rst:dark:text-error-100">
           <Story />
         </div>
       </div>

@@ -48,7 +48,7 @@ export const Playground: Story = {
 export const Sizes: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-col gap-4">
+    <div className="rst:flex rst:flex-col rst:gap-4">
       <Eyebrow size="xs">Extra small — the default</Eyebrow>
       <Eyebrow size="sm">Small</Eyebrow>
       <Eyebrow size="md">Medium</Eyebrow>
@@ -67,7 +67,7 @@ export const Sizes: Story = {
 export const Tones: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-col gap-4">
+    <div className="rst:flex rst:flex-col rst:gap-4">
       <Eyebrow tone="faint">Faint — the default, for chrome</Eyebrow>
       <Eyebrow tone="default">Default — for a label doing real work</Eyebrow>
       <Eyebrow tone="strong">Strong — when it is nearly a heading</Eyebrow>
@@ -87,7 +87,7 @@ export const Tones: Story = {
 export const Weights: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-col gap-4">
+    <div className="rst:flex rst:flex-col rst:gap-4">
       <Eyebrow weight="normal">Normal</Eyebrow>
       <Eyebrow weight="medium">Medium</Eyebrow>
       <Eyebrow weight="semibold">Semibold</Eyebrow>
@@ -98,12 +98,12 @@ export const Weights: Story = {
 export const AboveAHeading: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex max-w-md flex-col gap-2">
+    <div className="rst:flex rst:max-w-md rst:flex-col rst:gap-2">
       <Eyebrow tone="primary">Case study</Eyebrow>
-      <h2 className="m-0 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+      <h2 className="rst:m-0 rst:text-3xl rst:font-bold rst:tracking-tight rst:text-gray-900 rst:dark:text-gray-100">
         Game Verdict
       </h2>
-      <p className="m-0 text-sm text-gray-600 dark:text-gray-400">
+      <p className="rst:m-0 rst:text-sm rst:text-gray-600 rst:dark:text-gray-400">
         Settling the controller-versus-keyboard argument with 1,573 verdicts and
         a fingerprint instead of a login wall.
       </p>
@@ -121,7 +121,7 @@ export const AboveAHeading: Story = {
 export const AsAColumnHead: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="grid max-w-md grid-cols-3 gap-x-6 gap-y-2">
+    <div className="rst:grid rst:max-w-md rst:grid-cols-3 rst:gap-x-6 rst:gap-y-2">
       <Eyebrow>Project</Eyebrow>
       <Eyebrow>Stack</Eyebrow>
       <Eyebrow>Year</Eyebrow>
@@ -130,11 +130,11 @@ export const AsAColumnHead: Story = {
         ["MegaSquad", "Vite", "2024"],
         ["Roster", "Vite lib", "2024"],
       ].map((row) => (
-        <div key={row[0]} className="contents">
+        <div key={row[0]} className="rst:contents">
           {row.map((cell) => (
             <span
               key={cell}
-              className="text-sm text-gray-900 dark:text-gray-100"
+              className="rst:text-sm rst:text-gray-900 rst:dark:text-gray-100"
             >
               {cell}
             </span>
@@ -156,14 +156,14 @@ export const AsAColumnHead: Story = {
 export const PolymorphicAs: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-col gap-4">
-      <dl className="m-0">
+    <div className="rst:flex rst:flex-col rst:gap-4">
+      <dl className="rst:m-0">
         <dt>
           <Eyebrow>Rendered inside a dt</Eyebrow>
         </dt>
-        <dd className="m-0 text-sm text-gray-900 dark:text-gray-100">Value</dd>
+        <dd className="rst:m-0 rst:text-sm rst:text-gray-900 rst:dark:text-gray-100">Value</dd>
       </dl>
-      <Eyebrow as="p" className="m-0">
+      <Eyebrow as="p" className="rst:m-0">
         Rendered as a paragraph
       </Eyebrow>
       <Eyebrow as="legend">Rendered as a legend</Eyebrow>
@@ -182,8 +182,8 @@ export const PolymorphicAs: Story = {
 export const AsALink: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex flex-col items-start gap-4">
-      <Eyebrow as="a" href="#" className="no-underline hover:!text-primary-600">
+    <div className="rst:flex rst:flex-col rst:items-start rst:gap-4">
+      <Eyebrow as="a" href="#" className="rst:no-underline rst:hover:!text-primary-600">
         gameverdict.app
       </Eyebrow>
       <Eyebrow
@@ -192,7 +192,7 @@ export const AsALink: Story = {
         target="_blank"
         rel="noreferrer"
         tone="primary"
-        className="no-underline hover:underline"
+        className="rst:no-underline rst:hover:underline"
       >
         Opens in a new tab
       </Eyebrow>
@@ -201,7 +201,7 @@ export const AsALink: Story = {
       </Eyebrow>
       <input
         id="demo-field"
-        className="rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+        className="rst:rounded rst:border rst:border-gray-300 rst:px-2 rst:py-1 rst:text-sm rst:dark:border-gray-700 rst:dark:bg-gray-900"
       />
     </div>
   ),
@@ -222,7 +222,7 @@ export const DarkMode: Story = {
   args: { children: "placeholder" },
   render: () => (
     <div className="dark">
-      <div className="flex flex-col gap-3 rounded-xl bg-gray-950 p-6">
+      <div className="rst:flex rst:flex-col rst:gap-3 rst:rounded-xl rst:bg-gray-950 rst:p-6">
         <Eyebrow tone="faint">Faint</Eyebrow>
         <Eyebrow tone="default">Default</Eyebrow>
         <Eyebrow tone="strong">Strong</Eyebrow>

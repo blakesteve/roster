@@ -56,7 +56,7 @@ export const Link = <C extends React.ElementType = "a">({
         {shouldShowIcon && (
           <FontAwesomeIcon
             icon={faExternalLinkAlt}
-            className="ml-0.5 h-3 w-3"
+            className="rst:ml-0.5 rst:h-3 rst:w-3"
             data-testid="external-icon"
           />
         )}
@@ -74,7 +74,7 @@ export const Link = <C extends React.ElementType = "a">({
       {shouldShowIcon && (
         <FontAwesomeIcon
           icon={faExternalLinkAlt}
-          className="ml-1 h-3 w-3 opacity-70"
+          className="rst:ml-1 rst:h-3 rst:w-3 rst:opacity-70"
           data-testid="external-icon"
         />
       )}

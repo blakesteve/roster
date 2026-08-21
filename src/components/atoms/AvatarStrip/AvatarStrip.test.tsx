@@ -204,7 +204,7 @@ describe("AvatarStrip", () => {
 
   it("applies the default ring class to avatar wrappers", () => {
     render(<AvatarStrip items={THREE_ITEMS} />);
-    expect(screen.getByTestId("avatar-strip-item-u1")).toHaveClass("ring-white");
+    expect(screen.getByTestId("avatar-strip-item-u1")).toHaveClass("rst:ring-white");
   });
 
   it("applies a custom ringClass to avatar wrappers", () => {
@@ -220,8 +220,8 @@ describe("AvatarStrip", () => {
   // ── className ──────────────────────────────────────────────────────────────
 
   it("applies className to the outer container", () => {
-    render(<AvatarStrip items={THREE_ITEMS} className="my-custom-class" />);
-    expect(screen.getByTestId("avatar-strip")).toHaveClass("my-custom-class");
+    render(<AvatarStrip items={THREE_ITEMS} className="rst:my-custom-class" />);
+    expect(screen.getByTestId("avatar-strip")).toHaveClass("rst:my-custom-class");
   });
 
   // ── Edge cases ─────────────────────────────────────────────────────────────

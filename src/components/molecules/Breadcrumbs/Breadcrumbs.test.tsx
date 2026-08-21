@@ -42,9 +42,9 @@ describe("Breadcrumbs Molecule", () => {
     // Accessibility & styling checks for the active page
     expect(current).toHaveAttribute("aria-current", "page");
     expect(current).toHaveClass(
-      "font-semibold",
-      "text-gray-900",
-      "dark:text-gray-100",
+      "rst:font-semibold",
+      "rst:text-gray-900",
+      "rst:dark:text-gray-100",
     );
   });
 
@@ -54,7 +54,7 @@ describe("Breadcrumbs Molecule", () => {
 
     const level1Link = screen.getByRole("link", { name: "Level 1" });
     // Verify the primary light and dark mode classes from CVA
-    expect(level1Link).toHaveClass("text-primary-600", "dark:text-primary-400");
+    expect(level1Link).toHaveClass("rst:text-primary-600", "rst:dark:text-primary-400");
   });
 
   it("applies inverse variant classes correctly to the active page", () => {
@@ -62,8 +62,8 @@ describe("Breadcrumbs Molecule", () => {
 
     const current = screen.getByText("Current");
     // The inverse active page should be pure white, not the default gray-900
-    expect(current).toHaveClass("text-white");
-    expect(current).not.toHaveClass("text-gray-900");
+    expect(current).toHaveClass("rst:text-white");
+    expect(current).not.toHaveClass("rst:text-gray-900");
   });
 
   // 4. Feature Flags (Home Icon)

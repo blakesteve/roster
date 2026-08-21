@@ -49,7 +49,7 @@ describe("Checkbox Component", () => {
 
     const checkbox = screen.getByRole("checkbox");
     expect(checkbox).toHaveAttribute("aria-disabled", "true");
-    expect(checkbox).toHaveClass("opacity-50");
+    expect(checkbox).toHaveClass("rst:opacity-50");
 
     await user.click(checkbox);
     expect(handleChange).not.toHaveBeenCalled();
@@ -73,8 +73,8 @@ describe("Checkbox Component", () => {
       />,
     );
     expect(screen.getByRole("checkbox")).toHaveClass(
-      "bg-error-600",
-      "border-error-600",
+      "rst:bg-error-600",
+      "rst:border-error-600",
     );
   });
 
@@ -88,13 +88,13 @@ describe("Checkbox Component", () => {
       />,
     );
     expect(screen.getByRole("checkbox")).toHaveClass(
-      "bg-teal-100",
-      "border-teal-300",
+      "rst:bg-teal-100",
+      "rst:border-teal-300",
     );
   });
 
   it("applies the correct scale classes for the lg size", () => {
     render(<Checkbox size="lg" checked={false} onChange={() => {}} />);
-    expect(screen.getByRole("checkbox")).toHaveClass("h-6", "w-6");
+    expect(screen.getByRole("checkbox")).toHaveClass("rst:h-6", "rst:w-6");
   });
 });

@@ -40,25 +40,25 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const hasError = !!errorMessage || error;
 
     return (
-      <Field className={cn("w-full space-y-1.5", className)}>
+      <Field className={cn("rst:w-full rst:space-y-1.5", className)}>
         {label && (
           <Label
             className={cn(
-              "block text-sm font-medium leading-none text-left mb-1.5 transition-colors",
-              "text-gray-900 dark:text-gray-100",
-              "peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+              "rst:block rst:text-sm rst:font-medium rst:leading-none rst:text-left rst:mb-1.5 rst:transition-colors",
+              "rst:text-gray-900 rst:dark:text-gray-100",
+              "rst:peer-disabled:cursor-not-allowed rst:peer-disabled:opacity-70",
             )}
           >
             {label}
           </Label>
         )}
 
-        <div className="relative">
+        <div className="rst:relative">
           {startIcon && (
             <div
               className={cn(
                 iconVariants({ variant, error: hasError }),
-                "left-3",
+                "rst:left-3",
               )}
             >
               {startIcon}
@@ -71,8 +71,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             disabled={disabled}
             className={cn(
               inputVariants({ variant, error: hasError }),
-              startIcon && "pl-10",
-              endIcon && "pr-10",
+              startIcon && "rst:pl-10",
+              endIcon && "rst:pr-10",
             )}
             {...props}
           />
@@ -81,7 +81,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <div
               className={cn(
                 iconVariants({ variant, error: hasError }),
-                "right-3",
+                "rst:right-3",
               )}
             >
               {endIcon}
@@ -92,10 +92,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {(helperText || errorMessage) && (
           <Description
             className={cn(
-              "text-xs text-left mt-1",
+              "rst:text-xs rst:text-left rst:mt-1",
               hasError
-                ? "text-error-600 dark:text-error-400 font-medium"
-                : "text-gray-500 dark:text-gray-400",
+                ? "rst:text-error-600 rst:dark:text-error-400 rst:font-medium"
+                : "rst:text-gray-500 rst:dark:text-gray-400",
             )}
           >
             {errorMessage || helperText}

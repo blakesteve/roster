@@ -48,7 +48,7 @@ export const Playground: Story = {
 export const Variants: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex max-w-2xl flex-col gap-10">
+    <div className="rst:flex rst:max-w-2xl rst:flex-col rst:gap-10">
       <Pullquote variant="rule" cite="rule — the default">
         The rule gives the quote a left edge to hang from, which is enough to
         separate it from the paragraph above without a full break in the page.
@@ -76,7 +76,7 @@ export const Variants: Story = {
 export const ColorSchemes: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="flex max-w-2xl flex-col gap-8">
+    <div className="rst:flex rst:max-w-2xl rst:flex-col rst:gap-8">
       <Pullquote colorScheme="primary" cite="primary">
         The default accent.
       </Pullquote>
@@ -108,7 +108,7 @@ export const ColorSchemes: Story = {
 export const WithoutAttribution: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="max-w-2xl">
+    <div className="rst:max-w-2xl">
       <Pullquote>
         Not every lifted line has a source worth naming. Leave `cite` off and the
         figcaption is not rendered at all.
@@ -128,7 +128,7 @@ export const WithoutAttribution: Story = {
 export const WithSourceUrl: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="max-w-2xl">
+    <div className="rst:max-w-2xl">
       <Pullquote
         cite="MDN — the blockquote element"
         citeUrl="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/blockquote"
@@ -151,8 +151,8 @@ export const WithSourceUrl: Story = {
 export const InProse: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="max-w-prose space-y-4 text-[0.9375rem] leading-relaxed text-gray-700 dark:text-gray-300">
-      <p className="m-0">
+    <div className="rst:max-w-prose rst:space-y-4 rst:text-[0.9375rem] rst:leading-relaxed rst:text-gray-700 rst:dark:text-gray-300">
+      <p className="rst:m-0">
         Game Verdict asks one question — controller or keyboard — and the answer
         is only interesting if enough people answer it. Which made the login
         screen the most expensive component on the site.
@@ -161,7 +161,7 @@ export const InProse: Story = {
         A login wall on a poll about game controllers would have killed the
         sample size.
       </Pullquote>
-      <p className="m-0">
+      <p className="rst:m-0">
         So votes are keyed to a browser fingerprint instead. It is not perfect:
         the same person on a phone and a laptop counts twice. At this scale that
         is cheaper than the votes that would never have been cast.
@@ -181,7 +181,7 @@ export const InProse: Story = {
 export const InheritsColor: Story = {
   args: { children: "placeholder" },
   render: () => (
-    <div className="max-w-2xl text-purple-600 dark:text-purple-400">
+    <div className="rst:max-w-2xl rst:text-purple-600 rst:dark:text-purple-400">
       <Pullquote colorScheme="current" cite="Tinted by the parent">
         `current` inherits the rule color from whatever wraps it, which is how a
         page paints every quote in a per-project accent it works out at runtime.
@@ -194,7 +194,7 @@ export const DarkMode: Story = {
   args: { children: "placeholder" },
   render: () => (
     <div className="dark">
-      <div className="flex flex-col gap-8 rounded-xl bg-gray-950 p-6">
+      <div className="rst:flex rst:flex-col rst:gap-8 rst:rounded-xl rst:bg-gray-950 rst:p-6">
         <Pullquote cite="Why votes are anonymous">
           A login wall on a poll about game controllers would have killed the
           sample size.

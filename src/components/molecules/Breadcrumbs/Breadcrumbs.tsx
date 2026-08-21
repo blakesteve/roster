@@ -74,28 +74,28 @@ const Breadcrumbs = ({
   const Anchor = (linkComponent ?? Link) as React.ComponentType<BreadcrumbLinkProps>;
 
   const SeparatorIcon = separator ?? (
-    <span className="text-gray-300 dark:text-gray-600 text-sm transition-colors">
+    <span className="rst:text-gray-300 rst:dark:text-gray-600 rst:text-sm rst:transition-colors">
       /
     </span>
   );
 
   return (
-    <nav aria-label="Breadcrumb" className={cn("flex", className)} {...props}>
-      <ol className="flex items-center space-x-2">
+    <nav aria-label="Breadcrumb" className={cn("rst:flex", className)} {...props}>
+      <ol className="rst:flex rst:items-center rst:space-x-2">
         {showHomeIcon && (
-          <li className="flex items-center">
+          <li className="rst:flex rst:items-center">
             <Anchor
               href={homeHref}
               className={cn(
                 breadcrumbVariants({ variant }),
-                "hover:underline-none",
+                "rst:hover:underline-none",
               )}
               aria-label="Home"
             >
-              <FontAwesomeIcon icon={faHome} className="h-4 w-4" />
+              <FontAwesomeIcon icon={faHome} className="rst:h-4 rst:w-4" />
             </Anchor>
             <span
-              className="ml-2 flex select-none items-center"
+              className="rst:ml-2 rst:flex rst:select-none rst:items-center"
               aria-hidden="true"
             >
               {SeparatorIcon}
@@ -109,10 +109,10 @@ const Breadcrumbs = ({
           return (
             /* Keyed by index: `href` is optional now, and a trail can legally
                repeat one. */
-            <li key={index} className="flex items-center">
+            <li key={index} className="rst:flex rst:items-center">
               {index > 0 && (
                 <span
-                  className="mr-2 flex select-none items-center"
+                  className="rst:mr-2 rst:flex rst:select-none rst:items-center"
                   aria-hidden="true"
                 >
                   {SeparatorIcon}
@@ -122,10 +122,10 @@ const Breadcrumbs = ({
               {isLast || !item.href ? (
                 <span
                   className={cn(
-                    "font-semibold text-sm cursor-default transition-colors",
+                    "rst:font-semibold rst:text-sm rst:cursor-default rst:transition-colors",
                     variant === "inverse"
-                      ? "text-white"
-                      : "text-gray-900 dark:text-gray-100",
+                      ? "rst:text-white"
+                      : "rst:text-gray-900 rst:dark:text-gray-100",
                     isLast && currentClassName,
                     item.className,
                   )}
@@ -138,7 +138,7 @@ const Breadcrumbs = ({
                   href={item.href}
                   className={cn(
                     breadcrumbVariants({ variant }),
-                    "hover:underline",
+                    "rst:hover:underline",
                     item.className,
                   )}
                 >

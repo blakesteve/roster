@@ -18,7 +18,7 @@ describe("Textarea Component", () => {
 
     expect(helperText).toBeInTheDocument();
     // Verify standard helper text colors
-    expect(helperText).toHaveClass("text-gray-500", "dark:text-gray-400");
+    expect(helperText).toHaveClass("rst:text-gray-500", "rst:dark:text-gray-400");
   });
 
   // 3. Error State & Dark Mode Integration
@@ -29,14 +29,14 @@ describe("Textarea Component", () => {
     expect(errorMsg).toBeInTheDocument();
     // Verify error text colors
     expect(errorMsg).toHaveClass(
-      "text-error-600",
-      "dark:text-error-400",
-      "font-medium",
+      "rst:text-error-600",
+      "rst:dark:text-error-400",
+      "rst:font-medium",
     );
 
     // Check if error border classes are applied to the textarea
     const textarea = screen.getByRole("textbox");
-    expect(textarea).toHaveClass("border-error-500", "dark:border-error-500");
+    expect(textarea).toHaveClass("rst:border-error-500", "rst:dark:border-error-500");
   });
 
   // 4. Prop Priority
@@ -57,9 +57,9 @@ describe("Textarea Component", () => {
 
     // Verify the specific light and dark mode combo for the white variant
     expect(textarea).toHaveClass(
-      "bg-white",
-      "dark:bg-gray-900",
-      "dark:border-gray-800",
+      "rst:bg-white",
+      "rst:dark:bg-gray-900",
+      "rst:dark:border-gray-800",
     );
   });
 
@@ -67,13 +67,13 @@ describe("Textarea Component", () => {
   it("applies resize classes based on props", () => {
     const { rerender } = render(<Textarea resize="none" />);
     let textarea = screen.getByRole("textbox");
-    expect(textarea).toHaveClass("resize-none");
+    expect(textarea).toHaveClass("rst:resize-none");
 
     // Default behavior test
     rerender(<Textarea />);
     textarea = screen.getByRole("textbox");
     // Our CVA default is 'vertical', which maps to 'resize-y'
-    expect(textarea).toHaveClass("resize-y");
+    expect(textarea).toHaveClass("rst:resize-y");
   });
 
   // 7. Disabled State

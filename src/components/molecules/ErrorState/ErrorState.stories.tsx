@@ -88,7 +88,7 @@ export const AccessDenied: Story = {
       "You do not have permission to view the Commissioner Settings for this league.",
     variant: "card",
     action: (
-      <div className="flex gap-2">
+      <div className="rst:flex rst:gap-2">
         <Button variant="outline" colorScheme="error" onClick={() => {}}>
           Request Access
         </Button>

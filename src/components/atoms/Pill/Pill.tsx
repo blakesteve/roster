@@ -48,20 +48,20 @@ const Pill = React.forwardRef<HTMLSpanElement, PillProps>(
         {dot ? (
           // The pulse is a sibling ring rather than an animation on the dot
           // itself, so the dot stays a crisp solid circle while it radiates.
-          <span className="relative inline-flex shrink-0" aria-hidden="true">
+          <span className="rst:relative rst:inline-flex rst:shrink-0" aria-hidden="true">
             {pulse && (
               <span
                 className={cn(
                   pillDotVariants({ colorScheme, variant, size }),
-                  "absolute inset-0 motion-safe:animate-ping opacity-75",
+                  "rst:absolute rst:inset-0 rst:motion-safe:animate-ping rst:opacity-75",
                 )}
               />
             )}
-            <span className={cn(pillDotVariants({ colorScheme, variant, size }), "relative")} />
+            <span className={cn(pillDotVariants({ colorScheme, variant, size }), "rst:relative")} />
           </span>
         ) : (
           leadingIcon && (
-            <span className="inline-flex shrink-0 items-center" aria-hidden="true">
+            <span className="rst:inline-flex rst:shrink-0 rst:items-center" aria-hidden="true">
               {leadingIcon}
             </span>
           )

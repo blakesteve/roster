@@ -35,17 +35,17 @@ describe("Pullquote Component", () => {
 
   it("defaults to a primary rule", () => {
     const { container } = render(<Pullquote>Quote</Pullquote>);
-    expect(container.firstChild).toHaveClass("border-l-2", "border-primary-500");
+    expect(container.firstChild).toHaveClass("rst:border-l-2", "rst:border-primary-500");
   });
 
   it("drops the rule in the plain variant", () => {
     const { container } = render(<Pullquote variant="plain">Quote</Pullquote>);
-    expect(container.firstChild).not.toHaveClass("border-l-2");
+    expect(container.firstChild).not.toHaveClass("rst:border-l-2");
   });
 
   it("centers in the centered variant", () => {
     const { container } = render(<Pullquote variant="centered">Quote</Pullquote>);
-    expect(container.firstChild).toHaveClass("text-center");
+    expect(container.firstChild).toHaveClass("rst:text-center");
   });
 
   // `text-center` centers the lines, not the box. The blockquote is capped at
@@ -53,18 +53,18 @@ describe("Pullquote Component", () => {
   // the figure — measured 87px apart in a 672px container before the fix.
   it("centers the quote box too, not just its lines", () => {
     const { container } = render(<Pullquote variant="centered">Quote</Pullquote>);
-    expect(container.firstChild).toHaveClass("[&>blockquote]:mx-auto");
+    expect(container.firstChild).toHaveClass("rst:[&>blockquote]:mx-auto");
   });
 
   it("leaves the quote box left-aligned in the other variants", () => {
     for (const variant of ["rule", "plain"] as const) {
       const { container } = render(<Pullquote variant={variant}>Quote</Pullquote>);
-      expect(container.firstChild).not.toHaveClass("[&>blockquote]:mx-auto");
+      expect(container.firstChild).not.toHaveClass("rst:[&>blockquote]:mx-auto");
     }
   });
 
   it("can inherit the surrounding color", () => {
     const { container } = render(<Pullquote colorScheme="current">Quote</Pullquote>);
-    expect(container.firstChild).toHaveClass("border-current");
+    expect(container.firstChild).toHaveClass("rst:border-current");
   });
 });

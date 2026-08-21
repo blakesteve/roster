@@ -43,11 +43,11 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           <img
             src={src}
             alt={alt || "Avatar"}
-            className="h-full w-full object-cover"
+            className="rst:h-full rst:w-full rst:object-cover"
             onError={() => setImageError(true)}
           />
         ) : (
-          <span className="leading-none uppercase">
+          <span className="rst:leading-none rst:uppercase">
             {initials?.slice(0, 2)}
           </span>
         )}
@@ -61,10 +61,10 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
 
     // Popover Render (With Tooltip)
     return (
-      <Popover className="relative inline-flex">
+      <Popover className="rst:relative rst:inline-flex">
         <PopoverButton
           as="div"
-          className="outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded-full"
+          className="rst:outline-none rst:cursor-pointer rst:focus-visible:ring-2 rst:focus-visible:ring-primary-500 rst:focus-visible:ring-offset-2 rst:rounded-full"
         >
           {AvatarContent}
         </PopoverButton>
@@ -72,9 +72,9 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         <PopoverPanel
           anchor="bottom"
           className={cn(
-            "z-50 mt-2 rounded-md px-3 py-1.5 text-xs font-medium shadow-xl backdrop-blur-md ring-1",
-            "bg-gray-900/95 text-white ring-black/5 dark:bg-gray-100/95 dark:text-gray-900 dark:ring-white/20",
-            "transition duration-200 ease-in-out data-closed:opacity-0 data-closed:translate-y-1",
+            "rst:z-50 rst:mt-2 rst:rounded-md rst:px-3 rst:py-1.5 rst:text-xs rst:font-medium rst:shadow-xl rst:backdrop-blur-md rst:ring-1",
+            "rst:bg-gray-900/95 rst:text-white rst:ring-black/5 rst:dark:bg-gray-100/95 rst:dark:text-gray-900 rst:dark:ring-white/20",
+            "rst:transition rst:duration-200 rst:ease-in-out rst:data-closed:opacity-0 rst:data-closed:translate-y-1",
           )}
         >
           {title}

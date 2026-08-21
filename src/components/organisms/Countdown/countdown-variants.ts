@@ -1,15 +1,15 @@
 import { cva } from "class-variance-authority";
 
 export const countdownTitleVariants = cva(
-  "font-semibold uppercase tracking-wider mb-4 transition-colors",
+  "rst:font-semibold rst:uppercase rst:tracking-wider rst:mb-4 rst:transition-colors",
   {
     variants: {
       size: {
-        xs: "text-sm",
-        sm: "text-base",
-        md: "text-lg",
-        lg: "text-xl",
-        xl: "text-2xl",
+        xs: "rst:text-sm",
+        sm: "rst:text-base",
+        md: "rst:text-lg",
+        lg: "rst:text-xl",
+        xl: "rst:text-2xl",
       },
     },
     defaultVariants: {
@@ -19,21 +19,21 @@ export const countdownTitleVariants = cva(
 );
 
 export const countdownNumberVariants = cva(
-  "font-mono bg-clip-text transition-all",
+  "rst:font-mono rst:bg-clip-text rst:transition-all",
   {
     variants: {
       variant: {
         gradient:
-          "text-transparent animate-pulse bg-gradient-to-br from-primary-700 via-accent-600 to-primary-700 dark:from-primary-400 dark:via-accent-300 dark:to-primary-400 drop-shadow-sm dark:drop-shadow-md",
-        primary: "text-primary-600 dark:text-primary-400",
-        neutral: "text-gray-900 dark:text-gray-100",
+          "rst:text-transparent rst:animate-pulse rst:bg-gradient-to-br rst:from-primary-700 rst:via-accent-600 rst:to-primary-700 rst:dark:from-primary-400 rst:dark:via-accent-300 rst:dark:to-primary-400 rst:drop-shadow-sm rst:dark:drop-shadow-md",
+        primary: "rst:text-primary-600 rst:dark:text-primary-400",
+        neutral: "rst:text-gray-900 rst:dark:text-gray-100",
       },
       size: {
-        xs: "text-2xl",
-        sm: "text-3xl",
-        md: "text-4xl",
-        lg: "text-5xl",
-        xl: "text-6xl",
+        xs: "rst:text-2xl",
+        sm: "rst:text-3xl",
+        md: "rst:text-4xl",
+        lg: "rst:text-5xl",
+        xl: "rst:text-6xl",
       },
     },
     defaultVariants: {
@@ -44,15 +44,15 @@ export const countdownNumberVariants = cva(
 );
 
 export const countdownLabelVariants = cva(
-  "uppercase tracking-widest mt-1 transition-colors text-gray-500 dark:text-gray-400",
+  "rst:uppercase rst:tracking-widest rst:mt-1 rst:transition-colors rst:text-gray-500 rst:dark:text-gray-400",
   {
     variants: {
       size: {
-        xs: "text-[10px]",
-        sm: "text-xs",
-        md: "text-xs",
-        lg: "text-sm",
-        xl: "text-sm",
+        xs: "rst:text-[10px]",
+        sm: "rst:text-xs",
+        md: "rst:text-xs",
+        lg: "rst:text-sm",
+        xl: "rst:text-sm",
       },
     },
     defaultVariants: {

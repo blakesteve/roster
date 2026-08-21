@@ -23,8 +23,8 @@ describe("Avatar Component", () => {
 
     const avatarDiv = container.firstChild as HTMLElement;
 
-    expect(avatarDiv).toHaveClass("h-16", "w-16");
-    expect(avatarDiv).toHaveClass("bg-orange-50", "text-orange-700");
+    expect(avatarDiv).toHaveClass("rst:h-16", "rst:w-16");
+    expect(avatarDiv).toHaveClass("rst:bg-orange-50", "rst:text-orange-700");
   });
 
   it("renders Popover structure when title is provided", () => {

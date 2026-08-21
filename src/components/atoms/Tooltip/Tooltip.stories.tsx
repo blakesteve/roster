@@ -78,15 +78,15 @@ type Story = StoryObj<typeof meta>;
 // ─── Decorators ──────────────────────────────────────────────────────────────
 
 const DualPreviewDecorator: Decorator = (Story) => (
-  <div className="flex w-full rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm">
-    <div className="light flex-1 bg-white p-20 relative flex flex-col items-center justify-center">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest z-10">
+  <div className="rst:flex rst:w-full rst:rounded-xl rst:overflow-hidden rst:border rst:border-gray-200 rst:dark:border-gray-800 rst:shadow-sm">
+    <div className="light rst:flex-1 rst:bg-white rst:p-20 rst:relative rst:flex rst:flex-col rst:items-center rst:justify-center">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest rst:z-10">
         Light Mode
       </p>
       <Story />
     </div>
-    <div className="dark flex-1 bg-gray-950 p-20 relative flex flex-col items-center justify-center border-l border-gray-200 dark:border-gray-800">
-      <p className="absolute top-4 left-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest z-10">
+    <div className="dark rst:flex-1 rst:bg-gray-950 rst:p-20 rst:relative rst:flex rst:flex-col rst:items-center rst:justify-center rst:border-l rst:border-gray-200 rst:dark:border-gray-800">
+      <p className="rst:absolute rst:top-4 rst:left-4 rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest rst:z-10">
         Dark Mode
       </p>
       <Story />
@@ -167,10 +167,10 @@ export const Placements: Story = {
   // args satisfies required prop types; render overrides the output entirely
   args: { content: "Placed on this side", children: "Trigger" },
   render: () => (
-    <div className="grid grid-cols-2 gap-x-20 gap-y-16 p-12">
+    <div className="rst:grid rst:grid-cols-2 rst:gap-x-20 rst:gap-y-16 rst:p-12">
       {(["top", "bottom", "left", "right"] as const).map((side) => (
-        <div key={side} className="flex flex-col items-center gap-3">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+        <div key={side} className="rst:flex rst:flex-col rst:items-center rst:gap-3">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest">
             {side}
           </p>
           <Tooltip content={`Placed on the ${side}`} placement={side} defaultOpen>
@@ -245,7 +245,7 @@ export const WithInfoIcon: Story = {
     children: (
       <FontAwesomeIcon
         icon={faCircleInfo}
-        className="text-gray-400 hover:text-gray-600 cursor-help"
+        className="rst:text-gray-400 rst:hover:text-gray-600 rst:cursor-help"
         aria-label="More information"
       />
     ),
@@ -265,8 +265,8 @@ export const RichContent: Story = {
   args: {
     content: (
       <span>
-        <strong className="font-semibold text-zinc-100">Pro tip:</strong> hold{" "}
-        <kbd className="rounded bg-zinc-700 px-1 py-0.5 font-mono text-[10px]">
+        <strong className="rst:font-semibold rst:text-zinc-100">Pro tip:</strong> hold{" "}
+        <kbd className="rst:rounded rst:bg-zinc-700 rst:px-1 rst:py-0.5 rst:font-mono rst:text-[10px]">
           Shift
         </kbd>{" "}
         to multi-select rows

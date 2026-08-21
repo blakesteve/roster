@@ -68,7 +68,7 @@ const Checkbox = forwardRef<HTMLElement, CheckboxProps>(
               size,
               checked: checked || indeterminate,
             }),
-            disabled || props.disabled ? "opacity-50" : "cursor-pointer",
+            disabled || props.disabled ? "rst:opacity-50" : "rst:cursor-pointer",
             className,
           )
         }
@@ -77,8 +77,8 @@ const Checkbox = forwardRef<HTMLElement, CheckboxProps>(
           <FontAwesomeIcon
             icon={indeterminate ? faMinus : faCheck}
             className={cn(
-              "pointer-events-none transition-opacity duration-200",
-              checked || indeterminate ? "opacity-100" : "opacity-0",
+              "rst:pointer-events-none rst:transition-opacity rst:duration-200",
+              checked || indeterminate ? "rst:opacity-100" : "rst:opacity-0",
               iconSizeClasses[size as keyof typeof iconSizeClasses],
             )}
           />

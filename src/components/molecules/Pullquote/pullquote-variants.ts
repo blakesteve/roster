@@ -7,11 +7,11 @@ import { cva } from "class-variance-authority";
  * every case. A pullquote is body copy that has been promoted, and tinting it
  * would demote it again.
  */
-export const pullquoteVariants = cva("my-1", {
+export const pullquoteVariants = cva("rst:my-1", {
   variants: {
     variant: {
       /** Accent rule down the left. The quiet default. */
-      rule: "border-l-2 pl-4 py-[2px]",
+      rule: "rst:border-l-2 rst:pl-4 rst:py-[2px]",
       /** No rule; the quote carries itself on size alone. */
       plain: "",
       /**
@@ -22,15 +22,15 @@ export const pullquoteVariants = cva("my-1", {
        * while the figcaption centers on the figure — the two land in visibly
        * different places on any container wider than the quote.
        */
-      centered: "text-center py-4 [&>blockquote]:mx-auto",
+      centered: "rst:text-center rst:py-4 rst:[&>blockquote]:mx-auto",
     },
     colorScheme: {
-      primary: "border-primary-500 dark:border-primary-400",
-      success: "border-success-500 dark:border-success-400",
-      error: "border-error-500 dark:border-error-400",
-      amber: "border-amber-500 dark:border-amber-400",
-      neutral: "border-gray-300 dark:border-gray-700",
-      current: "border-current",
+      primary: "rst:border-primary-500 rst:dark:border-primary-400",
+      success: "rst:border-success-500 rst:dark:border-success-400",
+      error: "rst:border-error-500 rst:dark:border-error-400",
+      amber: "rst:border-amber-500 rst:dark:border-amber-400",
+      neutral: "rst:border-gray-300 rst:dark:border-gray-700",
+      current: "rst:border-current",
     },
   },
   defaultVariants: { variant: "rule", colorScheme: "primary" },

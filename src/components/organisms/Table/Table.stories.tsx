@@ -54,18 +54,18 @@ By default, table rows are static. To enable row hover effects and pointer curso
   },
   decorators: [
     (Story) => (
-      <div className="p-8 space-y-12 w-full max-w-5xl mx-auto">
+      <div className="rst:p-8 rst:space-y-12 rst:w-full rst:max-w-5xl rst:mx-auto">
         {/* Light Mode Preview */}
-        <div className="light bg-white p-8 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-4">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+        <div className="light rst:bg-white rst:p-8 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm rst:flex rst:flex-col rst:gap-4">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest">
             Light Mode Preview
           </p>
           <Story />
         </div>
 
         {/* Dark Mode Preview */}
-        <div className="dark bg-gray-950 p-8 rounded-xl border border-gray-800 shadow-xl flex flex-col gap-4">
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+        <div className="dark rst:bg-gray-950 rst:p-8 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl rst:flex rst:flex-col rst:gap-4">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:uppercase rst:tracking-widest">
             Dark Mode Preview
           </p>
           <Story />
@@ -91,26 +91,26 @@ const renderTable = (args: React.ComponentProps<typeof Table>) => (
     <TableCaption>Current Week Standings</TableCaption>
     <TableHeader>
       <TableRow>
-        <TableHead className="w-24">Rank</TableHead>
+        <TableHead className="rst:w-24">Rank</TableHead>
         <TableHead>Player</TableHead>
         <TableHead>Correct Picks</TableHead>
-        <TableHead className="text-right">Win Rate</TableHead>
+        <TableHead className="rst:text-right">Win Rate</TableHead>
       </TableRow>
     </TableHeader>
     <TableBody>
       {mockLeaderboard.map((row) => (
         <TableRow key={row.rank}>
-          <TableCell className="font-medium">{row.rank}</TableCell>
+          <TableCell className="rst:font-medium">{row.rank}</TableCell>
           <TableCell>{row.name}</TableCell>
           <TableCell>{row.correct}</TableCell>
-          <TableCell className="text-right font-bold">{row.winRate}</TableCell>
+          <TableCell className="rst:text-right rst:font-bold">{row.winRate}</TableCell>
         </TableRow>
       ))}
     </TableBody>
     <TableFooter>
       <TableRow>
         <TableCell colSpan={3}>Total Picks Made</TableCell>
-        <TableCell className="text-right">147</TableCell>
+        <TableCell className="rst:text-right">147</TableCell>
       </TableRow>
     </TableFooter>
   </Table>

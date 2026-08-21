@@ -60,7 +60,7 @@ export interface NavbarProps
   logoSize?: string | number;
   /**
    * Classes applied to the logo image. Replaces the default rounding, so a
-   * circular mark can pass `"rounded-full"` and a square one `""`.
+   * circular mark can pass `"rst:rounded-full"` and a square one `""`.
    */
   logoClassName?: string;
   brandName: string;
@@ -256,26 +256,26 @@ const Navbar = ({
   // the Link component's internal dark mode states
   const surfaceColors = {
     brand: isDarkSurface
-      ? "text-white dark:text-white hover:text-gray-200 dark:hover:text-gray-200"
-      : "text-gray-900 dark:text-gray-900 hover:text-gray-600 dark:hover:text-gray-600",
+      ? "rst:text-white rst:dark:text-white rst:hover:text-gray-200 rst:dark:hover:text-gray-200"
+      : "rst:text-gray-900 rst:dark:text-gray-900 rst:hover:text-gray-600 rst:dark:hover:text-gray-600",
 
     linkBase: isDarkSurface
-      ? "text-gray-300 dark:text-gray-300 hover:text-white dark:hover:text-white"
-      : "text-gray-600 dark:text-gray-600 hover:text-gray-900 dark:hover:text-gray-900",
+      ? "rst:text-gray-300 rst:dark:text-gray-300 rst:hover:text-white rst:dark:hover:text-white"
+      : "rst:text-gray-600 rst:dark:text-gray-600 rst:hover:text-gray-900 rst:dark:hover:text-gray-900",
 
     linkActive: isDarkSurface
-      ? "text-primary-400 dark:text-primary-400 font-semibold hover:text-primary-300 dark:hover:text-primary-300"
-      : "text-primary-600 dark:text-primary-600 font-semibold hover:text-primary-700 dark:hover:text-primary-700",
+      ? "rst:text-primary-400 rst:dark:text-primary-400 rst:font-semibold rst:hover:text-primary-300 rst:dark:hover:text-primary-300"
+      : "rst:text-primary-600 rst:dark:text-primary-600 rst:font-semibold rst:hover:text-primary-700 rst:dark:hover:text-primary-700",
 
     hamburger: isDarkSurface
-      ? "text-gray-300 dark:text-gray-300 hover:bg-white/10 dark:hover:bg-white/10 hover:text-white dark:hover:text-white"
-      : "text-gray-500 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-100 hover:text-gray-700 dark:hover:text-gray-700",
+      ? "rst:text-gray-300 rst:dark:text-gray-300 rst:hover:bg-white/10 rst:dark:hover:bg-white/10 rst:hover:text-white rst:dark:hover:text-white"
+      : "rst:text-gray-500 rst:dark:text-gray-500 rst:hover:bg-gray-100 rst:dark:hover:bg-gray-100 rst:hover:text-gray-700 rst:dark:hover:text-gray-700",
   };
 
   return (
     <Popover
       as="nav"
-      className={cn("z-50", navbarVariants({ variant, position }), className)}
+      className={cn("rst:z-50", navbarVariants({ variant, position }), className)}
       {...props}
     >
       {({ open, close }) => {
@@ -286,7 +286,7 @@ const Navbar = ({
 
         return (
         <>
-          <div className="container mx-auto flex items-center justify-between px-4 h-16">
+          <div className="rst:container rst:mx-auto rst:flex rst:items-center rst:justify-between rst:px-4 rst:h-16">
             {/* Brand Logo */}
             <Link
               as={routerElement}
@@ -295,7 +295,7 @@ const Navbar = ({
               variant="neutral"
               underline="none"
               className={cn(
-                "flex items-center gap-3 transition-opacity",
+                "rst:flex rst:items-center rst:gap-3 rst:transition-opacity",
                 surfaceColors.brand,
               )}
             >
@@ -303,18 +303,18 @@ const Navbar = ({
                 src={logoSrc}
                 alt={`${brandName} Logo`}
                 style={logoStyle}
-                className={cn("shrink-0", logoClassName ?? "rounded-md")}
+                className={cn("rst:shrink-0", logoClassName ?? "rst:rounded-md")}
               />
               {brandElement ?? (
-                <span className="text-xl font-bold tracking-tight">
+                <span className="rst:text-xl rst:font-bold rst:tracking-tight">
                   {brandName}
                 </span>
               )}
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8">
-              <div className="flex items-center gap-6">
+            <div className="rst:hidden rst:md:flex rst:items-center rst:gap-8">
+              <div className="rst:flex rst:items-center rst:gap-6">
                 {items.map((item) => {
                   const isActive = activePath === item.path;
                   return (
@@ -326,14 +326,14 @@ const Navbar = ({
                       variant="neutral"
                       underline="none"
                       className={cn(
-                        "inline-flex items-center gap-1.5 text-sm transition-colors duration-200",
+                        "rst:inline-flex rst:items-center rst:gap-1.5 rst:text-sm rst:transition-colors rst:duration-200",
                         isActive
                           ? surfaceColors.linkActive
                           : surfaceColors.linkBase,
                       )}
                     >
                       {item.label}
-                      {item.badge && <span className="inline-flex">{item.badge}</span>}
+                      {item.badge && <span className="rst:inline-flex">{item.badge}</span>}
                     </Link>
                   );
                 })}
@@ -344,9 +344,9 @@ const Navbar = ({
 
               {/* User Menu / Custom Actions */}
               {resolvedActions ?? (user ? (
-                <Menu as="div" className="relative ml-2">
-                  <MenuButton className="relative flex rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ring-offset-transparent">
-                    <span className="sr-only">Open user menu</span>
+                <Menu as="div" className="rst:relative rst:ml-2">
+                  <MenuButton className="rst:relative rst:flex rst:rounded-full rst:text-sm rst:focus:outline-none rst:focus:ring-2 rst:focus:ring-primary-500 rst:focus:ring-offset-2 rst:ring-offset-transparent">
+                    <span className="rst:sr-only">Open user menu</span>
 
                     <Avatar
                       initials={user.initials}
@@ -357,7 +357,7 @@ const Navbar = ({
                     />
 
                     {hasNotifications && (
-                      <div className="absolute -top-1 -right-2">
+                      <div className="rst:absolute rst:-top-1 rst:-right-2">
                         <Badge
                           fill={notificationFill}
                           size="xs"
@@ -372,15 +372,15 @@ const Navbar = ({
 
                   <Transition
                     as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
+                    enter="rst:transition rst:ease-out rst:duration-100"
+                    enterFrom="rst:transform rst:opacity-0 rst:scale-95"
+                    enterTo="rst:transform rst:opacity-100 rst:scale-100"
+                    leave="rst:transition rst:ease-in rst:duration-75"
+                    leaveFrom="rst:transform rst:opacity-100 rst:scale-100"
+                    leaveTo="rst:transform rst:opacity-0 rst:scale-95"
                   >
-                    <MenuItems className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black/5 dark:ring-white/10 focus:outline-none divide-y divide-gray-100 dark:divide-gray-700">
-                      <div className="py-1">
+                    <MenuItems className="rst:absolute rst:right-0 rst:z-50 rst:mt-2 rst:w-48 rst:origin-top-right rst:rounded-md rst:bg-white rst:dark:bg-gray-800 rst:py-1 rst:shadow-lg rst:ring-1 rst:ring-black/5 rst:dark:ring-white/10 rst:focus:outline-none rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700">
+                      <div className="rst:py-1">
                         {hasNotifications && onInboxClick && (
                           <MenuItem>
                             {({ focus }) => (
@@ -390,13 +390,13 @@ const Navbar = ({
                                 size="sm"
                                 onClick={onInboxClick}
                                 className={cn(
-                                  "w-full justify-start rounded-none px-4",
-                                  focus && "bg-gray-50 dark:bg-gray-700",
+                                  "rst:w-full rst:justify-start rst:rounded-none rst:px-4",
+                                  focus && "rst:bg-gray-50 rst:dark:bg-gray-700",
                                 )}
                                 startIcon={
                                   <FontAwesomeIcon
                                     icon={faInbox}
-                                    className="text-primary-500 w-4"
+                                    className="rst:text-primary-500 rst:w-4"
                                   />
                                 }
                               >
@@ -418,8 +418,8 @@ const Navbar = ({
                                 role="button"
                                 tabIndex={0}
                                 className={cn(
-                                  "flex w-full items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-200 cursor-pointer transition-colors",
-                                  focus && "bg-gray-50 dark:bg-gray-700",
+                                  "rst:flex rst:w-full rst:items-center rst:justify-between rst:px-4 rst:py-2 rst:text-sm rst:text-gray-700 rst:dark:text-gray-200 rst:cursor-pointer rst:transition-colors",
+                                  focus && "rst:bg-gray-50 rst:dark:bg-gray-700",
                                 )}
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter" || e.key === " ") {
@@ -428,24 +428,24 @@ const Navbar = ({
                                   }
                                 }}
                               >
-                                <div className="flex items-center gap-2">
+                                <div className="rst:flex rst:items-center rst:gap-2">
                                   <FontAwesomeIcon
                                     icon={faMoon}
                                     className={cn(
-                                      "w-4 transition-colors",
+                                      "rst:w-4 rst:transition-colors",
                                       isDarkMode
-                                        ? "text-amber-500"
-                                        : "text-gray-400",
+                                        ? "rst:text-amber-500"
+                                        : "rst:text-gray-400",
                                     )}
                                   />
-                                  <span className="font-medium">Dark Mode</span>
+                                  <span className="rst:font-medium">Dark Mode</span>
                                 </div>
                                 <Switch
                                   checked={isDarkMode}
                                   onChange={() => {}}
                                   size="xs"
                                   variant="neutral"
-                                  className="pointer-events-none m-0"
+                                  className="rst:pointer-events-none rst:m-0"
                                 />
                               </div>
                             )}
@@ -454,7 +454,7 @@ const Navbar = ({
                       </div>
 
                       {userMenuItems.length > 0 && (
-                        <div className="py-1">
+                        <div className="rst:py-1">
                           {userMenuItems.map((item) => (
                             <MenuItem key={item.path}>
                               {({ focus }) => (
@@ -465,13 +465,13 @@ const Navbar = ({
                                   variant="neutral"
                                   underline="none"
                                   className={cn(
-                                    "flex w-full items-center justify-between gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 transition-colors",
-                                    focus && "bg-gray-50 dark:bg-gray-700",
+                                    "rst:flex rst:w-full rst:items-center rst:justify-between rst:gap-2 rst:px-4 rst:py-2 rst:text-sm rst:text-gray-700 rst:dark:text-gray-200 rst:transition-colors",
+                                    focus && "rst:bg-gray-50 rst:dark:bg-gray-700",
                                   )}
                                 >
                                   {item.label}
                                   {item.badge && (
-                                    <span className="inline-flex">{item.badge}</span>
+                                    <span className="rst:inline-flex">{item.badge}</span>
                                   )}
                                 </Link>
                               )}
@@ -481,7 +481,7 @@ const Navbar = ({
                       )}
 
                       {onLogout && (
-                        <div className="py-1">
+                        <div className="rst:py-1">
                           <MenuItem>
                             {({ focus }) => (
                               <Button
@@ -490,13 +490,13 @@ const Navbar = ({
                                 size="sm"
                                 onClick={onLogout}
                                 className={cn(
-                                  "w-full justify-start rounded-none px-4",
-                                  focus && "bg-gray-50 dark:bg-gray-700",
+                                  "rst:w-full rst:justify-start rst:rounded-none rst:px-4",
+                                  focus && "rst:bg-gray-50 rst:dark:bg-gray-700",
                                 )}
                                 startIcon={
                                   <FontAwesomeIcon
                                     icon={faRightFromBracket}
-                                    className="text-gray-400 dark:text-gray-500 w-4"
+                                    className="rst:text-gray-400 rst:dark:text-gray-500 rst:w-4"
                                   />
                                 }
                               >
@@ -517,29 +517,29 @@ const Navbar = ({
             </div>
 
             {/* Mobile Hamburger */}
-            <div data-roster-hamburger className="flex md:hidden">
+            <div data-roster-hamburger className="rst:flex rst:md:hidden">
               <PopoverButton
                 className={cn(
-                  "inline-flex items-center justify-center rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500",
+                  "rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:focus:outline-none rst:focus:ring-2 rst:focus:ring-inset rst:focus:ring-primary-500",
                   surfaceColors.hamburger,
                 )}
               >
-                <span className="sr-only">Open main menu</span>
+                <span className="rst:sr-only">Open main menu</span>
                 {open ? (
                   <FontAwesomeIcon
                     icon={faXmark}
-                    className="block h-6 w-6"
+                    className="rst:block rst:h-6 rst:w-6"
                     aria-hidden="true"
                   />
                 ) : (
-                  <div className="relative">
+                  <div className="rst:relative">
                     <FontAwesomeIcon
                       icon={faBars}
-                      className="block h-6 w-6"
+                      className="rst:block rst:h-6 rst:w-6"
                       aria-hidden="true"
                     />
                     {hasNotifications && (
-                      <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-error-500 ring-2 ring-transparent transform translate-x-1/4 -translate-y-1/4" />
+                      <span className="rst:absolute rst:top-0 rst:right-0 rst:block rst:h-2.5 rst:w-2.5 rst:rounded-full rst:bg-error-500 rst:ring-2 rst:ring-transparent rst:transform rst:translate-x-1/4 rst:-translate-y-1/4" />
                     )}
                   </div>
                 )}
@@ -556,49 +556,49 @@ const Navbar = ({
           {/* Mobile Menu Panel */}
           <Transition
             as={Fragment}
-            enter="duration-200 ease-out"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
-            leave="duration-100 ease-in"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
+            enter="rst:duration-200 rst:ease-out"
+            enterFrom="rst:opacity-0 rst:scale-95"
+            enterTo="rst:opacity-100 rst:scale-100"
+            leave="rst:duration-100 rst:ease-in"
+            leaveFrom="rst:opacity-100 rst:scale-100"
+            leaveTo="rst:opacity-0 rst:scale-95"
           >
             <PopoverPanel
               focus
-              className="absolute top-0 inset-x-0 z-50 origin-top-right transform p-2 transition md:hidden"
+              className="rst:absolute rst:top-0 rst:inset-x-0 rst:z-50 rst:origin-top-right rst:transform rst:p-2 rst:transition rst:md:hidden"
             >
-              <div data-roster-mobile-panel className="rounded-lg shadow-lg ring-1 ring-black/5 dark:ring-white/10 divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                <div className="px-5 pt-5 pb-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+              <div data-roster-mobile-panel className="rst:rounded-lg rst:shadow-lg rst:ring-1 rst:ring-black/5 rst:dark:ring-white/10 rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700 rst:bg-white rst:dark:bg-gray-800">
+                <div className="rst:px-5 rst:pt-5 rst:pb-6">
+                  <div className="rst:flex rst:items-center rst:justify-between">
+                    <div className="rst:flex rst:items-center rst:gap-3">
                       <img
                         src={logoSrc}
                         alt={brandName}
                         style={logoStyle}
-                        className={cn("shrink-0", logoClassName ?? "rounded-md")}
+                        className={cn("rst:shrink-0", logoClassName ?? "rst:rounded-md")}
                       />
                       {brandElement ?? (
-                        <span className="font-bold text-gray-900 dark:text-white">
+                        <span className="rst:font-bold rst:text-gray-900 rst:dark:text-white">
                           {brandName}
                         </span>
                       )}
                     </div>
-                    <div className="-mr-2">
-                      <PopoverButton className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-500 dark:hover:text-white focus:outline-none">
-                        <span className="sr-only">Close menu</span>
+                    <div className="rst:-mr-2">
+                      <PopoverButton className="rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:text-gray-400 rst:hover:bg-gray-100 rst:dark:hover:bg-gray-700 rst:hover:text-gray-500 rst:dark:hover:text-white rst:focus:outline-none">
+                        <span className="rst:sr-only">Close menu</span>
                         <FontAwesomeIcon
                           icon={faXmark}
-                          className="h-6 w-6"
+                          className="rst:h-6 rst:w-6"
                           aria-hidden="true"
                         />
                       </PopoverButton>
                     </div>
                   </div>
-                  <div className="mt-6">
+                  <div className="rst:mt-6">
                     {resolvedNavActions && (
-                      <div className="mb-4">{resolvedNavActions}</div>
+                      <div className="rst:mb-4">{resolvedNavActions}</div>
                     )}
-                    <nav className="grid gap-y-4">
+                    <nav className="rst:grid rst:gap-y-4">
                       {items.map((item) => {
                         const isActive = activePath === item.path;
                         return (
@@ -611,30 +611,30 @@ const Navbar = ({
                             variant="neutral"
                             underline="none"
                             className={cn(
-                              "-m-3 flex items-center rounded-md p-3 transition-colors",
-                              "hover:bg-gray-50 dark:hover:bg-gray-700",
+                              "rst:-m-3 rst:flex rst:items-center rst:rounded-md rst:p-3 rst:transition-colors",
+                              "rst:hover:bg-gray-50 rst:dark:hover:bg-gray-700",
                               isActive
-                                ? "bg-gray-50 dark:bg-gray-700"
-                                : "text-gray-900 dark:text-gray-100",
+                                ? "rst:bg-gray-50 rst:dark:bg-gray-700"
+                                : "rst:text-gray-900 rst:dark:text-gray-100",
                             )}
                           >
                             <span
                               className={cn(
-                                "ml-3 inline-flex items-center gap-1.5 text-base font-medium",
+                                "rst:ml-3 rst:inline-flex rst:items-center rst:gap-1.5 rst:text-base rst:font-medium",
                                 isActive
-                                  ? "text-primary-600 dark:text-primary-400 font-bold"
-                                  : "text-gray-900 dark:text-gray-100",
+                                  ? "rst:text-primary-600 rst:dark:text-primary-400 rst:font-bold"
+                                  : "rst:text-gray-900 rst:dark:text-gray-100",
                               )}
                             >
                               {item.label}
-                              {item.badge && <span className="inline-flex">{item.badge}</span>}
+                              {item.badge && <span className="rst:inline-flex">{item.badge}</span>}
                             </span>
                           </Link>
                         );
                       })}
                       {user && userMenuItems.length > 0 && (
                         <>
-                          <hr className="border-gray-100 dark:border-gray-700" />
+                          <hr className="rst:border-gray-100 rst:dark:border-gray-700" />
                           {userMenuItems.map((item) => {
                             const isActive = activePath === item.path;
                             return (
@@ -647,25 +647,25 @@ const Navbar = ({
                                 variant="neutral"
                                 underline="none"
                                 className={cn(
-                                  "-m-3 flex items-center rounded-md p-3 transition-colors",
-                                  "hover:bg-gray-50 dark:hover:bg-gray-700",
+                                  "rst:-m-3 rst:flex rst:items-center rst:rounded-md rst:p-3 rst:transition-colors",
+                                  "rst:hover:bg-gray-50 rst:dark:hover:bg-gray-700",
                                   isActive
-                                    ? "bg-gray-50 dark:bg-gray-700"
-                                    : "text-gray-900 dark:text-gray-100",
+                                    ? "rst:bg-gray-50 rst:dark:bg-gray-700"
+                                    : "rst:text-gray-900 rst:dark:text-gray-100",
                                 )}
                               >
                                 <span
                                   className={cn(
-                                    "ml-3 text-base font-medium",
+                                    "rst:ml-3 rst:text-base rst:font-medium",
                                     isActive
-                                      ? "text-primary-600 dark:text-primary-400 font-bold"
-                                      : "text-gray-900 dark:text-gray-100",
+                                      ? "rst:text-primary-600 rst:dark:text-primary-400 rst:font-bold"
+                                      : "rst:text-gray-900 rst:dark:text-gray-100",
                                   )}
                                 >
                                   {item.label}
                                 </span>
                                 {item.badge && (
-                                  <span className="ml-2 inline-flex">{item.badge}</span>
+                                  <span className="rst:ml-2 rst:inline-flex">{item.badge}</span>
                                 )}
                               </Link>
                             );
@@ -677,14 +677,14 @@ const Navbar = ({
                 </div>
 
                 {(user || resolvedActions || onLogin) && (
-                  <div className="py-6 px-5 space-y-4">
+                  <div className="rst:py-6 rst:px-5 rst:space-y-4">
                     {resolvedActions ? (
                       resolvedActions
                     ) : !user && onLogin ? (
                       <Button
                         variant="solid"
                         colorScheme="primary"
-                        className="w-full justify-center"
+                        className="rst:w-full rst:justify-center"
                         onClick={() => { onLogin(); close(); }}
                       >
                         Log In
@@ -699,7 +699,7 @@ const Navbar = ({
                               onInboxClick?.();
                               close();
                             }}
-                            className="w-full justify-between px-4 text-base font-medium hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            className="rst:w-full rst:justify-between rst:px-4 rst:text-base rst:font-medium rst:hover:bg-gray-50 rst:dark:hover:bg-gray-700 rst:text-gray-900 rst:dark:text-gray-100"
                             endIcon={
                               <Badge
                                 fill={notificationFill}
@@ -730,14 +730,14 @@ const Navbar = ({
                                 onThemeToggle();
                               }
                             }}
-                            className="flex w-full items-center justify-between rounded-md px-4 py-2 text-base transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            className="rst:flex rst:w-full rst:items-center rst:justify-between rst:rounded-md rst:px-4 rst:py-2 rst:text-base rst:transition-colors rst:cursor-pointer rst:hover:bg-gray-50 rst:dark:hover:bg-gray-700 rst:text-gray-900 rst:dark:text-gray-100"
                           >
-                            <div className="flex items-center gap-3 font-medium">
+                            <div className="rst:flex rst:items-center rst:gap-3 rst:font-medium">
                               <FontAwesomeIcon
                                 icon={faMoon}
                                 className={cn(
-                                  "w-5 transition-colors",
-                                  isDarkMode ? "text-amber-500" : "text-gray-400",
+                                  "rst:w-5 rst:transition-colors",
+                                  isDarkMode ? "rst:text-amber-500" : "rst:text-gray-400",
                                 )}
                               />
                               <span>Dark Mode</span>
@@ -747,7 +747,7 @@ const Navbar = ({
                               onChange={() => {}}
                               size="sm"
                               variant="neutral"
-                              className="pointer-events-none m-0"
+                              className="rst:pointer-events-none rst:m-0"
                             />
                           </div>
                         )}
@@ -756,7 +756,7 @@ const Navbar = ({
                           <Button
                             variant="outline"
                             colorScheme="error"
-                            className="w-full justify-center"
+                            className="rst:w-full rst:justify-center"
                             onClick={() => {
                               onLogout?.();
                               close();

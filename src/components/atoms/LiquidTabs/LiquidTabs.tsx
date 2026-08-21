@@ -150,12 +150,12 @@ export function LiquidTabs({
       data-testid="liquid-tabs"
       style={{ background: "var(--roster-lt-bg)", borderColor: "var(--roster-lt-border)" }}
       className={cn(
-        "relative flex border",
+        "rst:relative rst:flex rst:border",
         isFilled
-          ? "w-full overflow-hidden rounded-lg"
+          ? "rst:w-full rst:overflow-hidden rst:rounded-lg"
           : cn(
-              "gap-1 rounded-xl p-1",
-              fullWidth ? "w-full" : "w-fit",
+              "rst:gap-1 rst:rounded-xl rst:p-1",
+              fullWidth ? "rst:w-full" : "rst:w-fit",
             ),
         className,
       )}
@@ -166,8 +166,8 @@ export function LiquidTabs({
         aria-hidden
         data-testid="liquid-tabs-pill"
         className={cn(
-          "absolute rounded-lg",
-          isFilled ? "top-0 bottom-0" : "top-1 bottom-1",
+          "rst:absolute rst:rounded-lg",
+          isFilled ? "rst:top-0 rst:bottom-0" : "rst:top-1 rst:bottom-1",
         )}
         style={{ opacity: 0, left: 0, width: 0, background: "var(--roster-lt-pill)" }}
       />
@@ -183,20 +183,20 @@ export function LiquidTabs({
             data-testid={`liquid-tab-${tab.id}`}
             onClick={() => handleChange(tab.id)}
             className={cn(
-              "relative z-10 text-sm font-medium transition-colors cursor-pointer",
+              "rst:relative rst:z-10 rst:text-sm rst:font-medium rst:transition-colors rst:cursor-pointer",
               isFilled
                 ? cn(
-                    "flex-1 py-2",
+                    "rst:flex-1 rst:py-2",
                     isActive
-                      ? "text-white"
-                      : "text-(--roster-lt-text-inactive) hover:text-(--roster-lt-text-hover)",
+                      ? "rst:text-white"
+                      : "rst:text-(--roster-lt-text-inactive) rst:hover:text-(--roster-lt-text-hover)",
                   )
                 : cn(
-                    "rounded-lg py-1.5",
-                    fullWidth ? "flex-1" : "px-4",
+                    "rst:rounded-lg rst:py-1.5",
+                    fullWidth ? "rst:flex-1" : "rst:px-4",
                     isActive
-                      ? "text-white"
-                      : "text-(--roster-lt-text-inactive) hover:text-(--roster-lt-text-hover)",
+                      ? "rst:text-white"
+                      : "rst:text-(--roster-lt-text-inactive) rst:hover:text-(--roster-lt-text-hover)",
                   ),
             )}
           >

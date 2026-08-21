@@ -33,12 +33,12 @@ const Pullquote = React.forwardRef<HTMLElement, PullquoteProps>(
     >
       <blockquote
         cite={citeUrl}
-        className="m-0 max-w-[48ch] text-[1.03125rem] leading-[1.5] text-gray-900 dark:text-gray-100"
+        className="rst:m-0 rst:max-w-[48ch] rst:text-[1.03125rem] rst:leading-[1.5] rst:text-gray-900 rst:dark:text-gray-100"
       >
         {children}
       </blockquote>
       {cite && (
-        <figcaption className="mt-[7px] font-mono text-[0.625rem] uppercase leading-none tracking-[0.14em] text-gray-500 dark:text-gray-400">
+        <figcaption className="rst:mt-[7px] rst:font-mono rst:text-[0.625rem] rst:uppercase rst:leading-none rst:tracking-[0.14em] rst:text-gray-500 rst:dark:text-gray-400">
           {cite}
         </figcaption>
       )}

@@ -41,14 +41,14 @@ describe("ActionBar Component", () => {
     render(<ActionBar data-testid="action-bar" />);
 
     const actionBar = screen.getByTestId("action-bar");
-    expect(actionBar).toHaveClass("sticky", "top-0", "border-b");
+    expect(actionBar).toHaveClass("rst:sticky", "rst:top-0", "rst:border-b");
   });
 
   it('applies the correct CSS classes for position="bottom"', () => {
     render(<ActionBar data-testid="action-bar" position="bottom" />);
 
     const actionBar = screen.getByTestId("action-bar");
-    expect(actionBar).toHaveClass("sticky", "bottom-0", "border-t");
+    expect(actionBar).toHaveClass("rst:sticky", "rst:bottom-0", "rst:border-t");
   });
 
   // verifying the /50 opacities
@@ -56,10 +56,10 @@ describe("ActionBar Component", () => {
     render(<ActionBar data-testid="action-bar" variant="primary" />);
 
     const actionBar = screen.getByTestId("action-bar");
-    expect(actionBar).toHaveClass("bg-primary-700/50", "text-white");
+    expect(actionBar).toHaveClass("rst:bg-primary-700/50", "rst:text-white");
     expect(actionBar).toHaveClass(
-      "dark:bg-primary-950/50",
-      "dark:text-primary-50",
+      "rst:dark:bg-primary-950/50",
+      "rst:dark:text-primary-50",
     );
   });
 
@@ -69,20 +69,20 @@ describe("ActionBar Component", () => {
 
     const actionBar = screen.getByTestId("action-bar");
     expect(actionBar).toHaveClass(
-      "bg-transparent",
-      "border-transparent",
-      "shadow-none",
+      "rst:bg-transparent",
+      "rst:border-transparent",
+      "rst:shadow-none",
     );
   });
 
   it("merges custom classNames correctly", () => {
     render(
-      <ActionBar data-testid="action-bar" className="custom-test-class" />,
+      <ActionBar data-testid="action-bar" className="rst:custom-test-class" />,
     );
 
     const actionBar = screen.getByTestId("action-bar");
-    expect(actionBar).toHaveClass("custom-test-class");
+    expect(actionBar).toHaveClass("rst:custom-test-class");
     // Ensure default base classes are still there
-    expect(actionBar).toHaveClass("z-40", "w-full", "backdrop-blur-md");
+    expect(actionBar).toHaveClass("rst:z-40", "rst:w-full", "rst:backdrop-blur-md");
   });
 });

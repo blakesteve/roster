@@ -99,13 +99,13 @@ describe("DataTable Component", () => {
     const firstDataRow = dataRows[1];
 
     // Assert Size ("sm" maps to "text-xs" on the table)
-    expect(tableElement).toHaveClass("text-xs");
+    expect(tableElement).toHaveClass("rst:text-xs");
 
     // Assert Variant ("ghost" maps to "bg-transparent" on rows)
-    expect(firstDataRow).toHaveClass("bg-transparent");
+    expect(firstDataRow).toHaveClass("rst:bg-transparent");
 
     // Assert Hoverable (hoverable={true} maps to "cursor-pointer" and hover utility classes)
-    expect(firstDataRow).toHaveClass("cursor-pointer");
-    expect(firstDataRow).toHaveClass("hover:bg-gray-50");
+    expect(firstDataRow).toHaveClass("rst:cursor-pointer");
+    expect(firstDataRow).toHaveClass("rst:hover:bg-gray-50");
   });
 });

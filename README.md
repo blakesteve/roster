@@ -292,6 +292,41 @@ Server Component it typechecks and then throws at render — use `/utils` there.
 | `useCountdown` | Countdown timer logic without the UI |
 | `useKeySequence` | Fires a callback when a sequence of keys is typed in order. Ships `KONAMI_CODE` |
 
+## Authoring components: the `rst:` prefix
+
+Every class Roster emits carries an `rst:` prefix — `rst:flex`, `rst:bg-white`,
+`rst:dark:bg-gray-950`, `rst:group-data-[checked]:translate-x-5`. **Consumers do
+not write the prefix and never see it.** It exists to stop a host app from
+overriding Roster by accident.
+
+Roster's stylesheet deliberately sits in a layer *below* the host's `utilities`
+so a consumer's `className` can override a component. Without a prefix that also
+means the host wins any class-name *collision* — including on Roster's own
+internal elements, which the consumer never touches:
+
+- an app that used `bg-white` anywhere defeated the Textarea's
+  `dark:bg-gray-950`, rendering a white field on a dark page
+- an app that used `translate-x-0` defeated the Switch's
+  `group-data-[checked]:translate-x-5`, so the thumb never moved
+
+Neither app referenced those elements. Both bugs are invisible in this repo,
+because Storybook is the only consumer here and it cannot collide with itself.
+
+When adding or editing a component, write classes with the prefix. The codemod
+that performed the original migration can also fix a file you forget:
+
+```bash
+node scripts/prefix-classes.mjs src/components/atoms/Thing/Thing.tsx    # dry run
+APPLY=1 node scripts/prefix-classes.mjs src/components/atoms/Thing/Thing.tsx
+```
+
+Two things are deliberately never prefixed. `dark` is the *consuming document's*
+theme class, which Roster's own `@custom-variant dark` matches by name — Button
+applies it directly for `surface="dark"`. And any class a consumer passes in,
+such as `AvatarStrip`'s `ringClass`, stays exactly as they wrote it.
+
+`npm run build` fails if any unprefixed class reaches `dist/roster.css`.
+
 ## Development
 
 Storybook is the component playground. Each component has dedicated stories covering all variants, props, and light/dark mode.
@@ -313,7 +348,24 @@ npm run test
 
 # Storybook interaction tests (Vitest + Playwright)
 npx vitest run --project storybook
+
+# Every emitted class carries the rst: prefix (runs as part of the build)
+npm run check:prefix
 ```
+
+Two guards are worth knowing about, because the bug they catch cannot be
+reproduced from inside this repo.
+
+`check:prefix` reads `dist/roster.css` and fails on any unprefixed class
+selector. The collision it prevents only appears in an app with its own Tailwind
+build, so asserting on a rendered component here would never see it — the check
+has to be on the artifact.
+
+`src/lib/utils.test.ts` pins `cn`. `tailwind-merge` has to be configured with the
+prefix or it stops recognising Roster's classes as utilities and silently
+degrades to concatenation: conflicting classes both survive and the winner falls
+back to stylesheet order. The class string still *contains* what you asked for,
+so a snapshot passes while the browser is wrong.
 
 ## Building
 

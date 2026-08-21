@@ -61,7 +61,7 @@ export const Playground: Story = {
 
 export const WithLabel: Story = {
   render: () => (
-    <div className="flex items-center gap-4">
+    <div className="rst:flex rst:items-center rst:gap-4">
       <ThemeToggle />
       <ThemeToggle showLabel />
     </div>
@@ -78,7 +78,7 @@ export const WithLabel: Story = {
 
 export const Variants: Story = {
   render: () => (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="rst:flex rst:flex-wrap rst:items-center rst:gap-3">
       <ThemeToggle variant="ghost" showLabel />
       <ThemeToggle variant="soft" showLabel />
       <ThemeToggle variant="outline" showLabel />
@@ -98,7 +98,7 @@ export const Variants: Story = {
 
 export const Sizes: Story = {
   render: () => (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="rst:flex rst:flex-wrap rst:items-center rst:gap-3">
       <ThemeToggle size="xs" showLabel />
       <ThemeToggle size="sm" showLabel />
       <ThemeToggle size="default" showLabel />
@@ -110,8 +110,8 @@ export const Sizes: Story = {
 
 export const InAToolbar: Story = {
   render: () => (
-    <div className="flex max-w-lg items-center justify-between rounded-lg border border-gray-200 px-4 py-2 dark:border-gray-800">
-      <span className="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400">
+    <div className="rst:flex rst:max-w-lg rst:items-center rst:justify-between rst:rounded-lg rst:border rst:border-gray-200 rst:px-4 rst:py-2 rst:dark:border-gray-800">
+      <span className="rst:font-mono rst:text-[0.625rem] rst:uppercase rst:tracking-[0.14em] rst:text-gray-500 rst:dark:text-gray-400">
         blakeb.dev
       </span>
       <ThemeToggle />
@@ -164,7 +164,7 @@ export const CustomLabels: Story = {
 
 export const CustomIcons: Story = {
   render: () => (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="rst:flex rst:flex-wrap rst:items-center rst:gap-3">
       <ThemeToggle
         showLabel
         lightLabel="Press sheet"
@@ -190,13 +190,13 @@ export const CustomIcons: Story = {
 
 export const ObservingChanges: Story = {
   render: () => (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-3">
+    <div className="rst:flex rst:flex-col rst:gap-3">
+      <div className="rst:flex rst:items-center rst:gap-3">
         <ThemeToggle showLabel />
         <ThemeToggle showLabel />
         <ThemeToggle showLabel />
       </div>
-      <p className="m-0 max-w-prose text-xs text-gray-500 dark:text-gray-400">
+      <p className="rst:m-0 rst:max-w-prose rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">
         Three independent toggles, no shared state, no context. Click any one of
         them and all three update, because each is reading the live class on
         the document root rather than a copy of it.

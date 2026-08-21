@@ -47,7 +47,7 @@ const Disclosure = ({
   };
 
   return (
-    <div className={cn("w-full flex flex-col", className)} {...props}>
+    <div className={cn("rst:w-full rst:flex rst:flex-col", className)} {...props}>
       {/* TRIGGER BUTTON */}
       <button
         type="button"
@@ -56,24 +56,24 @@ const Disclosure = ({
         className={cn(
           disclosureTriggerVariants({ variant }),
           // Dynamic rounding and border fix
-          isOpen ? "rounded-t-md rounded-b-none" : "rounded-md",
+          isOpen ? "rst:rounded-t-md rst:rounded-b-none" : "rst:rounded-md",
           // If it's the outline variant and it's open, remove the bottom border so it merges seamlessly with the content box
           isOpen &&
             variant === "outline" &&
-            "border-b-transparent dark:border-b-transparent",
+            "rst:border-b-transparent rst:dark:border-b-transparent",
         )}
       >
-        <span className="flex-1 text-left text-inherit">{title}</span>
+        <span className="rst:flex-1 rst:text-left rst:text-inherit">{title}</span>
         <span
           className={cn(
-            "ml-2 flex items-center transition-transform duration-200 text-inherit",
-            isOpen ? "rotate-180" : "",
+            "rst:ml-2 rst:flex rst:items-center rst:transition-transform rst:duration-200 rst:text-inherit",
+            isOpen ? "rst:rotate-180" : "",
           )}
         >
           {icon || (
             <FontAwesomeIcon
               icon={faChevronDown}
-              className="h-3.5 w-3.5 opacity-60"
+              className="rst:h-3.5 rst:w-3.5 rst:opacity-60"
             />
           )}
         </span>
@@ -82,15 +82,15 @@ const Disclosure = ({
       {/* CONTENT PANEL (With Transition) */}
       <Transition
         show={isOpen}
-        enter="transition duration-100 ease-out"
-        enterFrom="transform scale-95 opacity-0"
-        enterTo="transform scale-100 opacity-100"
-        leave="transition duration-75 ease-out"
-        leaveFrom="transform scale-100 opacity-100"
-        leaveTo="transform scale-95 opacity-0"
+        enter="rst:transition rst:duration-100 rst:ease-out"
+        enterFrom="rst:transform rst:scale-95 rst:opacity-0"
+        enterTo="rst:transform rst:scale-100 rst:opacity-100"
+        leave="rst:transition rst:duration-75 rst:ease-out"
+        leaveFrom="rst:transform rst:scale-100 rst:opacity-100"
+        leaveTo="rst:transform rst:scale-95 rst:opacity-0"
       >
         <div
-          className={cn(disclosureContentVariants({ variant }), "rounded-b-md")}
+          className={cn(disclosureContentVariants({ variant }), "rst:rounded-b-md")}
         >
           {children}
         </div>

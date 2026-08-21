@@ -47,16 +47,16 @@ export const Playground: Story = {
 export const Layouts: Story = {
   args: { items: stack },
   render: () => (
-    <div className="grid gap-8 sm:grid-cols-3">
-      <div className="flex flex-col gap-3">
+    <div className="rst:grid rst:gap-8 rst:sm:grid-cols-3">
+      <div className="rst:flex rst:flex-col rst:gap-3">
         <LabeledDivider label="Inline" />
         <DescriptionList items={stack} layout="inline" />
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="rst:flex rst:flex-col rst:gap-3">
         <LabeledDivider label="Stacked" />
         <DescriptionList items={stack} layout="stacked" />
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="rst:flex rst:flex-col rst:gap-3">
         <LabeledDivider label="Split" />
         <DescriptionList items={stack} layout="split" />
       </div>
@@ -80,12 +80,12 @@ export const Layouts: Story = {
 export const Sizes: Story = {
   args: { items: stack },
   render: () => (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
+    <div className="rst:flex rst:flex-col rst:gap-8">
+      <div className="rst:flex rst:flex-col rst:gap-2">
         <LabeledDivider label="Small — the default" />
         <DescriptionList items={stack} size="sm" />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="rst:flex rst:flex-col rst:gap-2">
         <LabeledDivider label="Medium" />
         <DescriptionList items={stack} size="md" />
       </div>
@@ -104,7 +104,7 @@ export const Sizes: Story = {
 export const WithDividers: Story = {
   args: { items: stack },
   render: () => (
-    <div className="grid max-w-2xl gap-8 sm:grid-cols-2">
+    <div className="rst:grid rst:max-w-2xl rst:gap-8 rst:sm:grid-cols-2">
       <DescriptionList items={stack} layout="stacked" dividers />
       <DescriptionList items={stack} layout="split" dividers />
     </div>
@@ -150,7 +150,7 @@ export const NodeContent: Story = {
           description: (
             <a
               href="https://roster-tan.vercel.app"
-              className="text-primary-600 underline dark:text-primary-400"
+              className="rst:text-primary-600 rst:underline rst:dark:text-primary-400"
             >
               roster-tan.vercel.app
             </a>
@@ -172,12 +172,12 @@ export const NodeContent: Story = {
 export const InAPanel: Story = {
   args: { items: stack },
   render: () => (
-    <div className="grid max-w-xl gap-3 sm:grid-cols-2">
-      <div className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+    <div className="rst:grid rst:max-w-xl rst:gap-3 rst:sm:grid-cols-2">
+      <div className="rst:flex rst:flex-col rst:gap-3 rst:rounded-lg rst:border rst:border-gray-200 rst:p-4 rst:dark:border-gray-800">
         <LabeledDivider label="Stack" />
         <DescriptionList items={stack} />
       </div>
-      <div className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+      <div className="rst:flex rst:flex-col rst:gap-3 rst:rounded-lg rst:border rst:border-gray-200 rst:p-4 rst:dark:border-gray-800">
         <LabeledDivider label="Also shipped" />
         <DescriptionList
           items={[
@@ -215,12 +215,12 @@ export const LongValues: Story = {
       },
     ];
     return (
-      <div className="grid max-w-2xl gap-8 sm:grid-cols-2">
-        <div className="flex flex-col gap-2">
+      <div className="rst:grid rst:max-w-2xl rst:gap-8 rst:sm:grid-cols-2">
+        <div className="rst:flex rst:flex-col rst:gap-2">
           <LabeledDivider label="Inline — ragged" />
           <DescriptionList items={items} layout="inline" />
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="rst:flex rst:flex-col rst:gap-2">
           <LabeledDivider label="Stacked — better" />
           <DescriptionList items={items} layout="stacked" />
         </div>
@@ -253,7 +253,7 @@ export const DarkMode: Story = {
   args: { items: stack },
   render: () => (
     <div className="dark">
-      <div className="grid gap-6 rounded-xl bg-gray-950 p-6 sm:grid-cols-3">
+      <div className="rst:grid rst:gap-6 rst:rounded-xl rst:bg-gray-950 rst:p-6 rst:sm:grid-cols-3">
         <DescriptionList items={stack} layout="inline" />
         <DescriptionList items={stack} layout="stacked" dividers />
         <DescriptionList items={stack} layout="split" dividers />
