@@ -156,3 +156,39 @@ export const Minimal: Story = {
     },
   },
 };
+
+/**
+ * The gap that prompted the fix: this component had no dark handling at all, so
+ * the default `dashed` variant rendered as a white panel on a dark page. Found
+ * in an admin queue, on a memorial site, in the one state a user only sees when
+ * there is nothing else on screen to distract from it.
+ */
+export const EmptyStateInDarkMode: Story = {
+  args: { title: "Queue is clear", description: "Nothing waiting for review." },
+  decorators: [
+    (Story) => (
+      <div className="rst:grid rst:grid-cols-1 md:rst:grid-cols-2 rst:gap-6">
+        <div className="light rst:bg-gray-50 rst:p-6 rst:rounded-xl rst:border rst:border-gray-100">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:mb-6 rst:uppercase rst:tracking-widest">
+            Light Mode
+          </p>
+          <Story />
+        </div>
+        <div className="dark rst:bg-gray-950 rst:p-6 rst:rounded-xl rst:border rst:border-gray-800">
+          <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:mb-6 rst:uppercase rst:tracking-widest">
+            Dark Mode
+          </p>
+          <Story />
+        </div>
+      </div>
+    ),
+  ],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Surface, border, title, description and icon chip all carry a dark counterpart. Before this, every one of them was light-only.",
+      },
+    },
+  },
+};

@@ -5,7 +5,9 @@ export const emptyStateVariants = cva(
   {
     variants: {
       variant: {
-        dashed: "rst:border-2 rst:border-dashed rst:border-gray-300 rst:bg-gray-50 rst:hover:bg-gray-100/50",
+        dashed:
+          "rst:border-2 rst:border-dashed rst:border-gray-300 rst:bg-gray-50 rst:hover:bg-gray-100/50 " +
+          "rst:dark:border-gray-700 rst:dark:bg-gray-500/10 rst:dark:hover:bg-gray-500/15",
         simple: "rst:border-transparent rst:bg-transparent rst:p-0",
       },
     },
