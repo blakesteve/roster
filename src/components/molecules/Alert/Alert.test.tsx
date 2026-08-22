@@ -57,4 +57,80 @@ describe("Alert Component", () => {
     render(<Alert icon={<span data-testid="custom" />}>Custom</Alert>);
     expect(screen.getByTestId("custom")).toBeInTheDocument();
   });
+
+  /**
+   * `current` and `surface` exist so a consuming app can stop hand-rolling a
+   * labeled accent callout beside this one. Game Verdict had built exactly
+   * that — a gradient panel with a title row, tinted to whichever answer won —
+   * because Alert could only take colors from Roster's own ramps.
+   */
+  describe("current colorScheme", () => {
+    it("inherits the page's color for stripe, text and fill", () => {
+      const { container } = render(<Alert colorScheme="current">Tinted</Alert>);
+      expect(container.firstChild).toHaveClass("rst:border-current");
+      expect(container.firstChild).toHaveClass("rst:text-current");
+      /* The fill is the half that is easy to leave out, and an Alert with a
+         stripe and no wash just looks like a mistake. */
+      expect(container.firstChild).toHaveClass("rst:bg-current/10");
+    });
+
+    // A lookup miss here renders an empty icon box rather than no icon.
+    it("still renders a default icon", () => {
+      const { container } = render(<Alert colorScheme="current">Tinted</Alert>);
+      expect(container.querySelector("svg")).toBeInTheDocument();
+    });
+
+    // Only `error` is assertive; a page-tinted note should not interrupt.
+    it("announces politely", () => {
+      render(<Alert colorScheme="current">Tinted</Alert>);
+      expect(screen.getByRole("status")).toBeInTheDocument();
+    });
+  });
+
+  describe("surface", () => {
+    it("holds a flat tint by default, so existing alerts are unchanged", () => {
+      const { container } = render(<Alert colorScheme="error">Flat</Alert>);
+      expect(container.firstChild).toHaveClass("rst:bg-error-50");
+      expect(container.firstChild).not.toHaveClass("rst:bg-gradient-to-r");
+    });
+
+    it("fades the fill out when asked", () => {
+      const { container } = render(
+        <Alert colorScheme="error" surface="gradient">Faded</Alert>,
+      );
+      expect(container.firstChild).toHaveClass("rst:bg-gradient-to-r");
+      expect(container.firstChild).toHaveClass("rst:from-error-500/10");
+    });
+
+    /*
+     * This shipped broken for one build. Clearing the flat fill with `bg-none`
+     * targets background-IMAGE, which is the gradient itself — both classes
+     * survived the merge and which one won came down to stylesheet order, so
+     * the gradient simply did not appear. The fill is a background-COLOR.
+     */
+    it("clears the flat fill without cancelling the gradient", () => {
+      const { container } = render(
+        <Alert colorScheme="error" surface="gradient">Faded</Alert>,
+      );
+      expect(container.firstChild).not.toHaveClass("rst:bg-none");
+      expect(container.firstChild).not.toHaveClass("rst:bg-error-50");
+      expect(container.firstChild).not.toHaveClass("rst:dark:bg-error-500/10");
+    });
+
+    it("clears it for a page-supplied color too, in both themes", () => {
+      const { container } = render(
+        <Alert colorScheme="current" surface="gradient">Faded</Alert>,
+      );
+      expect(container.firstChild).not.toHaveClass("rst:bg-current/10");
+      expect(container.firstChild).toHaveClass("rst:dark:bg-transparent");
+    });
+
+    it("fades a page-supplied color too", () => {
+      const { container } = render(
+        <Alert colorScheme="current" surface="gradient">Faded</Alert>,
+      );
+      expect(container.firstChild).toHaveClass("rst:bg-gradient-to-r");
+      expect(container.firstChild).toHaveClass("rst:border-current");
+    });
+  });
 });

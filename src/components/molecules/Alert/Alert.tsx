@@ -27,6 +27,12 @@ export interface AlertProps
   dismissLabel?: string;
 }
 
+/*
+ * `current` has no icon of its own on purpose. The scheme exists for a page
+ * supplying its own accent, which usually means it is supplying its own mark
+ * too — and a lookup that returns `undefined` for a valid scheme renders a
+ * blank box rather than nothing, so the fallback is explicit.
+ */
 const DEFAULT_ICONS = {
   error: faCircleExclamation,
   success: faCircleCheck,
@@ -34,6 +40,7 @@ const DEFAULT_ICONS = {
   info: faCircleInfo,
   primary: faCircleInfo,
   neutral: faCircleInfo,
+  current: faCircleInfo,
 } as const;
 
 /**
@@ -48,6 +55,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   (
     {
       colorScheme = "error",
+      surface,
       title,
       children,
       icon,
@@ -65,7 +73,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         ref={ref}
         role={isError ? "alert" : "status"}
         aria-live={isError ? "assertive" : "polite"}
-        className={cn(alertVariants({ colorScheme }), className)}
+        className={cn(alertVariants({ colorScheme, surface }), className)}
         {...props}
       >
         {icon === undefined ? (

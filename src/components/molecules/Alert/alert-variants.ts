@@ -7,6 +7,19 @@ import { cva } from "class-variance-authority";
  *
  * The left stripe carries the color weight so the fill can stay quiet enough
  * to sit inside a form without shouting.
+ *
+ * Two additions let this absorb the summary callouts apps were hand-rolling
+ * beside it — a labeled, accent-keyed panel carrying a sentence of prose is
+ * this component with a `title`, not a different component:
+ *
+ * - `colorScheme: "current"` inherits `currentColor` for the stripe, the text
+ *   and the fill, so a page can tint an Alert with an accent Roster has never
+ *   heard of. Pullquote, Stat and InlineCode already work this way; Alert was
+ *   the one that could not, which is what pushed a consumer to build its own.
+ * - `surface: "gradient"` fades the fill out to the right instead of holding a
+ *   flat tint, which is the treatment those hand-rolled callouts used.
+ *
+ * Both default to the previous behavior, so neither changes an existing Alert.
  */
 export const alertVariants = cva(
   "rst:flex rst:items-start rst:gap-2.5 rst:rounded-lg rst:border-l-4 rst:px-4 rst:py-3 rst:text-sm",
@@ -24,10 +37,76 @@ export const alertVariants = cva(
           "rst:border-primary-500 rst:bg-primary-50 rst:text-primary-800 rst:dark:border-primary-400 rst:dark:bg-primary-500/10 rst:dark:text-primary-200",
         neutral:
           "rst:border-gray-400 rst:bg-gray-50 rst:text-gray-800 rst:dark:border-gray-500 rst:dark:bg-gray-500/10 rst:dark:text-gray-200",
+        /*
+         * The fill is a wash of `currentColor` rather than a step off a ramp,
+         * because there is no ramp to reach for: the color arrives from the
+         * consuming page. One value serves both themes — 10% of whatever the
+         * text color is reads correctly on paper and on a dark ground, where a
+         * fixed tint would have to be declared twice and guessed at both times.
+         */
+        current:
+          "rst:border-current rst:text-current rst:bg-current/10",
+      },
+      surface: {
+        /* The existing flat tint, and still the default. */
+        tint: "",
+        /*
+         * Set per scheme below: a gradient needs the color, not just a switch.
+         * Each one clears the flat fill with `bg-transparent` in both themes —
+         * a background-COLOR, since that is what the tint is. Clearing
+         * `background-image` instead cancels the gradient itself, which is the
+         * bug this shipped with for one build.
+         */
+        gradient: "",
       },
     },
+    compoundVariants: [
+      {
+        surface: "gradient",
+        colorScheme: "error",
+        class:
+          "rst:bg-transparent rst:dark:bg-transparent rst:bg-gradient-to-r rst:from-error-500/10 rst:to-transparent rst:dark:from-error-500/15",
+      },
+      {
+        surface: "gradient",
+        colorScheme: "success",
+        class:
+          "rst:bg-transparent rst:dark:bg-transparent rst:bg-gradient-to-r rst:from-success-500/10 rst:to-transparent rst:dark:from-success-500/15",
+      },
+      {
+        surface: "gradient",
+        colorScheme: "amber",
+        class:
+          "rst:bg-transparent rst:dark:bg-transparent rst:bg-gradient-to-r rst:from-amber-500/10 rst:to-transparent rst:dark:from-amber-500/15",
+      },
+      {
+        surface: "gradient",
+        colorScheme: "info",
+        class:
+          "rst:bg-transparent rst:dark:bg-transparent rst:bg-gradient-to-r rst:from-info-500/10 rst:to-transparent rst:dark:from-info-500/15",
+      },
+      {
+        surface: "gradient",
+        colorScheme: "primary",
+        class:
+          "rst:bg-transparent rst:dark:bg-transparent rst:bg-gradient-to-r rst:from-primary-500/10 rst:to-transparent rst:dark:from-primary-500/15",
+      },
+      {
+        surface: "gradient",
+        colorScheme: "neutral",
+        class:
+          "rst:bg-transparent rst:dark:bg-transparent rst:bg-gradient-to-r rst:from-gray-500/10 rst:to-transparent rst:dark:from-gray-500/15",
+      },
+      {
+        surface: "gradient",
+        colorScheme: "current",
+        class:
+          "rst:bg-transparent rst:dark:bg-transparent rst:bg-gradient-to-r rst:from-current/15 rst:to-transparent",
+      },
+    ],
     defaultVariants: {
       colorScheme: "error",
+      surface: "tint",
     },
   },
 );
