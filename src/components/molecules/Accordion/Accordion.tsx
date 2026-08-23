@@ -47,7 +47,7 @@ const Accordion = ({
   };
 
   return (
-    <div className={cn("rst:w-full rst:space-y-1", className)}>
+    <div className={cn("rst:font-ui rst:w-full rst:space-y-1", className)}>
       {items.map((item, index) => (
         <div key={item.id} className="rst:relative">
           {showDividers && index > 0 && (

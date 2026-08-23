@@ -22,7 +22,7 @@ import { cva } from "class-variance-authority";
  * Both default to the previous behavior, so neither changes an existing Alert.
  */
 export const alertVariants = cva(
-  "rst:flex rst:items-start rst:gap-2.5 rst:rounded-lg rst:border-l-4 rst:px-4 rst:py-3 rst:text-sm",
+  "rst:font-ui rst:flex rst:items-start rst:gap-2.5 rst:rounded-lg rst:border-l-4 rst:px-4 rst:py-3 rst:text-sm",
   {
     variants: {
       colorScheme: {

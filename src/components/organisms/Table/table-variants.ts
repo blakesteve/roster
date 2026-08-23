@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const tableWrapperVariants = cva(
-  "rst:relative rst:w-full rst:overflow-auto rst:rounded-md rst:transition-colors rst:duration-200",
+  "rst:font-ui rst:relative rst:w-full rst:overflow-auto rst:rounded-md rst:transition-colors rst:duration-200",
   {
     variants: {
       variant: {

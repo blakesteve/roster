@@ -80,7 +80,7 @@ const Dialog = ({
 }: DialogProps) => {
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <HeadlessDialog as="div" className="rst:relative rst:z-50" onClose={onClose}>
+      <HeadlessDialog as="div" className="rst:font-ui rst:relative rst:z-50" onClose={onClose}>
         <TransitionChild
           as={Fragment}
           enter="rst:ease-out rst:duration-300"

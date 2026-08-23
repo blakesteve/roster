@@ -95,7 +95,7 @@ export function AvatarStrip({
   return (
     <div
       data-testid="avatar-strip"
-      className={cn("rst:flex rst:items-center rst:gap-3", className)}
+      className={cn("rst:font-ui rst:flex rst:items-center rst:gap-3", className)}
     >
       {onDismiss && (
         <button

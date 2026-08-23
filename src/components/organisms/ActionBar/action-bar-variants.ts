@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const actionBarVariants = cva(
-  "rst:w-full rst:z-40 rst:shadow-lg rst:backdrop-blur-md rst:transition-all",
+  "rst:font-ui rst:w-full rst:z-40 rst:shadow-lg rst:backdrop-blur-md rst:transition-all",
   {
     variants: {
       variant: {

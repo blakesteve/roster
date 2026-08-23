@@ -12,7 +12,7 @@ import { cva } from "class-variance-authority";
  * padding so words breathe, and can lead with a status dot.
  */
 export const pillVariants = cva(
-  "rst:inline-flex rst:items-center rst:rounded-full rst:font-medium rst:whitespace-nowrap rst:align-middle",
+  "rst:font-ui rst:inline-flex rst:items-center rst:rounded-full rst:font-medium rst:whitespace-nowrap rst:align-middle",
   {
     variants: {
       colorScheme: {

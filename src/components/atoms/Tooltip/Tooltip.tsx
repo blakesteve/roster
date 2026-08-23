@@ -70,7 +70,7 @@ export function Tooltip({
             collisionPadding={8}
             data-testid="tooltip-content"
             className={cn(
-              "rst:z-50 rst:max-w-60 rst:rounded-lg rst:px-3 rst:py-2 rst:text-xs rst:leading-snug rst:shadow-xl",
+              "rst:font-ui rst:z-50 rst:max-w-60 rst:rounded-lg rst:px-3 rst:py-2 rst:text-xs rst:leading-snug rst:shadow-xl",
               "rst:animate-in rst:fade-in-0 rst:zoom-in-95",
               "rst:data-[side=bottom]:slide-in-from-top-2",
               "rst:data-[side=top]:slide-in-from-bottom-2",

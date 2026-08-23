@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const breadcrumbVariants = cva(
-  "rst:flex rst:items-center rst:text-sm rst:font-medium rst:transition-colors",
+  "rst:font-ui rst:flex rst:items-center rst:text-sm rst:font-medium rst:transition-colors",
   {
     variants: {
       variant: {

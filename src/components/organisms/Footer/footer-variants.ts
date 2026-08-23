@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const footerVariants = cva(
-  "rst:w-full rst:py-6 rst:mt-auto rst:transition-colors rst:duration-200",
+  "rst:font-ui rst:w-full rst:py-6 rst:mt-auto rst:transition-colors rst:duration-200",
   {
     variants: {
       variant: {

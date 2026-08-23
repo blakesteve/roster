@@ -148,6 +148,37 @@
   --color-gray-900: var(--roster-gray-900, #1c1917);
   --color-gray-950: var(--roster-gray-950, #0c0a09);
   
+  /* ── UI face ────────────────────────────────────────────────────────────────
+     Roster's chrome sets no font of its own, so it inherits whatever the host
+     app put on `body`. In an app whose reading face is a serif, that means
+     serif buttons, serif badges, serif inputs and serif table cells — controls
+     rendered in a face chosen for long-form prose. Found twice on blakeb.dev,
+     which reads in Source Serif; the first workaround forced monospace onto
+     every Button in the consuming app, which only traded one wrong face for
+     another.
+
+     Chrome now asks for `font-ui` explicitly. Override `--roster-font-ui` to
+     put your own UI face on every control at once; set nothing and you get a
+     system sans instead of whatever your prose happens to use.
+
+     Components that render the *host's* content — Card, Link — are deliberately
+     left inheriting, because that text is not Roster's to restyle. A separate
+     set (Eyebrow, InlineCode, Stat, Pullquote and friends) asks for `font-mono`
+     on purpose. `src/font-ui.test.ts` holds both lists and fails on a component
+     that belongs to neither.
+     ────────────────────────────────────────────────────────────────────────── */
+  --font-ui: var(
+    --roster-font-ui,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif
+  );
+
   --color-black: var(--roster-black, #1e1c1a);
   --color-white: var(--roster-white, #ffffff);
   --color-cream: var(--roster-cream, #f3eee3);

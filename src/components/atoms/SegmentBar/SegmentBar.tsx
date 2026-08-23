@@ -44,7 +44,7 @@ export function SegmentBar({
   const visibleSegments = segments.filter((s) => s.value > 0);
 
   return (
-    <div className={cn("rst:flex rst:flex-col rst:gap-1.5", className)}>
+    <div className={cn("rst:font-ui rst:flex rst:flex-col rst:gap-1.5", className)}>
       {/* Bar track */}
       <div
         data-testid="segment-bar-track"

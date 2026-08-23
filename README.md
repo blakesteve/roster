@@ -143,6 +143,26 @@ the script and the toggle disagree, which shows up as a flash on every reload.
 bar paints *itself* with. Pair them with `themeMode="auto"` and the nav follows
 whatever `ThemeToggle` sets.
 
+### The UI font
+
+Controls, labels and table cells render in `--roster-font-ui`. Set nothing and
+they use a system sans stack, which is the point: without it they would inherit
+whatever your app puts on `body`, and an app that reads in a serif would get
+serif buttons and serif badges.
+
+To match your own UI face, define the variable once:
+
+```css
+:root {
+  --roster-font-ui: "Archivo", ui-sans-serif, system-ui, sans-serif;
+}
+```
+
+Two sets of components opt out. `Card` and `Link` inherit on purpose, because
+they wrap your content and that text is not Roster's to restyle. `Eyebrow`,
+`InlineCode`, `Stat`, `Pullquote`, `DescriptionList`, `MatchupCard` and
+`Countdown` ask for a monospace face as a design decision.
+
 ### Components that render links
 
 `Breadcrumbs` renders a plain `<a>` by default, which is right for a static

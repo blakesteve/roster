@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const avatarVariants = cva(
-  "rst:relative rst:inline-flex rst:items-center rst:justify-center rst:overflow-hidden rst:font-semibold rst:border rst:transition-colors rst:focus:outline-none rst:select-none rst:shrink-0 rst:shadow-sm",
+  "rst:font-ui rst:relative rst:inline-flex rst:items-center rst:justify-center rst:overflow-hidden rst:font-semibold rst:border rst:transition-colors rst:focus:outline-none rst:select-none rst:shrink-0 rst:shadow-sm",
   {
     variants: {
       size: {

@@ -105,7 +105,7 @@ export function DataTable<TData extends RowData>({
   });
 
   return (
-    <div className={cn("rst:flex rst:flex-col rst:gap-4", className)}>
+    <div className={cn("rst:font-ui rst:flex rst:flex-col rst:gap-4", className)}>
       <Table
         variant={variant}
         size={size}
