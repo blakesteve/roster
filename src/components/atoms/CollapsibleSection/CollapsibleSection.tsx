@@ -43,7 +43,7 @@ export function CollapsibleSection({
   }, [children, size]);
 
   return (
-    <div className={className}>
+    <div className={cn("rst:font-ui", className)}>
       <div
         ref={ref}
         data-testid="collapsible-content"

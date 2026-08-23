@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const navbarVariants = cva(
-  "rst:w-full rst:z-30 rst:border-b rst:transition-colors rst:duration-200",
+  "rst:font-ui rst:w-full rst:z-30 rst:border-b rst:transition-colors rst:duration-200",
   {
     variants: {
       variant: {

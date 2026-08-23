@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const emptyStateVariants = cva(
-  "rst:flex rst:flex-col rst:items-center rst:justify-center rst:text-center rst:p-8 rst:rounded-lg rst:transition-colors",
+  "rst:font-ui rst:flex rst:flex-col rst:items-center rst:justify-center rst:text-center rst:p-8 rst:rounded-lg rst:transition-colors",
   {
     variants: {
       variant: {

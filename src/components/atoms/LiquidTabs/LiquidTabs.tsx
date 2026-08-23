@@ -150,7 +150,7 @@ export function LiquidTabs({
       data-testid="liquid-tabs"
       style={{ background: "var(--roster-lt-bg)", borderColor: "var(--roster-lt-border)" }}
       className={cn(
-        "rst:relative rst:flex rst:border",
+        "rst:font-ui rst:relative rst:flex rst:border",
         isFilled
           ? "rst:w-full rst:overflow-hidden rst:rounded-lg"
           : cn(

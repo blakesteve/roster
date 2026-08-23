@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const switchTrackVariants = cva(
-  "rst:group rst:relative rst:inline-flex rst:shrink-0 rst:cursor-pointer rst:rounded-full rst:border-2 rst:border-transparent rst:transition-colors rst:duration-200 rst:ease-in-out rst:focus:outline-none rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:disabled:cursor-not-allowed rst:disabled:opacity-50",
+  "rst:font-ui rst:group rst:relative rst:inline-flex rst:shrink-0 rst:cursor-pointer rst:rounded-full rst:border-2 rst:border-transparent rst:transition-colors rst:duration-200 rst:ease-in-out rst:focus:outline-none rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:disabled:cursor-not-allowed rst:disabled:opacity-50",
   {
     variants: {
       variant: {

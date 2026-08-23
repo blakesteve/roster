@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const ctaVariants = cva(
-  "rst:relative rst:flex rst:flex-col rst:gap-4 rst:overflow-hidden rst:rounded-lg rst:border rst:p-6 rst:shadow-sm rst:transition-all rst:md:flex-row rst:md:items-center rst:md:justify-between",
+  "rst:font-ui rst:relative rst:flex rst:flex-col rst:gap-4 rst:overflow-hidden rst:rounded-lg rst:border rst:p-6 rst:shadow-sm rst:transition-all rst:md:flex-row rst:md:items-center rst:md:justify-between",
   {
     variants: {
       variant: {

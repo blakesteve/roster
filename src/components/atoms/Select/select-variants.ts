@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const selectTriggerVariants = cva(
-  "rst:relative rst:w-full rst:cursor-pointer rst:rounded-md rst:py-2.5 rst:pl-4 rst:pr-10 rst:text-left rst:text-sm rst:font-medium rst:shadow-sm rst:ring-1 rst:ring-inset rst:transition-all rst:focus:outline-none rst:focus:ring-2 rst:focus:ring-primary-500 rst:dark:focus:ring-primary-400 rst:sm:leading-6",
+  "rst:font-ui rst:relative rst:w-full rst:cursor-pointer rst:rounded-md rst:py-2.5 rst:pl-4 rst:pr-10 rst:text-left rst:text-sm rst:font-medium rst:shadow-sm rst:ring-1 rst:ring-inset rst:transition-all rst:focus:outline-none rst:focus:ring-2 rst:focus:ring-primary-500 rst:dark:focus:ring-primary-400 rst:sm:leading-6",
   {
     variants: {
       variant: {
