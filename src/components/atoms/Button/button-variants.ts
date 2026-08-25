@@ -33,11 +33,11 @@ export const buttonVariants = cva(
     compoundVariants: [
       // --- SOLID VARIANTS (Bold Backgrounds) ---
       { variant: "solid", colorScheme: "primary", className: "rst:bg-primary-600 rst:text-white rst:hover:bg-primary-700 rst:dark:bg-primary-600 rst:dark:hover:bg-primary-500" },
-      { variant: "solid", colorScheme: "orange",  className: "rst:bg-orange-600 rst:text-white rst:hover:bg-orange-700 rst:dark:bg-orange-600 rst:dark:hover:bg-orange-500" },
-      { variant: "solid", colorScheme: "teal",    className: "rst:bg-teal-600 rst:text-white rst:hover:bg-teal-700 rst:dark:bg-teal-600 rst:dark:hover:bg-teal-500" },
-      { variant: "solid", colorScheme: "purple",  className: "rst:bg-purple-600 rst:text-white rst:hover:bg-purple-700 rst:dark:bg-purple-600 rst:dark:hover:bg-purple-500" },
-      { variant: "solid", colorScheme: "amber",   className: "rst:bg-amber-400 rst:text-black rst:hover:bg-amber-500 rst:dark:bg-amber-500 rst:dark:hover:bg-amber-400 rst:dark:text-gray-900" },
-      { variant: "solid", colorScheme: "success", className: "rst:bg-success-600 rst:text-white rst:hover:bg-success-700 rst:dark:bg-success-600 rst:dark:hover:bg-success-500" },
+      { variant: "solid", colorScheme: "orange",  className: "rst:bg-orange-600 rst:text-white rst:hover:bg-orange-700 rst:dark:bg-orange-600 rst:dark:hover:bg-orange-700" },
+      { variant: "solid", colorScheme: "teal",    className: "rst:bg-teal-600 rst:text-gray-950 rst:hover:bg-teal-500 rst:dark:bg-teal-600 rst:dark:hover:bg-teal-500" },
+      { variant: "solid", colorScheme: "purple",  className: "rst:bg-purple-600 rst:text-white rst:hover:bg-purple-700 rst:dark:bg-purple-600 rst:dark:hover:bg-purple-700" },
+      { variant: "solid", colorScheme: "amber",   className: "rst:bg-amber-400 rst:text-gray-950 rst:hover:bg-amber-500 rst:dark:bg-amber-500 rst:dark:hover:bg-amber-400" },
+      { variant: "solid", colorScheme: "success", className: "rst:bg-success-600 rst:text-white rst:hover:bg-success-700 rst:dark:bg-success-600 rst:dark:hover:bg-success-700" },
       { variant: "solid", colorScheme: "error",   className: "rst:bg-error-600 rst:text-white rst:hover:bg-error-700 rst:dark:bg-error-600 rst:dark:hover:bg-error-500" },
       { variant: "solid", colorScheme: "neutral", className: "rst:bg-gray-600 rst:text-white rst:hover:bg-gray-700 rst:dark:bg-gray-600 rst:dark:hover:bg-gray-500" },
 

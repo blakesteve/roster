@@ -163,6 +163,31 @@ they wrap your content and that text is not Roster's to restyle. `Eyebrow`,
 `InlineCode`, `Stat`, `Pullquote`, `DescriptionList`, `MatchupCard` and
 `Countdown` ask for a monospace face as a design decision.
 
+### Solid fill contrast
+
+`solid` is the one variant where a component picks both the background and the
+text on it, so it can fail contrast on its own with no help from your app. Every
+solid fill in `Badge`, `Pill` and `Button` is measured against WCAG AA (4.5:1)
+by `src/contrast.test.ts`, at rest **and** on hover, in both themes.
+
+Which foreground a family gets is decided per family, not by a rule:
+
+- **White** on primary, error and neutral.
+- **`gray-950`** on teal, success, orange, purple, info and amber — a mid-tone
+  fill cannot carry white. Solid teal with white text measured 2.49:1.
+- Three of them flip: orange, purple and success take dark text in light mode
+  and white in dark, because Badge uses a darker fill in dark mode.
+
+One consequence worth knowing if you retheme. A dark foreground assumes the fill
+stays light. If you retint `--roster-teal-500` substantially darker, solid teal
+becomes near-black on near-black — worse than the white it replaced. The
+`Foundations/Solid fill contrast` story measures the rendered elements rather
+than the tokens, so pointing it at your palette reports *your* ratios.
+
+Note also that a solid fill's contrast against the surface *behind* it is a
+separate requirement (WCAG 1.4.11, 3:1) and is not covered here. Solid amber on
+a white page is 1.67:1, so it has effectively no visible edge.
+
 ### Components that render links
 
 `Breadcrumbs` renders a plain `<a>` by default, which is right for a static

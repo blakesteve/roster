@@ -91,7 +91,10 @@ describe("Pill Component", () => {
       const { container } = render(
         <Pill variant="solid" colorScheme="amber">Warning</Pill>,
       );
-      expect(container.firstChild).toHaveClass("rst:text-amber-950");
+      /* `gray-950` rather than the old `amber-950`: every dark foreground in the
+         library now uses one neutral, which reads 9.20:1 here against amber-950's
+         6.97:1. See src/contrast.test.ts. */
+      expect(container.firstChild).toHaveClass("rst:text-gray-950");
     });
   });
 
