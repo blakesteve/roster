@@ -52,7 +52,8 @@ function walk(dir) {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) out.push(...walk(full));
-    else if (/\.tsx?$/.test(entry) && !/\.(test|stories)\./.test(entry)) out.push(full);
+    else if (/\.tsx?$/.test(entry) && !/\.(test|stories)\./.test(entry))
+      out.push(full);
   }
   return out;
 }
@@ -91,33 +92,36 @@ function referencedClasses() {
  */
 function emittedClasses() {
   const names = new Set();
-  for (const match of css.matchAll(/\.((?:\\.|[a-zA-Z_-])(?:\\.|[a-zA-Z0-9_-])*)/g)) {
+  for (const match of css.matchAll(
+    /\.((?:\\.|[a-zA-Z_-])(?:\\.|[a-zA-Z0-9_-])*)/g,
+  )) {
     names.add(match[1].replace(/\\(.)/g, "$1"));
   }
   return names;
 }
 
 /**
- * Dead classes that predate this check, recorded rather than hidden.
+ * Dead classes this check is willing to tolerate.
  *
- * Each one produces no CSS today and has a visible consequence. They are listed
- * so the check can go green on the state it inherited while still failing on
- * anything NEW — and so the debt is written down somewhere that gets read,
- * instead of living in a silent skip. The check also fails if one of these
- * starts emitting, so a fix cannot leave a stale entry behind.
+ * Empty, and worth keeping that way. It carried ten entries when the check was
+ * written — seven animation classes with no plugin behind them, two gradient
+ * stops naming a color that did not exist, and a scrollbar class defined
+ * nowhere. All ten are fixed.
+ *
+ * Ten was the count in component source, which is all `walk` reads: it skips
+ * `*.test.*` and `*.stories.*`, because docs blurbs carry CSS code fences and
+ * prose that would false-positive. Two more dead classes were sitting in
+ * `ActionBar.stories.tsx` the whole time and had to be found by hand. The
+ * exclusion is the right default, but read this check as covering shipped
+ * components, not the Storybook surface.
+ *
+ * The mechanism stays because the next person to find a dead class may not be
+ * able to fix it in the same sitting. Add it here with a reason and the build
+ * goes green on the state it inherited while still failing on anything new. The
+ * check also fails when a listed class starts emitting, so a fix cannot leave a
+ * stale entry behind — which is how these ten got pruned rather than forgotten.
  */
-const KNOWN_DEAD = new Map([
-  ["via-accent-600", "no --color-accent; Countdown's gradient has no middle stop"],
-  ["via-accent-300", "no --color-accent; same gradient, dark mode"],
-  ["animate-in", "no animation plugin installed; Tooltip/Dialog do not animate in"],
-  ["fade-in-0", "no animation plugin installed"],
-  ["zoom-in-95", "no animation plugin installed"],
-  ["slide-in-from-top-2", "no animation plugin installed"],
-  ["slide-in-from-bottom-2", "no animation plugin installed"],
-  ["slide-in-from-left-2", "no animation plugin installed"],
-  ["slide-in-from-right-2", "no animation plugin installed"],
-  ["custom-scrollbar", "defined nowhere; Textarea's scrollbar is the browser default"],
-]);
+const KNOWN_DEAD = new Map();
 
 const REFERENCED = referencedClasses();
 const EMITTED = emittedClasses();
@@ -127,7 +131,8 @@ for (const [cls, file] of REFERENCED) {
   const bare = cls.replace(/^rst:/, "").split(":").pop();
   if (NO_RULE_EXPECTED.has(bare)) continue;
   const emitted = EMITTED.has(cls);
-  if (!emitted && !KNOWN_DEAD.has(bare)) dead.push({ cls, utility: bare, file });
+  if (!emitted && !KNOWN_DEAD.has(bare))
+    dead.push({ cls, utility: bare, file });
   if (emitted && KNOWN_DEAD.has(bare)) revived.push(bare);
 }
 
@@ -153,7 +158,9 @@ if (revived.length > 0) {
     `\n[check-classes-emit] ${revived.length} class(es) now emit but are still listed as known-dead:\n`,
   );
   for (const utility of new Set(revived)) console.error(`  ${utility}`);
-  console.error("\nRemove them from KNOWN_DEAD so the list keeps meaning something.\n");
+  console.error(
+    "\nRemove them from KNOWN_DEAD so the list keeps meaning something.\n",
+  );
   process.exit(1);
 }
 
@@ -164,5 +171,6 @@ console.log(
     `${known.size} known-dead carried over`,
 );
 if (process.argv.includes("--verbose")) {
-  for (const [utility, why] of KNOWN_DEAD) console.log(`  · ${utility} — ${why}`);
+  for (const [utility, why] of KNOWN_DEAD)
+    console.log(`  · ${utility} — ${why}`);
 }

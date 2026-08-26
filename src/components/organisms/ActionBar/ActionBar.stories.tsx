@@ -265,7 +265,7 @@ const InteractiveWrapper = (args: ActionBarProps) => {
                 {selectedItems.map((item) => (
                   <div
                     key={item.id}
-                    className="rst:flex rst:h-10 rst:w-10 rst:animate-in rst:fade-in rst:zoom-in rst:items-center rst:justify-center rst:rounded-full rst:bg-white rst:dark:bg-gray-800 rst:shadow-sm rst:ring-1 rst:ring-gray-200 rst:dark:ring-gray-700"
+                    className="rst:flex rst:h-10 rst:w-10 rst:animate-in rst:fade-in-0 rst:zoom-in-95 rst:items-center rst:justify-center rst:rounded-full rst:bg-white rst:dark:bg-gray-800 rst:shadow-sm rst:ring-1 rst:ring-gray-200 rst:dark:ring-gray-700"
                   >
                     <FontAwesomeIcon
                       icon={item.icon}

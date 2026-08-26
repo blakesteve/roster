@@ -59,7 +59,13 @@ describe("Countdown Component", () => {
     // Test Default (Gradient)
     const { rerender } = render(<Countdown targetDate={targetDate} />);
     let dayNumber = screen.getByText("01");
-    expect(dayNumber).toHaveClass("rst:bg-gradient-to-br", "rst:from-primary-700");
+    /* The gradient stops used to be spelled out here as `bg-gradient-to-br
+       from-primary-700 via-accent-600 to-primary-700`. There was never a
+       `--color-accent`, so the middle stop was dropped and the gradient ran from
+       a color to itself — this assertion passed the whole time it was broken,
+       because it only ever checked the two stops that did resolve. The colors
+       now live in `--roster-shimmer-*` and the sweep is a real animation. */
+    expect(dayNumber).toHaveClass("rst:animate-shimmer", "rst:text-transparent");
 
     // Test Primary Variant
     rerender(<Countdown targetDate={targetDate} variant="primary" />);
