@@ -188,6 +188,29 @@ Note also that a solid fill's contrast against the surface *behind* it is a
 separate requirement (WCAG 1.4.11, 3:1) and is not covered here. Solid amber on
 a white page is 1.67:1, so it has effectively no visible edge.
 
+### Focus
+
+Every focusable control draws the same ring: `--roster-ring` for the ring
+itself, `--roster-ring-offset` for the 2px band that separates it from the
+control's own fill. Both flip with the theme — `primary-500` on white in light,
+`primary-400` on `gray-950` in dark — which puts the indicator at 6.37:1 and
+7.31:1 against the surface either side of it, where WCAG 1.4.11 asks for 3:1.
+
+Retint it for your own accent:
+
+```css
+:root { --roster-ring: #7c3aed; }
+.dark { --roster-ring: #a78bfa; }
+```
+
+Set it in **both** scopes. Roster's own `.dark` rule has the same specificity
+and comes later in the stylesheet, so a `:root`-only override is silently
+discarded in dark mode.
+
+The band matters more than it looks. Without it the ring sits directly on the
+fill, and a `primary-500` ring on a `primary-600` button is 1.37:1 — which is
+why the ring and its offset are a pair rather than two independent knobs.
+
 ### Components that render links
 
 `Breadcrumbs` renders a plain `<a>` by default, which is right for a static
@@ -396,15 +419,33 @@ npx vitest run --project storybook
 
 # Every emitted class carries the rst: prefix (runs as part of the build)
 npm run check:prefix
+npm run check:classes-emit
 ```
 
-Two guards are worth knowing about, because the bug they catch cannot be
+Three guards are worth knowing about, because the bugs they catch cannot be
 reproduced from inside this repo.
 
 `check:prefix` reads `dist/roster.css` and fails on any unprefixed class
 selector. The collision it prevents only appears in an app with its own Tailwind
 build, so asserting on a rendered component here would never see it — the check
 has to be on the artifact.
+
+`check:classes-emit` reads the same artifact and fails when a component
+references a utility Tailwind never generated. Tailwind v4 builds utilities from
+theme tokens, so a class naming a token that does not exist is not an error —
+it simply produces no CSS, and the class sits in the component looking correct
+while doing nothing. That is how the focus ring was inert: `Button` asked for
+`ring-ring` and `ring-offset-background`, neither `--color-ring` nor
+`--color-background` existed, and the ring fell back to `currentColor` — a
+white ring on a white page. Nothing caught it, because typecheck cannot read a
+class name and the unit tests assert a class is *present* rather than that it
+does anything.
+
+It compares whole class names, variants included, so a misspelled variant fails
+as readily as a misspelled utility. Ten classes that were already dead when the
+check was written are listed in its `KNOWN_DEAD` map with a reason each; the
+check fails on anything new joining them, and also if one starts emitting, so a
+fix cannot leave a stale entry behind. Run it with `--verbose` to print them.
 
 `src/lib/utils.test.ts` pins `cn`. `tailwind-merge` has to be configured with the
 prefix or it stops recognising Roster's classes as utilities and silently

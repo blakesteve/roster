@@ -98,7 +98,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
             type="button"
             onClick={onDismiss}
             aria-label={dismissLabel}
-            className="rst:-m-1 rst:shrink-0 rst:rounded rst:p-1 rst:opacity-60 rst:transition-opacity rst:hover:opacity-100 rst:focus:outline-none rst:focus-visible:ring-2 rst:focus-visible:ring-current"
+            className="rst:-m-1 rst:shrink-0 rst:rounded rst:p-1 rst:opacity-60 rst:transition-opacity rst:hover:opacity-100 rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring"
           >
             <FontAwesomeIcon icon={faXmark} className="rst:h-3.5 rst:w-3.5" aria-hidden="true" />
           </button>

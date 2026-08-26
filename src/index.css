@@ -182,6 +182,42 @@
   --color-black: var(--roster-black, #1e1c1a);
   --color-white: var(--roster-white, #ffffff);
   --color-cream: var(--roster-cream, #f3eee3);
+
+  /* ── Focus ───────────────────────────────────────────────────────────────
+     `ring-ring` and `ring-offset-background` were referenced before either
+     color existed. Button is the one that actually suffered for it: Badge sets
+     no `tabIndex` so its focus rule never fires, and Input names its own ring
+     color, so only its offset was affected — and it sets no ring offset width,
+     so nothing was painted there either. Tailwind generates utilities from
+     theme tokens, so an undefined token means the utility is simply never
+     emitted — `grep -c ring-ring dist/roster.css` returned 0. The classes were
+     inert, and the ring silently fell back to `var(--tw-ring-color,
+     currentcolor)`: the focus ring was the text color, which on a white solid
+     Button drew a white ring on a white page.
+
+     Both resolve through `--roster-*` so a consuming app can retint focus
+     without overriding a selector, and both flip under `.dark` below.
+     ──────────────────────────────────────────────────────────────────────── */
+  --color-ring: var(--roster-ring, #0f6498);
+  --color-background: var(--roster-ring-offset, #ffffff);
+}
+
+/* ── Focus tokens ────────────────────────────────────────────────────────────
+   The offset is the page behind the control, not a color in its own right: the
+   2px gap it paints is what separates the ring from the fill, so it has to
+   match whatever surface the control sits on. Pinning it to white — which is
+   what Tailwind's default did while `--color-background` was undefined — put a
+   white halo around every focused control on a dark page.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --roster-ring:        var(--roster-primary-500, #0f6498);
+  --roster-ring-offset: var(--roster-white, #ffffff);
+}
+
+.dark {
+  /* A step lighter, for the same reason text lightens on a dark ground. */
+  --roster-ring:        var(--roster-primary-400, #5ea3de);
+  --roster-ring-offset: var(--roster-gray-950, #0c0a09);
 }
 
 /* ── LiquidTabs component tokens ─────────────────────────────────────────────

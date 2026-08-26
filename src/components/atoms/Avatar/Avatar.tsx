@@ -64,7 +64,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
       <Popover className="rst:relative rst:inline-flex">
         <PopoverButton
           as="div"
-          className="rst:outline-none rst:cursor-pointer rst:focus-visible:ring-2 rst:focus-visible:ring-primary-500 rst:focus-visible:ring-offset-2 rst:rounded-full"
+          className="rst:cursor-pointer rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background rst:rounded-full"
         >
           {AvatarContent}
         </PopoverButton>
