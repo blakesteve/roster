@@ -203,6 +203,16 @@ describe("the entrance animation", () => {
     expect(from).toMatch(/--rst-enter-translate-y,\s*0\)/);
   });
 
+  it("fills backwards, so a delayed entrance does not flash first", () => {
+    /* With the default `none`, an element carrying `animation-delay` paints at
+       its resting state, then snaps back to the keyframe's start when the delay
+       elapses. Staggering a group is the obvious use, and it looks broken
+       without this — every item appears, then re-animates one by one. */
+    expect(declaration(utility("animate-in"), "animation-fill-mode")).toBe(
+      "backwards",
+    );
+  });
+
   it.each([
     ["fade-in-0", "--rst-enter-opacity", "0"],
     ["zoom-in-95", "--rst-enter-scale", "0.95"],

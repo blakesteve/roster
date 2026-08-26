@@ -326,6 +326,12 @@
 @utility animate-in {
   animation: rst-enter var(--rst-enter-duration, 150ms)
     var(--rst-enter-easing, cubic-bezier(0.16, 1, 0.3, 1));
+  /* `backwards` so the from-state applies during `animation-delay` rather than
+     after it. Without it a delayed element paints at its resting state first,
+     then snaps back to the start when the delay elapses — which makes a
+     staggered entrance flash every item before animating it. The default delay
+     is 0, so this changes nothing until someone staggers. */
+  animation-fill-mode: backwards;
 }
 
 @utility fade-in-0 {

@@ -231,6 +231,23 @@ into a single animation rather than three fighting over `transform`. `Tooltip`
 uses it, keyed off Radix's `data-side` so the panel always rises from the side it
 is anchored on.
 
+The suffixes are that plugin's, kept so anyone arriving from it keeps their
+vocabulary. Each one is the value the modifier animates from: `-0` is an opacity,
+`95` is a scale percentage, and `-2` is a step on Tailwind's spacing scale, so
+`slide-in-from-top-2` starts `0.5rem` above its resting position. Only the steps
+Roster's own components need are implemented; adding `-4` or `zoom-in-90` is one
+line each.
+
+`animate-in` on its own does nothing, by design: with no modifier the keyframe's
+start values are the element's resting state. It is the engine, and a modifier is
+what gives it somewhere to start. It fills `backwards`, so `animation-delay` can
+stagger a group without every item flashing at rest first.
+
+The default duration is 150ms, matching the plugin. At that speed a `-2` slide
+covers 8px, which is right for a tooltip and reads as a twitch on anything
+larger — `Foundations/Motion` in Storybook has controls for duration, easing,
+direction and stagger to find what suits a bigger surface.
+
 It is hand-rolled rather than a dependency: seven utilities does not justify a
 package in a library that ships compiled CSS, and it keeps the stylesheet
 self-contained — the same reasoning as not bundling a preflight.
