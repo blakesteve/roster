@@ -124,7 +124,7 @@ export const DefaultGradient: Story = {
     docs: {
       description: {
         story:
-          "The default configuration. Uses an animated gradient that automatically shifts to a brighter, glowing tone when placed in a dark mode container.",
+          "The default configuration. A highlight sweeps across the digits and rests between passes, retinted for dark containers and held still for `prefers-reduced-motion`.",
       },
     },
   },

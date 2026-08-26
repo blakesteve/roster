@@ -219,11 +219,31 @@ export const TransparentHero: Story = {
 
 // --- Interactive Story Setup ---
 const AVAILABLE_ICONS = [
-  { id: "star", icon: faStar, color: "text-yellow-500" },
-  { id: "heart", icon: faHeart, color: "text-error-500" },
-  { id: "fire", icon: faFire, color: "text-orange-500" },
-  { id: "bolt", icon: faBolt, color: "text-blue-500" },
-  { id: "cube", icon: faCube, color: "text-purple-500" },
+  {
+    id: "star",
+    icon: faStar,
+    color: "rst:text-amber-500 rst:dark:text-amber-400",
+  },
+  {
+    id: "heart",
+    icon: faHeart,
+    color: "rst:text-error-500 rst:dark:text-error-400",
+  },
+  {
+    id: "fire",
+    icon: faFire,
+    color: "rst:text-orange-500 rst:dark:text-orange-400",
+  },
+  {
+    id: "bolt",
+    icon: faBolt,
+    color: "rst:text-info-500 rst:dark:text-info-400",
+  },
+  {
+    id: "cube",
+    icon: faCube,
+    color: "rst:text-purple-500 rst:dark:text-purple-400",
+  },
 ];
 
 const InteractiveWrapper = (args: ActionBarProps) => {
@@ -265,7 +285,7 @@ const InteractiveWrapper = (args: ActionBarProps) => {
                 {selectedItems.map((item) => (
                   <div
                     key={item.id}
-                    className="rst:flex rst:h-10 rst:w-10 rst:animate-in rst:fade-in rst:zoom-in rst:items-center rst:justify-center rst:rounded-full rst:bg-white rst:dark:bg-gray-800 rst:shadow-sm rst:ring-1 rst:ring-gray-200 rst:dark:ring-gray-700"
+                    className="rst:flex rst:h-10 rst:w-10 rst:animate-in rst:fade-in-0 rst:zoom-in-95 rst:slide-in-from-bottom-2 rst:items-center rst:justify-center rst:rounded-full rst:bg-white rst:dark:bg-gray-800 rst:shadow-sm rst:ring-1 rst:ring-gray-200 rst:dark:ring-gray-700"
                   >
                     <FontAwesomeIcon
                       icon={item.icon}
@@ -300,8 +320,8 @@ const InteractiveWrapper = (args: ActionBarProps) => {
                     onClick={() => toggleItem(item.id)}
                     className={`rst:flex rst:h-20 rst:w-20 rst:items-center rst:justify-center rst:rounded-2xl rst:border-2 rst:transition-all rst:active:scale-95 ${
                       isSelected
-                        ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30 dark:border-primary-400 shadow-md"
-                        : "border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500"
+                        ? "rst:border-primary-500 rst:bg-primary-50 rst:shadow-md rst:dark:border-primary-400 rst:dark:bg-primary-900/30"
+                        : "rst:border-gray-200 rst:bg-white rst:hover:border-gray-300 rst:dark:border-gray-700 rst:dark:bg-gray-900 rst:dark:hover:border-gray-500"
                     }`}
                   >
                     <FontAwesomeIcon

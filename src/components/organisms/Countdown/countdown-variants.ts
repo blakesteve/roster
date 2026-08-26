@@ -24,7 +24,7 @@ export const countdownNumberVariants = cva(
     variants: {
       variant: {
         gradient:
-          "rst:text-transparent rst:animate-pulse rst:bg-gradient-to-br rst:from-primary-700 rst:via-accent-600 rst:to-primary-700 rst:dark:from-primary-400 rst:dark:via-accent-300 rst:dark:to-primary-400 rst:drop-shadow-sm rst:dark:drop-shadow-md",
+          "rst:text-transparent rst:animate-shimmer rst:drop-shadow-sm rst:dark:drop-shadow-md",
         primary: "rst:text-primary-600 rst:dark:text-primary-400",
         neutral: "rst:text-gray-900 rst:dark:text-gray-100",
       },

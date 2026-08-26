@@ -37,7 +37,7 @@
 
 @theme inline {
   /* --- Primary (Deep Blue) --- */
-  --color-primary-50:  var(--roster-primary-50, #f2f8fc);
+  --color-primary-50: var(--roster-primary-50, #f2f8fc);
   --color-primary-100: var(--roster-primary-100, #e1f0f8);
   --color-primary-200: var(--roster-primary-200, #c5e1f2);
   --color-primary-300: var(--roster-primary-300, #9bcce9);
@@ -50,7 +50,7 @@
   --color-primary-950: var(--roster-primary-950, #021724);
 
   /* --- Orange --- */
-  --color-orange-50:  var(--roster-orange-50, #fff5f2);
+  --color-orange-50: var(--roster-orange-50, #fff5f2);
   --color-orange-100: var(--roster-orange-100, #ffe8e1);
   --color-orange-200: var(--roster-orange-200, #ffd1c2);
   --color-orange-300: var(--roster-orange-300, #ffb19b);
@@ -63,7 +63,7 @@
   --color-orange-950: var(--roster-orange-950, #420d05);
 
   /* --- Teal --- */
-  --color-teal-50:  var(--roster-teal-50, #f0fdfa);
+  --color-teal-50: var(--roster-teal-50, #f0fdfa);
   --color-teal-100: var(--roster-teal-100, #ccfbf1);
   --color-teal-200: var(--roster-teal-200, #99f6e4);
   --color-teal-300: var(--roster-teal-300, #5eead4);
@@ -76,7 +76,7 @@
   --color-teal-950: var(--roster-teal-950, #042f2e);
 
   /* --- Purple --- */
-  --color-purple-50:  var(--roster-purple-50, #f5f3ff);
+  --color-purple-50: var(--roster-purple-50, #f5f3ff);
   --color-purple-100: var(--roster-purple-100, #ede9fe);
   --color-purple-200: var(--roster-purple-200, #ddd6fe);
   --color-purple-300: var(--roster-purple-300, #c4b5fd);
@@ -89,7 +89,7 @@
   --color-purple-950: var(--roster-purple-950, #2e1065);
 
   /* --- Amber --- */
-  --color-amber-50:  var(--roster-amber-50, #fffbeb);
+  --color-amber-50: var(--roster-amber-50, #fffbeb);
   --color-amber-100: var(--roster-amber-100, #fef3c7);
   --color-amber-200: var(--roster-amber-200, #fde68a);
   --color-amber-300: var(--roster-amber-300, #fcd34d);
@@ -102,7 +102,7 @@
   --color-amber-950: var(--roster-amber-950, #451a03);
 
   /* --- Semantic Colors --- */
-  --color-success-50:  var(--roster-success-50, #f0fdf4);
+  --color-success-50: var(--roster-success-50, #f0fdf4);
   --color-success-100: var(--roster-success-100, #dcfce7);
   --color-success-200: var(--roster-success-200, #bbf7d0);
   --color-success-300: var(--roster-success-300, #86efac);
@@ -113,7 +113,7 @@
   --color-success-800: var(--roster-success-800, #14532d);
   --color-success-900: var(--roster-success-900, #14532d);
 
-  --color-error-50:  var(--roster-error-50, #fef2f2);
+  --color-error-50: var(--roster-error-50, #fef2f2);
   --color-error-100: var(--roster-error-100, #fee2e2);
   --color-error-200: var(--roster-error-200, #fecaca);
   --color-error-300: var(--roster-error-300, #fca5a5);
@@ -124,7 +124,7 @@
   --color-error-800: var(--roster-error-800, #450a0a);
   --color-error-900: var(--roster-error-900, #450a0a);
 
-  --color-info-50:  var(--roster-info-50, #f0f9ff);
+  --color-info-50: var(--roster-info-50, #f0f9ff);
   --color-info-100: var(--roster-info-100, #e0f2fe);
   --color-info-200: var(--roster-info-200, #bae6fd);
   --color-info-300: var(--roster-info-300, #7dd3fc);
@@ -136,18 +136,18 @@
   --color-info-900: var(--roster-info-900, #0c4a6e);
 
   /* --- Neutrals --- */
-  --color-gray-50:  var(--roster-gray-50, #fafaf9);
+  --color-gray-50: var(--roster-gray-50, #fafaf9);
   --color-gray-100: var(--roster-gray-100, #f5f5f4);
   --color-gray-200: var(--roster-gray-200, #e7e5e4);
   --color-gray-300: var(--roster-gray-300, #d6d3d1);
   --color-gray-400: var(--roster-gray-400, #a8a29e);
-  --color-gray-500: var(--roster-gray-500, #65635f); 
+  --color-gray-500: var(--roster-gray-500, #65635f);
   --color-gray-600: var(--roster-gray-600, #57534e);
   --color-gray-700: var(--roster-gray-700, #44403c);
   --color-gray-800: var(--roster-gray-800, #292524);
   --color-gray-900: var(--roster-gray-900, #1c1917);
   --color-gray-950: var(--roster-gray-950, #0c0a09);
-  
+
   /* ── UI face ────────────────────────────────────────────────────────────────
      Roster's chrome sets no font of its own, so it inherits whatever the host
      app put on `body`. In an app whose reading face is a serif, that means
@@ -210,13 +210,13 @@
    white halo around every focused control on a dark page.
    ─────────────────────────────────────────────────────────────────────────── */
 :root {
-  --roster-ring:        var(--roster-primary-500, #0f6498);
+  --roster-ring: var(--roster-primary-500, #0f6498);
   --roster-ring-offset: var(--roster-white, #ffffff);
 }
 
 .dark {
   /* A step lighter, for the same reason text lightens on a dark ground. */
-  --roster-ring:        var(--roster-primary-400, #5ea3de);
+  --roster-ring: var(--roster-primary-400, #5ea3de);
   --roster-ring-offset: var(--roster-gray-950, #0c0a09);
 }
 
@@ -237,19 +237,19 @@
    `default`) are tokenized. The other variants stay deliberately literal.
    ─────────────────────────────────────────────────────────────────────────── */
 :root {
-  --roster-card-bg:       var(--roster-white, #ffffff);
-  --roster-card-border:   var(--roster-gray-200, #e7e5e4);
-  --roster-card-text:     var(--roster-gray-900, #1c1917);
+  --roster-card-bg: var(--roster-white, #ffffff);
+  --roster-card-border: var(--roster-gray-200, #e7e5e4);
+  --roster-card-text: var(--roster-gray-900, #1c1917);
 
-  --roster-footer-bg:     var(--roster-gray-50, #fafaf9);
+  --roster-footer-bg: var(--roster-gray-50, #fafaf9);
   --roster-footer-border: var(--roster-gray-200, #e7e5e4);
-  --roster-footer-text:   var(--roster-gray-500, #65635f);
+  --roster-footer-text: var(--roster-gray-500, #65635f);
 }
 
 .dark {
-  --roster-card-bg:       var(--roster-gray-900, #1c1917);
-  --roster-card-border:   var(--roster-gray-800, #292524);
-  --roster-card-text:     var(--roster-gray-100, #f5f5f4);
+  --roster-card-bg: var(--roster-gray-900, #1c1917);
+  --roster-card-border: var(--roster-gray-800, #292524);
+  --roster-card-text: var(--roster-gray-100, #f5f5f4);
 
   /* Half-transparent, matching the previous `dark:bg-gray-900/50`. */
   --roster-footer-bg: color-mix(
@@ -258,7 +258,7 @@
     transparent
   );
   --roster-footer-border: var(--roster-gray-800, #292524);
-  --roster-footer-text:   var(--roster-gray-400, #a8a29e);
+  --roster-footer-text: var(--roster-gray-400, #a8a29e);
 }
 
 /* ── Navbar surface tokens ───────────────────────────────────────────────────
@@ -268,29 +268,245 @@
    the `default` variant with no selector overrides.
    ─────────────────────────────────────────────────────────────────────────── */
 :root {
-  --roster-nav-bg:     var(--roster-white, #ffffff);
+  --roster-nav-bg: var(--roster-white, #ffffff);
   --roster-nav-border: var(--roster-gray-200, #e7e5e4);
-  --roster-nav-text:   var(--roster-gray-900, #1c1917);
+  --roster-nav-text: var(--roster-gray-900, #1c1917);
 }
 
 .dark {
-  --roster-nav-bg:     var(--roster-gray-950, #0c0a09);
+  --roster-nav-bg: var(--roster-gray-950, #0c0a09);
   --roster-nav-border: var(--roster-gray-800, #292524);
-  --roster-nav-text:   var(--roster-gray-100, #f5f5f4);
+  --roster-nav-text: var(--roster-gray-100, #f5f5f4);
 }
 
 :root {
-  --roster-lt-bg:            var(--roster-white, #ffffff);
-  --roster-lt-border:        var(--roster-gray-200, #e7e5e4);
-  --roster-lt-pill:          var(--roster-primary-500, #0f6498);
+  --roster-lt-bg: var(--roster-white, #ffffff);
+  --roster-lt-border: var(--roster-gray-200, #e7e5e4);
+  --roster-lt-pill: var(--roster-primary-500, #0f6498);
   --roster-lt-text-inactive: var(--roster-gray-500, #65635f);
-  --roster-lt-text-hover:    var(--roster-gray-900, #1c1917);
+  --roster-lt-text-hover: var(--roster-gray-900, #1c1917);
 }
 
 .dark {
-  --roster-lt-bg:            var(--roster-gray-800, #292524);
-  --roster-lt-border:        var(--roster-gray-700, #44403c);
-  --roster-lt-pill:          var(--roster-primary-500, #0f6498);
+  --roster-lt-bg: var(--roster-gray-800, #292524);
+  --roster-lt-border: var(--roster-gray-700, #44403c);
+  --roster-lt-pill: var(--roster-primary-500, #0f6498);
   --roster-lt-text-inactive: var(--roster-gray-400, #a8a29e);
-  --roster-lt-text-hover:    var(--roster-gray-100, #f5f5f4);
+  --roster-lt-text-hover: var(--roster-gray-100, #f5f5f4);
+}
+
+/* ── Entrance animation ──────────────────────────────────────────────────────
+   Tooltip asked for `animate-in`, `fade-in-0`, `zoom-in-95` and four
+   `slide-in-from-*` classes, all of which come from `tailwindcss-animate` — a
+   plugin this library has never depended on. Seven classes emitted nothing, so
+   every tooltip in every consuming app appeared instantly with no transition.
+
+   Rolled by hand rather than by adding the dependency. Seven utilities does not
+   justify a package in a library that ships compiled CSS, and it keeps the
+   stylesheet self-contained, which is the same reasoning behind not bundling a
+   preflight.
+
+   The mechanism is the plugin's: one keyframe reads a set of custom properties,
+   and each modifier sets one of them. That way `fade-in-0 zoom-in-95
+   slide-in-from-top-2` compose into a single animation instead of fighting over
+   `transform`, which three separate animations would.
+   ─────────────────────────────────────────────────────────────────────────── */
+@keyframes rst-enter {
+  from {
+    opacity: var(--rst-enter-opacity, 1);
+    transform: translate3d(
+        var(--rst-enter-translate-x, 0),
+        var(--rst-enter-translate-y, 0),
+        0
+      )
+      scale3d(var(--rst-enter-scale, 1), var(--rst-enter-scale, 1), 1);
+  }
+}
+
+@utility animate-in {
+  animation: rst-enter var(--rst-enter-duration, 150ms)
+    var(--rst-enter-easing, cubic-bezier(0.16, 1, 0.3, 1));
+  /* `backwards` so the from-state applies during `animation-delay` rather than
+     after it. Without it a delayed element paints at its resting state first,
+     then snaps back to the start when the delay elapses — which makes a
+     staggered entrance flash every item before animating it. The default delay
+     is 0, so this changes nothing until someone staggers. */
+  animation-fill-mode: backwards;
+}
+
+@utility fade-in-0 {
+  --rst-enter-opacity: 0;
+}
+
+@utility zoom-in-95 {
+  --rst-enter-scale: 0.95;
+}
+
+@utility slide-in-from-top-2 {
+  --rst-enter-translate-y: -0.5rem;
+}
+
+@utility slide-in-from-bottom-2 {
+  --rst-enter-translate-y: 0.5rem;
+}
+
+@utility slide-in-from-left-2 {
+  --rst-enter-translate-x: -0.5rem;
+}
+
+@utility slide-in-from-right-2 {
+  --rst-enter-translate-x: 0.5rem;
+}
+
+/* A tooltip that flies in is exactly the kind of motion this setting is for. */
+@layer roster {
+  @media (prefers-reduced-motion: reduce) {
+    .rst\:animate-in {
+      animation: none;
+    }
+  }
+}
+
+/* ── Shimmer ─────────────────────────────────────────────────────────────────
+   Countdown's `gradient` variant clips a gradient to its digits. It asked for
+   `via-accent-600`, and there has never been an `--color-accent`, so the middle
+   stop was dropped and the gradient ran primary-700 to primary-700 — a gradient
+   from a color to itself. `animate-pulse` then faded the whole thing in and out,
+   which is why it read as a pulse rather than the shimmer it was meant to be.
+
+   Two stops rather than three: a base the digits sit in, and a narrow highlight
+   that travels across them. The highlight is a lighter step of the same family
+   in both themes, so it reads as light moving over the numerals instead of a
+   second color appearing in them.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --roster-shimmer-base: var(--roster-primary-700, #084063);
+  --roster-shimmer-highlight: var(--roster-primary-300, #9bcce9);
+}
+
+.dark {
+  --roster-shimmer-base: var(--roster-primary-400, #5ea3de);
+  --roster-shimmer-highlight: var(--roster-white, #ffffff);
+}
+
+/*
+ * The sweep stays inside 0%-100%, and the reason is not cosmetic.
+ *
+ * A background position outside that range moves the image far enough that it
+ * stops covering the box. With `background-clip: text` and transparent glyphs,
+ * uncovered means invisible — the digits would simply disappear at the ends of
+ * the sweep. Within the range, an image wider than the box always covers; see
+ * the `background-size` comment below for the width this one uses.
+ *
+ * 100% parks the highlight just past the left edge and 0% just past the right,
+ * so animating 100% -> 0% carries it left to right across the numerals and
+ * leaves it out of frame at both ends. The hold from 55% to 100% is the rest
+ * between passes; because no highlight is on screen during it, the jump back to
+ * the start is invisible.
+ */
+@keyframes rst-shimmer {
+  0% {
+    background-position: 100% center;
+  }
+  55% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 0% center;
+  }
+}
+
+@utility animate-shimmer {
+  background-image: linear-gradient(
+    /* 90deg, not a tilt. An angled gradient widens the highlight's horizontal
+       footprint by roughly tan(angle - 90) x height, so on a box taller than
+       about half its width the band still clips a corner at the ends of the
+       sweep — where the comment above promises it is out of frame. Countdown
+       happened to escape that on its own font metrics; a narrower box using
+       this utility would not. */
+      90deg,
+    var(--roster-shimmer-base) 42%,
+    var(--roster-shimmer-highlight) 50%,
+    var(--roster-shimmer-base) 58%
+  );
+  /* 260 rather than 250: coverage at position 100% would otherwise land the
+     image edge exactly on the box edge, where sub-pixel rounding of a
+     fractional width can leave a transparent sliver. */
+  background-size: 260% auto;
+  /* Belt and braces. The flicker this originally chased was the sweep running
+     outside 0-100%, where the image stopped covering the box and the adjacent
+     tile showed through; clamping the range is what actually fixed it. Within
+     the range the neighbours are entirely off-box, so this changes nothing
+     today — it is here so that a future change to the range degrades to a gap
+     rather than to a phantom second highlight. */
+  background-repeat: no-repeat;
+  animation: rst-shimmer var(--rst-shimmer-duration, 3.2s) linear infinite;
+}
+
+/* An endless sweep is precisely what this setting asks you to stop doing.
+
+   An earlier version also parked the highlight at 50% so the digits kept some
+   of the gradient's lift. That was a mistake: `primary-300` on white is 1.72:1,
+   and parking it put a permanent sub-3:1 band across the middle of the numerals
+   for exactly the users least likely to want visual noise. With no position
+   override the element falls back to its own `background-position`, which
+   leaves the highlight off-frame and the digits flat `primary-700` at 10.92:1 —
+   the same thing the broken gradient rendered, and readable. */
+@layer roster {
+  @media (prefers-reduced-motion: reduce) {
+    .rst\:animate-shimmer {
+      animation: none;
+    }
+  }
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────────
+   `custom-scrollbar` sat on Textarea referencing nothing — the class was never
+   defined in this stylesheet, in Storybook's, or anywhere else, so the field got
+   the browser default and the name was aspirational.
+
+   `scrollbar-width` / `scrollbar-color` are the standard properties: Firefox has
+   had both for years, Chromium since 121, Safari `scrollbar-width` since 18.2
+   and `scrollbar-color` later still. A supporting browser drops the
+   `::-webkit-scrollbar` pseudo-elements for any element that sets *either*
+   property to a non-initial value, and this utility sets both — so the block
+   below is reached only by Safari 18.1 and older and Chromium 120 and older. It
+   is kept for those, and it reads the same tokens, so retinting is one place
+   either way.
+
+   Worth knowing before reaching for it: the 8px width and the inset-pill thumb
+   live only in that legacy block. On anything current, `scrollbar-width: thin`
+   is the entire shape control the standard gives you.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --roster-scrollbar-thumb: var(--roster-gray-300, #d6d3d1);
+  --roster-scrollbar-track: transparent;
+}
+
+.dark {
+  --roster-scrollbar-thumb: var(--roster-gray-700, #44403c);
+  --roster-scrollbar-track: transparent;
+}
+
+@utility custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--roster-scrollbar-thumb) var(--roster-scrollbar-track);
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--roster-scrollbar-track);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--roster-scrollbar-thumb);
+    border-radius: 9999px;
+    /* Inset by a transparent border so the thumb reads as a slim pill rather
+       than filling the gutter edge to edge. */
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
 }

@@ -23,7 +23,7 @@ const meta = {
           "- **Desktop:** Opens after a configurable hover delay (default 300 ms). Also opens on keyboard focus so screen-reader users aren't left out.\n" +
           "- **Mobile / touch:** Tap the trigger to toggle the tooltip open. Tap anywhere else to dismiss. This prevents tooltips from getting permanently stuck open on touchscreens.\n\n" +
           "### Placement & collision\n" +
-          "Radix automatically flips the tooltip to the opposite side when the preferred placement would clip outside the viewport — no extra code needed.\n\n" +
+          "Radix automatically flips the tooltip to the opposite side when the preferred placement would clip outside the viewport — no extra code needed. The bubble fades and scales in from the side it ends up anchored on, keyed off Radix's `data-side`, and holds still under `prefers-reduced-motion`.\n\n" +
           "### Variants\n" +
           "- **`dark` (default):** High-contrast zinc-900 bubble. Works great on both light and dark page backgrounds.\n" +
           "- **`light`:** White bubble with a subtle ring. Ideal for tooltips that appear on very dark surfaces (e.g. hero banners, code editors).",
@@ -169,11 +169,18 @@ export const Placements: Story = {
   render: () => (
     <div className="rst:grid rst:grid-cols-2 rst:gap-x-20 rst:gap-y-16 rst:p-12">
       {(["top", "bottom", "left", "right"] as const).map((side) => (
-        <div key={side} className="rst:flex rst:flex-col rst:items-center rst:gap-3">
+        <div
+          key={side}
+          className="rst:flex rst:flex-col rst:items-center rst:gap-3"
+        >
           <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:uppercase rst:tracking-widest">
             {side}
           </p>
-          <Tooltip content={`Placed on the ${side}`} placement={side} defaultOpen>
+          <Tooltip
+            content={`Placed on the ${side}`}
+            placement={side}
+            defaultOpen
+          >
             <Button size="sm" variant="outline" colorScheme="neutral">
               {side}
             </Button>
@@ -199,7 +206,12 @@ export const WithIconButton: Story = {
     placement: "bottom",
     defaultOpen: true,
     children: (
-      <Button size="icon" variant="ghost" colorScheme="neutral" aria-label="Save">
+      <Button
+        size="icon"
+        variant="ghost"
+        colorScheme="neutral"
+        aria-label="Save"
+      >
         <FontAwesomeIcon icon={faBookmark} />
       </Button>
     ),
@@ -239,7 +251,8 @@ export const WithBadge: Story = {
 
 export const WithInfoIcon: Story = {
   args: {
-    content: "This score is calculated from the last 90 days of community verdicts",
+    content:
+      "This score is calculated from the last 90 days of community verdicts",
     placement: "right",
     defaultOpen: true,
     children: (
@@ -265,7 +278,10 @@ export const RichContent: Story = {
   args: {
     content: (
       <span>
-        <strong className="rst:font-semibold rst:text-zinc-100">Pro tip:</strong> hold{" "}
+        <strong className="rst:font-semibold rst:text-zinc-100">
+          Pro tip:
+        </strong>{" "}
+        hold{" "}
         <kbd className="rst:rounded rst:bg-zinc-700 rst:px-1 rst:py-0.5 rst:font-mono rst:text-[10px]">
           Shift
         </kbd>{" "}
@@ -293,7 +309,11 @@ export const LongContent: Story = {
       "Controller support requires a USB or Bluetooth gamepad. DualSense, Xbox Series, and Switch Pro controllers are all natively supported without additional drivers on macOS 12+.",
     placement: "bottom",
     defaultOpen: true,
-    children: <Button size="sm" variant="outline">Controller setup</Button>,
+    children: (
+      <Button size="sm" variant="outline">
+        Controller setup
+      </Button>
+    ),
   } as TooltipProps,
   decorators: [DualPreviewDecorator],
   parameters: {

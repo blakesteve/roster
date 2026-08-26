@@ -41,7 +41,10 @@ npm install @tanstack/react-table
 ```
 
 ```tsx
-import { DataTable, type RosterTableFeatures } from "@blakesteve/roster/data-table";
+import {
+  DataTable,
+  type RosterTableFeatures,
+} from "@blakesteve/roster/data-table";
 ```
 
 It is a peer rather than a bundled dependency because v9 types column
@@ -87,7 +90,7 @@ stripping padding off buttons and turning `border-transparent` into a visible
 1px line. **Below `utilities`**, so your app's classes and variants such as
 `dark:hidden` still win.
 
-Layers are ordered by *first registration*, so importing Roster before Tailwind
+Layers are ordered by _first registration_, so importing Roster before Tailwind
 is the reliable arrangement. If you would rather not depend on import order at
 all, declare the same line yourself at the top of your global stylesheet and it
 holds regardless.
@@ -130,7 +133,9 @@ document head:
 <script>
   try {
     var s = localStorage.getItem("roster-theme");
-    var dark = s ? s === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    var dark = s
+      ? s === "dark"
+      : matchMedia("(prefers-color-scheme: dark)").matches;
     if (dark) document.documentElement.classList.add("dark");
   } catch (e) {}
 </script>
@@ -140,7 +145,7 @@ If you pass a custom `storageKey`, change the script to match — a mismatch mea
 the script and the toggle disagree, which shows up as a flash on every reload.
 
 `Navbar`'s `themeMode` prop is a different thing: it describes what palette the
-bar paints *itself* with. Pair them with `themeMode="auto"` and the nav follows
+bar paints _itself_ with. Pair them with `themeMode="auto"` and the nav follows
 whatever `ThemeToggle` sets.
 
 ### The UI font
@@ -182,9 +187,9 @@ One consequence worth knowing if you retheme. A dark foreground assumes the fill
 stays light. If you retint `--roster-teal-500` substantially darker, solid teal
 becomes near-black on near-black — worse than the white it replaced. The
 `Foundations/Solid fill contrast` story measures the rendered elements rather
-than the tokens, so pointing it at your palette reports *your* ratios.
+than the tokens, so pointing it at your palette reports _your_ ratios.
 
-Note also that a solid fill's contrast against the surface *behind* it is a
+Note also that a solid fill's contrast against the surface _behind_ it is a
 separate requirement (WCAG 1.4.11, 3:1) and is not covered here. Solid amber on
 a white page is 1.67:1, so it has effectively no visible edge.
 
@@ -199,8 +204,12 @@ control's own fill. Both flip with the theme — `primary-500` on white in light
 Retint it for your own accent:
 
 ```css
-:root { --roster-ring: #7c3aed; }
-.dark { --roster-ring: #a78bfa; }
+:root {
+  --roster-ring: #7c3aed;
+}
+.dark {
+  --roster-ring: #a78bfa;
+}
 ```
 
 Set it in **both** scopes. Roster's own `.dark` rule has the same specificity
@@ -210,6 +219,82 @@ discarded in dark mode.
 The band matters more than it looks. Without it the ring sits directly on the
 fill, and a `primary-500` ring on a `primary-600` button is 1.37:1 — which is
 why the ring and its offset are a pair rather than two independent knobs.
+
+### Motion
+
+Two hand-rolled utilities, both of which stop for `prefers-reduced-motion`.
+
+`animate-in` is the entrance, composed from modifiers the way
+`tailwindcss-animate` does it — one keyframe reading four custom properties, and
+each modifier setting one, so `fade-in-0 zoom-in-95 slide-in-from-top-2` combine
+into a single animation rather than three fighting over `transform`. `Tooltip`
+uses it, keyed off Radix's `data-side` so the panel always rises from the side it
+is anchored on.
+
+The suffixes are that plugin's, kept so anyone arriving from it keeps their
+vocabulary. Each one is the value the modifier animates from: `-0` is an opacity,
+`95` is a scale percentage, and `-2` is a step on Tailwind's spacing scale, so
+`slide-in-from-top-2` starts `0.5rem` above its resting position. Only the steps
+Roster's own components need are implemented; adding `-4` or `zoom-in-90` is one
+line each.
+
+`animate-in` on its own does nothing, by design: with no modifier the keyframe's
+start values are the element's resting state. It is the engine, and a modifier is
+what gives it somewhere to start. It fills `backwards`, so `animation-delay` can
+stagger a group without every item flashing at rest first.
+
+The default duration is 150ms, matching the plugin. At that speed a `-2` slide
+covers 8px, which is right for a tooltip and reads as a twitch on anything
+larger — `Foundations/Motion` in Storybook has controls for duration, easing,
+direction and stagger to find what suits a bigger surface.
+
+It is hand-rolled rather than a dependency: seven utilities does not justify a
+package in a library that ships compiled CSS, and it keeps the stylesheet
+self-contained — the same reasoning as not bundling a preflight.
+
+`animate-shimmer` is a highlight travelling across a base, used by `Countdown`'s
+`gradient` variant. Retint it with two variables:
+
+```css
+:root {
+  --roster-shimmer-base: #084063;
+  --roster-shimmer-highlight: #9bcce9;
+}
+.dark {
+  /* … */
+}
+```
+
+The base is what carries the text whenever the highlight is elsewhere, so it has
+to be readable on its own — it is also all you get under reduced motion, where
+the sweep stops and the highlight parks off-frame. The highlight is deliberately
+exempt from that bar: it is a specular pass on screen for a fraction of a second
+per glyph, and holding it to 3:1 would flatten the effect.
+
+### Scrollbars
+
+`custom-scrollbar` gives any scrollable surface a slim themed scrollbar.
+`Textarea` carries it already.
+
+```css
+:root {
+  --roster-scrollbar-thumb: #0f6498;
+}
+.dark {
+  --roster-scrollbar-thumb: #5ea3de;
+}
+```
+
+Set it in both scopes — Roster's own `.dark` rule has equal specificity and comes
+later, so a `:root`-only override is discarded in dark mode.
+
+The default sits close to what the browser already draws, on purpose: a
+component library should not repaint your scrollbars merely for being installed.
+Color is the part that works everywhere. The 8px width and inset-pill thumb live
+in a `::-webkit-scrollbar` block that only legacy engines reach. Every current
+browser honors `scrollbar-width` / `scrollbar-color`, and drops the WebKit
+pseudo-elements for any element that sets either of them, so on anything modern
+`thin` is the whole shape control available.
 
 ### Components that render links
 
@@ -225,8 +310,8 @@ import NextLink from "next/link";
 
 In an app with React Server Components, do that from a client component.
 `linkComponent` is a function, and functions do not cross the RSC boundary —
-passing it from a server component fails the render with *Functions cannot be
-passed directly to Client Components*. A small `"use client"` wrapper binds it
+passing it from a server component fails the render with _Functions cannot be
+passed directly to Client Components_. A small `"use client"` wrapper binds it
 once, and the pages that use the wrapper stay server-rendered.
 
 `Eyebrow` takes the other approach: `as` accepts any element and the props
@@ -260,58 +345,58 @@ function App() {
 
 ### Atoms
 
-| Component | Description |
-|---|---|
-| `Avatar` | User avatar with image, initials fallback, and optional popover |
-| `Badge` | Status label with semantic color schemes and fill variants |
-| `Button` | Primary interactive element: solid, soft, outline, ghost, link variants |
-| `Card` | Bordered surface container |
-| `Checkbox` | Accessible checkbox with label support |
-| `Disclosure` | Show/hide toggle using HeadlessUI |
-| `Eyebrow` | Small tracked-out uppercase label above a heading or beside a rule; polymorphic via `as` |
-| `InlineCode` | Inline `<code>` for identifiers in running prose |
-| `Input` | Text input with label, error state, and icon slots |
-| `LabeledDivider` | Horizontal rule carrying a label, with an optional trailing count |
-| `Link` | Styled anchor with variant support |
-| `PasswordInput` | Password field with a show/hide reveal toggle |
-| `Pill` | Inline phrase chrome: social proof, live state, applied filters |
-| `AvatarStrip` | Stacked avatar row with overflow chip, dismiss button, trailing slot, and label area |
-| `CollapsibleSection` | Clamps any content (prose, chips, image grids) to a fixed height with a fade and expand/collapse toggle |
-| `LiquidTabs` | Controlled tab strip with a liquid sliding pill indicator: pill and filled variants |
-| `Select` | Dropdown selector |
-| `SegmentBar` | Proportional horizontal bar divided into colored segments with optional legend |
-| `Stat` | A single figure with its label and, optionally, where the figure came from |
-| `Spinner` | Loading indicator |
-| `Switch` | Toggle switch |
-| `Textarea` | Multi-line text input |
-| `ThemeToggle` | Flips class-based dark mode on the document root and remembers the choice; labels and icons are configurable |
-| `Tooltip` | Radix-powered tooltip: hover/focus on desktop, tap-to-toggle on mobile |
+| Component            | Description                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `Avatar`             | User avatar with image, initials fallback, and optional popover                                              |
+| `Badge`              | Status label with semantic color schemes and fill variants                                                   |
+| `Button`             | Primary interactive element: solid, soft, outline, ghost, link variants                                      |
+| `Card`               | Bordered surface container                                                                                   |
+| `Checkbox`           | Accessible checkbox with label support                                                                       |
+| `Disclosure`         | Show/hide toggle using HeadlessUI                                                                            |
+| `Eyebrow`            | Small tracked-out uppercase label above a heading or beside a rule; polymorphic via `as`                     |
+| `InlineCode`         | Inline `<code>` for identifiers in running prose                                                             |
+| `Input`              | Text input with label, error state, and icon slots                                                           |
+| `LabeledDivider`     | Horizontal rule carrying a label, with an optional trailing count                                            |
+| `Link`               | Styled anchor with variant support                                                                           |
+| `PasswordInput`      | Password field with a show/hide reveal toggle                                                                |
+| `Pill`               | Inline phrase chrome: social proof, live state, applied filters                                              |
+| `AvatarStrip`        | Stacked avatar row with overflow chip, dismiss button, trailing slot, and label area                         |
+| `CollapsibleSection` | Clamps any content (prose, chips, image grids) to a fixed height with a fade and expand/collapse toggle      |
+| `LiquidTabs`         | Controlled tab strip with a liquid sliding pill indicator: pill and filled variants                          |
+| `Select`             | Dropdown selector                                                                                            |
+| `SegmentBar`         | Proportional horizontal bar divided into colored segments with optional legend                               |
+| `Stat`               | A single figure with its label and, optionally, where the figure came from                                   |
+| `Spinner`            | Loading indicator                                                                                            |
+| `Switch`             | Toggle switch                                                                                                |
+| `Textarea`           | Multi-line text input                                                                                        |
+| `ThemeToggle`        | Flips class-based dark mode on the document root and remembers the choice; labels and icons are configurable |
+| `Tooltip`            | Radix-powered tooltip: hover/focus on desktop, tap-to-toggle on mobile                                       |
 
 ### Molecules
 
-| Component | Description |
-|---|---|
-| `Accordion` | Collapsible content sections (single or multi-expand) |
-| `Alert` | Inline notice strip with optional title and dismiss |
-| `Breadcrumbs` | Navigation trail; pass `linkComponent` to keep navigation client-side |
-| `CallToAction` | Prominent hero-style CTA block |
-| `DescriptionList` | Label and value pairs as a real `<dl>`: inline, stacked, or split |
-| `EmptyState` | Zero-data placeholder with icon and action slot |
-| `ErrorState` | Error display with retry action |
-| `MatchupCard` | Head-to-head comparison card |
-| `Pullquote` | A line lifted out of prose, as `<figure>` + `<blockquote>` + `<figcaption>` |
+| Component         | Description                                                                 |
+| ----------------- | --------------------------------------------------------------------------- |
+| `Accordion`       | Collapsible content sections (single or multi-expand)                       |
+| `Alert`           | Inline notice strip with optional title and dismiss                         |
+| `Breadcrumbs`     | Navigation trail; pass `linkComponent` to keep navigation client-side       |
+| `CallToAction`    | Prominent hero-style CTA block                                              |
+| `DescriptionList` | Label and value pairs as a real `<dl>`: inline, stacked, or split           |
+| `EmptyState`      | Zero-data placeholder with icon and action slot                             |
+| `ErrorState`      | Error display with retry action                                             |
+| `MatchupCard`     | Head-to-head comparison card                                                |
+| `Pullquote`       | A line lifted out of prose, as `<figure>` + `<blockquote>` + `<figcaption>` |
 
 ### Organisms
 
-| Component | Description |
-|---|---|
-| `ActionBar` | Sticky bottom action strip |
-| `Countdown` | Live countdown timer |
+| Component   | Description                                                                                                                                                        |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ActionBar` | Sticky bottom action strip                                                                                                                                         |
+| `Countdown` | Live countdown timer                                                                                                                                               |
 | `DataTable` | Full-featured table with sorting and pagination via TanStack Table v9. Imported from `@blakesteve/roster/data-table` (see [DataTable columns](#datatable-columns)) |
-| `Dialog` | Modal dialog |
-| `Footer` | Site footer |
-| `Navbar` | Responsive navigation bar with mobile slide-out |
-| `Table` | Static data table |
+| `Dialog`    | Modal dialog                                                                                                                                                       |
+| `Footer`    | Site footer                                                                                                                                                        |
+| `Navbar`    | Responsive navigation bar with mobile slide-out                                                                                                                    |
+| `Table`     | Static data table                                                                                                                                                  |
 
 ### DataTable columns
 
@@ -320,7 +405,10 @@ the table. `DataTable` registers sorting and pagination and exports that set as
 `RosterTableFeatures`, so your columns name it:
 
 ```tsx
-import { DataTable, type RosterTableFeatures } from "@blakesteve/roster/data-table";
+import {
+  DataTable,
+  type RosterTableFeatures,
+} from "@blakesteve/roster/data-table";
 import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
 
 type Player = { name: string; points: number };
@@ -355,9 +443,9 @@ Server Component it typechecks and then throws at render — use `/utils` there.
 
 ### Hooks
 
-| Hook | Description |
-|---|---|
-| `useCountdown` | Countdown timer logic without the UI |
+| Hook             | Description                                                                     |
+| ---------------- | ------------------------------------------------------------------------------- |
+| `useCountdown`   | Countdown timer logic without the UI                                            |
 | `useKeySequence` | Fires a callback when a sequence of keys is typed in order. Ships `KONAMI_CODE` |
 
 ## Authoring components: the `rst:` prefix
@@ -367,9 +455,9 @@ Every class Roster emits carries an `rst:` prefix — `rst:flex`, `rst:bg-white`
 not write the prefix and never see it.** It exists to stop a host app from
 overriding Roster by accident.
 
-Roster's stylesheet deliberately sits in a layer *below* the host's `utilities`
+Roster's stylesheet deliberately sits in a layer _below_ the host's `utilities`
 so a consumer's `className` can override a component. Without a prefix that also
-means the host wins any class-name *collision* — including on Roster's own
+means the host wins any class-name _collision_ — including on Roster's own
 internal elements, which the consumer never touches:
 
 - an app that used `bg-white` anywhere defeated the Textarea's
@@ -388,7 +476,7 @@ node scripts/prefix-classes.mjs src/components/atoms/Thing/Thing.tsx    # dry ru
 APPLY=1 node scripts/prefix-classes.mjs src/components/atoms/Thing/Thing.tsx
 ```
 
-Two things are deliberately never prefixed. `dark` is the *consuming document's*
+Two things are deliberately never prefixed. `dark` is the _consuming document's_
 theme class, which Roster's own `@custom-variant dark` matches by name — Button
 applies it directly for `surface="dark"`. And any class a consumer passes in,
 such as `AvatarStrip`'s `ringClass`, stays exactly as they wrote it.
@@ -438,19 +526,24 @@ while doing nothing. That is how the focus ring was inert: `Button` asked for
 `ring-ring` and `ring-offset-background`, neither `--color-ring` nor
 `--color-background` existed, and the ring fell back to `currentColor` — a
 white ring on a white page. Nothing caught it, because typecheck cannot read a
-class name and the unit tests assert a class is *present* rather than that it
+class name and the unit tests assert a class is _present_ rather than that it
 does anything.
 
 It compares whole class names, variants included, so a misspelled variant fails
-as readily as a misspelled utility. Ten classes that were already dead when the
-check was written are listed in its `KNOWN_DEAD` map with a reason each; the
-check fails on anything new joining them, and also if one starts emitting, so a
-fix cannot leave a stale entry behind. Run it with `--verbose` to print them.
+as readily as a misspelled utility. It reads component source only — `*.test.*`
+and `*.stories.*` are skipped, because docs blurbs carry CSS code fences that
+would false-positive, so a dead class in a story is not covered. Its
+`KNOWN_DEAD` map is empty — the ten classes it was written to catch have all
+been fixed. The map stays for the case
+where a dead class cannot be fixed in the same sitting: add it there with a
+reason and the build goes green on the state it inherited while still failing on
+anything new. It also fails when a listed class starts emitting, so a fix cannot
+leave a stale entry behind. Run it with `--verbose` to print the list.
 
 `src/lib/utils.test.ts` pins `cn`. `tailwind-merge` has to be configured with the
 prefix or it stops recognising Roster's classes as utilities and silently
 degrades to concatenation: conflicting classes both survive and the winner falls
-back to stylesheet order. The class string still *contains* what you asked for,
+back to stylesheet order. The class string still _contains_ what you asked for,
 so a snapshot passes while the browser is wrong.
 
 ## Building
@@ -461,15 +554,15 @@ npm run build
 
 Output in `dist/`:
 
-| File | Description |
-|---|---|
-| `roster.es.js` | ES module bundle |
-| `roster.umd.js` | UMD bundle |
+| File               | Description                                                         |
+| ------------------ | ------------------------------------------------------------------- |
+| `roster.es.js`     | ES module bundle                                                    |
+| `roster.umd.js`    | UMD bundle                                                          |
 | `data-table.es.js` | DataTable entry, keeping the TanStack import out of the main bundle |
-| `roster.css` | Compiled component styles, in the `roster` cascade layer |
-| `tokens.css` | Design token CSS variables |
-| `preflight.css` | Optional global reset (see Setup) |
-| `index.d.ts` | TypeScript definitions |
+| `roster.css`       | Compiled component styles, in the `roster` cascade layer            |
+| `tokens.css`       | Design token CSS variables                                          |
+| `preflight.css`    | Optional global reset (see Setup)                                   |
+| `index.d.ts`       | TypeScript definitions                                              |
 
 ## Contributing
 
