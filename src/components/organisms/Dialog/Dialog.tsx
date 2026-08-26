@@ -55,7 +55,7 @@ const titleVariants = cva("rst:text-xl rst:font-bold rst:leading-6 rst:text-inhe
 const descriptionVariants = cva("rst:mt-1 rst:text-sm rst:text-inherit rst:opacity-75");
 
 const closeVariants = cva(
-  "rst:inline-flex rst:rounded-md rst:bg-transparent rst:text-inherit rst:opacity-50 rst:hover:opacity-100 rst:focus:outline-none rst:focus:ring-2 rst:focus:ring-primary-500 rst:focus:ring-offset-2 rst:transition-opacity",
+  "rst:inline-flex rst:rounded-md rst:bg-transparent rst:text-inherit rst:opacity-50 rst:hover:opacity-100 rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background rst:transition-opacity",
 );
 
 export interface DialogProps extends VariantProps<typeof dialogVariants> {

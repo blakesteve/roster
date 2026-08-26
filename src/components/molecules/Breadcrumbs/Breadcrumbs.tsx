@@ -88,7 +88,7 @@ const Breadcrumbs = ({
               href={homeHref}
               className={cn(
                 breadcrumbVariants({ variant }),
-                "rst:hover:underline-none",
+                "rst:hover:no-underline",
               )}
               aria-label="Home"
             >

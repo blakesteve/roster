@@ -345,7 +345,7 @@ const Navbar = ({
               {/* User Menu / Custom Actions */}
               {resolvedActions ?? (user ? (
                 <Menu as="div" className="rst:relative rst:ml-2">
-                  <MenuButton className="rst:relative rst:flex rst:rounded-full rst:text-sm rst:focus:outline-none rst:focus:ring-2 rst:focus:ring-primary-500 rst:focus:ring-offset-2 rst:ring-offset-transparent">
+                  <MenuButton className="rst:relative rst:flex rst:rounded-full rst:text-sm rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background">
                     <span className="rst:sr-only">Open user menu</span>
 
                     <Avatar
@@ -379,7 +379,7 @@ const Navbar = ({
                     leaveFrom="rst:transform rst:opacity-100 rst:scale-100"
                     leaveTo="rst:transform rst:opacity-0 rst:scale-95"
                   >
-                    <MenuItems className="rst:absolute rst:right-0 rst:z-50 rst:mt-2 rst:w-48 rst:origin-top-right rst:rounded-md rst:bg-white rst:dark:bg-gray-800 rst:py-1 rst:shadow-lg rst:ring-1 rst:ring-black/5 rst:dark:ring-white/10 rst:focus:outline-none rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700">
+                    <MenuItems className="rst:absolute rst:right-0 rst:z-50 rst:mt-2 rst:w-48 rst:origin-top-right rst:rounded-md rst:bg-white rst:dark:bg-gray-800 rst:py-1 rst:shadow-lg rst:ring-1 rst:ring-black/5 rst:dark:ring-white/10 rst:focus:outline-hidden rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700">
                       <div className="rst:py-1">
                         {hasNotifications && onInboxClick && (
                           <MenuItem>
@@ -520,7 +520,7 @@ const Navbar = ({
             <div data-roster-hamburger className="rst:flex rst:md:hidden">
               <PopoverButton
                 className={cn(
-                  "rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:focus:outline-none rst:focus:ring-2 rst:focus:ring-inset rst:focus:ring-primary-500",
+                  "rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background",
                   surfaceColors.hamburger,
                 )}
               >
@@ -584,7 +584,7 @@ const Navbar = ({
                       )}
                     </div>
                     <div className="rst:-mr-2">
-                      <PopoverButton className="rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:text-gray-400 rst:hover:bg-gray-100 rst:dark:hover:bg-gray-700 rst:hover:text-gray-500 rst:dark:hover:text-white rst:focus:outline-none">
+                      <PopoverButton className="rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:text-gray-400 rst:hover:bg-gray-100 rst:dark:hover:bg-gray-700 rst:hover:text-gray-500 rst:dark:hover:text-white rst:focus:outline-hidden">
                         <span className="rst:sr-only">Close menu</span>
                         <FontAwesomeIcon
                           icon={faXmark}

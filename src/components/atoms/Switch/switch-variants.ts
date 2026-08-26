@@ -1,14 +1,14 @@
 import { cva } from "class-variance-authority";
 
 export const switchTrackVariants = cva(
-  "rst:font-ui rst:group rst:relative rst:inline-flex rst:shrink-0 rst:cursor-pointer rst:rounded-full rst:border-2 rst:border-transparent rst:transition-colors rst:duration-200 rst:ease-in-out rst:focus:outline-none rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:disabled:cursor-not-allowed rst:disabled:opacity-50",
+  "rst:font-ui rst:group rst:relative rst:inline-flex rst:shrink-0 rst:cursor-pointer rst:rounded-full rst:border-2 rst:border-transparent rst:transition-colors rst:duration-200 rst:ease-in-out rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:ring-offset-background rst:disabled:cursor-not-allowed rst:disabled:opacity-50",
   {
     variants: {
       variant: {
-        primary: "rst:bg-gray-200 rst:dark:bg-gray-700 rst:data-[checked]:bg-primary-500 rst:focus-visible:ring-primary-500",
-        success: "rst:bg-gray-200 rst:dark:bg-gray-700 rst:data-[checked]:bg-green-500 rst:focus-visible:ring-green-500",
-        danger:  "rst:bg-gray-200 rst:dark:bg-gray-700 rst:data-[checked]:bg-error-500 rst:focus-visible:ring-error-500",
-        neutral: "rst:bg-gray-200 rst:dark:bg-gray-700 rst:data-[checked]:bg-gray-600 rst:dark:data-[checked]:bg-gray-500 rst:focus-visible:ring-gray-600",
+        primary: "rst:bg-gray-200 rst:dark:bg-gray-700 rst:data-[checked]:bg-primary-500 rst:focus-visible:ring-ring",
+        success: "rst:bg-gray-200 rst:dark:bg-gray-700 rst:data-[checked]:bg-green-500 rst:focus-visible:ring-ring",
+        danger:  "rst:bg-gray-200 rst:dark:bg-gray-700 rst:data-[checked]:bg-error-500 rst:focus-visible:ring-ring",
+        neutral: "rst:bg-gray-200 rst:dark:bg-gray-700 rst:data-[checked]:bg-gray-600 rst:dark:data-[checked]:bg-gray-500 rst:focus-visible:ring-ring",
       },
       size: {
         xs: "rst:h-4 rst:w-7",

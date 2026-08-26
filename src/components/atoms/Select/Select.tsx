@@ -89,7 +89,7 @@ const Select = ({
             <ListboxOptions
               anchor="bottom start"
               className={cn(
-                "rst:w-(--button-width) rst:z-50 rst:rounded-md rst:bg-white rst:dark:bg-gray-800 rst:py-1 rst:text-base rst:shadow-lg rst:ring-1 rst:ring-black/5 rst:dark:ring-gray-700 rst:focus:outline-none rst:sm:text-sm",
+                "rst:w-(--button-width) rst:z-50 rst:rounded-md rst:bg-white rst:dark:bg-gray-800 rst:py-1 rst:text-base rst:shadow-lg rst:ring-1 rst:ring-black/5 rst:dark:ring-gray-700 rst:focus:outline-hidden rst:sm:text-sm",
                 "rst:[--anchor-gap:4px]",
               )}
             >

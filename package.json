@@ -52,7 +52,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/check-prefix.mjs",
+    "build": "tsc -b && vite build && node scripts/check-prefix.mjs && node scripts/check-classes-emit.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
@@ -60,7 +60,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "check:prefix": "node scripts/check-prefix.mjs"
+    "check:prefix": "node scripts/check-prefix.mjs",
+    "check:classes-emit": "node scripts/check-classes-emit.mjs"
   },
   "peerDependencies": {
     "react": "^19.2.0",

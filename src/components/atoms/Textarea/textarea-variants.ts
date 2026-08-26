@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const textareaVariants = cva(
-  "rst:font-ui rst:flex rst:w-full rst:min-h-[80px] rst:rounded-md rst:border rst:py-2.5 rst:px-4 rst:text-sm rst:ring-offset-white rst:dark:ring-offset-gray-950 rst:placeholder:text-gray-400 rst:focus-visible:outline-none rst:focus-visible:ring-2 rst:focus-visible:ring-primary-500 rst:dark:focus-visible:ring-primary-400 rst:disabled:cursor-not-allowed rst:disabled:opacity-50 rst:transition-colors rst:custom-scrollbar",
+  "rst:font-ui rst:flex rst:w-full rst:min-h-[80px] rst:rounded-md rst:border rst:py-2.5 rst:px-4 rst:text-sm rst:ring-offset-background rst:focus-visible:ring-offset-2 rst:placeholder:text-gray-400 rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:disabled:cursor-not-allowed rst:disabled:opacity-50 rst:transition-colors rst:custom-scrollbar",
   {
     variants: {
       variant: {
