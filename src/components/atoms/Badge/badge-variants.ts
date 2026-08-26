@@ -63,11 +63,11 @@ export const badgeVariants = cva(
 
       // --- SOLID ---
       { fill: "solid", variant: "primary", className: "rst:border-transparent rst:bg-primary-500 rst:hover:bg-primary-600 rst:text-white rst:dark:bg-primary-600 rst:dark:hover:bg-primary-500" },
-      { fill: "solid", variant: "orange",  className: "rst:border-transparent rst:bg-orange-500 rst:hover:bg-orange-600 rst:text-white rst:dark:bg-orange-600 rst:dark:hover:bg-orange-500" },
-      { fill: "solid", variant: "teal",    className: "rst:border-transparent rst:bg-teal-500 rst:hover:bg-teal-600 rst:text-white rst:dark:bg-teal-600 rst:dark:hover:bg-teal-500" },
-      { fill: "solid", variant: "purple",  className: "rst:border-transparent rst:bg-purple-500 rst:hover:bg-purple-600 rst:text-white rst:dark:bg-purple-600 rst:dark:hover:bg-purple-500" },
-      { fill: "solid", variant: "amber",   className: "rst:border-transparent rst:bg-amber-400 rst:hover:bg-amber-500 rst:text-black rst:dark:bg-amber-500 rst:dark:hover:bg-amber-400 rst:dark:text-gray-900" },
-      { fill: "solid", variant: "success", className: "rst:border-transparent rst:bg-success-500 rst:hover:bg-success-600 rst:text-white rst:dark:bg-success-600 rst:dark:hover:bg-success-500" },
+      { fill: "solid", variant: "orange",  className: "rst:border-transparent rst:bg-orange-500 rst:hover:bg-orange-400 rst:text-gray-950 rst:dark:bg-orange-600 rst:dark:hover:bg-orange-700 rst:dark:text-white" },
+      { fill: "solid", variant: "teal",    className: "rst:border-transparent rst:bg-teal-500 rst:hover:bg-teal-600 rst:text-gray-950 rst:dark:bg-teal-600 rst:dark:hover:bg-teal-500" },
+      { fill: "solid", variant: "purple",  className: "rst:border-transparent rst:bg-purple-500 rst:hover:bg-purple-400 rst:text-gray-950 rst:dark:bg-purple-600 rst:dark:hover:bg-purple-700 rst:dark:text-white" },
+      { fill: "solid", variant: "amber",   className: "rst:border-transparent rst:bg-amber-400 rst:hover:bg-amber-500 rst:text-gray-950 rst:dark:bg-amber-500 rst:dark:hover:bg-amber-400" },
+      { fill: "solid", variant: "success", className: "rst:border-transparent rst:bg-success-500 rst:hover:bg-success-400 rst:text-gray-950 rst:dark:bg-success-600 rst:dark:hover:bg-success-700 rst:dark:text-white" },
       { fill: "solid", variant: "error",   className: "rst:border-transparent rst:bg-error-500 rst:hover:bg-error-600 rst:text-white rst:dark:bg-error-600 rst:dark:hover:bg-error-500" },
       { fill: "solid", variant: "neutral", className: "rst:border-transparent rst:bg-gray-500 rst:hover:bg-gray-600 rst:text-white rst:dark:bg-gray-600 rst:dark:hover:bg-gray-500" },
 

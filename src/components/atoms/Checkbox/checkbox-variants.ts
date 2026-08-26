@@ -27,7 +27,7 @@ export const checkboxVariants = cva(
       { checked: true, variant: "solid", colorScheme: "orange",  className: "rst:bg-orange-600 rst:border-orange-600 rst:text-white rst:dark:bg-orange-600 rst:dark:border-orange-500" },
       { checked: true, variant: "solid", colorScheme: "teal",    className: "rst:bg-teal-600 rst:border-teal-600 rst:text-white rst:dark:bg-teal-600 rst:dark:border-teal-500" },
       { checked: true, variant: "solid", colorScheme: "purple",  className: "rst:bg-purple-600 rst:border-purple-600 rst:text-white rst:dark:bg-purple-600 rst:dark:border-purple-500" },
-      { checked: true, variant: "solid", colorScheme: "amber",   className: "rst:bg-amber-400 rst:border-amber-400 rst:text-black rst:dark:bg-amber-500 rst:dark:border-amber-500 rst:dark:text-gray-900" },
+      { checked: true, variant: "solid", colorScheme: "amber",   className: "rst:bg-amber-400 rst:border-amber-400 rst:text-gray-950 rst:dark:bg-amber-500 rst:dark:border-amber-500" },
       { checked: true, variant: "solid", colorScheme: "success", className: "rst:bg-success-600 rst:border-success-600 rst:text-white rst:dark:bg-success-600 rst:dark:border-success-500" },
       { checked: true, variant: "solid", colorScheme: "error",   className: "rst:bg-error-600 rst:border-error-600 rst:text-white rst:dark:bg-error-600 rst:dark:border-error-500" },
       { checked: true, variant: "solid", colorScheme: "neutral", className: "rst:bg-gray-600 rst:border-gray-600 rst:text-white rst:dark:bg-gray-600 rst:dark:border-gray-500" },

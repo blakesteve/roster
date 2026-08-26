@@ -52,10 +52,10 @@ export const pillVariants = cva(
 
       // Solid is for when the pill is the loudest thing in its row on purpose.
       { variant: "solid", colorScheme: "primary", className: "rst:bg-primary-500 rst:text-white" },
-      { variant: "solid", colorScheme: "success", className: "rst:bg-success-500 rst:text-white" },
+      { variant: "solid", colorScheme: "success", className: "rst:bg-success-500 rst:text-gray-950" },
       { variant: "solid", colorScheme: "error",   className: "rst:bg-error-500 rst:text-white" },
-      { variant: "solid", colorScheme: "amber",   className: "rst:bg-amber-500 rst:text-amber-950" },
-      { variant: "solid", colorScheme: "info",    className: "rst:bg-info-500 rst:text-white" },
+      { variant: "solid", colorScheme: "amber",   className: "rst:bg-amber-500 rst:text-gray-950" },
+      { variant: "solid", colorScheme: "info",    className: "rst:bg-info-500 rst:text-gray-950" },
       { variant: "solid", colorScheme: "neutral", className: "rst:bg-gray-600 rst:text-white rst:dark:bg-gray-500" },
     ],
     defaultVariants: {
