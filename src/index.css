@@ -181,6 +181,55 @@
 
   --color-black: var(--roster-black, #1e1c1a);
   --color-white: var(--roster-white, #ffffff);
+
+  /* --- Ink on solid fills ---------------------------------------------
+     The readable foreground for each fill, as its own token.
+
+     Solid variants used to hardcode `text-white` or `text-gray-950` per color
+     scheme. That choice is only correct against Roster's palette, and the
+     whole purpose of `--roster-*` is that consumers replace it: three apps
+     remapped a family and got a sub-AA fill, discovered only by measuring by
+     hand. Retinting a ramp should not require knowing which foreground some
+     variant picked.
+
+     Keyed by fill rather than by family, because the right ink flips partway
+     up three of the nine ramps — orange, purple and success all want dark ink
+     at 500 and white at 600. A per-family token would be wrong for those three,
+     which is why Pill and Button legitimately disagreed about `success` before
+     this: Pill fills at 500 and Button at 600, so they reached opposite and
+     equally correct answers.
+
+     Defaults are exactly what each fill carried before, so nothing changes
+     for anyone who does not set one. The single exception is `teal-600`,
+     where Checkbox used white (3.74:1) against Badge and Button's gray-950
+     (5.28:1); the higher one wins.
+     ------------------------------------------------------------------ */
+  --color-amber-400-ink: var(--roster-amber-400-ink, var(--roster-gray-950, #0c0a09));
+  --color-amber-500-ink: var(--roster-amber-500-ink, var(--roster-gray-950, #0c0a09));
+  --color-error-500-ink: var(--roster-error-500-ink, var(--roster-white, #ffffff));
+  --color-error-600-ink: var(--roster-error-600-ink, var(--roster-white, #ffffff));
+  --color-error-700-ink: var(--roster-error-700-ink, var(--roster-white, #ffffff));
+  --color-gray-500-ink: var(--roster-gray-500-ink, var(--roster-white, #ffffff));
+  --color-gray-600-ink: var(--roster-gray-600-ink, var(--roster-white, #ffffff));
+  --color-gray-700-ink: var(--roster-gray-700-ink, var(--roster-white, #ffffff));
+  --color-info-500-ink: var(--roster-info-500-ink, var(--roster-gray-950, #0c0a09));
+  --color-orange-400-ink: var(--roster-orange-400-ink, var(--roster-gray-950, #0c0a09));
+  --color-orange-500-ink: var(--roster-orange-500-ink, var(--roster-gray-950, #0c0a09));
+  --color-orange-600-ink: var(--roster-orange-600-ink, var(--roster-white, #ffffff));
+  --color-orange-700-ink: var(--roster-orange-700-ink, var(--roster-white, #ffffff));
+  --color-primary-500-ink: var(--roster-primary-500-ink, var(--roster-white, #ffffff));
+  --color-primary-600-ink: var(--roster-primary-600-ink, var(--roster-white, #ffffff));
+  --color-primary-700-ink: var(--roster-primary-700-ink, var(--roster-white, #ffffff));
+  --color-purple-400-ink: var(--roster-purple-400-ink, var(--roster-gray-950, #0c0a09));
+  --color-purple-500-ink: var(--roster-purple-500-ink, var(--roster-gray-950, #0c0a09));
+  --color-purple-600-ink: var(--roster-purple-600-ink, var(--roster-white, #ffffff));
+  --color-purple-700-ink: var(--roster-purple-700-ink, var(--roster-white, #ffffff));
+  --color-success-400-ink: var(--roster-success-400-ink, var(--roster-gray-950, #0c0a09));
+  --color-success-500-ink: var(--roster-success-500-ink, var(--roster-gray-950, #0c0a09));
+  --color-success-600-ink: var(--roster-success-600-ink, var(--roster-white, #ffffff));
+  --color-success-700-ink: var(--roster-success-700-ink, var(--roster-white, #ffffff));
+  --color-teal-500-ink: var(--roster-teal-500-ink, var(--roster-gray-950, #0c0a09));
+  --color-teal-600-ink: var(--roster-teal-600-ink, var(--roster-gray-950, #0c0a09));
   --color-cream: var(--roster-cream, #f3eee3);
 
   /* ── Focus ───────────────────────────────────────────────────────────────

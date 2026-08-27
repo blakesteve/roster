@@ -83,7 +83,7 @@ describe("Pill Component", () => {
       const { container } = render(
         <Pill variant="solid" colorScheme="error">Solid</Pill>,
       );
-      expect(container.firstChild).toHaveClass("rst:bg-error-500", "rst:text-white");
+      expect(container.firstChild).toHaveClass("rst:bg-error-500", "rst:text-error-500-ink");
     });
 
     // Amber is light enough that white text on it fails contrast.
@@ -94,7 +94,7 @@ describe("Pill Component", () => {
       /* `gray-950` rather than the old `amber-950`: every dark foreground in the
          library now uses one neutral, which reads 9.20:1 here against amber-950's
          6.97:1. See src/contrast.test.ts. */
-      expect(container.firstChild).toHaveClass("rst:text-gray-950");
+      expect(container.firstChild).toHaveClass("rst:text-amber-500-ink");
     });
   });
 

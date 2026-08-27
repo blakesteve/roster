@@ -62,14 +62,14 @@ export const badgeVariants = cva(
       { fill: "outline", variant: "neutral", className: "rst:border-gray-500 rst:text-gray-600 rst:dark:border-gray-500 rst:dark:text-gray-400" },
 
       // --- SOLID ---
-      { fill: "solid", variant: "primary", className: "rst:border-transparent rst:bg-primary-500 rst:hover:bg-primary-600 rst:text-white rst:dark:bg-primary-600 rst:dark:hover:bg-primary-500" },
-      { fill: "solid", variant: "orange",  className: "rst:border-transparent rst:bg-orange-500 rst:hover:bg-orange-400 rst:text-gray-950 rst:dark:bg-orange-600 rst:dark:hover:bg-orange-700 rst:dark:text-white" },
-      { fill: "solid", variant: "teal",    className: "rst:border-transparent rst:bg-teal-500 rst:hover:bg-teal-600 rst:text-gray-950 rst:dark:bg-teal-600 rst:dark:hover:bg-teal-500" },
-      { fill: "solid", variant: "purple",  className: "rst:border-transparent rst:bg-purple-500 rst:hover:bg-purple-400 rst:text-gray-950 rst:dark:bg-purple-600 rst:dark:hover:bg-purple-700 rst:dark:text-white" },
-      { fill: "solid", variant: "amber",   className: "rst:border-transparent rst:bg-amber-400 rst:hover:bg-amber-500 rst:text-gray-950 rst:dark:bg-amber-500 rst:dark:hover:bg-amber-400" },
-      { fill: "solid", variant: "success", className: "rst:border-transparent rst:bg-success-500 rst:hover:bg-success-400 rst:text-gray-950 rst:dark:bg-success-600 rst:dark:hover:bg-success-700 rst:dark:text-white" },
-      { fill: "solid", variant: "error",   className: "rst:border-transparent rst:bg-error-500 rst:hover:bg-error-600 rst:text-white rst:dark:bg-error-600 rst:dark:hover:bg-error-500" },
-      { fill: "solid", variant: "neutral", className: "rst:border-transparent rst:bg-gray-500 rst:hover:bg-gray-600 rst:text-white rst:dark:bg-gray-600 rst:dark:hover:bg-gray-500" },
+      { fill: "solid", variant: "primary", className: "rst:border-transparent rst:bg-primary-500 rst:hover:bg-primary-600 rst:dark:bg-primary-600 rst:dark:hover:bg-primary-500 rst:text-primary-500-ink rst:hover:text-primary-600-ink rst:dark:text-primary-600-ink rst:dark:hover:text-primary-500-ink" },
+      { fill: "solid", variant: "orange",  className: "rst:border-transparent rst:bg-orange-500 rst:hover:bg-orange-400 rst:dark:bg-orange-600 rst:dark:hover:bg-orange-700 rst:text-orange-500-ink rst:hover:text-orange-400-ink rst:dark:text-orange-600-ink rst:dark:hover:text-orange-700-ink" },
+      { fill: "solid", variant: "teal",    className: "rst:border-transparent rst:bg-teal-500 rst:hover:bg-teal-600 rst:dark:bg-teal-600 rst:dark:hover:bg-teal-500 rst:text-teal-500-ink rst:hover:text-teal-600-ink rst:dark:text-teal-600-ink rst:dark:hover:text-teal-500-ink" },
+      { fill: "solid", variant: "purple",  className: "rst:border-transparent rst:bg-purple-500 rst:hover:bg-purple-400 rst:dark:bg-purple-600 rst:dark:hover:bg-purple-700 rst:text-purple-500-ink rst:hover:text-purple-400-ink rst:dark:text-purple-600-ink rst:dark:hover:text-purple-700-ink" },
+      { fill: "solid", variant: "amber",   className: "rst:border-transparent rst:bg-amber-400 rst:hover:bg-amber-500 rst:dark:bg-amber-500 rst:dark:hover:bg-amber-400 rst:text-amber-400-ink rst:hover:text-amber-500-ink rst:dark:text-amber-500-ink rst:dark:hover:text-amber-400-ink" },
+      { fill: "solid", variant: "success", className: "rst:border-transparent rst:bg-success-500 rst:hover:bg-success-400 rst:dark:bg-success-600 rst:dark:hover:bg-success-700 rst:text-success-500-ink rst:hover:text-success-400-ink rst:dark:text-success-600-ink rst:dark:hover:text-success-700-ink" },
+      { fill: "solid", variant: "error",   className: "rst:border-transparent rst:bg-error-500 rst:hover:bg-error-600 rst:dark:bg-error-600 rst:dark:hover:bg-error-500 rst:text-error-500-ink rst:hover:text-error-600-ink rst:dark:text-error-600-ink rst:dark:hover:text-error-500-ink" },
+      { fill: "solid", variant: "neutral", className: "rst:border-transparent rst:bg-gray-500 rst:hover:bg-gray-600 rst:dark:bg-gray-600 rst:dark:hover:bg-gray-500 rst:text-gray-500-ink rst:hover:text-gray-600-ink rst:dark:text-gray-600-ink rst:dark:hover:text-gray-500-ink" },
 
       // --- STATUS PILL SIZES ---
       { statusBadge: true, size: "xs", className: "rst:min-w-[1.25rem] rst:h-5 rst:px-1" },

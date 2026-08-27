@@ -51,12 +51,12 @@ export const pillVariants = cva(
       { variant: "outline", colorScheme: "neutral", className: "rst:border-gray-300 rst:text-gray-700 rst:dark:border-gray-600 rst:dark:text-gray-300" },
 
       // Solid is for when the pill is the loudest thing in its row on purpose.
-      { variant: "solid", colorScheme: "primary", className: "rst:bg-primary-500 rst:text-white" },
-      { variant: "solid", colorScheme: "success", className: "rst:bg-success-500 rst:text-gray-950" },
-      { variant: "solid", colorScheme: "error",   className: "rst:bg-error-500 rst:text-white" },
-      { variant: "solid", colorScheme: "amber",   className: "rst:bg-amber-500 rst:text-gray-950" },
-      { variant: "solid", colorScheme: "info",    className: "rst:bg-info-500 rst:text-gray-950" },
-      { variant: "solid", colorScheme: "neutral", className: "rst:bg-gray-600 rst:text-white rst:dark:bg-gray-500" },
+      { variant: "solid", colorScheme: "primary", className: "rst:bg-primary-500 rst:text-primary-500-ink" },
+      { variant: "solid", colorScheme: "success", className: "rst:bg-success-500 rst:text-success-500-ink" },
+      { variant: "solid", colorScheme: "error",   className: "rst:bg-error-500 rst:text-error-500-ink" },
+      { variant: "solid", colorScheme: "amber",   className: "rst:bg-amber-500 rst:text-amber-500-ink" },
+      { variant: "solid", colorScheme: "info",    className: "rst:bg-info-500 rst:text-info-500-ink" },
+      { variant: "solid", colorScheme: "neutral", className: "rst:bg-gray-600 rst:dark:bg-gray-500 rst:text-gray-600-ink rst:dark:text-gray-500-ink" },
     ],
     defaultVariants: {
       colorScheme: "neutral",

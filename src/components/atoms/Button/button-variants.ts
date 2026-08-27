@@ -32,14 +32,14 @@ export const buttonVariants = cva(
     },
     compoundVariants: [
       // --- SOLID VARIANTS (Bold Backgrounds) ---
-      { variant: "solid", colorScheme: "primary", className: "rst:bg-primary-600 rst:text-white rst:hover:bg-primary-700 rst:dark:bg-primary-600 rst:dark:hover:bg-primary-500" },
-      { variant: "solid", colorScheme: "orange",  className: "rst:bg-orange-600 rst:text-white rst:hover:bg-orange-700 rst:dark:bg-orange-600 rst:dark:hover:bg-orange-700" },
-      { variant: "solid", colorScheme: "teal",    className: "rst:bg-teal-600 rst:text-gray-950 rst:hover:bg-teal-500 rst:dark:bg-teal-600 rst:dark:hover:bg-teal-500" },
-      { variant: "solid", colorScheme: "purple",  className: "rst:bg-purple-600 rst:text-white rst:hover:bg-purple-700 rst:dark:bg-purple-600 rst:dark:hover:bg-purple-700" },
-      { variant: "solid", colorScheme: "amber",   className: "rst:bg-amber-400 rst:text-gray-950 rst:hover:bg-amber-500 rst:dark:bg-amber-500 rst:dark:hover:bg-amber-400" },
-      { variant: "solid", colorScheme: "success", className: "rst:bg-success-600 rst:text-white rst:hover:bg-success-700 rst:dark:bg-success-600 rst:dark:hover:bg-success-700" },
-      { variant: "solid", colorScheme: "error",   className: "rst:bg-error-600 rst:text-white rst:hover:bg-error-700 rst:dark:bg-error-600 rst:dark:hover:bg-error-500" },
-      { variant: "solid", colorScheme: "neutral", className: "rst:bg-gray-600 rst:text-white rst:hover:bg-gray-700 rst:dark:bg-gray-600 rst:dark:hover:bg-gray-500" },
+      { variant: "solid", colorScheme: "primary", className: "rst:bg-primary-600 rst:hover:bg-primary-700 rst:dark:bg-primary-600 rst:dark:hover:bg-primary-500 rst:text-primary-600-ink rst:hover:text-primary-700-ink rst:dark:hover:text-primary-500-ink" },
+      { variant: "solid", colorScheme: "orange",  className: "rst:bg-orange-600 rst:hover:bg-orange-700 rst:dark:bg-orange-600 rst:dark:hover:bg-orange-700 rst:text-orange-600-ink rst:hover:text-orange-700-ink rst:dark:hover:text-orange-700-ink" },
+      { variant: "solid", colorScheme: "teal",    className: "rst:bg-teal-600 rst:hover:bg-teal-500 rst:dark:bg-teal-600 rst:dark:hover:bg-teal-500 rst:text-teal-600-ink rst:hover:text-teal-500-ink rst:dark:hover:text-teal-500-ink" },
+      { variant: "solid", colorScheme: "purple",  className: "rst:bg-purple-600 rst:hover:bg-purple-700 rst:dark:bg-purple-600 rst:dark:hover:bg-purple-700 rst:text-purple-600-ink rst:hover:text-purple-700-ink rst:dark:hover:text-purple-700-ink" },
+      { variant: "solid", colorScheme: "amber",   className: "rst:bg-amber-400 rst:hover:bg-amber-500 rst:dark:bg-amber-500 rst:dark:hover:bg-amber-400 rst:text-amber-400-ink rst:hover:text-amber-500-ink rst:dark:text-amber-500-ink rst:dark:hover:text-amber-400-ink" },
+      { variant: "solid", colorScheme: "success", className: "rst:bg-success-600 rst:hover:bg-success-700 rst:dark:bg-success-600 rst:dark:hover:bg-success-700 rst:text-success-600-ink rst:hover:text-success-700-ink rst:dark:hover:text-success-700-ink" },
+      { variant: "solid", colorScheme: "error",   className: "rst:bg-error-600 rst:hover:bg-error-700 rst:dark:bg-error-600 rst:dark:hover:bg-error-500 rst:text-error-600-ink rst:hover:text-error-700-ink rst:dark:hover:text-error-500-ink" },
+      { variant: "solid", colorScheme: "neutral", className: "rst:bg-gray-600 rst:hover:bg-gray-700 rst:dark:bg-gray-600 rst:dark:hover:bg-gray-500 rst:text-gray-600-ink rst:hover:text-gray-700-ink rst:dark:hover:text-gray-500-ink" },
 
       // --- SOFT VARIANTS (Crisp Light Mode, Translucent Dark Mode) ---
       { variant: "soft", colorScheme: "primary", className: "rst:bg-primary-50 rst:text-primary-700 rst:hover:bg-primary-100 rst:dark:bg-primary-900/40 rst:dark:text-primary-300 rst:dark:hover:bg-primary-900/60" },
