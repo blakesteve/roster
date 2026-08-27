@@ -13,10 +13,17 @@
  * source: `it.each` expands at runtime, so a static count is wrong by however
  * many table-driven cases the suite has, which here is dozens.
  *
- * Runs from `prepublishOnly`, not from `build`. The suite takes long enough
- * that paying for it on every local build would be a tax on the wrong people,
- * and the only moment this number needs to be right is the moment it is
- * published.
+ * Runs from `prepack`, not from `build`. The suite takes long enough that
+ * paying for it on every local build would be a tax on the wrong people, and
+ * the only moment this number has to be right is the moment the tarball is
+ * built.
+ *
+ * `prepack` rather than `prepublishOnly`, which was the first attempt and
+ * shipped 4.6.1 without the file. `prepublishOnly` fires only on `npm publish`,
+ * so there is no way to check its output short of publishing — which is how a
+ * version went out with the writer wired up and never run. `prepack` runs for
+ * `npm pack` too, so `tar -tzf` on a local tarball answers the question before
+ * anyone publishes anything.
  */
 
 import { execFileSync } from "node:child_process";
