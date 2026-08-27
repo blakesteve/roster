@@ -563,6 +563,40 @@ Output in `dist/`:
 | `tokens.css`       | Design token CSS variables                                          |
 | `preflight.css`    | Optional global reset (see Setup)                                   |
 | `index.d.ts`       | TypeScript definitions                                              |
+| `meta.json`        | Test count and version, written when the tarball is built           |
+
+### What `meta.json` is for
+
+Consumers read this package to describe it. blakeb.dev's case study takes the
+version from `package.json` and counts components by parsing the exports out of
+`dist/*.d.ts`, so both stay correct on their own.
+
+The test count has no such source. `files` is `["dist"]`, so the suite never
+leaves this repo, and the number on that page was a hand-typed literal that
+drifted two minor versions behind while sitting next to a live one.
+
+`scripts/write-meta.mjs` writes it from a real `vitest run`, wired to `prepack`
+rather than `build` — the suite is slow enough that charging every local build
+for it would be a tax on the wrong people, and the only moment the number has to
+be right is when the tarball is built. A static count of `it(` would not work
+anyway, because `it.each` expands at runtime.
+
+`prepack` and not `prepublishOnly`, which was the first attempt. The latter
+fires only on `npm publish`, so its output cannot be inspected without
+publishing — and 4.6.1 went out with the script committed, the hook wired, and
+`meta.json` nowhere in the tarball. Under `prepack`, `npm pack` produces the
+real artifact and the question is answerable in a second:
+
+```bash
+npm pack --pack-destination /tmp
+tar -tzf /tmp/blakesteve-roster-*.tgz | grep meta.json
+```
+
+It refuses to write a zero. A runner that collected nothing reports zero passing
+rather than failing, and "live · 0 tests" would look authoritative while being
+the worst possible answer. `src/write-meta.test.ts` pins that guard and the
+field selection, including the one that bit first: `numTotalTestSuites` reads
+like a file count but counts `describe` blocks — 166 against 92 real files.
 
 ## Contributing
 
