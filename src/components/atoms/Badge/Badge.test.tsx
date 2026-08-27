@@ -19,7 +19,7 @@ describe("Badge Component", () => {
     const badge = container.firstChild as HTMLElement;
 
     // Testing default fill: solid
-    expect(badge).toHaveClass("rst:bg-primary-500", "rst:text-white");
+    expect(badge).toHaveClass("rst:bg-primary-500", "rst:text-primary-500-ink");
   });
 
   it("applies light variant classes with the new crisp colors", () => {
@@ -46,7 +46,7 @@ describe("Badge Component", () => {
     );
     const badge = container.firstChild as HTMLElement;
 
-    expect(badge).toHaveClass("rst:bg-error-500", "rst:text-white");
+    expect(badge).toHaveClass("rst:bg-error-500", "rst:text-error-500-ink");
   });
 
   it("applies outline variant classes", () => {

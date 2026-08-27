@@ -175,19 +175,72 @@ text on it, so it can fail contrast on its own with no help from your app. Every
 solid fill in `Badge`, `Pill` and `Button` is measured against WCAG AA (4.5:1)
 by `src/contrast.test.ts`, at rest **and** on hover, in both themes.
 
-Which foreground a family gets is decided per family, not by a rule:
+`Checkbox` is measured too, at 3:1 rather than 4.5:1 — its tick is a graphical
+object under WCAG 1.4.11, not text. It used to be excluded from the suite
+entirely, which measured it against nothing.
 
-- **White** on primary, error and neutral.
-- **`gray-950`** on teal, success, orange, purple, info and amber — a mid-tone
-  fill cannot carry white. Solid teal with white text measured 2.49:1.
-- Three of them flip: orange, purple and success take dark text in light mode
-  and white in dark, because Badge uses a darker fill in dark mode.
+#### Ink follows the fill
 
-One consequence worth knowing if you retheme. A dark foreground assumes the fill
-stays light. If you retint `--roster-teal-500` substantially darker, solid teal
-becomes near-black on near-black — worse than the white it replaced. The
-`Foundations/Solid fill contrast` story measures the rendered elements rather
-than the tokens, so pointing it at your palette reports _your_ ratios.
+The foreground is a token per fill, not per family:
+
+```css
+/* Only after you have retinted `primary` to something light. Against Roster's
+   own primary these would be 2.08:1 and 2.84:1 — the tokens do not check your
+   arithmetic, they just stop you having to fight a hardcoded `text-white`. */
+:root {
+  --roster-primary-600-ink: #10142e;   /* the fill Button and Checkbox rest on */
+  --roster-primary-500-ink: #10142e;   /* Badge and Pill's rest fill, and where
+                                          Button hovers in dark mode */
+}
+```
+
+Keyed by fill because the right ink flips partway up three of the nine ramps:
+`orange`, `purple` and `success` all want dark ink at 500 and white at 600. A
+per-family token would be wrong for those three — and it is why `Pill` and
+`Button` legitimately disagreed about `success` before this existed. Pill fills
+at 500 and Button at 600, so they reached opposite and equally correct answers.
+
+Every fill carries the foreground it always had, so nothing changes until you set
+one. Hover and dark mode each resolve against *their own* fill, so a scheme whose
+hover moves to a lighter shade picks up that shade's ink automatically.
+
+This matters when you retheme. Roster's own choice of white or `gray-950` was
+made against Roster's colors, and `--roster-*` exists precisely so you can
+replace those. Two apps remapped `primary` and got a sub-AA fill nobody noticed
+until it was measured by hand: BB Blue put white at 3.66:1 on a dark-mode hover,
+and a gold `primary` failed at every state, worst at 2.10:1.
+
+They reached for opposite remedies, which is the clearest argument for the
+token. One moved the *fill* so white stayed readable; the other overrode
+`text-white` from its own stylesheet to darken the *ink*. Only one of those was
+expressible in Roster, and neither survives an upgrade. Setting the ink token is
+the supported way now.
+
+##### Upgrading
+
+**If you override a solid variant's foreground from your own stylesheet, that
+rule stops matching.** Solid Button, Badge, Pill and Checkbox no longer carry
+`rst:text-white` or `rst:text-gray-950`, so a selector naming either matches
+nothing. It fails silently, and it fails *partially*: those classes are still on
+`Card`, `Navbar`, `Dialog`, `ActionBar`, `Avatar`, `LiquidTabs` and
+`Breadcrumbs`, so a themed foreground keeps working there while reverting on
+every solid control. Replace the rule with the token:
+
+```css
+/* before */
+.rst\:bg-primary-600.rst\:text-white { color: #10142e; }
+
+/* after — and it covers hover and dark mode, which the rule above did not */
+:root { --roster-primary-600-ink: #10142e; }
+```
+
+**If you pass a foreground through `className`, add the hover modifier.** Solid
+variants now carry `hover:text-*`, and `tailwind-merge` resolves conflicts per
+modifier, so a bare `rst:text-black` no longer holds through hover. Write
+`rst:text-black rst:hover:text-black`, or set the ink tokens instead.
+
+The `Foundations/Solid fill contrast` story measures rendered elements rather
+than tokens, so pointing it at your palette reports _your_ ratios.
 
 Note also that a solid fill's contrast against the surface _behind_ it is a
 separate requirement (WCAG 1.4.11, 3:1) and is not covered here. Solid amber on

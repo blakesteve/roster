@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Badge } from "./components/atoms/Badge/Badge";
 import { Pill } from "./components/atoms/Pill/Pill";
 import { Button } from "./components/atoms/Button/Button";
+import { Checkbox } from "./components/atoms/Checkbox/Checkbox";
 
 /**
  * A solid fill is the one place a component chooses both a background and the
@@ -47,7 +48,16 @@ function contrast(a: string, b: string): number | null {
  * parser does not read at all. Adding a soft or outline row here means
  * compositing against the parent background first.
  */
-function Measured({ label, children }: { label: string; children: ReactNode }) {
+function Measured({
+  label,
+  bar = 4.5,
+  children,
+}: {
+  label: string;
+  /** 4.5:1 for text; 3:1 where the foreground is a glyph (WCAG 1.4.11). */
+  bar?: number;
+  children: ReactNode;
+}) {
   const [ratio, setRatio] = useState<number | null>(null);
 
   /*
@@ -64,7 +74,7 @@ function Measured({ label, children }: { label: string; children: ReactNode }) {
     setRatio(contrast(style.backgroundColor, style.color));
   }, []);
 
-  const passes = ratio !== null && ratio >= 4.5;
+  const passes = ratio !== null && ratio >= bar;
 
   return (
     <div className="rst:flex rst:flex-col rst:items-start rst:gap-1">
@@ -81,6 +91,9 @@ function Measured({ label, children }: { label: string; children: ReactNode }) {
         }
       >
         {ratio === null ? "—" : `${ratio.toFixed(2)}:1 ${passes ? "✓" : "✗"}`}
+        {bar !== 4.5 && (
+          <span className="rst:font-normal rst:text-gray-400"> (needs {bar})</span>
+        )}
       </span>
     </div>
   );
@@ -98,6 +111,17 @@ const BADGE_VARIANTS = [
 ] as const;
 
 const PILL_SCHEMES = ["primary", "success", "error", "amber", "info", "neutral"] as const;
+
+const CHECKBOX_SCHEMES = [
+  "primary",
+  "orange",
+  "teal",
+  "purple",
+  "amber",
+  "success",
+  "error",
+  "neutral",
+] as const;
 
 const BUTTON_SCHEMES = [
   "primary",
@@ -166,6 +190,23 @@ function Panel({ mode }: { mode: "light" | "dark" }) {
           ))}
         </div>
       </section>
+
+      <section className="rst:flex rst:flex-col rst:gap-2">
+        <h3 className="rst:text-xs rst:font-semibold rst:text-gray-700 rst:dark:text-gray-300">
+          Checkbox · solid, checked
+        </h3>
+        <p className="rst:text-[10px] rst:text-gray-500 rst:dark:text-gray-400">
+          Judged at 3:1. The tick is a graphical object under WCAG 1.4.11, not
+          text, so the 4.5:1 above does not apply to it.
+        </p>
+        <div className="rst:flex rst:flex-wrap rst:gap-4">
+          {CHECKBOX_SCHEMES.map((c) => (
+            <Measured key={c} label={c} bar={3}>
+              <Checkbox colorScheme={c} variant="solid" checked onChange={() => {}} />
+            </Measured>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
@@ -178,7 +219,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Every solid fill, measured as painted. A solid variant picks its own background **and** its own foreground, so it is the one case where a component can fail contrast without any help from the consuming app.\n\nRatios are read from the rendered elements with `getComputedStyle`, not from the token file, so this reflects whatever palette is actually in play. **4.5:1** is WCAG AA for text at these sizes. Nothing here qualifies for the 3:1 large-text allowance \u2014 Badge runs 10-14px, Pill 12-14px, and Button's `lg` size changes only its height, not its 14px type.\n\nEleven pairings were previously below the line — solid teal at 2.49:1, solid info at 2.77:1. They were fixed by changing the foreground rather than the fill, which keeps the saturation and visual weight the solid variant exists for. The trade is that a near-black foreground assumes the fill stays light: a consumer who retints `--roster-teal-500` much darker gets a worse result than the `text-white` this replaced. That is what the live measurement above is for. `src/contrast.test.ts` fails the build if a new variant lands under the threshold.",
+          "Every solid fill, measured as painted. A solid variant picks its own background **and** its own foreground, so it is the one case where a component can fail contrast without any help from the consuming app.\n\nRatios are read from the rendered elements with `getComputedStyle`, not from the token file, so this reflects whatever palette is actually in play. **4.5:1** is WCAG AA for text at these sizes. Nothing here qualifies for the 3:1 large-text allowance \u2014 Badge runs 10-14px, Pill 12-14px, and Button's `lg` size changes only its height, not its 14px type.\n\nEleven pairings were previously below the line — solid teal at 2.49:1, solid info at 2.77:1. They were fixed by changing the foreground rather than the fill, which keeps the saturation and visual weight the solid variant exists for.\n\nThat foreground is no longer hardcoded. Each fill carries `--roster-{fill}-ink`, so a near-black foreground no longer assumes the fill stays light — retint `--roster-teal-500` darker and set `--roster-teal-500-ink` alongside it. Keyed by fill rather than by family because the right ink flips partway up three of the nine ramps: orange, purple and success all want dark ink at 500 and white at 600.\n\nThe measurement above reads rendered elements with `getComputedStyle`, so pointing it at your palette reports your ratios rather than Roster's. `src/contrast.test.ts` fails the build if a variant's default lands under its bar — 4.5:1 here, and 3:1 for `Checkbox`, whose tick is a graphical object under WCAG 1.4.11 rather than text.",
       },
     },
   },

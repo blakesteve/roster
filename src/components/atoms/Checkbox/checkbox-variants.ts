@@ -23,14 +23,14 @@ export const checkboxVariants = cva(
     },
     compoundVariants: [
       // --- SOLID VARIANTS ---
-      { checked: true, variant: "solid", colorScheme: "primary", className: "rst:bg-primary-600 rst:border-primary-600 rst:text-white rst:dark:bg-primary-600 rst:dark:border-primary-500" },
-      { checked: true, variant: "solid", colorScheme: "orange",  className: "rst:bg-orange-600 rst:border-orange-600 rst:text-white rst:dark:bg-orange-600 rst:dark:border-orange-500" },
-      { checked: true, variant: "solid", colorScheme: "teal",    className: "rst:bg-teal-600 rst:border-teal-600 rst:text-white rst:dark:bg-teal-600 rst:dark:border-teal-500" },
-      { checked: true, variant: "solid", colorScheme: "purple",  className: "rst:bg-purple-600 rst:border-purple-600 rst:text-white rst:dark:bg-purple-600 rst:dark:border-purple-500" },
-      { checked: true, variant: "solid", colorScheme: "amber",   className: "rst:bg-amber-400 rst:border-amber-400 rst:text-gray-950 rst:dark:bg-amber-500 rst:dark:border-amber-500" },
-      { checked: true, variant: "solid", colorScheme: "success", className: "rst:bg-success-600 rst:border-success-600 rst:text-white rst:dark:bg-success-600 rst:dark:border-success-500" },
-      { checked: true, variant: "solid", colorScheme: "error",   className: "rst:bg-error-600 rst:border-error-600 rst:text-white rst:dark:bg-error-600 rst:dark:border-error-500" },
-      { checked: true, variant: "solid", colorScheme: "neutral", className: "rst:bg-gray-600 rst:border-gray-600 rst:text-white rst:dark:bg-gray-600 rst:dark:border-gray-500" },
+      { checked: true, variant: "solid", colorScheme: "primary", className: "rst:bg-primary-600 rst:border-primary-600 rst:dark:bg-primary-600 rst:dark:border-primary-500 rst:text-primary-600-ink" },
+      { checked: true, variant: "solid", colorScheme: "orange",  className: "rst:bg-orange-600 rst:border-orange-600 rst:dark:bg-orange-600 rst:dark:border-orange-500 rst:text-orange-600-ink" },
+      { checked: true, variant: "solid", colorScheme: "teal",    className: "rst:bg-teal-600 rst:border-teal-600 rst:dark:bg-teal-600 rst:dark:border-teal-500 rst:text-teal-600-ink" },
+      { checked: true, variant: "solid", colorScheme: "purple",  className: "rst:bg-purple-600 rst:border-purple-600 rst:dark:bg-purple-600 rst:dark:border-purple-500 rst:text-purple-600-ink" },
+      { checked: true, variant: "solid", colorScheme: "amber",   className: "rst:bg-amber-400 rst:border-amber-400 rst:dark:bg-amber-500 rst:dark:border-amber-500 rst:text-amber-400-ink rst:dark:text-amber-500-ink" },
+      { checked: true, variant: "solid", colorScheme: "success", className: "rst:bg-success-600 rst:border-success-600 rst:dark:bg-success-600 rst:dark:border-success-500 rst:text-success-600-ink" },
+      { checked: true, variant: "solid", colorScheme: "error",   className: "rst:bg-error-600 rst:border-error-600 rst:dark:bg-error-600 rst:dark:border-error-500 rst:text-error-600-ink" },
+      { checked: true, variant: "solid", colorScheme: "neutral", className: "rst:bg-gray-600 rst:border-gray-600 rst:dark:bg-gray-600 rst:dark:border-gray-500 rst:text-gray-600-ink" },
 
       // --- SOFT VARIANTS ---
       { checked: true, variant: "soft", colorScheme: "primary", className: "rst:bg-primary-50 rst:border-primary-200 rst:text-primary-700 rst:dark:bg-primary-900/40 rst:dark:border-primary-800/50 rst:dark:text-primary-300" },
