@@ -61,7 +61,8 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "check:prefix": "node scripts/check-prefix.mjs",
-    "check:classes-emit": "node scripts/check-classes-emit.mjs"
+    "check:classes-emit": "node scripts/check-classes-emit.mjs",
+    "prepack": "npm run build && node scripts/write-meta.mjs"
   },
   "peerDependencies": {
     "react": "^19.2.0",
