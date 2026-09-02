@@ -537,6 +537,59 @@
   --roster-scrollbar-track: transparent;
 }
 
+/* ───────────────────────────────────────────────────────────────────────────
+   Input, outline variant
+
+   Button's colors resolve through `--roster-*`, so remapping a palette carries
+   into it. Input's did not: every variant hardcoded its border and background,
+   so a consumer wanting a field border in their own accent had no variant to
+   pick and no token to point at. retrospect wanted a gold hairline at 28% alpha
+   over deep indigo and had to keep a raw <input>.
+
+   FOUR tokens, and all four matter: --roster-input-bg, -border, -text and
+   -border-focus. Setting only the first three is the trap — a dark-first host
+   with no `.dark` class leaves -text at its `:root` default of gray-900, which
+   is near-black text and caret on a dark field, around 1.2:1. Name all four.
+
+   They default to exactly what the outline variant already used, so nothing
+   moves for a consumer who sets none of them. Set them in BOTH scopes:
+   Roster's own `.dark` rule has equal specificity and comes later in this
+   stylesheet, so a `:root`-only override is discarded in dark mode. Same trap
+   as the scrollbar token above.
+
+     :root { --roster-input-bg: …; --roster-input-border: …;
+             --roster-input-text: …; --roster-input-border-focus: …; }
+     .dark { … the same four … }
+
+   Two caveats worth knowing, both shared with the existing --roster-card-*,
+   --roster-nav-* and --roster-footer-* families rather than new here:
+
+   1. These declarations are NOT inside `@layer roster`, so the guarantee at the
+      top of this file — that a consumer's own styles outrank ours — does not
+      hold for them. A host writing `@layer base { :root { … } }` is outranked
+      by this unlayered `.dark`. Set them unlayered too.
+   2. `var(--roster-gray-300, …)` resolves HERE, at `:root`, not on the element.
+      The old `border-gray-300` utility resolved on the input, so a subtree
+      palette override reached it; a subtree override no longer does. Only
+      `:root`-scoped palette remaps carry.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --roster-input-border: var(--roster-gray-300, #d6d3d1);
+  --roster-input-bg: transparent;
+  --roster-input-text: var(--roster-gray-900, #1c1917);
+  --roster-input-border-focus: var(--roster-primary-500, #0f6498);
+}
+
+.dark {
+  --roster-input-border: var(--roster-gray-700, #44403c);
+  --roster-input-text: var(--roster-gray-100, #f5f5f4);
+  /* `-bg` and `-border-focus` are identical to `:root` and are restated on
+     purpose: this block is what a consumer copies, and a half-populated
+     counterpart teaches the wrong shape. */
+  --roster-input-bg: transparent;
+  --roster-input-border-focus: var(--roster-primary-500, #0f6498);
+}
+
 @utility custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--roster-scrollbar-thumb) var(--roster-scrollbar-track);

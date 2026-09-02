@@ -349,6 +349,58 @@ browser honors `scrollbar-width` / `scrollbar-color`, and drops the WebKit
 pseudo-elements for any element that sets either of them, so on anything modern
 `thin` is the whole shape control available.
 
+### Input surface colors
+
+`Input` and `PasswordInput` read four variables in the `outline` variant, so a
+consumer can repaint the field without restating the class list.
+
+```css
+:root {
+  --roster-input-border: #d6d3d1;
+  --roster-input-bg: transparent;
+  --roster-input-text: #1c1917;
+  --roster-input-border-focus: #0f6498;
+}
+.dark {
+  --roster-input-border: #44403c;
+  --roster-input-bg: transparent;
+  --roster-input-text: #f5f5f4;
+  --roster-input-border-focus: #0f6498;
+}
+```
+
+Set them in both scopes, for the same reason the scrollbar thumb needs both:
+Roster's own `.dark` rule has equal specificity and comes later.
+
+The defaults are the values the component used to hardcode, so installing this
+version changes nothing on its own. Placeholder color, the error state, and the
+focus ring are deliberately not on tokens — the ring is already
+`--roster-ring`, and error styling should stay recognizably an error.
+
+One caveat worth knowing before you lean on these: like `--roster-card-*`,
+`--roster-nav-*` and `--roster-footer-*`, they are declared outside
+`@layer roster` and resolved at `:root`. A host that declares its override
+inside `@layer base` is outranked, and an override scoped to a subtree rather
+than the document root will not reach them.
+
+### Control heights
+
+`Button` and `Input` share one size scale, so they line up when set side by side
+in a row:
+
+| `size`    | Height | `Button` padding | `Input` padding |
+| --------- | ------ | ---------------- | --------------- |
+| `sm`      | 36px   | `px-3`           | `px-3`          |
+| `default` | 40px   | `px-4`           | `px-4`          |
+| `lg`      | 44px   | `px-8`           | `px-4`          |
+
+`lg` padding differs on purpose: a button's label is centered and wants the
+room, while an input's text is left-aligned and a wide inset only pushes the
+caret toward the middle of the field.
+
+`Button` also has `xs` and `icon`, which `Input` has no equivalent for.
+`Select` and `Textarea` are not on this scale yet.
+
 ### Components that render links
 
 `Breadcrumbs` renders a plain `<a>` by default, which is right for a static
@@ -408,7 +460,7 @@ function App() {
 | `Disclosure`         | Show/hide toggle using HeadlessUI                                                                            |
 | `Eyebrow`            | Small tracked-out uppercase label above a heading or beside a rule; polymorphic via `as`                     |
 | `InlineCode`         | Inline `<code>` for identifiers in running prose                                                             |
-| `Input`              | Text input with label, error state, and icon slots                                                           |
+| `Input`              | Text input with label, error state, icon slots, and a size scale matching `Button`                           |
 | `LabeledDivider`     | Horizontal rule carrying a label, with an optional trailing count                                            |
 | `Link`               | Styled anchor with variant support                                                                           |
 | `PasswordInput`      | Password field with a show/hide reveal toggle                                                                |
