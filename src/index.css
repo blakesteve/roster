@@ -546,7 +546,13 @@
    pick and no token to point at. retrospect wanted a gold hairline at 28% alpha
    over deep indigo and had to keep a raw <input>.
 
-   FOUR tokens, and all four matter: --roster-input-bg, -border, -text and
+   Read by Input, PasswordInput and Select, in their `outline` variant only.
+   Select takes the first three: focus on its trigger is --roster-ring rather
+   than a border color. One family rather than one per component, because these
+   controls sit in the same row of the same form and are drawn to look
+   identical — being able to repaint one and not the other would be a bug.
+
+   FOUR tokens, and all four matter: --roster-control-bg, -border, -text and
    -border-focus. Setting only the first three is the trap — a dark-first host
    with no `.dark` class leaves -text at its `:root` default of gray-900, which
    is near-black text and caret on a dark field, around 1.2:1. Name all four.
@@ -557,8 +563,8 @@
    stylesheet, so a `:root`-only override is discarded in dark mode. Same trap
    as the scrollbar token above.
 
-     :root { --roster-input-bg: …; --roster-input-border: …;
-             --roster-input-text: …; --roster-input-border-focus: …; }
+     :root { --roster-control-bg: …; --roster-control-border: …;
+             --roster-control-text: …; --roster-control-border-focus: …; }
      .dark { … the same four … }
 
    Two caveats worth knowing, both shared with the existing --roster-card-*,
@@ -574,20 +580,20 @@
       `:root`-scoped palette remaps carry.
    ─────────────────────────────────────────────────────────────────────────── */
 :root {
-  --roster-input-border: var(--roster-gray-300, #d6d3d1);
-  --roster-input-bg: transparent;
-  --roster-input-text: var(--roster-gray-900, #1c1917);
-  --roster-input-border-focus: var(--roster-primary-500, #0f6498);
+  --roster-control-border: var(--roster-gray-300, #d6d3d1);
+  --roster-control-bg: transparent;
+  --roster-control-text: var(--roster-gray-900, #1c1917);
+  --roster-control-border-focus: var(--roster-primary-500, #0f6498);
 }
 
 .dark {
-  --roster-input-border: var(--roster-gray-700, #44403c);
-  --roster-input-text: var(--roster-gray-100, #f5f5f4);
+  --roster-control-border: var(--roster-gray-700, #44403c);
+  --roster-control-text: var(--roster-gray-100, #f5f5f4);
   /* `-bg` and `-border-focus` are identical to `:root` and are restated on
      purpose: this block is what a consumer copies, and a half-populated
      counterpart teaches the wrong shape. */
-  --roster-input-bg: transparent;
-  --roster-input-border-focus: var(--roster-primary-500, #0f6498);
+  --roster-control-bg: transparent;
+  --roster-control-border-focus: var(--roster-primary-500, #0f6498);
 }
 
 @utility custom-scrollbar {

@@ -180,3 +180,19 @@ describe("PasswordInput Component", () => {
     });
   });
 });
+
+describe("PasswordInput className composition", () => {
+  it("keeps the Edge reveal fix when a consumer passes className", () => {
+    /* The component composed `[&_input::-ms-reveal]:hidden` with the
+       consumer's className and then spread `{...props}` AFTER it. Because
+       `className` was read off `props` rather than destructured out, the spread
+       overwrote the composed value and took the Edge fix with it — so the one
+       consumer who styled a PasswordInput would silently get two reveal
+       controls side by side on Edge. Dormant when found; nobody passes one
+       today. */
+    const { container } = render(<PasswordInput className="rst:max-w-xs" />);
+    const wrapper = container.firstElementChild!;
+    expect(wrapper).toHaveClass("rst:max-w-xs");
+    expect(wrapper.className).toMatch(/ms-reveal/);
+  });
+});

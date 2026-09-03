@@ -45,6 +45,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
       variant,
       error,
       errorMessage,
+      className,
       ...props
     },
     ref,
@@ -68,8 +69,12 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
         variant={variant}
         error={error}
         errorMessage={errorMessage}
-        // Edge renders its own reveal control, which would sit next to ours.
-        className={cn("rst:[&_input::-ms-reveal]:hidden", props.className)}
+        /* Edge renders its own reveal control, which would sit next to ours.
+           `className` MUST be destructured out above rather than read off
+           `props`: `{...props}` is spread after this line, so leaving it in
+           there meant a consumer-supplied className overwrote this composed
+           value and silently took the Edge fix with it. */
+        className={cn("rst:[&_input::-ms-reveal]:hidden", className)}
         endIcon={
           revealable ? (
             <button
