@@ -144,6 +144,14 @@ document head:
 If you pass a custom `storageKey`, change the script to match — a mismatch means
 the script and the toggle disagree, which shows up as a flash on every reload.
 
+**Components that render into a portal**, such as `Select`'s menu, are attached
+to `<body>` rather than to the element you wrote them next to. When `.dark` is
+on `<html>` — what `ThemeToggle` does, and what the script above sets up — that
+makes no difference, because the portal is still a descendant. If you scope
+`.dark` to a subtree instead, `Select` detects the nearest `.dark` ancestor of
+the field and carries it across the portal, so the menu follows the same scope
+the trigger is in.
+
 `Navbar`'s `themeMode` prop is a different thing: it describes what palette the
 bar paints _itself_ with. Pair them with `themeMode="auto"` and the nav follows
 whatever `ThemeToggle` sets.
@@ -349,23 +357,24 @@ browser honors `scrollbar-width` / `scrollbar-color`, and drops the WebKit
 pseudo-elements for any element that sets either of them, so on anything modern
 `thin` is the whole shape control available.
 
-### Input surface colors
+### Control surface colors
 
-`Input` and `PasswordInput` read four variables in the `outline` variant, so a
-consumer can repaint the field without restating the class list.
+`Input`, `PasswordInput` and `Select` read these variables in their `outline`
+variant, so a consumer can repaint a form control without restating the class
+list.
 
 ```css
 :root {
-  --roster-input-border: #d6d3d1;
-  --roster-input-bg: transparent;
-  --roster-input-text: #1c1917;
-  --roster-input-border-focus: #0f6498;
+  --roster-control-border: #d6d3d1;
+  --roster-control-bg: transparent;
+  --roster-control-text: #1c1917;
+  --roster-control-border-focus: #0f6498;
 }
 .dark {
-  --roster-input-border: #44403c;
-  --roster-input-bg: transparent;
-  --roster-input-text: #f5f5f4;
-  --roster-input-border-focus: #0f6498;
+  --roster-control-border: #44403c;
+  --roster-control-bg: transparent;
+  --roster-control-text: #f5f5f4;
+  --roster-control-border-focus: #0f6498;
 }
 ```
 
@@ -377,29 +386,69 @@ version changes nothing on its own. Placeholder color, the error state, and the
 focus ring are deliberately not on tokens — the ring is already
 `--roster-ring`, and error styling should stay recognizably an error.
 
+Not every control uses every token: `Select` takes the first three, because
+focus on its trigger is the shared `--roster-ring` rather than a border color.
+One family rather than one per component is deliberate — these controls sit in
+the same row of the same form and are drawn to look identical, so being able to
+repaint one and not the other would be a bug, not a choice.
+
+The `outline` variant is the only one that reads them, in every component, and
+it carries no hover fill. The other variants each name a concrete surface
+(`white`, `soft`, `slate`, `ghost`) and stay opinionated: a token that meant
+something different in each would not be a token.
+
 One caveat worth knowing before you lean on these: like `--roster-card-*`,
 `--roster-nav-*` and `--roster-footer-*`, they are declared outside
 `@layer roster` and resolved at `:root`. A host that declares its override
 inside `@layer base` is outranked, and an override scoped to a subtree rather
 than the document root will not reach them.
 
+### Reaching the control
+
+`className` on a field component lands on the outer `Field` wrapper. That is
+right for layout — width, flex, margins — and useless for anything else: it
+cannot reach the element that draws the border, the height or the font.
+
+Every field therefore has a second prop, **named for the element it reaches**:
+
+| Component      | Wrapper     | The control itself   |
+| -------------- | ----------- | -------------------- |
+| `Input`        | `className` | `inputClassName`     |
+| `PasswordInput`| `className` | `inputClassName`     |
+| `Select`       | `className` | `triggerClassName`   |
+| `Textarea`     | `className` | `textareaClassName`  |
+
+The names differ on purpose. A single `controlClassName` would name a concept
+rather than an element, and it breaks the first time a component has two
+styleable inner parts — a combobox has an input *and* a toggle. `triggerClassName`
+also tells you something true: the thing you are styling is a `<button>`, so
+`placeholder:` and `disabled:` behave differently on it than they would on an
+`<input>`.
+
+These merge last and win, not because they come later in the attribute (CSS
+ignores that) but because `cn` is tailwind-merge and deletes the class they
+conflict with.
+
 ### Control heights
 
-`Button` and `Input` share one size scale, so they line up when set side by side
-in a row:
+`Button`, `Input` and `Select` share one size scale, so they line up when set
+side by side in a row:
 
-| `size`    | Height | `Button` padding | `Input` padding |
-| --------- | ------ | ---------------- | --------------- |
-| `sm`      | 36px   | `px-3`           | `px-3`          |
-| `default` | 40px   | `px-4`           | `px-4`          |
-| `lg`      | 44px   | `px-8`           | `px-4`          |
+| `size`    | Height | `Button` padding | `Input` padding | `Select` padding |
+| --------- | ------ | ---------------- | --------------- | ---------------- |
+| `sm`      | 36px   | `px-3`           | `px-3`          | `pl-3 pr-9`      |
+| `default` | 40px   | `px-4`           | `px-4`          | `pl-4 pr-10`     |
+| `lg`      | 44px   | `px-8`           | `px-4`          | `pl-4 pr-10`     |
 
-`lg` padding differs on purpose: a button's label is centered and wants the
-room, while an input's text is left-aligned and a wide inset only pushes the
-caret toward the middle of the field.
+Padding diverges at `lg` on purpose. A button's label is centered and wants the
+room, while a field's text is left-aligned and a wide inset only pushes the
+caret toward the middle. `Select`'s right padding is clearance for the chevron,
+which is a fixed 14px at every size, so it has nothing to grow for.
 
-`Button` also has `xs` and `icon`, which `Input` has no equivalent for.
-`Select` and `Textarea` are not on this scale yet.
+Unit tests assert the three components resolve to the same height at every
+shared size, so they cannot drift apart. `Button` also has `xs` and `icon`,
+which neither field has an equivalent for. `Textarea` is not on this scale — it
+is multi-line, so the answer there is a min-height rather than a height.
 
 ### Components that render links
 
@@ -468,7 +517,7 @@ function App() {
 | `AvatarStrip`        | Stacked avatar row with overflow chip, dismiss button, trailing slot, and label area                         |
 | `CollapsibleSection` | Clamps any content (prose, chips, image grids) to a fixed height with a fade and expand/collapse toggle      |
 | `LiquidTabs`         | Controlled tab strip with a liquid sliding pill indicator: pill and filled variants                          |
-| `Select`             | Dropdown selector                                                                                            |
+| `Select`             | Dropdown selector, on the same size scale as `Button` and `Input`                                            |
 | `SegmentBar`         | Proportional horizontal bar divided into colored segments with optional legend                               |
 | `Stat`               | A single figure with its label and, optionally, where the figure came from                                   |
 | `Spinner`            | Loading indicator                                                                                            |

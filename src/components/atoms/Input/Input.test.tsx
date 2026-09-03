@@ -201,10 +201,10 @@ describe("Input Component", () => {
       const input = screen.getByRole("textbox");
 
       expect(input).toHaveClass(
-        "rst:border-[var(--roster-input-border)]",
-        "rst:bg-[var(--roster-input-bg)]",
-        "rst:text-[var(--roster-input-text)]",
-        "rst:focus-visible:border-[var(--roster-input-border-focus)]",
+        "rst:border-[var(--roster-control-border)]",
+        "rst:bg-[var(--roster-control-bg)]",
+        "rst:text-[var(--roster-control-text)]",
+        "rst:focus-visible:border-[var(--roster-control-border-focus)]",
       );
       expect(input).not.toHaveClass("rst:border-gray-300");
     });

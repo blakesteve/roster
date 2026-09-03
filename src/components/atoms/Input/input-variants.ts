@@ -27,7 +27,7 @@ export const inputVariants = cva(
            `ghost` each name a specific surface, and a token that meant something
            different in each would not be a token. */
         outline:
-          "rst:border-[var(--roster-input-border)] rst:bg-[var(--roster-input-bg)] rst:text-[var(--roster-input-text)] rst:placeholder:text-gray-400 rst:focus-visible:border-[var(--roster-input-border-focus)] rst:dark:placeholder:text-gray-500",
+          "rst:border-[var(--roster-control-border)] rst:bg-[var(--roster-control-bg)] rst:text-[var(--roster-control-text)] rst:placeholder:text-gray-400 rst:focus-visible:border-[var(--roster-control-border-focus)] rst:dark:placeholder:text-gray-500",
         ghost:
           "rst:border-transparent rst:bg-transparent rst:text-gray-900 rst:placeholder:text-gray-400 rst:hover:bg-gray-100 rst:focus-visible:bg-gray-100 rst:dark:text-gray-100 rst:dark:placeholder:text-gray-500 rst:dark:hover:bg-gray-800 rst:dark:focus-visible:bg-gray-800",
       },

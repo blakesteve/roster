@@ -13,7 +13,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "A highly versatile **Input** atom powered by Headless UI. It supports leading and trailing icons, built-in labels, helper text, error validation states, and full dark mode compliance across all variants.\n\n**Sizing** matches `Button` exactly — `sm` / `default` / `lg` are `h-9` / `h-10` / `h-11` — so a field and a submit button line up in a row. See *Paired With Button*.\n\n**Theming**: the `outline` variant reads four custom properties — `--roster-input-bg`, `-border`, `-text` and `-border-focus` — so a field can take a host palette without forking the variant. Set all four; leaving `-text` out is the one that bites. See *Themed With Tokens*.",
+          "A highly versatile **Input** atom powered by Headless UI. It supports leading and trailing icons, built-in labels, helper text, error validation states, and full dark mode compliance across all variants.\n\n**Sizing** matches `Button` exactly — `sm` / `default` / `lg` are `h-9` / `h-10` / `h-11` — so a field and a submit button line up in a row. See *Paired With Button*.\n\n**Theming**: the `outline` variant reads four custom properties — `--roster-control-bg`, `-border`, `-text` and `-border-focus` — so a field can take a host palette without forking the variant. Set all four; leaving `-text` out is the one that bites. See *Themed With Tokens*.",
       },
     },
   },
@@ -86,7 +86,7 @@ export const DefaultOutlineTokensResolve: Story = {
     /* This story is also the only guard on the var() chain itself.
        `check-classes-emit.mjs` proves a class emits a rule; it cannot prove the
        custom property inside an arbitrary value resolves. A typo such as
-       `--roster-input-bordr` emits valid CSS, goes invalid at computed-value
+       `--roster-control-bordr` emits valid CSS, goes invalid at computed-value
        time, and falls back to `currentcolor` — the same silent failure that
        script was written for. Add a fifth token, extend this story.
 
@@ -273,10 +273,10 @@ export const ThemedWithTokens: Story = {
       style={
         {
           background: "#1a1a2e",
-          "--roster-input-border": "rgba(212,175,55,0.28)",
-          "--roster-input-bg": "rgba(255,255,255,0.02)",
-          "--roster-input-text": "#f5f5f4",
-          "--roster-input-border-focus": "rgba(212,175,55,0.9)",
+          "--roster-control-border": "rgba(212,175,55,0.28)",
+          "--roster-control-bg": "rgba(255,255,255,0.02)",
+          "--roster-control-text": "#f5f5f4",
+          "--roster-control-border-focus": "rgba(212,175,55,0.9)",
         } as React.CSSProperties
       }
     >
@@ -296,7 +296,7 @@ export const ThemedWithTokens: Story = {
     docs: {
       description: {
         story:
-          "The `outline` variant reads four custom properties — `--roster-input-bg`, `-border`, `-text` and `-border-focus` — so a host can restyle the field without forking the variant. Set all four: a dark-first host that sets only the first three leaves `-text` at its light default, which is near-black text on a dark field. This is retrospect's deep indigo with a gold hairline at 28% alpha, which previously had no variant to reach for and no token to point at.\n\nSet them in **both** `:root` and `.dark` in real usage. Roster's own `.dark` rule has equal specificity and comes later in the stylesheet, so a `:root`-only override is discarded in dark mode — the same trap as `--roster-scrollbar-thumb`.\n\nThe other four variants stay opinionated: `white`, `soft`, `slate` and `ghost` each name a specific surface, and a token that meant something different in each would not be a token.",
+          "The `outline` variant reads four custom properties — `--roster-control-bg`, `-border`, `-text` and `-border-focus` — so a host can restyle the field without forking the variant. Set all four: a dark-first host that sets only the first three leaves `-text` at its light default, which is near-black text on a dark field. This is retrospect's deep indigo with a gold hairline at 28% alpha, which previously had no variant to reach for and no token to point at.\n\nSet them in **both** `:root` and `.dark` in real usage. Roster's own `.dark` rule has equal specificity and comes later in the stylesheet, so a `:root`-only override is discarded in dark mode — the same trap as `--roster-scrollbar-thumb`.\n\nThe other four variants stay opinionated: `white`, `soft`, `slate` and `ghost` each name a specific surface, and a token that meant something different in each would not be a token.",
       },
     },
   },

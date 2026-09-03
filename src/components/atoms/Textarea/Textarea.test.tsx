@@ -82,3 +82,55 @@ describe("Textarea Component", () => {
     expect(screen.getByRole("textbox")).toBeDisabled();
   });
 });
+
+describe("Textarea spacing and escape hatch", () => {
+  it("does not space its Field with space-y", () => {
+    /* The bug this guards is invisible and has now shipped twice in this
+       codebase. Headless UI's Field always renders a trailing hidden element,
+       and Tailwind v4 applies `space-y-*` as `margin-block-end` on
+       `:not(:last-child)` — so the control stopped being the last child and
+       took a stray 6px bottom margin against a sibling nobody can see. In a
+       flex or grid parent the Field's box really does end 6px below the
+       control, and an `items-end` row aligns its neighbours to that phantom
+       edge. Input carried the same bug and the same fix; this is the assertion
+       Textarea shipped without. */
+    const { container } = render(<Textarea />);
+    expect(container.firstElementChild!.className).not.toMatch(/space-y/);
+  });
+
+  it("spaces the label and description explicitly instead", () => {
+    /* The other half: without these, removing space-y just deletes the gap.
+       Negative assertions alone would pass on a Field with no spacing at all. */
+    render(<Textarea label="Bio" helperText="Keep it short" />);
+    expect(screen.getByText("Bio")).toHaveClass("rst:mb-1.5");
+    expect(screen.getByText("Keep it short")).toHaveClass("rst:mt-1.5");
+  });
+
+  it("sends className to the wrapper and textareaClassName to the control", () => {
+    /* `<Textarea className="rst:h-40" />` sized the wrapper and left the
+       control alone, with no way to reach it. Three game-verdict sites are
+       working around this with inline `style` and comments explaining it.
+       Both directions asserted so neither can quietly start going to the
+       other place. */
+    const { container } = render(
+      <Textarea className="rst:max-w-xs" textareaClassName="rst:font-mono" />,
+    );
+    const wrapper = container.firstElementChild!;
+    const control = screen.getByRole("textbox");
+
+    expect(wrapper).toHaveClass("rst:max-w-xs");
+    expect(wrapper).not.toHaveClass("rst:font-mono");
+    expect(control).toHaveClass("rst:font-mono");
+    expect(control).not.toHaveClass("rst:max-w-xs");
+  });
+
+  it("lets textareaClassName beat the variant's own resize rule", () => {
+    /* Absence, not ordering: `cn` is tailwind-merge and DELETES the loser, so
+       if it ever degraded to concatenation both classes would be present and an
+       ordering assertion would still pass. */
+    render(<Textarea resize="none" textareaClassName="rst:resize-y" />);
+    const control = screen.getByRole("textbox");
+    expect(control).toHaveClass("rst:resize-y");
+    expect(control).not.toHaveClass("rst:resize-none");
+  });
+});
