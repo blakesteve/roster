@@ -152,6 +152,12 @@ makes no difference, because the portal is still a descendant. If you scope
 the field and carries it across the portal, so the menu follows the same scope
 the trigger is in.
 
+That mechanism carries the `.dark` CLASS across the portal. It does not carry
+custom properties: `--roster-popover-*` and any other variable you scope to a
+container reach the trigger and stop at the portal boundary, because the panel
+is not a descendant of your container. Set those at `:root`. See
+[Floating surface colors](#floating-surface-colors).
+
 `Navbar`'s `themeMode` prop is a different thing: it describes what palette the
 bar paints _itself_ with. Pair them with `themeMode="auto"` and the nav follows
 whatever `ThemeToggle` sets.
@@ -403,6 +409,56 @@ One caveat worth knowing before you lean on these: like `--roster-card-*`,
 inside `@layer base` is outranked, and an override scoped to a subtree rather
 than the document root will not reach them.
 
+### Floating surface colors
+
+`Select`'s menu, `Dialog`'s `white` variant and `Tooltip`'s `themed` variant
+read these, so one palette covers every panel that floats over the page.
+
+```css
+:root {
+  --roster-popover-bg: #fff;
+  --roster-popover-border: #e7e5e4;
+  --roster-popover-text: #1c1917;
+}
+.dark {
+  --roster-popover-bg: #292524;
+  --roster-popover-border: #44403c;
+  --roster-popover-text: #f5f5f4;
+}
+```
+
+Separate from `--roster-control-*` on purpose, and the default is the reason:
+`--roster-control-bg` is `transparent`, which is right for a field drawn on a
+page and actively broken for a panel drawn over one. A control and the menu it
+opens are also legitimately different surfaces in plenty of palettes.
+
+**Set these at `:root`, not on a container.** The menu and the tooltip bubble
+are portaled to `<body>`, so they are not descendants of whatever you rendered
+the component inside: properties set on a wrapper reach the trigger and stop
+there. Any ancestor of `<body>` works — `:root` is simply the one that always
+is, which is also why the `.dark` block below reaches a menu whose `.dark`
+scope `Select` copies across the portal. The result is a themed trigger opening an unthemed panel, which is the
+exact problem this family exists to fix. Set them in both scopes too, for the
+same reason the control family needs both.
+
+Where each component takes them, and why not everywhere:
+
+- **`Select`'s menu** has no variants, so it reads all three outright — panel
+  fill, hairline, and the option labels, which are `text-inherit` so the text
+  token actually reaches the only text in the panel.
+- **`Dialog`** takes them in `white` only. `slate`, `primary` and `glass` each
+  name a specific surface, and a token that meant something different inside
+  each name would not be a token. The defaults are `white`'s previous values
+  exactly, in both schemes, so nothing moves.
+- **`Tooltip`** has a `themed` variant that reads them. Its `dark` and `light`
+  variants are untouched: `dark` is the default, an inverted bubble that
+  deliberately reads the same on a light or a dark page, and pointing that at a
+  token whose light default is white would not theme it, it would delete it.
+
+One appearance change ships with this: `Select`'s menu ring moves from
+`black/5` to `--roster-gray-200` in light mode, which is the hairline the rest
+of the library already draws.
+
 ### Reaching the control
 
 `className` on a field component lands on the outer `Field` wrapper. That is
@@ -411,12 +467,20 @@ cannot reach the element that draws the border, the height or the font.
 
 Every field therefore has a second prop, **named for the element it reaches**:
 
-| Component      | Wrapper     | The control itself   |
-| -------------- | ----------- | -------------------- |
-| `Input`        | `className` | `inputClassName`     |
-| `PasswordInput`| `className` | `inputClassName`     |
-| `Select`       | `className` | `triggerClassName`   |
-| `Textarea`     | `className` | `textareaClassName`  |
+| Component      | Wrapper     | The control itself   | Other inner parts   |
+| -------------- | ----------- | -------------------- | ------------------- |
+| `Input`        | `className` | `inputClassName`     | —                   |
+| `PasswordInput`| `className` | `inputClassName`     | —                   |
+| `Select`       | `className` | `triggerClassName`   | `optionsClassName`  |
+| `Textarea`     | `className` | `textareaClassName`  | —                   |
+
+`Select` is the first component with two styleable inner parts, which is the
+case the naming scheme was chosen for: `optionsClassName` reaches the popup
+panel. One caveat that is a property of Headless UI rather than of this prop —
+the panel's `max-height` and `overflow` are written inline by its `size`
+middleware, so a height passed here lands in the class list and is outranked.
+To cap the menu, set the variable that inline rule reads:
+`optionsClassName="rst:[--anchor-max-height:20rem]"`.
 
 The names differ on purpose. A single `controlClassName` would name a concept
 rather than an element, and it breaks the first time a component has two

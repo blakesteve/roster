@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import { render, screen, fireEvent, within, cleanup } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { Select } from "./Select";
 import { selectTriggerVariants, selectOptionVariants } from "./select-variants";
@@ -466,5 +466,231 @@ describe("Select theming", () => {
        someone introduces --roster-select-*, this is the test that argues. */
     const outline = cn(selectTriggerVariants({ variant: "outline" }));
     expect(outline).not.toMatch(/--roster-select-/);
+  });
+
+  describe("the menu", () => {
+    it("leaves the height to Headless UI rather than restating it", async () => {
+      /* This is the correction, and it is worth writing down. The filed bug
+         said the panel had no max-height and no overflow, so a long list ran
+         off the screen. It never did: Headless UI's `size` middleware writes
+         BOTH inline on this element whenever `anchor` is set —
+         `overflow: "auto"` and `maxHeight: min(var(--anchor-max-height,100vh),
+         Npx)`. A utility class here loses to that inline rule anyway, so
+         adding one bought nothing and implied a fix that was not happening.
+
+         Asserted as an absence, which is the only shape this can take: the day
+         someone re-adds a height utility here, this fails and sends them to
+         the comment explaining why it cannot work. */
+      render(
+        <Select
+          options={Array.from({ length: 60 }, (_, i) => ({
+            value: `v${i}`,
+            label: `Option ${i}`,
+          }))}
+          value={null}
+          onChange={() => {}}
+        />,
+      );
+      fireEvent.click(screen.getByRole("button"));
+      const listbox = await screen.findByRole("listbox");
+
+      const classes = listbox.className.split(/\s+/);
+      expect(classes.some((c) => /^rst:max-h-/.test(c))).toBe(false);
+      expect(classes.some((c) => /^rst:overflow-/.test(c))).toBe(false);
+    });
+
+    it("lets a consumer cap the menu through the variable Headless UI reads", async () => {
+      /* The supported way to get a shorter menu. `--anchor-max-height` is read
+         by that inline `min()` and never set by Headless UI — it is an author
+         hook like `--anchor-gap` — so a consumer sets the VARIABLE, not a
+         height, and the inline rule does the rest. A `max-h-*` through
+         `optionsClassName` would be silently outranked. */
+      render(
+        <Select
+          options={options}
+          value={null}
+          onChange={() => {}}
+          optionsClassName="rst:[--anchor-max-height:20rem]"
+        />,
+      );
+      fireEvent.click(screen.getByRole("button"));
+
+      expect(await screen.findByRole("listbox")).toHaveClass(
+        "rst:[--anchor-max-height:20rem]",
+      );
+    });
+
+    it("draws its surface from the popover tokens, not from hardcoded colors", async () => {
+      /* The half that 4.8.0 did not fix: a consumer could repaint the trigger
+         with `--roster-control-*` and it opened a hardcoded white sheet. */
+      render(<Select options={options} value={null} onChange={() => {}} />);
+      fireEvent.click(screen.getByRole("button"));
+      const listbox = await screen.findByRole("listbox");
+
+      expect(listbox).toHaveClass(
+        "rst:bg-[var(--roster-popover-bg)]",
+        "rst:text-[var(--roster-popover-text)]",
+        "rst:ring-[var(--roster-popover-border)]",
+      );
+      expect(listbox).not.toHaveClass("rst:bg-white");
+      expect(listbox).not.toHaveClass("rst:dark:bg-gray-800");
+      expect(listbox).not.toHaveClass("rst:ring-black/5");
+    });
+
+    it("takes optionsClassName, the escape hatch the panel never had", async () => {
+      /* Deliberately not a height: Headless UI's inline `max-height` outranks
+         any utility, so a `max-h-*` here would land in the class list and do
+         nothing — a test that passed while the feature failed. Padding is
+         something the prop can actually deliver. */
+      render(
+        <Select
+          options={options}
+          value={null}
+          onChange={() => {}}
+          optionsClassName="rst:p-2"
+        />,
+      );
+      fireEvent.click(screen.getByRole("button"));
+
+      expect(await screen.findByRole("listbox")).toHaveClass("rst:p-2");
+    });
+
+    it("lets the surface token reach the option labels", async () => {
+      /* The option labels are the ONLY text in this panel. They used to carry
+         `text-gray-900 dark:text-gray-100`, and a color declaration on the
+         option beats the panel's inherited token — so `--roster-popover-text`
+         was dead for the one thing anyone reads, and darkening the surface
+         produced near-black on near-black. */
+      render(<Select options={options} value={null} onChange={() => {}} />);
+      fireEvent.click(screen.getByRole("button"));
+      const listbox = await screen.findByRole("listbox");
+
+      for (const opt of within(listbox).getAllByRole("option")) {
+        expect(opt).toHaveClass("rst:text-inherit");
+        expect(opt).not.toHaveClass("rst:text-gray-900");
+        expect(opt).not.toHaveClass("rst:dark:text-gray-100");
+      }
+    });
+
+    it("reports invalidity on the trigger, not only in the message", async () => {
+      /* Headless UI's Listbox emits `data-invalid` and no `aria-invalid`, and
+         this component's `...props` land on the inert wrapper div — so there
+         was no route to it from either side, and a screen reader heard the
+         error text on focus while the field never announced as invalid. */
+      render(
+        <Select
+          options={options}
+          value={null}
+          onChange={() => {}}
+          errorMessage="Choose a sky"
+        />,
+      );
+      expect(screen.getByRole("button")).toHaveAttribute("aria-invalid", "true");
+
+      cleanup();
+      render(<Select options={options} value={null} onChange={() => {}} />);
+      expect(screen.getByRole("button")).not.toHaveAttribute("aria-invalid");
+    });
+  });
+
+  describe("describing the trigger", () => {
+    it("renders helper text and points the trigger at it", () => {
+      /* `aria-describedby` passed to the component lands on the wrapper div,
+         which has no role and is inert. Headless UI wires the trigger from the
+         Field's Description context instead, which is the path assistive tech
+         follows — and Select never rendered one. */
+      render(
+        <Select
+          options={options}
+          value={null}
+          onChange={() => {}}
+          helperText="Pick the one you want"
+        />,
+      );
+
+      const trigger = screen.getByRole("button");
+      const description = screen.getByText("Pick the one you want");
+      expect(trigger).toHaveAttribute("aria-describedby", description.id);
+    });
+
+    it("says what is wrong instead of only turning red", () => {
+      /* `error` on its own drew a red ring and no text anywhere, for anyone. */
+      render(
+        <Select
+          options={options}
+          value={null}
+          onChange={() => {}}
+          errorMessage="Choose a sky"
+        />,
+      );
+
+      const trigger = screen.getByRole("button");
+      const message = screen.getByText("Choose a sky");
+      expect(trigger).toHaveAttribute("aria-describedby", message.id);
+      expect(message).toHaveClass("rst:text-error-600");
+    });
+
+    it("treats errorMessage as implying error, so the ring cannot go missing", () => {
+      render(
+        <Select
+          options={options}
+          value={null}
+          onChange={() => {}}
+          variant="outline"
+          errorMessage="Choose a sky"
+        />,
+      );
+
+      /* Same assertion shape as passing `error` explicitly: whatever the
+         error state paints, `errorMessage` must paint it too. */
+      const withMessage = screen.getByRole("button").className;
+      cleanup();
+      render(
+        <Select
+          options={options}
+          value={null}
+          onChange={() => {}}
+          variant="outline"
+          error
+        />,
+      );
+      expect(screen.getByRole("button").className).toBe(withMessage);
+    });
+
+    it("prefers the error message over the helper text", () => {
+      render(
+        <Select
+          options={options}
+          value={null}
+          onChange={() => {}}
+          helperText="Pick the one you want"
+          errorMessage="Choose a sky"
+        />,
+      );
+
+      expect(screen.getByText("Choose a sky")).toBeInTheDocument();
+      expect(screen.queryByText("Pick the one you want")).not.toBeInTheDocument();
+    });
+  });
+
+  it("dims its label and description when disabled", () => {
+    /* `disabled` used to reach the Listbox only, so the Field's
+       DisabledProvider stayed false and the Label never picked up its
+       `peer-disabled` styling. Now that a Description renders under the
+       trigger, the same would have applied to that — a control whose label and
+       helper text look enabled reads as broken rather than unavailable. */
+    render(
+      <Select
+        options={options}
+        value={null}
+        onChange={() => {}}
+        label="Fruit"
+        helperText="Pick one"
+        disabled
+      />,
+    );
+
+    expect(screen.getByText("Fruit").closest("[data-disabled]")).toBeTruthy();
+    expect(screen.getByText("Pick one").closest("[data-disabled]")).toBeTruthy();
   });
 });

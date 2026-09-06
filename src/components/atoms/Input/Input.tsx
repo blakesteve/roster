@@ -65,7 +65,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           rather than to the field. Measured in Storybook: 6px off at every
           size, while both were the correct height. Spacing is set explicitly on
           the label and the description instead. */
-      <Field className={cn("rst:w-full", className)}>
+      /* Same one line as Select's: `disabled` has to reach the Field or its
+         DisabledProvider stays false and the Label and Description never dim.
+         Fixed in both rather than one, because a form with a disabled Input
+         and a disabled Select that grey differently is worse than neither. */
+      <Field disabled={disabled} className={cn("rst:w-full", className)}>
         {label && (
           <Label
             className={cn(

@@ -66,6 +66,13 @@ export const selectTriggerVariants = cva(
   }
 );
 
+/* `text-inherit`, not a hardcoded pair. The option labels are the ONLY text in
+   the panel, and a `color` declaration here always beats the panel's inherited
+   `--roster-popover-text` — so the token was dead for the one thing anyone
+   reads, and a consumer darkening the surface got near-black text on it. Dialog
+   already does this: every child is `text-inherit` so the surface token
+   reaches them. The focus and selected states keep their own colors, because
+   those name a state rather than the surface. */
 export const selectOptionVariants = cva(
   /* Horizontal padding is a floor here, and tracks the trigger's so the label's
      left edge stays put between the closed trigger and the open menu. (The menu
@@ -76,7 +83,7 @@ export const selectOptionVariants = cva(
      popup used to set `text-base sm:text-sm`, which made a menu row 44px on
      mobile and 40px from `sm` up: the exact breakpoint-dependent geometry this
      change removed from the trigger, still alive one element away. */
-  "rst:text-sm rst:group rst:relative rst:cursor-default rst:select-none rst:py-2.5 rst:pl-4 rst:pr-9 rst:transition-colors rst:text-gray-900 rst:dark:text-gray-100 rst:data-focus:bg-primary-100 rst:data-focus:text-primary-900 rst:dark:data-focus:bg-primary-900/30 rst:dark:data-focus:text-primary-100 rst:data-selected:bg-gray-50 rst:dark:data-selected:bg-gray-700/50 rst:data-disabled:opacity-50 rst:data-disabled:cursor-not-allowed",
+  "rst:text-sm rst:group rst:relative rst:cursor-default rst:select-none rst:py-2.5 rst:pl-4 rst:pr-9 rst:transition-colors rst:text-inherit rst:data-focus:bg-primary-100 rst:data-focus:text-primary-900 rst:dark:data-focus:bg-primary-900/30 rst:dark:data-focus:text-primary-100 rst:data-selected:bg-gray-50 rst:dark:data-selected:bg-gray-700/50 rst:data-disabled:opacity-50 rst:data-disabled:cursor-not-allowed",
   {
     variants: {
       size: {
