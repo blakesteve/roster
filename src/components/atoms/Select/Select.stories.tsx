@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect } from "storybook/test";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Select, type SelectOption, type SelectProps } from "./Select";
 import { Input } from "../Input/Input";
 import { Button } from "../Button/Button";
@@ -398,6 +398,179 @@ export const ThemedWithTokens: Story = {
       description: {
         story:
           "`Select`'s `outline` variant reads the same `--roster-control-bg`, `-border` and `-text` custom properties as `Input`'s, rather than a `--roster-select-*` family of its own. These two controls sit in the same row of the same form and are drawn to look identical, so a consumer who could repaint one and not the other would have a bug, not a choice.\n\nThere is no `-border-focus` on the trigger: focus here is the shared `--roster-ring`, not a border color.\n\nSet the tokens in **both** `:root` and `.dark` in real usage. Roster's own `.dark` rule has equal specificity and comes later in the stylesheet, so a `:root`-only override is discarded in dark mode.",
+      },
+    },
+  },
+};
+
+function ScopedPopoverTokens() {
+  useEffect(() => {
+    const el = document.createElement("style");
+    el.textContent = `.rst-story-popover {
+      --roster-popover-bg: #242442;
+      --roster-popover-border: rgba(212,175,55,0.28);
+      --roster-popover-text: #f5f5f4;
+    }`;
+    document.head.appendChild(el);
+    document.documentElement.classList.add("rst-story-popover");
+    return () => {
+      el.remove();
+      document.documentElement.classList.remove("rst-story-popover");
+    };
+  }, []);
+  return null;
+}
+
+/**
+ * The menu is a surface too, and it takes the popover tokens.
+ */
+export const ThemedPopover: Story = {
+  args: {
+    options: fruitOptions,
+    value: null,
+    onChange: () => {},
+  },
+  render: (args) => (
+    <>
+      {/* Scoped to this story and torn down with it. An unscoped
+          `<style>:root{…}` repaints every other Select story on the docs page,
+          because Storybook mounts them all into one DOM — the first version of
+          this story did exactly that.
+
+          The class goes on <html> rather than a wrapper, and that is the whole
+          lesson here: the menu is portaled to <body>, so it is not a descendant
+          of anything the Select is rendered inside. Custom properties set on a
+          container reach the trigger and stop dead at the portal boundary. Any
+          ancestor of the portal target works; `:root` is simply the one that
+          always is. */}
+      <ScopedPopoverTokens />
+      <div
+        className="rst:rounded-xl rst:p-6"
+        style={
+          {
+            background: "#1a1a2e",
+            "--roster-control-border": "rgba(212,175,55,0.28)",
+            "--roster-control-bg": "rgba(255,255,255,0.02)",
+            "--roster-control-text": "#f5f5f4",
+            "--roster-control-border-focus": "rgba(212,175,55,0.9)",
+          } as React.CSSProperties
+        }
+      >
+        <SelectWithState
+          {...args}
+          size="lg"
+          placeholder="Pick a fruit"
+          className="rst:max-w-xs"
+        />
+      </div>
+    </>
+  ),
+  play: async ({ canvasElement }) => {
+    /* This story OPENS the menu, which is the whole reason it exists.
+       `ThemedWithTokens` proves the trigger repaints and stops there, so the
+       docs page implied the control repainted when only half of it did — a
+       themed trigger opening a hardcoded white sheet. */
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getAllByRole("button")[0]);
+
+    /* The panel portals to <body>, so it is outside `canvasElement`. */
+    await waitFor(() => expect(document.querySelector('[role="listbox"]')).toBeTruthy());
+    const panel = document.querySelector('[role="listbox"]') as HTMLElement;
+    const c = getComputedStyle(panel);
+
+    expect(c.backgroundColor).toBe("rgb(36, 36, 66)");
+    expect(c.boxShadow).toContain("rgba(212, 175, 55, 0.28)");
+
+    /* The OPTION's color, not the panel's. Asserting the panel passed happily
+       while the labels underneath it stayed near-black on this surface —
+       about 1.17:1 — because the options carried their own `color`. They
+       inherit now, and this is the assertion that would have caught it. */
+    const option = panel.querySelector('[role="option"]') as HTMLElement;
+    expect(getComputedStyle(option).color).toBe("rgb(245, 245, 244)");
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The menu reads `--roster-popover-bg`, `-border` and `-text` — a family separate from `--roster-control-*`, and shared with `Dialog`'s `white` variant and `Tooltip`'s `themed` variant.\n\nSeparate because the defaults have to differ: `--roster-control-bg` is `transparent`, which is right for a field drawn on a page and wrong for a panel drawn over one. A control and the menu it opens are also legitimately different surfaces in plenty of palettes.\n\n**Set these at `:root`, not on a container.** The menu is portaled to `<body>`, so it is not a descendant of whatever the `Select` is rendered inside: custom properties set on a wrapper reach the trigger and stop at the portal boundary, which produces exactly the half-themed control this family exists to fix. The control tokens in this story are on the wrapper because the trigger is a descendant of it; the popover tokens are in a `:root` rule. Set both in `:root` **and** `.dark` in real usage.",
+      },
+    },
+  },
+};
+
+/**
+ * A list longer than the screen stays reachable.
+ */
+export const LongList: Story = {
+  args: {
+    options: Array.from({ length: 53 }, (_, i) => {
+      const offset = -12 + i * 0.5;
+      const sign = offset < 0 ? "-" : "+";
+      const abs = Math.abs(offset);
+      const hh = String(Math.floor(abs)).padStart(2, "0");
+      const mm = abs % 1 ? "30" : "00";
+      return { value: String(offset), label: `UTC${sign}${hh}:${mm}` };
+    }),
+    value: null,
+    onChange: () => {},
+    placeholder: "Birthplace UTC offset",
+  },
+  render: (args) => <SelectWithState {...args} className="rst:max-w-xs" />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "53 options — every half hour from UTC-12 to UTC+14, taken from a real consumer that had left this field as a native `<select>`.\n\nThe panel is capped at the space between the trigger and the viewport edge, and scrolls inside it. That is **Headless UI's** doing, not Roster's: its `size` middleware writes `overflow: auto` and `max-height: min(var(--anchor-max-height, 100vh), Npx)` inline whenever `anchor` is set. Worth stating plainly because the opposite was filed as a bug and believed for a while — a utility class here would lose to that inline rule regardless.\n\nTo cap it shorter than the viewport allows, set the variable that expression reads rather than a height: `optionsClassName=\"rst:[--anchor-max-height:20rem]\"`.",
+      },
+    },
+  },
+};
+
+/**
+ * Saying what is wrong, not only that something is.
+ */
+export const DescribingTheTrigger: Story = {
+  args: {
+    options: fruitOptions,
+    value: null,
+    onChange: () => {},
+  },
+  render: (args) => (
+    <div className="rst:flex rst:flex-col rst:gap-6 rst:max-w-xs">
+      <SelectWithState
+        {...args}
+        label="Fruit"
+        helperText="Whichever one you would actually eat."
+      />
+      <SelectWithState
+        {...args}
+        label="Fruit"
+        errorMessage="Pick one before continuing."
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    /* The point is the wiring, not the text: `aria-describedby` passed to the
+       component lands on the wrapper div, which has no role and is inert.
+       Headless UI wires the trigger from the Field's Description context, and
+       Select never rendered one — so before this there was no supported way to
+       describe this trigger at all. */
+    const triggers = [
+      ...canvasElement.querySelectorAll<HTMLElement>(
+        'button[aria-haspopup="listbox"]',
+      ),
+    ];
+    for (const t of triggers) {
+      const id = t.getAttribute("aria-describedby");
+      expect(id).toBeTruthy();
+      expect(canvasElement.querySelector(`#${id}`)).toBeTruthy();
+    }
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`helperText` and `errorMessage` match `Input`'s in wording, weight and spacing, because a form with both should not have two dialects of \"this is wrong\".\n\n`errorMessage` implies `error`, so the red ring cannot be set without a message — which is what `error` on its own did: a red outline and no text anywhere, for anyone.",
       },
     },
   },

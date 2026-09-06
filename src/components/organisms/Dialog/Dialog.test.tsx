@@ -53,8 +53,16 @@ describe("Dialog Component", () => {
     const title = await screen.findByText("Test Dialog");
     const panel = title.closest(".rst\\:rounded-2xl");
 
-    // Checks base light mode and native dark mode classes
-    expect(panel).toHaveClass("rst:bg-white", "rst:dark:bg-gray-800");
+    /* The neutral surface reads `--roster-popover-*` rather than naming its
+       own colors, so one class covers both schemes: the token is redefined
+       under `.dark` instead of the class being swapped. The values it resolves
+       to are unchanged — white on gray-800 — which is the point of the
+       defaults. */
+    expect(panel).toHaveClass(
+      "rst:bg-[var(--roster-popover-bg)]",
+      "rst:border-[var(--roster-popover-border)]",
+      "rst:text-[var(--roster-popover-text)]",
+    );
 
     // Checks that typography correctly uses inheritance now instead of hardcoded colors
     expect(title).toHaveClass("rst:text-inherit");

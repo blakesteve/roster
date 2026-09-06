@@ -46,8 +46,9 @@ const meta = {
     },
     variant: {
       control: "inline-radio",
-      options: ["dark", "light"],
-      description: "Visual theme of the tooltip bubble.",
+      options: ["dark", "light", "themed"],
+      description:
+        "Visual theme of the tooltip bubble. `dark` and `light` name a surface; `themed` reads `--roster-popover-*`, the same family Select's menu and Dialog's `white` variant read.",
       table: { defaultValue: { summary: "dark" } },
     },
     delayDuration: {
@@ -339,6 +340,26 @@ export const InstantOpen: Story = {
       description: {
         story:
           "Set `delayDuration={0}` for tooltips that should appear immediately — useful for toolbar buttons where the user is already in pointing mode.",
+      },
+    },
+  },
+};
+
+/**
+ * Taking a host palette instead of naming a surface.
+ */
+export const Themed: Story = {
+  args: {
+    content: "Reads --roster-popover-*",
+    variant: "themed",
+    defaultOpen: true,
+    children: <Button>Hover me</Button>,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A third variant rather than a repaint of the existing two. `dark` is the default: an inverted bubble that deliberately reads the same on a light or a dark page. Pointing that at a token whose light default is white would not theme `Tooltip`, it would delete it — so `dark` and `light` are untouched and this is the opt-in.\n\nThe bubble portals to `<body>`, so set `--roster-popover-*` at `:root`, not on a container: properties set on a wrapper never reach it.",
       },
     },
   },

@@ -220,4 +220,42 @@ describe("Tooltip Component", () => {
     renderTooltip({ defaultOpen: true });
     expect(screen.getByTestId("tooltip-content")).toHaveClass("rst:animate-in");
   });
+
+  describe("the themed variant", () => {
+    it("draws its surface from the popover tokens", () => {
+      /* A third variant rather than a repaint of the existing two. `dark` is
+         an inverted bubble that deliberately reads the same on a light or a
+         dark page; pointing it at a token whose light default is white would
+         not theme Tooltip, it would delete it. */
+      render(
+        <Tooltip content="Hello" variant="themed" defaultOpen>
+          <button>Trigger</button>
+        </Tooltip>,
+      );
+      const bubble = screen.getByTestId("tooltip-content");
+
+      expect(bubble).toHaveClass(
+        "rst:bg-[var(--roster-popover-bg)]",
+        "rst:text-[var(--roster-popover-text)]",
+        "rst:ring-[var(--roster-popover-border)]",
+      );
+      expect(bubble).not.toHaveClass("rst:bg-zinc-900");
+      expect(bubble).not.toHaveClass("rst:bg-white");
+    });
+
+    it("leaves the named variants alone", () => {
+      /* The whole point of adding a variant instead of repointing one: a
+         consumer who sets the popover tokens for their Select menus must not
+         find their tooltips silently repainted. */
+      render(
+        <Tooltip content="Hello" defaultOpen>
+          <button>Trigger</button>
+        </Tooltip>,
+      );
+      const bubble = screen.getByTestId("tooltip-content");
+
+      expect(bubble).toHaveClass("rst:bg-zinc-900", "rst:text-zinc-100");
+      expect(bubble).not.toHaveClass("rst:bg-[var(--roster-popover-bg)]");
+    });
+  });
 });

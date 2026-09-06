@@ -27,8 +27,14 @@ const dialogVariants = cva(
         full: "rst:max-w-[95vw] rst:m-4",
       },
       variant: {
+        /* `white` is the neutral surface, so it is the one that reads
+           `--roster-popover-*`. The tokens default to exactly the values this
+           variant already used, in both schemes, so nothing moves for a
+           consumer who sets none of them. The other three name a specific
+           surface and stay opinionated — a token that meant something
+           different inside each name would not be a token. */
         white:
-          "rst:bg-white rst:border-gray-200 rst:text-gray-900 rst:dark:bg-gray-800 rst:dark:border-gray-700 rst:dark:text-gray-100",
+          "rst:bg-[var(--roster-popover-bg)] rst:border-[var(--roster-popover-border)] rst:text-[var(--roster-popover-text)]",
         slate:
           "rst:bg-gray-700 rst:border-gray-600 rst:text-gray-100 rst:dark:bg-gray-900 rst:dark:border-gray-800",
         primary:

@@ -596,6 +596,66 @@
   --roster-control-border-focus: var(--roster-primary-500, #0f6498);
 }
 
+/* ─── Floating surfaces ───────────────────────────────────────────────────────
+   --roster-popover-bg, -border and -text.
+
+   Read by Select's menu, Dialog's `white` variant and Tooltip's `themed`
+   variant. One family rather than one per component, because these are the
+   same object seen three ways: a panel that floats over the page. A consumer
+   who repaints one and not the others gets a form whose fields, menus and
+   dialogs disagree about what a surface is, which is the bug this exists to
+   prevent — and it was already happening, with a themed trigger opening a
+   hardcoded white sheet.
+
+   Separate from --roster-control-* on purpose, and the reason is the default:
+   --roster-control-bg is `transparent`, which is right for a field drawn on a
+   page and actively broken for a panel drawn over one. A control and the panel
+   it opens are also legitimately different surfaces in plenty of palettes.
+
+   Where each component takes them, and why not everywhere:
+
+   - Select's menu has no variants, so it reads the tokens outright. Its
+     option labels are `text-inherit` for that to mean anything: they used to
+     carry their own color, which beats the panel's inherited one, so the text
+     token was dead for the only text in the panel.
+   - Dialog takes them in `white` only. `slate`, `primary` and `glass` each
+     NAME a specific surface, and a token that meant something different inside
+     each name would not be a token — the same call as Input's four opinionated
+     variants.
+   - Tooltip gets a new `themed` variant rather than having its existing ones
+     repainted. Its default is `dark`: an inverted bubble that deliberately
+     reads the same on light and dark pages. Pointing that at a token whose
+     light default is white would not theme Tooltip, it would delete it.
+
+   Defaults are Dialog's `white` values exactly. Every current surface is
+   unchanged by this except one, stated rather than discovered: Select's menu
+   ring moves from `black/5` to `--roster-gray-200`, which is the same hairline
+   the rest of the library draws.
+
+   Set them in BOTH scopes — the `.dark` rule below has equal specificity and
+   comes later, so a `:root`-only override is discarded in dark mode. Same trap
+   as --roster-control-* above.
+
+   And set them at :root rather than on a container, which matters more here
+   than it does for the control family. Select's menu and Tooltip's bubble are
+   PORTALED to <body>, so they are not descendants of whatever the component
+   was rendered inside: properties set on a wrapper reach the trigger and stop
+   at the portal boundary, which produces the exact half-themed control this
+   family exists to fix. Caught by a story that set them on a wrapper and got a
+   white panel back.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --roster-popover-bg: var(--roster-white, #fff);
+  --roster-popover-border: var(--roster-gray-200, #e7e5e4);
+  --roster-popover-text: var(--roster-gray-900, #1c1917);
+}
+
+.dark {
+  --roster-popover-bg: var(--roster-gray-800, #292524);
+  --roster-popover-border: var(--roster-gray-700, #44403c);
+  --roster-popover-text: var(--roster-gray-100, #f5f5f4);
+}
+
 @utility custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--roster-scrollbar-thumb) var(--roster-scrollbar-track);

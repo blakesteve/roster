@@ -1,5 +1,6 @@
 import React, { Fragment } from "react";
 import {
+  Description,
   Field,
   Label,
   Listbox,
@@ -40,6 +41,22 @@ export interface SelectProps
    * is the escape hatch for the rest. Mirrors `Input`'s `inputClassName`.
    */
   triggerClassName?: string;
+  /**
+   * Classes for the popup panel.
+   *
+   * The escape-hatch rule already covers the wrapper (`className`) and the
+   * control (`triggerClassName`); the panel was the one styleable element with
+   * no way in. Mirrors `Input`'s `inputClassName`.
+   */
+  optionsClassName?: string;
+  /** Supporting text under the trigger. */
+  helperText?: string;
+  /**
+   * The message for an invalid selection. Implies `error`, so a caller cannot
+   * set the red ring and forget to say why — which is what `error` on its own
+   * did: a red outline and no text anywhere for anyone.
+   */
+  errorMessage?: string;
 }
 
 const Select = ({
@@ -53,10 +70,14 @@ const Select = ({
   error,
   className,
   triggerClassName,
+  optionsClassName,
+  helperText,
+  errorMessage,
   label,
   ...props
 }: SelectProps) => {
   const selectedOption = options.find((opt) => opt.value === value);
+  const hasError = !!errorMessage || error;
 
   /* The menu is rendered through a portal attached to <body>, because `anchor`
      implies one and `portal={false}` does not opt out of it. That is fine when
@@ -96,13 +117,20 @@ const Select = ({
        extended `HTMLAttributes<HTMLDivElement>`, so `id`, `data-*` and the
        handlers all typechecked and were then silently dropped on the floor.
 
-       Deliberately NOT claimed: `aria-*`. This is a plain wrapper div with no
-       role, so an `aria-describedby` landing here is inert, and Headless UI
-       wires the trigger's description from the Field's <Description> context
-       rather than from the wrapper's attributes. Select has no `helperText` /
-       `errorMessage` yet, so there is currently no supported way to describe
-       the trigger at all — filed, not fixed here. */
+       Still deliberately NOT claimed: `aria-*`. This is a plain wrapper div
+       with no role, so an `aria-describedby` landing here is inert. The
+       supported route is `helperText` / `errorMessage` below: Headless UI
+       wires the trigger's description from the Field's <Description> context,
+       which is the one path assistive tech actually follows. Before those
+       existed there was no way to describe this trigger at all. */
     <Field
+      /* `disabled` reaches the Field, not only the Listbox. Without it the
+         Field's DisabledProvider stays false, so the Label never picks up its
+         `peer-disabled` styling — and now that there is a Description under
+         the trigger, the same was about to be true of that. A disabled control
+         whose label and helper text look enabled is a control that reads as
+         broken rather than unavailable. */
+      disabled={disabled}
       className={cn("rst:flex rst:flex-col rst:gap-1.5", className)}
       {...props}
     >
@@ -119,8 +147,14 @@ const Select = ({
       >
         <div ref={fieldRef} className="rst:relative">
           <ListboxButton
+            /* Headless UI's `Listbox` emits `data-invalid` and no
+               `aria-invalid`, and this component's `...props` land on the
+               wrapper div, which has no role — so there was no route to it from
+               either side. Without this a screen reader reads the error text on
+               focus but never reports the field as invalid. */
+            aria-invalid={hasError || undefined}
             className={cn(
-              selectTriggerVariants({ variant, size, error }),
+              selectTriggerVariants({ variant, size, error: hasError }),
               triggerClassName,
             )}
           >
@@ -158,8 +192,30 @@ const Select = ({
               anchor="bottom start"
               className={cn(
                 inDarkScope && "dark",
-                "rst:w-(--button-width) rst:z-50 rst:rounded-md rst:bg-white rst:dark:bg-gray-800 rst:py-1 rst:shadow-lg rst:ring-1 rst:ring-black/5 rst:dark:ring-gray-700 rst:focus:outline-hidden",
+                "rst:w-(--button-width) rst:z-50 rst:rounded-md rst:py-1 rst:shadow-lg rst:ring-1 rst:focus:outline-hidden",
+                /* The surface, from `--roster-popover-*`. This panel has no
+                   variants to preserve, so it reads the family outright: a
+                   consumer who repaints the trigger with `--roster-control-*`
+                   was otherwise opening a hardcoded white sheet under it. */
+                "rst:bg-[var(--roster-popover-bg)] rst:text-[var(--roster-popover-text)] rst:ring-[var(--roster-popover-border)]",
                 "rst:[--anchor-gap:4px]",
+                /* No max-height or overflow here, deliberately. Headless UI's
+                   `size` middleware already writes both INLINE on this element
+                   whenever `anchor` is set:
+
+                     Object.assign(floating.style, { overflow: "auto",
+                       maxHeight: `min(var(--anchor-max-height, 100vh), Npx)` })
+
+                   so the panel has always been capped at the space between the
+                   trigger and the viewport edge, and has always scrolled. A
+                   utility class here would lose to that inline rule anyway.
+
+                   `--anchor-max-height` is READ by that expression and never
+                   set by Headless UI — it is an author hook, like
+                   `--anchor-gap`. A consumer who wants a shorter menu than the
+                   viewport allows sets the variable rather than a height:
+                   `optionsClassName="rst:[--anchor-max-height:20rem]"`. */
+                optionsClassName,
               )}
             >
               {options.map((option) => (
@@ -187,6 +243,28 @@ const Select = ({
           </Transition>
         </div>
       </Listbox>
+
+      {/* Identical wording, weight and spacing to Input's, because a form with
+          both should not have two dialects of "this is wrong".
+
+          No `mt-1.5` here even though Input has one: Input's Field is a plain
+          block, so its message needs the margin, while this Field is
+          `flex-col gap-1.5` and already supplies the same 6px. Copying the
+          class across would have doubled it and put the two components'
+          helper text on different baselines — which is the exact thing this
+          comment claims not to do. */}
+      {(helperText || errorMessage) && (
+        <Description
+          className={cn(
+            "rst:text-xs rst:text-left",
+            hasError
+              ? "rst:text-error-600 rst:dark:text-error-400 rst:font-medium"
+              : "rst:text-gray-500 rst:dark:text-gray-400",
+          )}
+        >
+          {errorMessage || helperText}
+        </Description>
+      )}
     </Field>
   );
 };

@@ -4,7 +4,15 @@ import * as RadixTooltip from "@radix-ui/react-tooltip";
 import { cn } from "../../../lib/utils";
 
 export type TooltipPlacement = "top" | "bottom" | "left" | "right";
-export type TooltipVariant = "dark" | "light";
+/**
+ * `dark` is an inverted bubble that deliberately reads the same on a light or
+ * a dark page, and `light` is its counterpart — both NAME a surface, so
+ * neither can be repointed at a consumer token without becoming something
+ * else. `themed` is the opt-in third: it reads `--roster-popover-*`, the same
+ * family Select's menu and Dialog's `white` variant read, so a host palette
+ * covers every floating surface at once.
+ */
+export type TooltipVariant = "dark" | "light" | "themed";
 
 export interface TooltipProps {
   /** The tooltip's popup content. Accepts a string or any React node. */
@@ -76,15 +84,26 @@ export function Tooltip({
               "rst:data-[side=top]:slide-in-from-bottom-2",
               "rst:data-[side=left]:slide-in-from-right-2",
               "rst:data-[side=right]:slide-in-from-left-2",
-              variant === "dark"
-                ? "rst:bg-zinc-900 rst:text-zinc-100 rst:ring-1 rst:ring-white/10"
-                : "rst:bg-white rst:text-zinc-900 rst:ring-1 rst:ring-zinc-200",
+              variant === "themed"
+                ? "rst:bg-[var(--roster-popover-bg)] rst:text-[var(--roster-popover-text)] rst:ring-1 rst:ring-[var(--roster-popover-border)]"
+                : variant === "dark"
+                  ? "rst:bg-zinc-900 rst:text-zinc-100 rst:ring-1 rst:ring-white/10"
+                  : "rst:bg-white rst:text-zinc-900 rst:ring-1 rst:ring-zinc-200",
               className,
             )}
           >
             {content}
             <RadixTooltip.Arrow
-              className={variant === "dark" ? "rst:fill-zinc-900" : "rst:fill-white"}
+              /* The arrow is part of the bubble, so it takes the same fill.
+                 `fill` has no token utility, so the variable is named
+                 directly. */
+              className={
+                variant === "themed"
+                  ? "rst:fill-[var(--roster-popover-bg)]"
+                  : variant === "dark"
+                    ? "rst:fill-zinc-900"
+                    : "rst:fill-white"
+              }
               width={12}
               height={6}
             />
