@@ -2,6 +2,7 @@ import { useCallback, useState, type ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Badge } from "./components/atoms/Badge/Badge";
 import { Pill } from "./components/atoms/Pill/Pill";
+import { Chip } from "./components/atoms/Chip/Chip";
 import { Button } from "./components/atoms/Button/Button";
 import { Checkbox } from "./components/atoms/Checkbox/Checkbox";
 
@@ -171,6 +172,25 @@ function Panel({ mode }: { mode: "light" | "dark" }) {
               <Pill colorScheme={c} variant="solid" size="sm">
                 Shipped
               </Pill>
+            </Measured>
+          ))}
+        </div>
+      </section>
+
+      <section className="rst:flex rst:flex-col rst:gap-2">
+        <h3 className="rst:text-xs rst:font-semibold rst:text-gray-700 rst:dark:text-gray-300">
+          Chip · solid
+        </h3>
+        <div className="rst:flex rst:flex-wrap rst:gap-4">
+          {PILL_SCHEMES.map((c) => (
+            <Measured key={c} label={c}>
+              {/* Same six schemes and the same fills as Pill, so this block
+                  should read as a duplicate of the one above. That is the
+                  check: a Chip that has drifted from its Pill shows up here as
+                  a different number beside the same name. */}
+              <Chip colorScheme={c} variant="solid" size="sm" onRemove={() => {}}>
+                Shipped
+              </Chip>
             </Measured>
           ))}
         </div>
