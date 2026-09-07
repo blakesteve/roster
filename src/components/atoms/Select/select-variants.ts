@@ -17,8 +17,10 @@ export const selectTriggerVariants = cva(
       variant: {
         white:
           "rst:bg-white rst:text-gray-900 rst:ring-gray-300 rst:hover:bg-gray-50 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:ring-gray-700 rst:dark:hover:bg-gray-700",
+        /* Same reasoning as Input's and Textarea's `soft`; the trigger draws a
+           ring rather than a border, so the token lands there. */
         soft:
-          "rst:bg-gray-100 rst:text-gray-900 rst:ring-transparent rst:hover:bg-gray-200 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:hover:bg-gray-700",
+          "rst:bg-gray-100 rst:text-gray-900 rst:ring-[var(--roster-control-border)] rst:hover:bg-gray-200 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:hover:bg-gray-700",
         slate:
           "rst:bg-gray-700 rst:text-gray-100 rst:ring-transparent rst:hover:bg-gray-600 rst:dark:bg-gray-900 rst:dark:text-gray-100 rst:dark:hover:bg-gray-800",
         /* The default variant, and the only one that reads tokens, exactly as

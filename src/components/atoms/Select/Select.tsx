@@ -134,8 +134,11 @@ const Select = ({
       className={cn("rst:flex rst:flex-col rst:gap-1.5", className)}
       {...props}
     >
+      {/* The label reads `--roster-control-text` rather than `text-inherit`,
+          which fell to the UA default on a page that sets no body color. See
+          Input's label for the full reasoning. */}
       {label && (
-        <Label className="rst:block rst:text-sm rst:font-medium rst:text-inherit rst:text-left">
+        <Label className="rst:block rst:text-sm rst:font-medium rst:text-[var(--roster-control-text)] rst:text-left">
           {label}
         </Label>
       )}

@@ -35,10 +35,37 @@ const dialogVariants = cva(
            different inside each name would not be a token. */
         white:
           "rst:bg-[var(--roster-popover-bg)] rst:border-[var(--roster-popover-border)] rst:text-[var(--roster-popover-text)]",
+        /* These two carry their own ring, because they are the two that invert.
+           `--roster-ring` and `--roster-ring-offset` are declared once at
+           `:root` and once under `.dark`, so they follow the PAGE — and on a
+           light page that hands a dark panel the light-mode ring, primary-500
+           on gray-700: 1.61:1, which is not a focus indicator. A consumer found
+           it by saying the focus "was just not noticeable".
+
+           So the variant states what it knows: it is dark regardless of the
+           page. primary-400 gives 3.80 on the light-mode slate and 6.47 on the
+           dark one, 4.04 and 6.75 on `primary`. The offset is set to each
+           surface's own color so the gap between border and ring reads as a
+           gap rather than as a stray white or black line — the offset was the
+           most visible part of the indicator before, at 10.27:1 against slate
+           while the ring itself sat at 1.61.
+
+           The `--roster-control-*` trio rides along for the same reason, and
+           fixing only the ring would have been worse than fixing neither: an
+           `outline` field on these panels draws `--roster-control-text`, which
+           is `:root`'s gray-900 on a light page — 1.70:1 on slate, 1.60:1 on
+           primary. That has been true of `Input` since 4.8.0 and was about to
+           become true of `Textarea`, which previously drew its own white box
+           and so escaped it. A correct focus ring around illegible text is not
+           an improvement. Inverted values give 9.42 / 16.03 for the text and
+           4.07 / 6.93 for the border.
+
+           `white` and `glass` are not here on purpose: both follow the page's
+           scheme, so the page-level tokens are already right for them. */
         slate:
-          "rst:bg-gray-700 rst:border-gray-600 rst:text-gray-100 rst:dark:bg-gray-900 rst:dark:border-gray-800",
+          "rst:bg-gray-700 rst:border-gray-600 rst:text-gray-100 rst:dark:bg-gray-900 rst:dark:border-gray-800 rst:[--roster-ring:var(--roster-primary-400,#5ea3de)] rst:[--roster-ring-offset:var(--roster-gray-700,#44403c)] rst:dark:[--roster-ring-offset:var(--roster-gray-900,#1c1917)] rst:[--roster-control-text:var(--roster-gray-100,#f5f5f4)] rst:[--roster-control-border:var(--roster-gray-400,#a8a29e)] rst:[--roster-control-border-focus:var(--roster-primary-400,#5ea3de)]",
         primary:
-          "rst:bg-primary-700 rst:border-primary-600 rst:text-white rst:dark:bg-primary-950 rst:dark:border-primary-900",
+          "rst:bg-primary-700 rst:border-primary-600 rst:text-white rst:dark:bg-primary-950 rst:dark:border-primary-900 rst:[--roster-ring:var(--roster-primary-400,#5ea3de)] rst:[--roster-ring-offset:var(--roster-primary-700,#084063)] rst:dark:[--roster-ring-offset:var(--roster-primary-950,#021724)] rst:[--roster-control-text:var(--roster-gray-100,#f5f5f4)] rst:[--roster-control-border:var(--roster-gray-400,#a8a29e)] rst:[--roster-control-border-focus:var(--roster-primary-400,#5ea3de)]",
         glass:
           "rst:bg-white/80 rst:border-white/20 rst:backdrop-blur-xl rst:text-gray-900 rst:dark:bg-slate-900/80 rst:dark:border-slate-700/50 rst:dark:text-white rst:shadow-2xl rst:dark:shadow-black/50",
       },

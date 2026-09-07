@@ -557,8 +557,9 @@
    with no `.dark` class leaves -text at its `:root` default of gray-900, which
    is near-black text and caret on a dark field, around 1.2:1. Name all four.
 
-   They default to exactly what the outline variant already used, so nothing
-   moves for a consumer who sets none of them. Set them in BOTH scopes:
+   Three of the four still default to what the outline variant already used.
+   `--roster-control-border` does not: the 1.4.11 pass moved it two ramp steps,
+   so a consumer who sets none of these WILL see heavier field borders. Set them in BOTH scopes:
    Roster's own `.dark` rule has equal specificity and comes later in this
    stylesheet, so a `:root`-only override is discarded in dark mode. Same trap
    as the scrollbar token above.
@@ -580,20 +581,47 @@
       `:root`-scoped palette remaps carry.
    ─────────────────────────────────────────────────────────────────────────── */
 :root {
-  --roster-control-border: var(--roster-gray-300, #d6d3d1);
+  /* gray-500, not gray-300, and the reason is 1.4.11: a control has to be
+     identifiable from its surroundings at 3:1. gray-300 reached 1.49 on white
+     and 1.43 on the gray-50 page — a hairline, not a boundary. gray-500 gives
+     5.99 / 5.74 / 5.49 against white, the page and the `soft` fill.
+
+     The two scopes carry DIFFERENT values, which is not the shape the other
+     three control tokens use. No single step of this ramp clears 3:1 both
+     ways: gray-500 falls to 2.53 against the gray-800 Dialog, and gray-400
+     only reaches 2.52 against white. A border has to move opposite its
+     surface, so this one is per-scheme by necessity.
+
+     Same call 4.6.0 made for solid fills, applied to the non-text half.
+     Consumers who want the old hairline set the token. */
+  --roster-control-border: var(--roster-gray-500, #65635f);
   --roster-control-bg: transparent;
   --roster-control-text: var(--roster-gray-900, #1c1917);
   --roster-control-border-focus: var(--roster-primary-500, #0f6498);
 }
 
 .dark {
-  --roster-control-border: var(--roster-gray-700, #44403c);
+  /* gray-400 here, not gray-500. gray-700 was 1.48 against the gray-800
+     Dialog — the surface a field is most likely to sit on — and gray-500 only
+     reaches 2.53 there. gray-400 gives 7.83 / 6.93 / 6.01 against the gray-950
+     page, the gray-900 Card and that Dialog. */
+  --roster-control-border: var(--roster-gray-400, #a8a29e);
   --roster-control-text: var(--roster-gray-100, #f5f5f4);
-  /* `-bg` and `-border-focus` are identical to `:root` and are restated on
-     purpose: this block is what a consumer copies, and a half-populated
-     counterpart teaches the wrong shape. */
+  /* `-bg` is identical to `:root` and is restated on purpose: this block is
+     what a consumer copies, and a half-populated counterpart teaches the wrong
+     shape. `-border` and `-border-focus` genuinely differ per scheme. */
   --roster-control-bg: transparent;
-  --roster-control-border-focus: var(--roster-primary-500, #0f6498);
+  /* primary-400, a step lighter, for the same reason `--roster-ring` lightens
+     here: primary-500 on a dark ground is 3.10:1 on the page and 2.38:1 on a
+     gray-800 Dialog, well under the 3:1 a control boundary needs. primary-400
+     gives 7.31 and 5.61.
+
+     Worth being exact about what this does and does not achieve. The unfocused
+     border is gray-400 at 7.83 / 6.93 / 6.01, so focus is not a step UP in
+     contrast — it is a hue change at comparable contrast, and the ring is what
+     actually announces focus. The old value was a step DOWN, to below the
+     threshold, which is the part that was broken. */
+  --roster-control-border-focus: var(--roster-primary-400, #5ea3de);
 }
 
 /* ─── Floating surfaces ───────────────────────────────────────────────────────

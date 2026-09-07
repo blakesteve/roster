@@ -15,7 +15,13 @@ export const checkboxVariants = cva(
       },
       checked: {
         true: "",
-        false: "rst:bg-white rst:border-gray-300 rst:dark:bg-gray-900 rst:dark:border-gray-700 rst:text-transparent",
+        /* The unchecked box reads `--roster-control-border` like every other
+           field. It was gray-300 / gray-700 — 1.49:1 on white and 1.70:1 on a
+           gray-900 surface — which is the same hairline the 1.4.11 pass raised
+           on Input, Textarea and Select, on a control 1.4.11 covers at least as
+           squarely. Left alone it would have sat next to an `outline` field
+           with a visibly lighter edge. */
+        false: "rst:bg-white rst:border-[var(--roster-control-border)] rst:dark:bg-gray-900 rst:text-transparent",
       },
       colorScheme: {
         primary: "", orange: "", teal: "", purple: "", amber: "", success: "", error: "", neutral: "",

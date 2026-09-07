@@ -103,11 +103,15 @@ export const DefaultOutlineTokensResolve: Story = {
     expect(dark).toBeTruthy();
 
     const l = getComputedStyle(light);
-    expect(l.borderTopColor).toBe("rgb(214, 211, 209)"); // gray-300
+    /* gray-500 light, gray-400 dark, since the 1.4.11 pass. It used to be
+       gray-300 / gray-700, which were 1.49:1 and 1.48:1 — hairlines rather
+       than identifiable boundaries. The two scopes differ because no single
+       step of the ramp clears 3:1 against both a white page and a dark one. */
+    expect(l.borderTopColor).toBe("rgb(101, 99, 95)"); // gray-500
     expect(l.color).toBe("rgb(28, 25, 23)"); // gray-900
 
     const d = getComputedStyle(dark);
-    expect(d.borderTopColor).toBe("rgb(68, 64, 60)"); // gray-700
+    expect(d.borderTopColor).toBe("rgb(168, 162, 158)"); // gray-400
     expect(d.color).toBe("rgb(245, 245, 244)"); // gray-100
   },
 };

@@ -56,7 +56,9 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           `display: none` so it is not a flex item. */
       <Field className={cn("rst:w-full", className)}>
         {label && (
-          <Label className="rst:block rst:text-sm rst:font-medium rst:leading-none rst:text-gray-900 rst:dark:text-gray-100 rst:peer-disabled:cursor-not-allowed rst:peer-disabled:opacity-70 rst:text-left rst:mb-1.5">
+          /* `--roster-control-text`, matching Input's label — see the comment
+             there for why not `text-inherit`. */
+          <Label className="rst:block rst:text-sm rst:font-medium rst:leading-none rst:text-[var(--roster-control-text)] rst:peer-disabled:cursor-not-allowed rst:peer-disabled:opacity-70 rst:text-left rst:mb-1.5">
             {label}
           </Label>
         )}

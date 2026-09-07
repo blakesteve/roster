@@ -72,9 +72,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <Field disabled={disabled} className={cn("rst:w-full", className)}>
         {label && (
           <Label
+            /* `--roster-control-text`, not `text-inherit` and not a hardcoded
+               pair. `text-inherit` followed the surface correctly and fell to
+               the UA default black on any page that sets no body color — which
+               Roster does not — so a dark page rendered black on gray-950 at
+               1.06:1. The token defaults to the gray-900 / gray-100 this label
+               always used and is overridden by surfaces that invert, so it is
+               right in both directions. A label sits on the same surface as
+               the value beneath it, so it wants the same token. */
             className={cn(
               "rst:block rst:text-sm rst:font-medium rst:leading-none rst:text-left rst:mb-1.5 rst:transition-colors",
-              "rst:text-gray-900 rst:dark:text-gray-100",
+              "rst:text-[var(--roster-control-text)]",
               "rst:peer-disabled:cursor-not-allowed rst:peer-disabled:opacity-70",
             )}
           >
