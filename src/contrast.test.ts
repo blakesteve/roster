@@ -3,6 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { badgeVariants } from "./components/atoms/Badge/badge-variants";
 import { pillVariants } from "./components/atoms/Pill/pill-variants";
+import { chipVariants } from "./components/atoms/Chip/chip-variants";
 import { buttonVariants } from "./components/atoms/Button/button-variants";
 import { checkboxVariants } from "./components/atoms/Checkbox/checkbox-variants";
 
@@ -200,6 +201,14 @@ const COMPONENTS = [
     expected: 6,
     resolve: (scheme: string) =>
       pillVariants({ variant: "solid", colorScheme: scheme as never }),
+  },
+  {
+    name: "Chip",
+    file: "components/atoms/Chip/chip-variants.ts",
+    key: "colorScheme" as const,
+    expected: 6,
+    resolve: (scheme: string) =>
+      chipVariants({ variant: "solid", colorScheme: scheme as never }),
   },
   {
     name: "Button",

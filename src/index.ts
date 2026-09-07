@@ -18,6 +18,8 @@ export * from './components/atoms/Input/input-variants';
 export * from './components/atoms/Link/Link';
 export * from './components/atoms/Link/link-variants';
 export * from './components/atoms/PasswordInput/PasswordInput';
+export * from './components/atoms/Chip/Chip';
+export * from './components/atoms/Chip/chip-variants';
 export * from './components/atoms/Pill/Pill';
 export * from './components/atoms/Pill/pill-variants';
 export * from './components/atoms/Eyebrow/Eyebrow';

@@ -186,7 +186,7 @@ they wrap your content and that text is not Roster's to restyle. `Eyebrow`,
 
 `solid` is the one variant where a component picks both the background and the
 text on it, so it can fail contrast on its own with no help from your app. Every
-solid fill in `Badge`, `Pill` and `Button` is measured against WCAG AA (4.5:1)
+solid fill in `Badge`, `Pill`, `Chip` and `Button` is measured against WCAG AA (4.5:1)
 by `src/contrast.test.ts`, at rest **and** on hover, in both themes.
 
 `Checkbox` is measured too, at 3:1 rather than 4.5:1 — its tick is a graphical
@@ -606,6 +606,7 @@ function App() {
 | `Button`             | Primary interactive element: solid, soft, outline, ghost, link variants                                      |
 | `Card`               | Bordered surface container                                                                                   |
 | `Checkbox`           | Accessible checkbox with label support                                                                       |
+| `Chip`               | The interactive one of Badge / Pill / Chip: removable, selectable, or both                                   |
 | `Disclosure`         | Show/hide toggle using HeadlessUI                                                                            |
 | `Eyebrow`            | Small tracked-out uppercase label above a heading or beside a rule; polymorphic via `as`                     |
 | `InlineCode`         | Inline `<code>` for identifiers in running prose                                                             |
