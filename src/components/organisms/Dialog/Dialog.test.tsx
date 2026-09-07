@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { Dialog } from "./Dialog";
 
@@ -99,5 +99,62 @@ describe("Dialog Component", () => {
     // The panel should have the blur and semi-transparent backgrounds for both themes
     expect(panel).toHaveClass("rst:backdrop-blur-xl");
     expect(panel).toHaveClass("rst:bg-white/80", "rst:dark:bg-slate-900/80");
+  });
+
+  describe("the ring on inverting variants", () => {
+    it("gives slate its own ring and offset instead of the page's", () => {
+      /* `--roster-ring` follows the page, and `slate` is dark regardless of
+         the page. On a light page that meant primary-500 on gray-700 —
+         1.61:1, no usable focus indicator — while the white offset behind it
+         sat at 10.27:1, so the gap was the most visible part. */
+      render(<Dialog {...defaultProps} variant="slate" />);
+      const panel = screen.getByText("Test Dialog").closest(".rst\\:rounded-2xl");
+
+      expect(panel).toHaveClass(
+        "rst:[--roster-ring:var(--roster-primary-400,#5ea3de)]",
+        "rst:[--roster-ring-offset:var(--roster-gray-700,#44403c)]",
+        "rst:dark:[--roster-ring-offset:var(--roster-gray-900,#1c1917)]",
+      );
+    });
+
+    it("gives primary its own too", () => {
+      render(<Dialog {...defaultProps} variant="primary" />);
+      const panel = screen.getByText("Test Dialog").closest(".rst\\:rounded-2xl");
+
+      expect(panel).toHaveClass(
+        "rst:[--roster-ring:var(--roster-primary-400,#5ea3de)]",
+        "rst:[--roster-ring-offset:var(--roster-primary-700,#084063)]",
+      );
+    });
+
+    it("inverts the control tokens too, not only the ring", () => {
+      /* Fixing the ring alone would have been worse than fixing neither: an
+         `outline` field on these panels draws `--roster-control-text`, which is
+         `:root`'s gray-900 on a light page — 1.70:1 on slate. A correct focus
+         ring around illegible text is not an improvement. */
+      for (const variant of ["slate", "primary"] as const) {
+        cleanup();
+        render(<Dialog {...defaultProps} variant={variant} />);
+        const panel = screen.getByText("Test Dialog").closest(".rst\\:rounded-2xl");
+        expect(panel).toHaveClass(
+          "rst:[--roster-control-text:var(--roster-gray-100,#f5f5f4)]",
+          "rst:[--roster-control-border:var(--roster-gray-400,#a8a29e)]",
+          "rst:[--roster-control-border-focus:var(--roster-primary-400,#5ea3de)]",
+        );
+      }
+    });
+
+    it("leaves the variants that follow the page alone", () => {
+      /* `white` and `glass` are light on a light page and dark on a dark one,
+         so the page-level tokens are already correct for them. Setting a ring
+         here would be wrong half the time. */
+      for (const variant of ["white", "glass"] as const) {
+        cleanup();
+        render(<Dialog {...defaultProps} variant={variant} />);
+        const panel = screen.getByText("Test Dialog").closest(".rst\\:rounded-2xl");
+        expect(panel?.className).not.toContain("--roster-ring");
+        expect(panel?.className).not.toContain("--roster-control-");
+      }
+    });
   });
 });

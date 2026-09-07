@@ -209,6 +209,35 @@ describe("Input Component", () => {
       expect(input).not.toHaveClass("rst:border-gray-300");
     });
 
+    it("draws its label from the surface token, with a working default", () => {
+      /* Two failures, one line. Hardcoded gray-900 / dark:gray-100 tracks the
+         PAGE, so inside an inverting panel it was gray-900 on gray-700 —
+         1.70:1, found by eye in the `FieldsOnAnInvertedPanel` story. Plain
+         `text-inherit` fixed that and broke every dark page instead, falling
+         to the UA default black because Roster sets no body color: 1.06:1 on
+         gray-950. The token has the right default AND follows the surface. */
+      render(<Input label="Name" />);
+      const label = screen.getByText("Name");
+
+      expect(label).toHaveClass("rst:text-[var(--roster-control-text)]");
+      expect(label).not.toHaveClass("rst:text-gray-900");
+      expect(label).not.toHaveClass("rst:text-inherit");
+    });
+
+    it("gives soft the border token, and only the border", () => {
+      /* `soft` used `border-transparent` and leaned on its fill alone, which
+         fails the moment the fill matches the surface — 1.00:1 inside a `white`
+         Dialog in dark mode. It borrows the boundary and nothing else: the fill
+         and ink stay its own. */
+      render(<Input variant="soft" />);
+      const input = screen.getByRole("textbox");
+
+      expect(input).toHaveClass("rst:border-[var(--roster-control-border)]");
+      expect(input).not.toHaveClass("rst:border-transparent");
+      expect(input).not.toHaveClass("rst:bg-[var(--roster-control-bg)]");
+      expect(input).not.toHaveClass("rst:text-[var(--roster-control-text)]");
+    });
+
     it("leaves the opinionated variants alone", () => {
       /* white, soft, slate and ghost each name a specific surface. A token that
          meant something different in each would not be a token. */

@@ -97,4 +97,17 @@ describe("Checkbox Component", () => {
     render(<Checkbox size="lg" checked={false} onChange={() => {}} />);
     expect(screen.getByRole("checkbox")).toHaveClass("rst:h-6", "rst:w-6");
   });
+
+  it("draws its unchecked box from the shared control border token", () => {
+    /* It was gray-300 / gray-700 — 1.49:1 on white, 1.70:1 on gray-900 — the
+       same hairline the 1.4.11 pass raised on the text fields, on a control
+       1.4.11 covers at least as squarely. Left alone it would have sat beside
+       an `outline` Input with a visibly lighter edge. */
+    render(<Checkbox checked={false} onChange={() => {}} />);
+    const box = document.querySelector('[class*="border-"]');
+
+    expect(box?.className).toContain("rst:border-[var(--roster-control-border)]");
+    expect(box?.className).not.toContain("rst:border-gray-300");
+    expect(box?.className).not.toContain("rst:dark:border-gray-700");
+  });
 });

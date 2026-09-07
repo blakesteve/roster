@@ -260,6 +260,9 @@ Note also that a solid fill's contrast against the surface _behind_ it is a
 separate requirement (WCAG 1.4.11, 3:1) and is not covered here. Solid amber on
 a white page is 1.67:1, so it has effectively no visible edge.
 
+Form controls **are** covered for that requirement, separately: see
+`--roster-control-border` under [Control surface colors](#control-surface-colors).
+
 ### Focus
 
 Every focusable control draws the same ring: `--roster-ring` for the ring
@@ -267,6 +270,24 @@ itself, `--roster-ring-offset` for the 2px band that separates it from the
 control's own fill. Both flip with the theme — `primary-500` on white in light,
 `primary-400` on `gray-950` in dark — which puts the indicator at 6.37:1 and
 7.31:1 against the surface either side of it, where WCAG 1.4.11 asks for 3:1.
+
+Both tokens follow the **page**, which is right until a component deliberately
+inverts against it. `Dialog`'s `slate` and `primary` are dark whatever the page
+is doing, so on a light page they were handing their contents the light-mode
+ring: `primary-500` on `gray-700` is **1.61:1**, and the white offset behind it
+was 10.27:1, making the gap the most visible part of the indicator. Those two
+variants now set both tokens on their own subtree, so a field inside them gets
+3.80:1 and 4.04:1 instead. `white` and `glass` are left alone because they
+follow the page like everything else.
+
+If you build your own inverted surface, do the same on it:
+
+```css
+.my-dark-panel {
+  --roster-ring: var(--roster-primary-400);
+  --roster-ring-offset: /* that panel's own background */;
+}
+```
 
 Retint it for your own accent:
 
@@ -365,40 +386,55 @@ pseudo-elements for any element that sets either of them, so on anything modern
 
 ### Control surface colors
 
-`Input`, `PasswordInput` and `Select` read these variables in their `outline`
-variant, so a consumer can repaint a form control without restating the class
-list.
+`Input`, `PasswordInput`, `Textarea` and `Select` read these variables, so a
+consumer can repaint a form control without restating the class list. Both
+`outline` and `soft` read the border: `soft` used to be borderless and lean on
+its fill alone, which fails the moment the fill matches the surface — a `soft`
+field inside a `white` Dialog in dark mode was exactly 1.00:1 and invisible
+until focus.
 
 ```css
 :root {
-  --roster-control-border: #d6d3d1;
+  --roster-control-border: #65635f; /* gray-500 */
   --roster-control-bg: transparent;
   --roster-control-text: #1c1917;
   --roster-control-border-focus: #0f6498;
 }
 .dark {
-  --roster-control-border: #44403c;
+  --roster-control-border: #a8a29e; /* gray-400 */
   --roster-control-bg: transparent;
   --roster-control-text: #f5f5f4;
-  --roster-control-border-focus: #0f6498;
+  --roster-control-border-focus: #5ea3de; /* primary-400 */
 }
 ```
+
+`--roster-control-border` is the one token here whose two scopes hold different
+values, and that is deliberate. WCAG 1.4.11 asks 3:1 to identify a control, and
+a border has to move opposite its surface to get there: gray-500 reaches 5.99
+on white but only 2.53 on a gray-800 Dialog, while gray-400 reaches 6.01 there
+and 2.52 on white. No single step of the ramp clears 3:1 both ways. The old
+gray-300 / gray-700 pair was 1.49 and 1.48 — a hairline rather than a boundary.
 
 Set them in both scopes, for the same reason the scrollbar thumb needs both:
 Roster's own `.dark` rule has equal specificity and comes later.
 
-The defaults are the values the component used to hardcode, so installing this
-version changes nothing on its own. Placeholder color, the error state, and the
+Three of the four still default to what the components used to hardcode.
+`--roster-control-border` does not — the 1.4.11 pass moved it two ramp steps —
+so installing this version **does** change how your fields look, deliberately. Placeholder color, the error state, and the
 focus ring are deliberately not on tokens — the ring is already
 `--roster-ring`, and error styling should stay recognizably an error.
 
 Not every control uses every token: `Select` takes the first three, because
-focus on its trigger is the shared `--roster-ring` rather than a border color.
+focus on its trigger is the shared `--roster-ring` rather than a border color,
+and it draws the border as a ring rather than a border.
 One family rather than one per component is deliberate — these controls sit in
 the same row of the same form and are drawn to look identical, so being able to
 repaint one and not the other would be a bug, not a choice.
 
-The `outline` variant is the only one that reads them, in every component, and
+`outline` reads all four. `soft` reads the border only, because a boundary is
+the one thing a filled field cannot supply for itself on an arbitrary surface;
+`white`, `slate` and `ghost` stay opinionated. `Checkbox` reads the border too,
+for its unchecked box. Historically `outline` was the only reader, and
 it carries no hover fill. The other variants each name a concrete surface
 (`white`, `soft`, `slate`, `ghost`) and stay opinionated: a token that meant
 something different in each would not be a token.

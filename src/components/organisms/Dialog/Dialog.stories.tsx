@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Dialog, type DialogProps } from "./Dialog";
 import { Button } from "../../atoms/Button/Button";
 import { Input } from "../../atoms/Input/Input";
+import { Textarea } from "../../atoms/Textarea/Textarea";
 
 const meta = {
   title: "Organisms/Dialog",
@@ -185,6 +186,35 @@ export const SlateMoody: Story = {
       description: {
         story:
           "The `slate` variant provides a solid mid-dark gray in light mode, dropping to a deep, moody gray in dark mode. Great for technical prompts or terminal-style interfaces.",
+      },
+    },
+  },
+};
+
+/**
+ * A form on an inverting panel — the combination that had no story.
+ */
+export const FieldsOnAnInvertedPanel: Story = {
+  render: (args) => <DialogWrapper {...args} />,
+  args: {
+    title: "Fields on slate",
+    description: "Every control here is drawn on a panel that inverts against the page.",
+    size: "md",
+    variant: "slate",
+    status: "default",
+    children: (
+      <div className="rst:mt-6 rst:flex rst:flex-col rst:gap-4">
+        <Input label="Name" placeholder="Type here" />
+        <Textarea label="Notes" placeholder="What happened?" />
+
+      </div>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "This is the story that did not exist, and its absence is why three regressions reached a consumer before anyone here saw them.\n\n`slate` and `primary` are dark whatever the page is doing, while `--roster-ring` and `--roster-control-*` are declared at `:root` and `.dark` and therefore follow the PAGE. On a light page that handed these fields the light-mode values: gray-900 text at **1.70:1** on the panel, and a focus ring at **1.61:1**. Both variants now set the ring and the control trio on their own subtree, giving 9.42:1 for the text and 3.80:1 for the ring.\n\nView it in light mode, which is the failing direction — in dark mode the page-level values were already right and nothing was ever visibly wrong.\n\nOnly `outline` fields are shown. `soft` and `Checkbox` carry their own light FILLS — gray-100 and white — which nothing inverts, so on this panel they are stark light boxes at 2.31:1 and 2.52:1 against their own borders. Tokenizing control fills is filed as a follow-up; showing them here would document a broken state as if it were the point of the story.",
       },
     },
   },

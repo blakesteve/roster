@@ -435,6 +435,17 @@ describe("Select theming", () => {
     expect(trigger).not.toHaveClass("rst:text-gray-900");
   });
 
+  it("gives soft the border token as a ring", () => {
+    /* The trigger draws a ring rather than a border, so the token lands there.
+       Same reason as Input's and Textarea's: a filled field cannot supply its
+       own boundary on a surface it does not know. */
+    render(<Select options={options} value={null} onChange={() => {}} variant="soft" />);
+    const trigger = screen.getByRole("button");
+
+    expect(trigger.className).toContain("var(--roster-control-border)");
+    expect(trigger).not.toHaveClass("rst:ring-transparent");
+  });
+
   it("does not repaint the themed surface on hover", () => {
     /* The one variant that reads tokens must not also carry a hardcoded hover
        fill. tailwind-merge keeps `hover:bg-gray-50` alongside

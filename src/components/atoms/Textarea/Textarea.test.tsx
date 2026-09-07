@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { Textarea } from "./Textarea";
+import { Input } from "../Input/Input";
 import "@testing-library/jest-dom";
 
 describe("Textarea Component", () => {
@@ -132,5 +133,90 @@ describe("Textarea spacing and escape hatch", () => {
     const control = screen.getByRole("textbox");
     expect(control).toHaveClass("rst:resize-y");
     expect(control).not.toHaveClass("rst:resize-none");
+  });
+
+  describe("theming the outline variant", () => {
+    it("reads its surface from the same tokens Input and Select read", () => {
+      /* 4.8.0 migrated `Input` and `Select` and skipped this one, so a form
+         holding both showed two different fields: different border in light,
+         and in dark a transparent Input beside a gray-950 Textarea, which on a
+         gray-800 Dialog was a near-black box. */
+      render(<Textarea />);
+      const textarea = screen.getByRole("textbox");
+
+      expect(textarea).toHaveClass(
+        "rst:border-[var(--roster-control-border)]",
+        "rst:bg-[var(--roster-control-bg)]",
+        "rst:text-[var(--roster-control-text)]",
+        "rst:focus-visible:border-[var(--roster-control-border-focus)]",
+      );
+      expect(textarea).not.toHaveClass("rst:border-gray-300");
+      /* The fill is the one that mattered: hardcoded, it punched a hole in
+         whatever surface it was drawn on. */
+      expect(textarea).not.toHaveClass("rst:bg-white");
+      expect(textarea).not.toHaveClass("rst:dark:bg-gray-950");
+    });
+
+    it("agrees with Input class for class on the tokens", () => {
+      /* The parity is the point, and asserting it here means the next variant
+         change to one of them fails loudly rather than drifting quietly. */
+      render(
+        <>
+          <Textarea aria-label="ta" />
+          <Input variant="outline" aria-label="in" />
+        </>,
+      );
+      const tokenClasses = (el: HTMLElement) =>
+        el.className
+          .split(/\s+/)
+          .filter((c) => c.includes("--roster-control-"))
+          .sort();
+
+      expect(tokenClasses(screen.getByLabelText("ta"))).toEqual(
+        tokenClasses(screen.getByLabelText("in")),
+      );
+    });
+
+    it("draws its label from the surface token, with a working default", () => {
+      /* Two failures, one line. Hardcoded gray-900 / dark:gray-100 tracks the
+         PAGE, so inside an inverting panel it was gray-900 on gray-700 —
+         1.70:1, found by eye in the `FieldsOnAnInvertedPanel` story. Plain
+         `text-inherit` fixed that and broke every dark page instead, falling
+         to the UA default black because Roster sets no body color: 1.06:1 on
+         gray-950. The token has the right default AND follows the surface. */
+      render(<Textarea label="Name" />);
+      const label = screen.getByText("Name");
+
+      expect(label).toHaveClass("rst:text-[var(--roster-control-text)]");
+      expect(label).not.toHaveClass("rst:text-gray-900");
+      expect(label).not.toHaveClass("rst:text-inherit");
+    });
+
+    it("gives soft the border token, and only the border", () => {
+      render(<Textarea variant="soft" />);
+      const textarea = screen.getByRole("textbox");
+
+      expect(textarea).toHaveClass("rst:border-[var(--roster-control-border)]");
+      expect(textarea).not.toHaveClass("rst:border-transparent");
+    });
+
+    it("does not restate the placeholder color the base already sets", () => {
+      /* Input's `outline` carries `dark:placeholder:text-gray-500` because
+         Input's base sets no placeholder rule. This base sets gray-400, so
+         copying that line across darkened the placeholder to 3.30:1 — under
+         the 4.5:1 placeholder text needs. Caught in review, not by eye. */
+      render(<Textarea />);
+      expect(screen.getByRole("textbox")).not.toHaveClass(
+        "rst:dark:placeholder:text-gray-500",
+      );
+    });
+
+    it("leaves the opinionated variants alone", () => {
+      /* `soft`, `ghost` and `white` each name a surface, same call as Input. */
+      render(<Textarea variant="soft" />);
+      expect(screen.getByRole("textbox")).not.toHaveClass(
+        "rst:bg-[var(--roster-control-bg)]",
+      );
+    });
   });
 });

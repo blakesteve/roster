@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Select, type SelectOption, type SelectProps } from "./Select";
@@ -122,8 +122,9 @@ export const DefaultOutlineTokensResolve: Story = {
        on Tailwind 4.1, which was checked by deleting the hint and watching
        this assertion still pass.
 
-       The values are what `outline` rendered BEFORE it read tokens: ring-gray-300
-       / dark:ring-gray-700 and text-gray-900 / dark:text-gray-100. The meta
+       The border is now gray-500 light / gray-400 dark, which the 1.4.11 pass
+       raised it to; the ink is still text-gray-900 / dark:text-gray-100. The
+       two scopes differ because no single step clears 3:1 both ways. The meta
        decorator renders every story twice, light then dark.
 
        What this story CANNOT prove, because it asserts each token's own
@@ -141,14 +142,15 @@ export const DefaultOutlineTokensResolve: Story = {
        is 1px of extra bounds, which breaks alignment against Input's border)
        or `ring-1` becoming `ring-2`. Both are pinned here. */
     const l = getComputedStyle(light);
-    expect(l.boxShadow).toContain("rgb(214, 211, 209)"); // gray-300
+    /* gray-500 since the 1.4.11 pass; was gray-300 at 1.49:1 on white. */
+    expect(l.boxShadow).toContain("rgb(101, 99, 95)"); // gray-500
     expect(l.boxShadow).toContain("inset");
     expect(l.boxShadow).toMatch(/0px 0px 0px 1px/);
     expect(l.color).toBe("rgb(28, 25, 23)"); // gray-900
     expect(l.backgroundColor).toBe("rgba(0, 0, 0, 0)"); // --roster-control-bg
 
     const d = getComputedStyle(dark);
-    expect(d.boxShadow).toContain("rgb(68, 64, 60)"); // gray-700
+    expect(d.boxShadow).toContain("rgb(168, 162, 158)"); // gray-400
     expect(d.boxShadow).toContain("inset");
     expect(d.color).toBe("rgb(245, 245, 244)"); // gray-100
     expect(d.backgroundColor).toBe("rgba(0, 0, 0, 0)");
@@ -403,24 +405,6 @@ export const ThemedWithTokens: Story = {
   },
 };
 
-function ScopedPopoverTokens() {
-  useEffect(() => {
-    const el = document.createElement("style");
-    el.textContent = `.rst-story-popover {
-      --roster-popover-bg: #242442;
-      --roster-popover-border: rgba(212,175,55,0.28);
-      --roster-popover-text: #f5f5f4;
-    }`;
-    document.head.appendChild(el);
-    document.documentElement.classList.add("rst-story-popover");
-    return () => {
-      el.remove();
-      document.documentElement.classList.remove("rst-story-popover");
-    };
-  }, []);
-  return null;
-}
-
 /**
  * The menu is a surface too, and it takes the popover tokens.
  */
@@ -432,18 +416,20 @@ export const ThemedPopover: Story = {
   },
   render: (args) => (
     <>
-      {/* Scoped to this story and torn down with it. An unscoped
-          `<style>:root{…}` repaints every other Select story on the docs page,
-          because Storybook mounts them all into one DOM — the first version of
-          this story did exactly that.
+      {/* A real `:root` override, which is the usage being documented — the
+          menu is portaled to <body>, so properties set on a container reach
+          the trigger and stop dead at the portal boundary.
 
-          The class goes on <html> rather than a wrapper, and that is the whole
-          lesson here: the menu is portaled to <body>, so it is not a descendant
-          of anything the Select is rendered inside. Custom properties set on a
-          container reach the trigger and stop dead at the portal boundary. Any
-          ancestor of the portal target works; `:root` is simply the one that
-          always is. */}
-      <ScopedPopoverTokens />
+          `:root` cannot be scoped to one story, so this story is rendered in
+          its own iframe (`inline: false` below) instead of being faked. Two
+          earlier attempts got this wrong: an unscoped `<style>` repainted every
+          other Select on the docs page, and then a class on `<html>` did the
+          same thing, since `<html>` is an ancestor of everything. */}
+      <style>{`:root {
+        --roster-popover-bg: #242442;
+        --roster-popover-border: rgba(212,175,55,0.28);
+        --roster-popover-text: #f5f5f4;
+      }`}</style>
       <div
         className="rst:rounded-xl rst:p-6"
         style={
@@ -490,6 +476,13 @@ export const ThemedPopover: Story = {
   },
   parameters: {
     docs: {
+      /* Its own iframe. The story sets `:root` tokens, which is the documented
+         usage and cannot be contained any other way on a page that mounts
+         every story into one DOM. */
+      /* 820, not 260. The story renders both light and dark previews and is
+         ~762px tall; at 260 the dark half was clipped entirely and the menu,
+         finding no room below the trigger, flipped upward over the caption. */
+      story: { inline: false, height: "820px" },
       description: {
         story:
           "The menu reads `--roster-popover-bg`, `-border` and `-text` — a family separate from `--roster-control-*`, and shared with `Dialog`'s `white` variant and `Tooltip`'s `themed` variant.\n\nSeparate because the defaults have to differ: `--roster-control-bg` is `transparent`, which is right for a field drawn on a page and wrong for a panel drawn over one. A control and the menu it opens are also legitimately different surfaces in plenty of palettes.\n\n**Set these at `:root`, not on a container.** The menu is portaled to `<body>`, so it is not a descendant of whatever the `Select` is rendered inside: custom properties set on a wrapper reach the trigger and stop at the portal boundary, which produces exactly the half-themed control this family exists to fix. The control tokens in this story are on the wrapper because the trigger is a descendant of it; the popover tokens are in a `:root` rule. Set both in `:root` **and** `.dark` in real usage.",

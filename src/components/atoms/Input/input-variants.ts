@@ -12,20 +12,32 @@ export const inputVariants = cva(
       variant: {
         white:
           "rst:border-gray-300 rst:bg-white rst:text-gray-900 rst:placeholder:text-gray-400 rst:focus-visible:border-primary-500 rst:dark:border-gray-700 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:placeholder:text-gray-500",
+        /* A boundary that does not depend on what is behind it. `soft` used
+           `border-transparent` and leaned on its fill alone, which fails the
+           moment the fill matches the surface — exactly 1.00:1 inside a
+           `white` Dialog in dark mode, where both are gray-800, so the field
+           vanished until focus. Reported twice in one app before anyone read
+           the variant. The border is the same token `outline` reads, so a
+           consumer repaints both at once. */
         soft:
-          "rst:border-transparent rst:bg-gray-100 rst:text-gray-900 rst:placeholder:text-gray-400 rst:focus-visible:bg-white rst:focus-visible:border-primary-500 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:placeholder:text-gray-500 rst:dark:focus-visible:bg-gray-900",
+          "rst:border-[var(--roster-control-border)] rst:bg-gray-100 rst:text-gray-900 rst:placeholder:text-gray-400 rst:focus-visible:bg-white rst:focus-visible:border-primary-500 rst:dark:focus-visible:border-primary-400 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:placeholder:text-gray-500 rst:dark:focus-visible:bg-gray-900",
         slate:
           "rst:border-transparent rst:bg-gray-700 rst:text-gray-100 rst:placeholder:text-gray-400 rst:focus-visible:bg-gray-600 rst:dark:bg-gray-900 rst:dark:placeholder:text-gray-500 rst:dark:focus-visible:bg-gray-800",
         /* The default variant, and the only one that reads tokens.
            `Button`'s colors resolve through `--roster-*`, so remapping a palette
            carries; these were hardcoded, so a consumer wanting a field border in
            their own accent had no variant for it and no token to point at.
-           The four tokens default to exactly the values this variant used
-           before, so nothing moves for a consumer who sets none of them at
-           `:root`. The other four
-           variants stay opinionated on purpose: `white`, `soft`, `slate` and
-           `ghost` each name a specific surface, and a token that meant something
-           different in each would not be a token. */
+           Three of the four still default to what this variant used before.
+           `--roster-control-border` does not: the 1.4.11 pass raised it two
+           ramp steps, because gray-300 was a 1.49:1 hairline rather than a
+           boundary — so field borders DO get heavier on a bump, deliberately.
+
+           `soft` reads that one token too. It is the only thing it borrows: a
+           filled field cannot supply its own boundary on a surface it does not
+           know, and `soft` leaning on fill alone made it invisible at 1.00:1
+           inside a `white` Dialog in dark mode. `white`, `slate` and `ghost`
+           stay fully opinionated — each names a specific surface, and a token
+           that meant something different in each would not be a token. */
         outline:
           "rst:border-[var(--roster-control-border)] rst:bg-[var(--roster-control-bg)] rst:text-[var(--roster-control-text)] rst:placeholder:text-gray-400 rst:focus-visible:border-[var(--roster-control-border-focus)] rst:dark:placeholder:text-gray-500",
         ghost:
