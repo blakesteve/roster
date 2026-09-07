@@ -65,10 +65,11 @@
     "prepack": "npm run build && node scripts/write-meta.mjs"
   },
   "peerDependencies": {
+    "@tanstack/react-table": "^9.1.2",
+    "@tanstack/table-core": "^9.1.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "@tanstack/react-table": "^9.1.2",
-    "@tanstack/table-core": "^9.1.2"
+    "react-hot-toast": "^2.6.0"
   },
   "peerDependenciesMeta": {
     "@tanstack/react-table": {
@@ -116,7 +117,8 @@
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "react-hot-toast": "^2.6.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.2.0",

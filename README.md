@@ -186,7 +186,8 @@ they wrap your content and that text is not Roster's to restyle. `Eyebrow`,
 
 `solid` is the one variant where a component picks both the background and the
 text on it, so it can fail contrast on its own with no help from your app. Every
-solid fill in `Badge`, `Pill`, `Chip` and `Button` is measured against WCAG AA (4.5:1)
+solid fill in `Badge`, `Pill`, `Chip`, `Toast` and `Button` is measured against WCAG AA
+(4.5:1)
 by `src/contrast.test.ts`, at rest **and** on hover, in both themes.
 
 `Checkbox` is measured too, at 3:1 rather than 4.5:1 — its tick is a graphical
@@ -550,6 +551,64 @@ shared size, so they cannot drift apart. `Button` also has `xs` and `icon`,
 which neither field has an equivalent for. `Textarea` is not on this scale — it
 is multi-line, so the answer there is a min-height rather than a height.
 
+### Toasts
+
+Mount `Toaster` once near the root, then call `toast` from anywhere:
+
+```tsx
+import { Toaster, toast } from "@blakesteve/roster";
+
+<Toaster position="bottom-right" />;
+
+toast.success("Saved");
+toast.error("That name is taken");
+toast.info("Week 4 matchups are up");
+toast.warning("Picks close in ten minutes");
+```
+
+It wraps [`react-hot-toast`](https://react-hot-toast.com), which is a **peer
+dependency** — install it alongside Roster. It has to be external rather than
+bundled: its queue lives in module scope, so a bundled copy would give you two
+stores, and toasts fired from your own `import { toast } from "react-hot-toast"`
+would silently never appear.
+
+An app already using it keeps its call sites and only changes the import. What changes is
+the styling: the toast body is a real `Toast` component reading `--roster-*`
+rather than the inline hex each app was pinning.
+
+Two of those four helpers are Roster's own. `react-hot-toast` ships `success`,
+`error`, `loading` and `blank` — there is no `info` and no `warning`, so an app
+that wants one improvises, and at least one improvised by calling `toast.error`
+for `info`.
+
+**Errors are announced assertively, everything else politely.** That is also
+Roster's decision rather than the library's: `react-hot-toast` marks every
+toast `status` / `polite`, and a polite live region is read when the reader
+next pauses — which for a message that disappears in four seconds can mean
+never.
+
+`variant` on `Toaster` sets the fill for the whole queue:
+
+- **`soft`** (default) — the tinted fill `Alert` uses. Quiet enough that a stack
+  does not shout, which is the common case.
+- **`solid`** — the `-500` fill and ink token, step for step with `Pill` and
+  `Chip`. The one to reach for when toasts land over photography, video, or any
+  surface the app does not own: `bg-success-50` is a whisper on a white page
+  and illegible over an image.
+- **`glass`** — a neutral translucent surface at 60% with a backdrop blur,
+  matching `Dialog`'s variant of the same name. The tone lives on the **border
+  only**; the surface and the text are neutral for every scheme.
+
+Glass is neutral for a reason, and the border-only tone is the cost. Anything
+whose contrast depends on the backdrop is a guess: a colored fill measured
+2.60:1, and colored text on a neutral fill measured 2.81:1 — worse. Only the
+neutral ink is safe in both directions, at 17.49 over white, 6.14 over black
+and 9.22 over a brand color — 60% is as far as that allows, with 4.69 the worst
+case in dark. If the tone needs to be unmistakable, use `solid`.
+
+`src/contrast.test.ts` measures the `solid` fills and deliberately does not
+measure `glass` — a number there would be a number for one background.
+
 ### Components that render links
 
 `Breadcrumbs` renders a plain `<a>` by default, which is right for a static
@@ -640,6 +699,7 @@ function App() {
 | `ErrorState`      | Error display with retry action                                             |
 | `MatchupCard`     | Head-to-head comparison card                                                |
 | `Pullquote`       | A line lifted out of prose, as `<figure>` + `<blockquote>` + `<figcaption>` |
+| `Toast`           | Transient floating notice; `Toaster` + the imperative `toast` handle        |
 
 ### Organisms
 

@@ -44,6 +44,10 @@ export * from './components/atoms/CollapsibleSection/CollapsibleSection';
 export * from './components/atoms/SegmentBar/SegmentBar';
 
 // --- MOLECULES ---
+export * from './components/molecules/Toast/Toast';
+export * from './components/molecules/Toast/toast-variants';
+export * from './components/molecules/Toast/Toaster';
+export * from './components/molecules/Toast/toast-api';
 export * from './components/molecules/Alert/Alert';
 export * from './components/molecules/Alert/alert-variants';
 export * from './components/molecules/Accordion/Accordion';
