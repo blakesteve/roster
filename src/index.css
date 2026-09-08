@@ -546,7 +546,7 @@
    pick and no token to point at. retrospect wanted a gold hairline at 28% alpha
    over deep indigo and had to keep a raw <input>.
 
-   Read by Input, PasswordInput and Select, in their `outline` variant only.
+   Read by Input, PasswordInput, Select and MultiSelect, in their `outline` variant only.
    Select takes the first three: focus on its trigger is --roster-ring rather
    than a border color. One family rather than one per component, because these
    controls sit in the same row of the same form and are drawn to look

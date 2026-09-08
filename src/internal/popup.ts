@@ -2,7 +2,8 @@ import * as React from "react";
 
 /**
  * The presentation shared by every anchored popup Roster opens off a control:
- * `Select`'s menu and `Combobox`'s, and whatever anchored popup comes next.
+ * `Select`'s menu, `Combobox`'s and `MultiSelect`'s, and whatever anchored
+ * popup comes next.
  *
  * Internal, and not exported from the package. Its contract is with those
  * components, not with consumers — the escape hatch a consumer reaches for is
@@ -94,6 +95,35 @@ export const POPUP_PANEL = [
  * it, so `--button-width` is about 20px and the panel renders as an
  * unreadable sliver. Use `--input-width` there.
  */
+/**
+ * Whether the panel should render on the dark palette.
+ *
+ * Two reasons it might, and they are unrelated:
+ *
+ * - the control sits inside a `.dark` subtree, which the portaled panel does
+ *   not inherit — that is `inDarkScope`, above.
+ * - the control's own variant NAMES a dark surface. `slate` paints `gray-700`
+ *   in light mode, and its panel was rendering white: a dark trigger opening a
+ *   white sheet, which is the exact mismatch `--roster-popover-*` was
+ *   introduced to stop. The token family only ever covered the variant that
+ *   reads tokens; the ones that name a surface were left behind.
+ *
+ * The fix reuses the dark palette rather than inventing a slate one, because
+ * every state in that palette already exists and has already been measured —
+ * `dark:data-focus:bg-primary-900/30` and `dark:data-selected:bg-gray-700/50`
+ * are designed for a dark sheet. Painting a bespoke slate panel would have
+ * meant a third set of option states with no contrast pass behind them.
+ *
+ * Shared here rather than repeated in three components, for the same reason
+ * everything else in this module is.
+ */
+export function popupInDarkPalette(
+  inDarkScope: boolean,
+  variant: string | null | undefined,
+): boolean {
+  return inDarkScope || variant === "slate";
+}
+
 export const POPUP_WIDTH_OF_BUTTON = "rst:w-(--button-width)";
 export const POPUP_WIDTH_OF_INPUT = "rst:w-(--input-width)";
 

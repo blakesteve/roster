@@ -31,6 +31,7 @@ export * from './components/atoms/LabeledDivider/LabeledDivider';
 export * from './components/atoms/Stat/Stat';
 export * from './components/atoms/Stat/stat-variants';
 export * from './components/atoms/ThemeToggle/ThemeToggle';
+export * from './components/atoms/MultiSelect/MultiSelect';
 export * from './components/atoms/Select/Select';
 export * from './components/atoms/Select/select-variants';
 export * from './components/atoms/Spinner/Spinner';

@@ -17,6 +17,7 @@ import { selectTriggerVariants } from "./select-variants";
 import { PopupOption } from "../../../internal/PopupOption";
 import {
   POPUP_ANCHOR,
+  popupInDarkPalette,
   POPUP_PANEL,
   POPUP_WIDTH_OF_BUTTON,
   useDarkScope,
@@ -176,7 +177,7 @@ const Select = ({
             <ListboxOptions
               anchor={POPUP_ANCHOR}
               className={cn(
-                inDarkScope && "dark",
+                popupInDarkPalette(inDarkScope, variant) && "dark",
                 POPUP_PANEL,
                 POPUP_WIDTH_OF_BUTTON,
                 optionsClassName,
