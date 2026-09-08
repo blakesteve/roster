@@ -10,10 +10,17 @@ import {
   Transition,
 } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faCheck } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
-import { selectTriggerVariants, selectOptionVariants } from "./select-variants";
+import { selectTriggerVariants } from "./select-variants";
+import { PopupOption } from "../../../internal/PopupOption";
+import {
+  POPUP_ANCHOR,
+  POPUP_PANEL,
+  POPUP_WIDTH_OF_BUTTON,
+  useDarkScope,
+} from "../../../internal/popup";
 
 export type SelectOption = {
   value: string | number;
@@ -79,38 +86,13 @@ const Select = ({
   const selectedOption = options.find((opt) => opt.value === value);
   const hasError = !!errorMessage || error;
 
-  /* The menu is rendered through a portal attached to <body>, because `anchor`
-     implies one and `portal={false}` does not opt out of it. That is fine when
-     `.dark` sits on <html>, which is what `ThemeToggle` does and what the
-     README recommends — the portal is still a descendant. It breaks when a
-     consumer scopes `.dark` to a subtree, which the README also permits: the
-     menu leaves the scope and renders white against a dark page. Measured, not
-     assumed: the portaled listbox reports `rgb(255, 255, 255)` inside a scoped
-     dark container.
-
-     So carry the scope across the portal. `closest` finds the NEAREST `.dark`,
-     which is exactly what `@custom-variant dark (&:where(.dark, .dark *))`
-     matches, so this reproduces the cascade rather than second-guessing it. The
-     class is applied to the panel itself, which the `&:where(.dark, …)` half of
-     that variant covers, and `.dark *` then covers the options inside it.
-     Harmless when `.dark` is already on the root: the class is idempotent.
-
-     Read once, on mount. A theme TOGGLE does not need this mechanism at all:
-     it flips `.dark` on <html>, and the portal is already a descendant of
-     <html>, so the variant matches natively whether or not this state is
-     current. The only case this covers is a `.dark` scoped to a subtree, and
-     that scope is part of the page's structure rather than something that
-     flips at runtime. */
-  /* The ref sits on the inner positioning div rather than on `Field`, because
-     Headless UI types `Field` through `forwardRefWithAs` and its props do not
-     admit a `ref` — `tsc --noEmit` against the root tsconfig let it through and
-     the build's stricter pass did not. Either element gives the same answer:
-     `closest` walks ancestors, and the two are in the same subtree. */
-  const fieldRef = React.useRef<HTMLDivElement>(null);
-  const [inDarkScope, setInDarkScope] = React.useState(false);
-  React.useLayoutEffect(() => {
-    setInDarkScope(!!fieldRef.current?.closest(".dark"));
-  }, []);
+  /* The `.dark` carry and the panel's classes are shared with `Combobox` and
+     `Multi-select` — see `src/internal/popup.ts` for why neither is inlined
+     here any more. The ref sits on the inner positioning div rather than on
+     `Field`, because Headless UI types `Field` through `forwardRefWithAs` and
+     its props do not admit a `ref`. Either element gives the same answer:
+     `closest` walks ancestors and the two are in the same subtree. */
+  const { ref: fieldRef, inDarkScope } = useDarkScope<HTMLDivElement>();
 
   return (
     /* `...props` is spread here, and was not before. The prop type has always
@@ -192,55 +174,24 @@ const Select = ({
             leaveTo="rst:opacity-0"
           >
             <ListboxOptions
-              anchor="bottom start"
+              anchor={POPUP_ANCHOR}
               className={cn(
                 inDarkScope && "dark",
-                "rst:w-(--button-width) rst:z-50 rst:rounded-md rst:py-1 rst:shadow-lg rst:ring-1 rst:focus:outline-hidden",
-                /* The surface, from `--roster-popover-*`. This panel has no
-                   variants to preserve, so it reads the family outright: a
-                   consumer who repaints the trigger with `--roster-control-*`
-                   was otherwise opening a hardcoded white sheet under it. */
-                "rst:bg-[var(--roster-popover-bg)] rst:text-[var(--roster-popover-text)] rst:ring-[var(--roster-popover-border)]",
-                "rst:[--anchor-gap:4px]",
-                /* No max-height or overflow here, deliberately. Headless UI's
-                   `size` middleware already writes both INLINE on this element
-                   whenever `anchor` is set:
-
-                     Object.assign(floating.style, { overflow: "auto",
-                       maxHeight: `min(var(--anchor-max-height, 100vh), Npx)` })
-
-                   so the panel has always been capped at the space between the
-                   trigger and the viewport edge, and has always scrolled. A
-                   utility class here would lose to that inline rule anyway.
-
-                   `--anchor-max-height` is READ by that expression and never
-                   set by Headless UI — it is an author hook, like
-                   `--anchor-gap`. A consumer who wants a shorter menu than the
-                   viewport allows sets the variable rather than a height:
-                   `optionsClassName="rst:[--anchor-max-height:20rem]"`. */
+                POPUP_PANEL,
+                POPUP_WIDTH_OF_BUTTON,
                 optionsClassName,
               )}
             >
               {options.map((option) => (
-                <ListboxOption
+                <PopupOption
                   key={option.value}
+                  as={ListboxOption}
                   value={option.value}
                   disabled={option.disabled}
-                  className={cn(selectOptionVariants({ size }))}
+                  size={size}
                 >
-                  <span className="rst:block rst:truncate rst:font-normal rst:group-data-selected:font-semibold">
-                    {option.label}
-                  </span>
-
-                  <span
-                    className={cn(
-                      "rst:absolute rst:inset-y-0 rst:right-0 rst:hidden rst:items-center rst:text-primary-600 rst:dark:text-primary-400 rst:group-data-selected:flex",
-                      size === "sm" ? "rst:pr-3" : "rst:pr-4",
-                    )}
-                  >
-                    <FontAwesomeIcon icon={faCheck} className="rst:h-3.5 rst:w-3.5" />
-                  </span>
-                </ListboxOption>
+                  {option.label}
+                </PopupOption>
               ))}
             </ListboxOptions>
           </Transition>
