@@ -9,6 +9,23 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
+// JSDOM does not implement matchMedia either, and react-hot-toast reads
+// `prefers-reduced-motion` through it while rendering — so the throw lands on
+// the first `<Toaster />` render rather than at import.
+if (!window.matchMedia) {
+  window.matchMedia = (query: string) =>
+    ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    }) as unknown as MediaQueryList;
+}
+
 afterEach(() => {
   cleanup();
 });

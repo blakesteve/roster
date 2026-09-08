@@ -40,7 +40,13 @@ export default defineConfig({
       // @tanstack/react-table is an optional peer: v9's types are generic over
       // the feature set, so consumer column defs must resolve against the same
       // copy roster uses. Bundling it would give them two.
-      external: ['react', 'react-dom', 'tailwindcss', '@tanstack/react-table'],
+      /* `react-hot-toast` is external and a peer, not bundled. Its queue lives
+         in module scope, so an inlined copy gives a consumer TWO stores: the
+         app's own `toast.success(...)` writes to one and Roster's `Toaster`
+         subscribes to the other, and the toast silently never appears. That
+         is the opposite of the point — the component exists so existing call
+         sites do not have to move. */
+      external: ['react', 'react-dom', 'tailwindcss', '@tanstack/react-table', 'react-hot-toast'],
       output: {
         // Only the entries that actually contain components. It used to be
         // applied to every chunk, which marked `cn` and the CSS shims as client
