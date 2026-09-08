@@ -704,4 +704,23 @@ describe("Select theming", () => {
     expect(screen.getByText("Fruit").closest("[data-disabled]")).toBeTruthy();
     expect(screen.getByText("Pick one").closest("[data-disabled]")).toBeTruthy();
   });
+
+  it("opens a dark panel for the slate variant", () => {
+    render(
+      <Select
+        variant="slate"
+        options={[{ value: "a", label: "A" }]}
+        value={null}
+        onChange={() => {}}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button"));
+
+    /* `slate` paints a dark trigger in LIGHT mode, and its panel used to
+       render white. Shared with Combobox and MultiSelect through
+       `popupInDarkPalette` in the popup internals. */
+    expect(screen.getByRole("listbox").className).toContain("dark");
+  });
+
 });

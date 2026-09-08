@@ -20,6 +20,7 @@ import type { SelectOption } from "../Select/Select";
 import { PopupOption } from "../../../internal/PopupOption";
 import {
   POPUP_ANCHOR,
+  popupInDarkPalette,
   POPUP_PANEL,
   POPUP_WIDTH_OF_INPUT,
   useDarkScope,
@@ -170,7 +171,7 @@ const Combobox = ({
             <ComboboxOptions
               anchor={POPUP_ANCHOR}
               className={cn(
-                inDarkScope && "dark",
+                popupInDarkPalette(inDarkScope, variant) && "dark",
                 POPUP_PANEL,
                 /* `--input-width`, not `--button-width`: the button here is
                    the chevron, so matching it renders a 20px sliver. */

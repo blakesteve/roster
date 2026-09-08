@@ -73,9 +73,12 @@ const CONTROL =
  * - both     -> a `<span>` wrapping TWO sibling buttons
  *
  * The last case is why the body is not simply made clickable when a dismiss
- * button is present: a button inside a button is invalid HTML, and browsers
- * resolve it by dropping one of them. Two siblings in a styled wrapper is the
- * only structure that gives both actions a name, a focus ring and a tab stop.
+ * button is present: a button inside a button is invalid HTML. Browsers do not
+ * rescue it either — measured, the HTML parser splits the pair into siblings,
+ * while the DOM API that React uses leaves it nested, so what actually ships is
+ * a focusable control whose every click also fires the button around it. Two
+ * siblings in a styled wrapper is the only structure that gives both actions a
+ * name, a focus ring and a tab stop.
  */
 const Chip = React.forwardRef<HTMLElement, ChipProps>(
   (
@@ -132,7 +135,16 @@ const Chip = React.forwardRef<HTMLElement, ChipProps>(
           (typeof children === "string" ? `Remove ${children}` : "Remove")
         }
         className={cn(
-          "rst:-mr-1 rst:flex rst:shrink-0 rst:items-center rst:justify-center rst:opacity-70 rst:hover:opacity-100 rst:disabled:hover:opacity-70",
+          "rst:-mr-1 rst:relative rst:flex rst:shrink-0 rst:items-center rst:justify-center rst:opacity-70 rst:hover:opacity-100 rst:disabled:hover:opacity-70",
+          /* WCAG 2.5.8 asks 24x24 CSS px for a pointer target, and the glyph
+             plus its box measured 15x12. Growing the button itself would grow
+             the chip with it, so the hit area is an invisible `::after`
+             instead — the standard way to keep a 12px icon and a 28px target.
+             The spacing exception does not rescue the small box: a dismissible
+             chip usually sits inside or beside another target (in
+             `MultiSelect` the trigger is directly underneath it), so a 24px
+             circle around this one always intersects another. */
+          "rst:after:absolute rst:after:-inset-2 rst:after:content-['']",
           CONTROL,
         )}
       >

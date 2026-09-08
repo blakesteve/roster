@@ -58,6 +58,8 @@ const COVERED_BY_COMPOSITION: Record<string, string> = {
   PasswordInput: "renders Input as its root",
   Combobox:
     "its trigger is Input's variants and its panel is the shared popup, so the token arrives from both",
+  MultiSelect:
+    "its trigger is Select's variants and its panel is the shared popup; the only markup it owns beyond those is chips, and Chip declares the token itself",
 };
 
 function componentDirs(): { name: string; dir: string }[] {

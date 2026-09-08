@@ -611,9 +611,9 @@ measure `glass` — a number there would be a number for one background.
 
 ### Anchored popups share their internals
 
-`Select` and `Combobox` open the same panel, and deliberately so: a combobox
-that opened a different-looking menu than a select on the same form is the bug
-worth preventing. The panel classes, the option rows and the dark-mode carry
+`Select`, `Combobox` and `MultiSelect` open the same panel, and deliberately
+so: a combobox that opened a different-looking menu than a select on the same
+form is the bug worth preventing. The panel classes, the option rows and the dark-mode carry
 live in `src/internal/`, which is **not exported** — its contract is
 with those components, not with you. The escape hatch you reach for is
 `optionsClassName` on the component itself.
@@ -627,23 +627,121 @@ look like oversights until you know why:
   variable that inline rule reads:
   `optionsClassName="rst:[--anchor-max-height:20rem]"`.
 - **The panel is portaled to `<body>`**, so a `.dark` scoped to part of your
-  page does not reach it. Both components copy the nearest `.dark` onto the
-  panel to fix that. Custom properties are not carried the same way — set
+  page does not reach it. All three components copy the nearest `.dark` onto
+  the panel to fix that. Custom properties are not carried the same way — set
   `--roster-popover-*` at `:root`.
+- **`variant="slate"` opens on the dark palette**, in light mode too. That
+  variant paints a dark trigger, and its panel was rendering white: a dark
+  control opening a white sheet, which is the mismatch `--roster-popover-*`
+  exists to prevent. The token family only ever covered the variant that reads
+  tokens, and the ones that name a surface were left behind. It reuses the dark
+  palette rather than introducing a slate one, because every option state there
+  already exists and has already been measured.
 
-### Multi-selection is a checklist, not a menu
+### Two ways to select more than one thing
 
-`CheckboxGroup` exists instead of a multi-select `Select`, and the reason is
-that neither multi-selection UI in the portfolio was ever a dropdown.
-mega-squad's squad form picks sports from a grouped, scrollable checklist with
-category headings; bb-memorial's share form picks tags from a flat row of
-toggles. Collapsing either into a menu would have hidden the options behind a
-click to save vertical space neither screen was short of, so the component
-follows the shape that already worked. A multi-select dropdown is still the
-right answer for a list too long to show — when something in the portfolio has
-one, that is when to build it.
+`MultiSelect` and `CheckboxGroup` both hold a set. They are not a fallback for
+each other:
 
-Three things it adds over the hand-rolled version it replaces:
+- **`MultiSelect`** when the field is one row of a form and the options do not
+  need to be read at a glance. It costs a click to see the list, which is what
+  makes it the right control for a dialog. Note that the default trigger still
+  grows as chips wrap — `maxChips` or `display="count"` is what actually pins
+  it to one row.
+- **`CheckboxGroup`** when scanning every option matters more than saving the
+  space, or when the options arrive in labeled categories. Nothing is hidden
+  and nothing needs a click to be read.
+
+Density is the axis, not correctness. The same eight sports are a good
+`MultiSelect` in a cramped creation dialog and a good `CheckboxGroup` on a
+settings page.
+
+Swapping one for the other is not free, though, and it is worth saying which
+parts move. `label`, `helperText` and `errorMessage` are the same three names
+in both. The value types are not: `CheckboxGroup` is `string[]`, `MultiSelect`
+is `(string | number)[]`, so state typed for one does not assign to the other.
+Neither do the options — `CheckboxGroupOption` carries a `description` that
+`SelectOption` has no field for, and `CheckboxGroup` additionally accepts
+`{ category, options }` groups that `MultiSelect` cannot take at all. Headless
+UI's `Listbox` has no grouping primitive, so option groups in the dropdown
+would be Roster's to build.
+
+#### MultiSelect
+
+The same Headless UI `Listbox` as `Select`, with `multiple` set, opening the
+same panel from `src/internal/popup.ts`. The panel stays open across picks;
+clicking a selected option again removes it.
+
+```tsx
+<MultiSelect
+  label="Sports"
+  options={SPORTS}
+  value={sports}
+  onChange={setSports}
+  maxChips={3}
+  clearable
+/>
+```
+
+Selections render as chips in the trigger, and each chip is individually
+dismissible without opening the menu.
+
+Getting that required a specific structure, and it is the interesting part of
+the component. A dismiss control is a `<button>` and `ListboxButton` is a
+button, so the chips cannot be its children — that pair is invalid HTML, and
+browsers do not rescue it either: React builds the DOM through the DOM API
+rather than the parser, which leaves it nested, so it would ship as a focusable
+control whose every click also opens the listbox. So the trigger is a **shell**
+with the `ListboxButton` stretched `inset-0` across it, and the chips are the
+button's siblings drawn on top.
+
+That keeps the button the full-width element, which matters more than it
+sounds: Headless UI anchors the panel to the button and sizes it from
+`--button-width`, and a trigger that stops being full width is how `Combobox`
+once shipped a 20px unreadable menu. Measured after the change, the panel still
+matches the field exactly.
+
+Everything decorative in the shell is `pointer-events-none`, so a click on a
+chip's label falls through and opens the menu like the rest of the field. Only
+the dismiss controls take their events back. Each is named after its own chip —
+a row of buttons all called "Remove" is a row a screen reader user cannot tell
+apart — and `removeLabel` takes a function if "Remove NFL" is not the phrasing
+you want. The chips are hidden from the trigger's accessible name, which
+carries a punctuated summary instead: they are `inline-flex` spans, and name
+computation joins them with no whitespace, so "NCAA Football" followed by "NBA"
+announced as "FootballNBA".
+
+The chips default to `outline` rather than a soft fill. The default trigger
+paints `--roster-control-bg`, which is `transparent`, so a chip sits on
+whatever the page is: a `soft neutral` chip is `gray-100`, which on this
+library's own `gray-50` page is a 1.04:1 rectangle. It rendered, it measured
+correct, and it could not be seen.
+
+`outline`'s identity is a border rather than a fill, but that alone was not
+enough either. Chip holds its border to 3:1 against a *page*, and this
+component can be told to paint its own surface — `variant="slate"` paints
+`gray-700`, byte-identical to the neutral chip's own `gray-700` label, which
+rendered chip-shaped holes at 1.00:1. So the chips take `text-inherit` and
+`border-current`, in both schemes, and cannot disagree with the surface they
+were placed on. The dismiss and clear controls inherit the same way, because
+the shell is what carries the trigger's color and they all sit inside it.
+Measured across all five variants in both schemes: chip label 9.42 to 18.11,
+chip border 4.33 to 8.99, glyphs 5.59 to 8.99.
+
+Each dismiss control's hit area is grown to 31x28 with an invisible `::after`.
+The glyph's own box is 15x12, and WCAG 2.5.8 asks 24x24 — the spacing exception
+does not rescue it, because the trigger is another target sitting directly
+underneath. That fix landed in `Chip` rather than here, so every dismissible
+chip gets it.
+
+`maxChips` collapses the tail into a `+N` chip and `display="count"` replaces
+the chips with `N selected`, so a field with eight selections does not become
+four rows tall. A selected value with no matching option renders as its own id
+rather than vanishing from a field that still reports it.
+
+#### CheckboxGroup
+
+Three things it adds over the version mega-squad's squad form hand-rolled:
 
 - **Each option is a Headless UI `Field`**, so its label is wired to its own
   checkbox and clicking the text toggles it. The pointer cursor sits on the
@@ -773,6 +871,7 @@ function App() {
 | `Input`              | Text input with label, error state, icon slots, and a size scale matching `Button`                           |
 | `LabeledDivider`     | Horizontal rule carrying a label, with an optional trailing count                                            |
 | `Link`               | Styled anchor with variant support                                                                           |
+| `MultiSelect`        | A `Select` that holds more than one value: dismissible chips, same panel                                     |
 | `PasswordInput`      | Password field with a show/hide reveal toggle                                                                |
 | `Pill`               | Inline phrase chrome: social proof, live state, applied filters                                              |
 | `AvatarStrip`        | Stacked avatar row with overflow chip, dismiss button, trailing slot, and label area                         |
