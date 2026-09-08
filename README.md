@@ -609,6 +609,28 @@ case in dark. If the tone needs to be unmistakable, use `solid`.
 `src/contrast.test.ts` measures the `solid` fills and deliberately does not
 measure `glass` — a number there would be a number for one background.
 
+### Anchored popups share their internals
+
+`Select` and `Combobox` open the same panel, and deliberately so: a combobox
+that opened a different-looking menu than a select on the same form is the bug
+worth preventing. The panel classes, the option rows and the dark-mode carry
+live in `src/internal/`, which is **not exported** — its contract is
+with those components, not with you. The escape hatch you reach for is
+`optionsClassName` on the component itself.
+
+Two things in there are worth knowing about even from outside, because both
+look like oversights until you know why:
+
+- **The panel sets no `max-height` and no `overflow`.** Headless UI's `size`
+  middleware writes both inline whenever `anchor` is set, so a utility would
+  lose to it anyway. To cap a menu shorter than the viewport allows, set the
+  variable that inline rule reads:
+  `optionsClassName="rst:[--anchor-max-height:20rem]"`.
+- **The panel is portaled to `<body>`**, so a `.dark` scoped to part of your
+  page does not reach it. Both components copy the nearest `.dark` onto the
+  panel to fix that. Custom properties are not carried the same way — set
+  `--roster-popover-*` at `:root`.
+
 ### Components that render links
 
 `Breadcrumbs` renders a plain `<a>` by default, which is right for a static
@@ -665,6 +687,7 @@ function App() {
 | `Button`             | Primary interactive element: solid, soft, outline, ghost, link variants                                      |
 | `Card`               | Bordered surface container                                                                                   |
 | `Checkbox`           | Accessible checkbox with label support                                                                       |
+| `Combobox`           | A `Select` you can type into: filters as you type, same panel and size scale                                 |
 | `Chip`               | The interactive one of Badge / Pill / Chip: removable, selectable, or both                                   |
 | `Disclosure`         | Show/hide toggle using HeadlessUI                                                                            |
 | `Eyebrow`            | Small tracked-out uppercase label above a heading or beside a rule; polymorphic via `as`                     |

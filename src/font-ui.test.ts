@@ -56,6 +56,8 @@ const DELIBERATELY_MONO = [
 const COVERED_BY_COMPOSITION: Record<string, string> = {
   ThemeToggle: "renders Button as its root",
   PasswordInput: "renders Input as its root",
+  Combobox:
+    "its trigger is Input's variants and its panel is the shared popup, so the token arrives from both",
 };
 
 function componentDirs(): { name: string; dir: string }[] {
