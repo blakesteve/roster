@@ -807,6 +807,84 @@ invalid — the selection is — so nothing rings the individual controls.
 A rebuild sorts the result into declaration order, which reads tidier and
 silently drops any selected value whose option has not loaded yet.
 
+### Multi-selection is a checklist, not a menu
+
+`CheckboxGroup` exists instead of a multi-select `Select`, and the reason is
+that neither multi-selection UI in the portfolio was ever a dropdown.
+mega-squad's squad form picks sports from a grouped, scrollable checklist with
+category headings; bb-memorial's share form picks tags from a flat row of
+toggles. Collapsing either into a menu would have hidden the options behind a
+click to save vertical space neither screen was short of, so the component
+follows the shape that already worked. A multi-select dropdown is still the
+right answer for a list too long to show — when something in the portfolio has
+one, that is when to build it.
+
+Three things it adds over the hand-rolled version it replaces:
+
+- **Each option is a Headless UI `Field`**, so its label is wired to its own
+  checkbox and clicking the text toggles it. The pointer cursor sits on the
+  label rather than on the row, because the label *is* the hit area: at two
+  columns, a short option like `NFL` fills about a quarter of its grid cell,
+  and a row-wide affordance would advertise the other three quarters as
+  clickable.
+- **Each category is a nested fieldset**, so `Football` is the accessible name
+  of the group under it rather than a styled `div` a screen reader walks past.
+  The heading is still a `<span>`, not a heading element, so it does not appear
+  in a screen reader's heading list — the name is reachable by entering the
+  group, which is what the nesting buys.
+- **`errorMessage` reaches the fieldset** as `aria-describedby`, wired by hand
+  rather than through Headless UI's `Description`. `Fieldset` collects
+  descendant labels but never calls `useDescriptions` and provides no
+  description context, so a `Description` dropped inside one throws rather than
+  degrading quietly. Per-option `description` text does go through `Field`,
+  which wires it properly — the distinction is real: a group description is
+  announced on entering the group, an option's on focusing that checkbox.
+
+  Both `aria-describedby` and `aria-invalid` are set **after** `...props` is
+  spread, and the describedby is merged with any the caller passes. Set before,
+  a caller's own `aria-describedby` would replace the error association with no
+  type error and no warning: a group rendering red text and reporting itself
+  valid.
+
+`variant="panel"` draws the enclosing box for the long-list case. It
+deliberately does not read `--roster-popover-*`: that family is for surfaces
+that float over the page, and this one is in the flow, so it takes `Card`'s
+`soft` fill. Its border is two ramp steps heavier than that card's, and that
+part is not shared: a card's hairline separates content from the page, while
+this one has to read as the wall a scroll region ends at.
+
+`maxHeight` is applied inline rather than as a class, because the useful values
+are arbitrary and a Tailwind class built from a prop is a class that does not
+exist at build time. A capped panel takes a tab stop of its own — Chrome and
+Firefox focus scrollers by themselves now, Safari does not, and a `disabled`
+group has no focusable option to tab to at all, so the region would be
+unscrollable from the keyboard.
+
+`errorMessage` repaints less here than it does on `Input` or `Select`, on
+purpose. `panel` gets an error border; `plain` has no boundary to repaint, so
+the message is the whole error state. A checkbox is not the thing that is
+invalid — the selection is — so nothing rings the individual controls.
+
+```tsx
+<CheckboxGroup
+  label="Select supported sports"
+  helperText="You can always add more later."
+  variant="panel"
+  columns={2}
+  maxHeight={240}
+  options={[
+    { category: "Football", options: [{ value: "nfl", label: "NFL" }] },
+    { category: "Hockey", options: [{ value: "nhl", label: "NHL" }] },
+  ]}
+  value={sports}
+  onChange={setSports}
+/>
+```
+
+`onChange` appends and filters rather than rebuilding the array from `options`.
+A rebuild sorts the result into declaration order, which reads tidier and
+silently drops any selected value whose option has not loaded yet.
+
 ### Components that render links
 
 `Breadcrumbs` renders a plain `<a>` by default, which is right for a static
