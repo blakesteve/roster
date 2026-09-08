@@ -48,15 +48,21 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/**
+ * `value` and `onChange` are applied AFTER the spread on purpose. `Playground`
+ * spreads its `args`, which carry the meta's own frozen `value: null` and no-op
+ * `onChange` — spread last, those took the state and the story could never hold
+ * a selection.
+ */
 function Stateful(props: Partial<React.ComponentProps<typeof Combobox>>) {
   const [value, setValue] = useState<string | number | null>(null);
   return (
     <Combobox
       options={SPORTS}
-      value={value}
-      onChange={setValue}
       className="rst:max-w-xs"
       {...props}
+      value={value}
+      onChange={setValue}
     />
   );
 }
@@ -72,7 +78,14 @@ export const Playground: Story = {
 
     /* The panel portals to <body>, so it is outside `canvasElement`. */
     const list = await within(document.body).findByRole("listbox");
-    await expect(within(list).getAllByRole("option")).toHaveLength(2);
+    const options = within(list).getAllByRole("option");
+    await expect(options).toHaveLength(2);
+
+    /* Selecting, not just filtering. Filtering is Headless UI's own state and
+       passes whether or not `value`/`onChange` reach the component, which is
+       why this story sat broken with a green test. */
+    await userEvent.click(options[0]);
+    await expect(canvas.getByRole("combobox")).toHaveValue("NCAA Football");
   },
   parameters: {
     docs: {
