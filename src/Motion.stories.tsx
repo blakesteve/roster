@@ -36,8 +36,8 @@ type EntranceArgs = {
  * is `--roster-*` — but a control panel has to reach them to be a control panel.
  */
 type EnterVars = CSSProperties & {
-  "--rst-enter-duration"?: string;
-  "--rst-enter-easing"?: string;
+  "--roster-enter-duration"?: string;
+  "--roster-enter-easing"?: string;
 };
 
 /* Spelled out rather than interpolated. Tailwind scans source as text, so
@@ -68,8 +68,8 @@ function Playground(args: EntranceArgs) {
   const [run, setRun] = useState(0);
   const classes = classesFor(args);
   const vars: EnterVars = {
-    "--rst-enter-duration": `${args.duration}ms`,
-    "--rst-enter-easing": args.easing,
+    "--roster-enter-duration": `${args.duration}ms`,
+    "--roster-enter-easing": args.easing,
   };
 
   return (
@@ -172,7 +172,7 @@ function ModifierCard({
 function EveryModifier() {
   /* 900ms, because at the library default a `-2` slide covers 8px in 150ms —
      right for a tooltip, far too small to study. */
-  const vars: EnterVars = { "--rst-enter-duration": "900ms" };
+  const vars: EnterVars = { "--roster-enter-duration": "900ms" };
 
   return (
     <section className="rst:flex rst:flex-col rst:gap-5 rst:border-t rst:border-gray-200 rst:p-6 rst:dark:border-gray-800">
@@ -245,12 +245,12 @@ const meta = {
     zoom: { control: "boolean", description: "Apply `zoom-in-95`." },
     duration: {
       control: { type: "range", min: 100, max: 2000, step: 50 },
-      description: "`--rst-enter-duration`. The library default is 150ms.",
+      description: "`--roster-enter-duration`. The library default is 150ms.",
     },
     easing: {
       control: "select",
       options: Object.keys(EASINGS),
-      description: "`--rst-enter-easing`.",
+      description: "`--roster-enter-easing`.",
     },
     stagger: {
       control: { type: "range", min: 0, max: 300, step: 10 },

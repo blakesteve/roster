@@ -33,6 +33,14 @@
 
 @import "tailwindcss/theme.css" layer(roster) prefix(rst);
 @import "tailwindcss/utilities.css" layer(roster);
+
+/* Tailwind only generates a utility it finds in the source it scans, and it
+   scans THIS repo — so `font-display` would never reach a consuming app, whose
+   own build has no idea `--roster-font-display` exists. No Roster component
+   asks for the display face (that is a separate decision, deliberately not
+   made here), which would leave the token unreachable for everyone. Forcing
+   the one class into the artifact is what makes the role usable. */
+@source inline("rst:font-display");
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
@@ -169,6 +177,55 @@
      ────────────────────────────────────────────────────────────────────────── */
   --font-ui: var(
     --roster-font-ui,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif
+  );
+
+  /* ── The other two roles ────────────────────────────────────────────────
+     `--font-ui` above was the only font role Roster PROMISED, which left two
+     holes.
+
+     MONO was reachable, but only through a name we do not keep. `font-mono`
+     resolved through `--rst-font-mono`, a Tailwind-internal prefixed variable
+     that an app could in fact set from an unlayered `:root` — it worked, it was
+     undocumented, and it was ours to rename at any time. The set that opts into
+     mono (Eyebrow, InlineCode, Stat, Pullquote, DescriptionList, MatchupCard,
+     Countdown) is now reachable through the same `--roster-*` namespace as
+     everything else. The fallback is Tailwind's own default stack, byte for
+     byte, so a consumer who sets nothing sees no change.
+
+     BREAKING, and small: nothing reads `--rst-font-mono` any more. An app that
+     found that hatch has to move to `--roster-font-mono`. It is called out in
+     the README rather than left to be discovered.
+
+     DISPLAY did not exist. Nothing in the library asks for it — it is for
+     consumers who want headings, figures and names in a face distinct from
+     their body text, which is a real need every app here has and none could
+     express. Its fallback is a COPY of the UI stack's default, not a reference
+     to it: theme values are inlined, so `var(--font-ui)` would not resolve. An
+     app that sets `--roster-font-ui` alone therefore does NOT change
+     `rst:font-display`; set both if you want them to agree.
+     ────────────────────────────────────────────────────────────────────── */
+  --font-mono: var(
+    --roster-font-mono,
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    "Courier New",
+    monospace
+  );
+
+  --font-display: var(
+    --roster-font-display,
     ui-sans-serif,
     system-ui,
     -apple-system,
@@ -373,8 +430,19 @@
 }
 
 @utility animate-in {
-  animation: rst-enter var(--rst-enter-duration, 150ms)
-    var(--rst-enter-easing, cubic-bezier(0.16, 1, 0.3, 1));
+  /* `--roster-*`, not `--rst-*`. These two are the only motion knobs a consumer
+     is meant to set, so they belong in the namespace Roster promises rather
+     than the prefix Tailwind generates its internals into — the same mistake
+     `font-mono` made.
+
+     The rest of the `--rst-enter-*` family stays exactly where it is on
+     purpose. `opacity`, `scale` and the translates are plumbing that the
+     `fade-in-*` and `zoom-in-*` utilities WRITE, in the same way Tailwind
+     writes `--tw-translate-x`. Promising those as API would be the opposite
+     error: they are implementation, and naming them `--roster-*` would invite
+     apps to set values the utilities then overwrite. */
+  animation: rst-enter var(--roster-enter-duration, 150ms)
+    var(--roster-enter-easing, cubic-bezier(0.16, 1, 0.3, 1));
   /* `backwards` so the from-state applies during `animation-delay` rather than
      after it. Without it a delayed element paints at its resting state first,
      then snaps back to the start when the delay elapses — which makes a

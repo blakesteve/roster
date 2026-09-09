@@ -162,25 +162,57 @@ is not a descendant of your container. Set those at `:root`. See
 bar paints _itself_ with. Pair them with `themeMode="auto"` and the nav follows
 whatever `ThemeToggle` sets.
 
-### The UI font
+### The three font roles
 
-Controls, labels and table cells render in `--roster-font-ui`. Set nothing and
-they use a system sans stack, which is the point: without it they would inherit
-whatever your app puts on `body`, and an app that reads in a serif would get
-serif buttons and serif badges.
+Roster exposes three type roles, each settable with one custom property:
 
-To match your own UI face, define the variable once:
+| role | variable | used by |
+| ---- | -------- | ------- |
+| UI | `--roster-font-ui` | controls, labels, table cells |
+| Mono | `--roster-font-mono` | `Eyebrow`, `InlineCode`, `Stat`, `Pullquote`, `DescriptionList`, `MatchupCard`, `Countdown` |
+| Display | `--roster-font-display` | nothing yet — yours to apply with `rst:font-display` |
 
 ```css
 :root {
-  --roster-font-ui: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --roster-font-ui: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --roster-font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --roster-font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 ```
 
-Two sets of components opt out. `Card` and `Link` inherit on purpose, because
-they wrap your content and that text is not Roster's to restyle. `Eyebrow`,
-`InlineCode`, `Stat`, `Pullquote`, `DescriptionList`, `MatchupCard` and
-`Countdown` ask for a monospace face as a design decision.
+Set none of them and nothing changes: UI and display fall back to a system sans
+stack, mono to Tailwind's own default. That matters more than it sounds for the
+UI role — without it, controls would inherit whatever your app puts on `body`,
+and an app that reads in a serif would get serif buttons and serif badges.
+
+Motion moved the same way. The two knobs a consumer is meant to set are now
+`--roster-enter-duration` and `--roster-enter-easing`; they were
+`--rst-enter-duration` and `--rst-enter-easing`. The rest of the `--rst-enter-*`
+family is untouched on purpose — `opacity`, `scale` and the translates are
+written *by* the `fade-in-*` and `zoom-in-*` utilities, so they are
+implementation, not API.
+
+**Mono moved namespace, and that is a small breaking change.** It used to
+resolve through `--rst-font-mono`, a Tailwind-internal variable. That did work
+if you found it — it was undocumented, and it was Roster's to rename at any
+time. Nothing reads it any more, so an app that set `--rst-font-mono` must move
+to `--roster-font-mono`. Setting neither is unaffected: the fallback is
+Tailwind's own default stack, byte for byte.
+
+**Display is deliberately unused by the library.** No component asks for it, so
+setting it changes nothing on its own — it exists so an app can put headings,
+figures and names in a face distinct from its body text, and reach them with
+`rst:font-display`. Roster force-emits that one utility, because Tailwind
+generates only what it finds in the source it scans, and your build has never
+heard of `--roster-font-display`.
+
+Its fallback is a copy of the UI stack rather than a reference to it, because
+theme values are inlined and `var(--font-ui)` would not resolve. Setting
+`--roster-font-ui` alone therefore does not change `rst:font-display`; set both
+if you want them to agree.
+
+`Card` and `Link` opt out of all of this and inherit, because they wrap your
+content and that text is not Roster's to restyle.
 
 ### Solid fill contrast
 
