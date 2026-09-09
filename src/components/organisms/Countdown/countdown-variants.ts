@@ -44,7 +44,11 @@ export const countdownNumberVariants = cva(
 );
 
 export const countdownLabelVariants = cva(
-  "rst:uppercase rst:tracking-widest rst:mt-1 rst:transition-colors rst:text-gray-500 rst:dark:text-gray-400",
+  /* Tracking steps down in a narrow container. The labels are what set each column's
+     width — "SECONDS" is wider than any digit pair — and dropping 0.1em to
+     0.025em across those 23 characters recovers about 17px, measured. The
+     tracked-out look is kept everywhere it fits. */
+  "rst:uppercase rst:tracking-wide rst:@[22rem]:tracking-widest rst:mt-1 rst:transition-colors rst:text-gray-500 rst:dark:text-gray-400",
   {
     variants: {
       size: {

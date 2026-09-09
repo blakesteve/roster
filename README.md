@@ -194,6 +194,36 @@ by `src/contrast.test.ts`, at rest **and** on hover, in both themes.
 object under WCAG 1.4.11, not text. It used to be excluded from the suite
 entirely, which measured it against nothing.
 
+`CallToAction` is **not** in that suite, and its light surface changed: the
+fills moved a ramp step and the borders moved four, because the old surface
+measured 1.03:1 against a light page with a 1.30:1 border — a banner you could
+not see. **Installing this version changes how your existing CTAs look**, the
+same way the 1.4.11 pass changed every field in 4.8.2. Its `info` variant also
+moves from Tailwind's stock `blue-*` to Roster's `info-*`, so it now answers to
+`--roster-info-*` like every other scheme.
+
+Worth knowing what that border step is and is not. It is a **prominence**
+decision, not a 1.4.11 one: a tinted banner is not a control, so the criterion
+no longer reaches it once the surface has a fill. A call to action is the one
+component whose job is to be looked at first, so it is deliberately the most
+defined bordered block in the library. The filled surfaces it sits beside are
+much fainter — `Card` soft at 1.04:1, `ErrorState` at 1.39:1, `Toast` and
+`Pill` between 1.34:1 and 1.82:1. `Alert` is the closest, and only because its
+4px left stripe is already a `-500`, at 6.10:1 for primary.
+
+`CallToAction` and `Countdown` also lay themselves out with **CSS container
+queries** rather than `md:` and `sm:`. The switch is now the CARD's width, not
+the window's — a 228px card on a 1200px page used to lay out as a row and
+squeeze its own text until it overflowed. Three things follow:
+
+- **The breakpoint number changed** from a 768px viewport to a 512px card. A
+  CTA in a narrow page column will stack where it did not before.
+- **`container-type: inline-size` collapses inside a content-sized ancestor.**
+  Give any `width: fit-content`, `inline-block` or table-cell ancestor a
+  definite width, or the card measures zero.
+- **Container queries are required**: Chrome 105+, Safari 16+, Firefox 110+.
+  Without them a `CallToAction` renders in its narrow form at every width.
+
 #### Ink follows the fill
 
 The foreground is a token per fill, not per family:

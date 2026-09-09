@@ -4,6 +4,7 @@ import { CallToAction } from "./CallToAction";
 import { Button } from "../../atoms/Button/Button";
 import "@testing-library/jest-dom";
 
+
 describe("CallToAction Molecule", () => {
   it("renders title and standard string description correctly", () => {
     render(
@@ -102,7 +103,7 @@ describe("CallToAction Molecule", () => {
 
     // Light mode check
     expect(container.firstChild).toHaveClass(
-      "rst:bg-primary-50",
+      "rst:bg-primary-100",
       "rst:text-primary-900",
     );
 
@@ -113,7 +114,7 @@ describe("CallToAction Molecule", () => {
 
     rerender(<CallToAction title="Error Test" variant="error" />);
     expect(container.firstChild).toHaveClass(
-      "rst:bg-error-50",
+      "rst:bg-error-100",
       "rst:dark:bg-error-900/30",
     );
   });
@@ -124,7 +125,7 @@ describe("CallToAction Molecule", () => {
     );
 
     expect(container.firstChild).toHaveClass(
-      "rst:bg-amber-50",
+      "rst:bg-amber-100",
       "rst:dark:bg-amber-900/30",
     );
   });
@@ -136,7 +137,7 @@ describe("CallToAction Molecule", () => {
     );
 
     expect(container.firstChild).toHaveClass(
-      "rst:bg-success-50",
+      "rst:bg-success-100",
       "rst:dark:bg-success-900/30",
     );
   });
@@ -146,8 +147,11 @@ describe("CallToAction Molecule", () => {
     const { container } = render(<CallToAction title="Info" variant="info" />);
 
     expect(container.firstChild).toHaveClass(
-      "rst:bg-blue-50",
-      "rst:dark:bg-blue-900/30",
+      /* `info-*`, not Tailwind's stock `blue-*`. Roster ships the ramp,
+         and the old classes resolved to a palette no `--roster-*` override
+         could reach. */
+      "rst:bg-info-100",
+      "rst:dark:bg-info-900/30",
     );
   });
 
@@ -167,6 +171,65 @@ describe("CallToAction Molecule", () => {
 
     expect(container.firstChild).toHaveClass("rst:my-custom-class");
     // Should still have base variants
-    expect(container.firstChild).toHaveClass("rst:relative", "rst:flex", "rst:rounded-lg");
+    /* `flex` moved to the inner layout element: the card is the container
+       query host and an element cannot query itself, so the row/column switch
+       had to live one level in. The card keeps its own chrome. */
+    expect(container.firstChild).toHaveClass(
+      "rst:relative",
+      "rst:rounded-lg",
+      "rst:@container",
+    );
   });
+
+  it("draws a -600 border on every variant", () => {
+    /* The load-bearing half of the surface fix, and it was unguarded: the
+       fills had assertions and the borders had none, so reverting -600 to
+       -200 left the suite green. The fill only reaches 1.12:1 against a light
+       page; the border is what makes the block visible. */
+    const borders = {
+      primary: "rst:border-primary-600",
+      neutral: "rst:border-gray-600",
+      warning: "rst:border-amber-600",
+      error: "rst:border-error-600",
+      success: "rst:border-success-600",
+      info: "rst:border-info-600",
+    } as const;
+
+    for (const [variant, expected] of Object.entries(borders)) {
+      const { container, unmount } = render(
+        <CallToAction
+          title={`${variant} border`}
+          variant={variant as keyof typeof borders}
+        />,
+      );
+      expect(container.firstChild).toHaveClass(expected);
+      unmount();
+    }
+  });
+
+  it("keeps the neutral variant on a white fill", () => {
+    /* Deepening this one to gray-100 measured 1.04:1 against the page, which
+       is exactly what white already measured — it would have traded the
+       raised-white-card reading for no contrast at all. */
+    const { container } = render(
+      <CallToAction title="Neutral" variant="neutral" />,
+    );
+    expect(container.firstChild).toHaveClass("rst:bg-white");
+    expect(container.firstChild).not.toHaveClass("rst:bg-gray-100");
+  });
+
+  it("gives the action full width in a narrow card and hands it back in a wide one", () => {
+    const { container } = render(
+      <CallToAction title="With action" action={<button>Go</button>} />,
+    );
+    const wrapper = container.querySelector("button")!.parentElement!;
+
+    /* Full width in a narrow card, natural width in a wide one — keyed to the
+       CARD's width, not the window's. `md:` was the bug: a 228px card on a
+       1200px page laid out as a row and squeezed the text column until it
+       overflowed. */
+    expect(wrapper).toHaveClass("rst:w-full", "rst:@[32rem]:w-auto");
+    expect(wrapper).not.toHaveClass("rst:self-end");
+  });
+
 });
