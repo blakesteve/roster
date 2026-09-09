@@ -37,14 +37,18 @@ The \`CallToAction\` is a high-visibility banner used to nudge users toward spec
   },
   decorators: [
     (Story) => (
-      <div className="rst:p-8 rst:space-y-12">
-        <div className="light rst:bg-gray-50 rst:p-8 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm">
+      /* Padding steps down below `sm`. At `p-8` on both this and each preview
+         panel, the decorator took 128px of chrome — so reviewing a story at a
+         400px pane left the card 238px and the countdown 126px, and everything
+         looked broken for reasons that were the harness, not the component. */
+      <div className="rst:p-2 rst:sm:p-8 rst:space-y-12">
+        <div className="light rst:bg-gray-50 rst:p-3 rst:sm:p-8 rst:rounded-xl rst:border rst:border-gray-100 rst:shadow-sm">
           <p className="rst:text-[10px] rst:font-bold rst:text-gray-400 rst:mb-6 rst:uppercase rst:tracking-widest">
             Light Mode Preview
           </p>
           <Story />
         </div>
-        <div className="dark rst:bg-gray-950 rst:p-8 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl">
+        <div className="dark rst:bg-gray-950 rst:p-3 rst:sm:p-8 rst:rounded-xl rst:border rst:border-gray-800 rst:shadow-xl">
           <p className="rst:text-[10px] rst:font-bold rst:text-gray-500 rst:mb-6 rst:uppercase rst:tracking-widest">
             Dark Mode Preview
           </p>
@@ -154,7 +158,11 @@ export const RichDescriptionEmbedded: Story = {
           create a NFL league. Once games are available, the schedule will
           automatically populate.
         </span>
-        <div className="rst:bg-black/5 rst:dark:bg-black/20 rst:p-4 rst:rounded-xl rst:border rst:border-black/10 rst:dark:border-white/10 rst:self-start">
+        {/* `w-full`, not `self-start`. `Countdown` is a container-query host,
+            and `container-type: inline-size` collapses to zero when an
+            ancestor is sized to its content — this box rendered about 20px
+            wide with the digits spilling out of its left edge. */}
+        <div className="rst:w-full rst:bg-black/5 rst:dark:bg-black/20 rst:p-4 rst:rounded-xl rst:border rst:border-black/10 rst:dark:border-white/10">
           <Countdown
             targetDate={new Date(new Date().setDate(new Date().getDate() + 14))} // 14 days from now
             size="sm"
@@ -291,4 +299,52 @@ export const WithPersistenceLogic: Story = {
       />
     );
   },
+};
+
+/**
+ * The narrow case — a `Countdown` embedded in a CTA on a phone.
+ *
+ * This is where both halves of the surface work land, and it is the story that
+ * found the real bug: the content column had no `min-w-0`, so an embedded
+ * Countdown's min-content held the column open and pushed the title and
+ * description out past the card, which clips them mid-word.
+ *
+ * Pinned narrow on purpose, at any pane width: that is the case worth seeing,
+ * and it only holds up because both the card and the `Countdown` inside it now
+ * size against their own container rather than the window. Nothing should
+ * cross the card's edge at any pane width.
+ */
+export const NarrowWithCountdown: Story = {
+  args: {
+    variant: "primary",
+    icon: <FontAwesomeIcon icon={faTrophy} />,
+    title: "National Football League is coming soon!",
+  },
+  render: (args) => (
+    <div className="rst:w-full rst:max-w-[319px]">
+      <CallToAction
+        {...args}
+        description={
+          <div className="rst:mt-2 rst:flex rst:flex-col rst:gap-4">
+            <span>
+              First game expected on 9/9/2026. Get your squad together and
+              create a NFL league.
+            </span>
+            {/* `w-full`, not `self-start`. The Countdown is a container query
+                host, and `container-type: inline-size` collapses to 0 when an
+                ancestor is sized to its content — which `self-start` is. */}
+            <div className="rst:w-full rst:rounded-xl rst:border rst:border-white/10 rst:bg-black/10 rst:p-3">
+              <Countdown
+                targetDate={new Date(Date.now() + 1000 * 60 * 60 * 25)}
+                size="xs"
+                variant="neutral"
+                className="rst:text-left"
+              />
+            </div>
+          </div>
+        }
+        action={<Button colorScheme="primary">Create a NFL League</Button>}
+      />
+    </div>
+  ),
 };

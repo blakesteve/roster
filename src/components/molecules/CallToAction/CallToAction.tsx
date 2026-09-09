@@ -29,9 +29,26 @@ const CallToAction = ({
 }: CallToActionProps) => {
   return (
     <div className={cn(ctaVariants({ variant }), className)} {...props}>
-      <div className="rst:flex rst:items-start rst:gap-4">
-        {icon && <div className="rst:mt-1 rst:shrink-0 rst:text-current">{icon}</div>}
-        <div className="rst:flex rst:flex-col rst:gap-1.5 rst:w-full">
+      {/* The layout lives one level inside the card because an element cannot
+          query its own width, and the card is the container. Everything below
+          keys off the CARD's width rather than the window's. */}
+      <div className="rst:flex rst:flex-col rst:gap-4 rst:@[32rem]:flex-row rst:@[32rem]:items-center rst:@[32rem]:justify-between">
+      {/* Stacks whenever the card is narrow — the same 32rem step the card
+          itself uses, so the icon never sits beside a title in a column
+          layout. The icon column costs about 36px, which a ~270px content box
+          feels immediately. */}
+      <div className="rst:flex rst:flex-col rst:items-center rst:gap-4 rst:@[32rem]:flex-row rst:@[32rem]:items-start">
+        {icon && (
+          <div className="rst:shrink-0 rst:text-current rst:@[32rem]:mt-1">
+            {icon}
+          </div>
+        )}
+        {/* `min-w-0` is load-bearing, not tidying. A flex child defaults to
+            `min-width: auto`, so this column refuses to shrink below the
+            min-content of its widest descendant — an embedded `Countdown` is
+            about 190px — and drags the title and description out past the
+            card, where the base `overflow-hidden` clips them mid-word. */}
+        <div className="rst:flex rst:min-w-0 rst:flex-col rst:gap-1.5 rst:w-full">
           <h3 className="rst:text-lg rst:font-bold rst:leading-tight rst:tracking-tight rst:text-current">
             {title}
           </h3>
@@ -43,7 +60,20 @@ const CallToAction = ({
         </div>
       </div>
 
-      {action && <div className="rst:shrink-0 rst:pt-2 rst:md:pt-0">{action}</div>}
+      {/* In a narrow CARD the action goes full width under the content rather
+          than hugging one side of a column that may only be ~180px across. A
+          right-aligned button was still an intrinsically sized box, so a long
+          label overflowed and the `overflow-hidden` on the card clipped it.
+
+          `[&>*]:w-full` reaches whatever node the consumer passed, since the
+          action is their element and not ours. Above 32rem it all reverts: the
+          card is a row with `justify-between`, which puts a naturally sized
+          action on the right. */}
+      {action && (
+        <div className="rst:flex rst:w-full rst:shrink-0 rst:pt-2 rst:[&>*]:w-full rst:@[32rem]:w-auto rst:@[32rem]:pt-0 rst:@[32rem]:[&>*]:w-auto">
+          {action}
+        </div>
+      )}
 
       {onDismiss && (
         <div className="rst:absolute rst:right-2 rst:top-2">
@@ -58,6 +88,7 @@ const CallToAction = ({
           </Button>
         </div>
       )}
+      </div>
     </div>
   );
 };
