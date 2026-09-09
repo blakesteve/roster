@@ -122,7 +122,7 @@ describe("font-ui coverage", () => {
   });
 });
 
-describe("font-ui token", () => {
+describe("font role tokens", () => {
   const css = readFileSync(join(__dirname, "index.css"), "utf8");
 
   it("is defined as a themeable custom property with a system fallback", () => {
@@ -134,6 +134,62 @@ describe("font-ui token", () => {
     const fallback = decl.slice(0, decl.indexOf(");"));
     expect(fallback).toContain("ui-sans-serif");
     expect(fallback).not.toContain("ui-serif");
+    expect(fallback).not.toContain("ui-monospace");
+  });
+
+  it("routes every font role through a --roster-* hook", () => {
+    /* The invariant, rather than three hard-coded assertions: a fourth role
+       added later must be themeable too. `font-mono` failed this for the life
+       of the library — it resolved through `--rst-font-mono`, a Tailwind
+       internal, so the components that opt into mono could not be retyped by a
+       consuming app at all. */
+    const theme = css.slice(css.indexOf("@theme inline"));
+    /* Matches EVERY `--font-*` declaration, not only the ones already written
+       as `var(...)`. A fourth role added the obvious way — `--font-serif:
+       ui-serif, Georgia, serif;` — matched nothing under the narrower pattern,
+       so the count stayed at three and the invariant passed while the new role
+       was unthemeable. */
+    const roles = [...theme.matchAll(/--font-([a-z]+):\s*([^;]+);/g)];
+
+    expect(roles.length).toBeGreaterThanOrEqual(3);
+    for (const [, role, value] of roles) {
+      expect(
+        value.replace(/\s+/g, " "),
+        `--font-${role} must read var(--roster-font-${role}, <fallback>)`,
+      ).toContain(`var( --roster-font-${role}, `.replace(/\s+/g, " "));
+    }
+  });
+
+  it("keeps the mono fallback identical to Tailwind's own default", () => {
+    /* Identity, in order, complete — not a containment check. Deleting the tail
+       of the stack (`"Liberation Mono", "Courier New", monospace`) left a
+       containment assertion green while dropping the generic `monospace`
+       family, so an unthemed consumer on a machine without the five named
+       faces would inherit `body` instead. This is the one invariant the whole
+       "setting nothing changes nothing" claim rests on. */
+    const decl = css.slice(css.indexOf("--font-mono:"));
+    const fallback = decl
+      .slice(decl.indexOf("--roster-font-mono,") + "--roster-font-mono,".length, decl.indexOf(");"))
+      .split(",")
+      .map((face) => face.trim())
+      .filter(Boolean);
+
+    expect(fallback).toEqual([
+      "ui-monospace",
+      "SFMono-Regular",
+      "Menlo",
+      "Monaco",
+      "Consolas",
+      '"Liberation Mono"',
+      '"Courier New"',
+      "monospace",
+    ]);
+  });
+
+  it("defaults display to the UI stack, so setting nothing changes nothing", () => {
+    const decl = css.slice(css.indexOf("--font-display:"));
+    const fallback = decl.slice(0, decl.indexOf(");"));
+    expect(fallback).toContain("ui-sans-serif");
     expect(fallback).not.toContain("ui-monospace");
   });
 });
