@@ -12,7 +12,7 @@ export const ctaVariants = cva(
      container instead — that worked, and made the card a grandchild, so a
      consumer's `className` with `col-span-2` or `flex-1` landed on something
      that was no longer the grid or flex item. */
-  "rst:@container rst:font-ui rst:relative rst:overflow-hidden rst:rounded-lg rst:border rst:p-6 rst:shadow-sm rst:transition-all",
+  "rst:@container rst:font-ui rst:relative rst:overflow-hidden rst:rounded-lg rst:border rst:p-6 rst:elevation-raised rst:transition-all",
   {
     variants: {
       /* Light-mode fills moved -50 -> -100 and borders -200 -> -600.

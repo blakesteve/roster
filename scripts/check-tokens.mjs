@@ -29,6 +29,10 @@ const ROLES = ["ui", "mono", "display"];
    implementation rather than API and belong in the internal prefix. */
 const MOTION = ["enter-duration", "enter-easing"];
 
+/* The elevation scale. A level that emits nothing means some surface stopped
+   using it, which is how a scale quietly becomes three unused tokens. */
+const ELEVATION = ["elevation-raised", "elevation-anchored", "elevation-overlay"];
+
 if (!existsSync(CSS)) {
   console.error(`[check-tokens] ${CSS} not found — run the build first.`);
   process.exit(1);
@@ -63,12 +67,33 @@ for (const role of ROLES) {
   }
 }
 
-for (const knob of MOTION) {
-  if (!css.includes(`var(--roster-${knob},`)) {
+/* Two kinds of token, two different invariants.
+
+   A HOOK is one Roster never defines — the font roles, the motion knobs. It is
+   read with a fallback, and the fallback is what a consumer who sets nothing
+   gets, so a missing one is invalid at computed-value time.
+
+   A DEFINED token is one Roster sets at `:root` itself — the elevation levels.
+   It needs no fallback, because it always has a value; what it needs is to
+   still be DEFINED and still be READ. A level nothing reads is how a scale
+   quietly becomes three unused custom properties. */
+for (const hook of MOTION) {
+  if (!css.includes(`var(--roster-${hook},`)) {
     problems.push(
-      `\`--roster-${knob}\` is not read anywhere in the artifact, so the ` +
-        `motion knob cannot be set. It was \`--rst-${knob}\` until 4.11 — a ` +
-        `Tailwind-internal prefix that is not ours to promise.`,
+      `\`--roster-${hook}\` is not read with a fallback, so a consumer who ` +
+        `sets nothing gets an invalid declaration.`,
+    );
+  }
+}
+
+for (const token of ELEVATION) {
+  if (!css.includes(`--roster-${token}:`)) {
+    problems.push(`\`--roster-${token}\` is never defined at \`:root\`.`);
+  }
+  if (!css.includes(`var(--roster-${token})`)) {
+    problems.push(
+      `\`--roster-${token}\` is defined but nothing reads it — the level has ` +
+        `no surfaces, so the scale has a rung nobody stands on.`,
     );
   }
 }
@@ -80,5 +105,5 @@ if (problems.length > 0) {
 }
 
 console.log(
-  `✓ ${ROLES.length} font roles and ${MOTION.length} motion knobs are themeable via --roster-*`,
+  `✓ ${ROLES.length} font roles, ${MOTION.length} motion knobs and ${ELEVATION.length} elevation levels are themeable via --roster-*`,
 );

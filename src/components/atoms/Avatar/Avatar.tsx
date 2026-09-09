@@ -72,7 +72,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         <PopoverPanel
           anchor="bottom"
           className={cn(
-            "rst:z-50 rst:mt-2 rst:rounded-md rst:px-3 rst:py-1.5 rst:text-xs rst:font-medium rst:shadow-xl rst:backdrop-blur-md rst:ring-1",
+            "rst:z-50 rst:mt-2 rst:rounded-md rst:px-3 rst:py-1.5 rst:text-xs rst:font-medium rst:elevation-anchored rst:backdrop-blur-md rst:ring-1",
             "rst:bg-gray-900/95 rst:text-white rst:ring-black/5 rst:dark:bg-gray-100/95 rst:dark:text-gray-900 rst:dark:ring-white/20",
             "rst:transition rst:duration-200 rst:ease-in-out rst:data-closed:opacity-0 rst:data-closed:translate-y-1",
           )}

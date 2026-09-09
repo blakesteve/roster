@@ -162,6 +162,62 @@ is not a descendant of your container. Set those at `:root`. See
 bar paints _itself_ with. Pair them with `themeMode="auto"` and the nav follows
 whatever `ThemeToggle` sets.
 
+### Elevation
+
+Three levels, each a themeable box-shadow, and the only way a surface should
+express depth.
+
+| level | relationship to the page | used by |
+| ----- | ------------------------ | ------- |
+| `raised` | rests on it, scrolls with it | `Card` (filled variants), `Table` (`primary`), `CallToAction` |
+| `anchored` | fixed to a trigger or a viewport edge | `Select`, `Combobox` and `MultiSelect` panels, `Tooltip`, the `Avatar` popover, `ActionBar`, `Navbar`'s menu and mobile panel |
+| `overlay` | detached from it | `Dialog`, `Toast` |
+
+```css
+:root { --roster-elevation-raised: 0 2px 0 0 rgb(20 17 13 / 0.9); }
+.dark { --roster-elevation-raised: 0 2px 0 0 rgb(0 0 0 / 0.9); }
+```
+
+Set them in **both** scopes. Roster re-declares all three under `.dark`, which
+is a closer ancestor than `:root`, so a `:root`-only override is simply
+inherited past in dark mode — the same trap the control and popover families
+document.
+
+Apply them with `rst:elevation-raised`, `rst:elevation-anchored` and
+`rst:elevation-overlay`.
+
+Before this, sixteen call sites used four Tailwind shadow steps with no rule
+connecting them: `Dialog` carried both `shadow-xl` and `shadow-2xl`, `Toast`
+both `shadow-lg` and `shadow-2xl`, and `Avatar` used `shadow-sm` in its variants
+while its own popover used `shadow-xl`.
+
+**Depth only, never fill.** `Card`'s `slate`, `primary` and `glass` each *name*
+a surface, so a token that also set a background would mean something different
+inside each name. Fill stays with `--roster-card-*`, `--roster-popover-*` and
+`--roster-control-*`.
+
+**Controls are not surfaces.** `Button`, the `Select` trigger and the `Avatar`
+ring keep their own `shadow-sm` and stay out of the scale. A button and a card
+do not have the same relationship to the page, and giving a 32px control the
+depth of a card is how a scale stops meaning anything. `src/elevation.test.ts`
+holds that exemption list and fails on a surface that reaches for a raw shadow.
+
+**Forced-colors mode gets an outline, on `anchored` only.** Those surfaces draw
+their border as `ring-1`, which is itself a box-shadow — and forced-colors drops
+`box-shadow`, taking the edge along with the depth. `anchored` carries
+`outline: 1px solid CanvasText` in that mode, as an outline rather than a border
+so nothing shifts by a pixel, and again at `:focus` because those panels are
+focused while open and `focus:outline-hidden` would otherwise outrank it.
+
+`raised` and `overlay` need none: every surface at those levels draws a real
+border, so an outline would paint a second edge just outside a forced one.
+
+**Dark is the honest limit.** A black shadow on a near-black ground has almost
+no range to work in — at full alpha over `gray-950` the darkest it can go is a
+few units. The dark values lean much heavier and still do less than their light
+counterparts. On the darkest grounds the **border** is what separates a surface;
+these levels are a lift on top of it, not a replacement for it.
+
 ### The three font roles
 
 Roster exposes three type roles, each settable with one custom property:

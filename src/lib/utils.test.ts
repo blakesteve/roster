@@ -48,4 +48,23 @@ describe("cn", () => {
       "rst:flex rst:gap-2",
     );
   });
+
+  it("lets a consumer override a component's elevation", () => {
+    /* The elevation levels are custom utilities, so tailwind-merge does not
+       know they set `box-shadow` unless it is told. Untold, `cn` kept both
+       classes and the winner fell to stylesheet order — which emits anchored,
+       overlay, raised, so the family resolved in the INVERSE of its own depth
+       order and `<Card className="rst:elevation-overlay">` was a no-op. */
+    expect(cn("rst:elevation-raised", "rst:elevation-overlay")).toBe(
+      "rst:elevation-overlay",
+    );
+    expect(cn("rst:elevation-overlay", "rst:elevation-raised")).toBe(
+      "rst:elevation-raised",
+    );
+    expect(cn("rst:elevation-raised", "rst:shadow-none")).toBe("rst:shadow-none");
+    expect(cn("rst:shadow-none", "rst:elevation-anchored")).toBe(
+      "rst:elevation-anchored",
+    );
+  });
+
 });

@@ -13,7 +13,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 
 const dialogVariants = cva(
-  "rst:relative rst:w-full rst:transform rst:overflow-hidden rst:rounded-2xl rst:p-6 rst:text-left rst:align-middle rst:shadow-xl rst:transition-all rst:border",
+  "rst:relative rst:w-full rst:transform rst:overflow-hidden rst:rounded-2xl rst:p-6 rst:text-left rst:align-middle rst:elevation-overlay rst:transition-all rst:border",
   {
     variants: {
       size: {
@@ -67,7 +67,7 @@ const dialogVariants = cva(
         primary:
           "rst:bg-primary-700 rst:border-primary-600 rst:text-white rst:dark:bg-primary-950 rst:dark:border-primary-900 rst:[--roster-ring:var(--roster-primary-400,#5ea3de)] rst:[--roster-ring-offset:var(--roster-primary-700,#084063)] rst:dark:[--roster-ring-offset:var(--roster-primary-950,#021724)] rst:[--roster-control-text:var(--roster-gray-100,#f5f5f4)] rst:[--roster-control-border:var(--roster-gray-400,#a8a29e)] rst:[--roster-control-border-focus:var(--roster-primary-400,#5ea3de)]",
         glass:
-          "rst:bg-white/80 rst:border-white/20 rst:backdrop-blur-xl rst:text-gray-900 rst:dark:bg-slate-900/80 rst:dark:border-slate-700/50 rst:dark:text-white rst:shadow-2xl rst:dark:shadow-black/50",
+          "rst:bg-white/80 rst:border-white/20 rst:backdrop-blur-xl rst:text-gray-900 rst:dark:bg-slate-900/80 rst:dark:border-slate-700/50 rst:dark:text-white",
       },
       status: {
         default: "",

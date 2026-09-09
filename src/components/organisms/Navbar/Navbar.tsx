@@ -379,7 +379,7 @@ const Navbar = ({
                     leaveFrom="rst:transform rst:opacity-100 rst:scale-100"
                     leaveTo="rst:transform rst:opacity-0 rst:scale-95"
                   >
-                    <MenuItems className="rst:absolute rst:right-0 rst:z-50 rst:mt-2 rst:w-48 rst:origin-top-right rst:rounded-md rst:bg-white rst:dark:bg-gray-800 rst:py-1 rst:shadow-lg rst:ring-1 rst:ring-black/5 rst:dark:ring-white/10 rst:focus:outline-hidden rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700">
+                    <MenuItems className="rst:absolute rst:right-0 rst:z-50 rst:mt-2 rst:w-48 rst:origin-top-right rst:rounded-md rst:bg-white rst:dark:bg-gray-800 rst:py-1 rst:elevation-anchored rst:ring-1 rst:ring-black/5 rst:dark:ring-white/10 rst:focus:outline-hidden rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700">
                       <div className="rst:py-1">
                         {hasNotifications && onInboxClick && (
                           <MenuItem>
@@ -567,7 +567,7 @@ const Navbar = ({
               focus
               className="rst:absolute rst:top-0 rst:inset-x-0 rst:z-50 rst:origin-top-right rst:transform rst:p-2 rst:transition rst:md:hidden"
             >
-              <div data-roster-mobile-panel className="rst:rounded-lg rst:shadow-lg rst:ring-1 rst:ring-black/5 rst:dark:ring-white/10 rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700 rst:bg-white rst:dark:bg-gray-800">
+              <div data-roster-mobile-panel className="rst:rounded-lg rst:elevation-anchored rst:ring-1 rst:ring-black/5 rst:dark:ring-white/10 rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700 rst:bg-white rst:dark:bg-gray-800">
                 <div className="rst:px-5 rst:pt-5 rst:pb-6">
                   <div className="rst:flex rst:items-center rst:justify-between">
                     <div className="rst:flex rst:items-center rst:gap-3">
