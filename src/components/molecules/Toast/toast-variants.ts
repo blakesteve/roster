@@ -19,7 +19,7 @@ import { cva } from "class-variance-authority";
  * rather than as something that fell out of the layout.
  */
 export const toastVariants = cva(
-  "rst:font-ui rst:pointer-events-auto rst:flex rst:items-start rst:gap-2.5 rst:rounded-lg rst:border rst:px-4 rst:py-3 rst:text-sm rst:shadow-lg",
+  "rst:font-ui rst:pointer-events-auto rst:flex rst:items-start rst:gap-2.5 rst:rounded-lg rst:border rst:elevation-overlay rst:px-4 rst:py-3 rst:text-sm",
   {
     variants: {
       colorScheme: {
@@ -40,7 +40,7 @@ export const toastVariants = cva(
            The blur is what makes even this safe, by muddying the backdrop
            before it shows through. */
         glass:
-          "rst:bg-white/60 rst:text-gray-900 rst:backdrop-blur-xl rst:shadow-2xl rst:dark:bg-slate-900/60 rst:dark:text-white",
+          "rst:bg-white/60 rst:text-gray-900 rst:backdrop-blur-xl rst:dark:bg-slate-900/60 rst:dark:text-white",
       },
     },
     compoundVariants: [

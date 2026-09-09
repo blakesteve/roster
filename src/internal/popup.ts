@@ -79,7 +79,7 @@ export const POPUP_PANEL = [
      anything else in the panel — the empty message rendered in the host's
      prose face while the options beside it did not. */
   "rst:font-ui",
-  "rst:z-50 rst:rounded-md rst:py-1 rst:shadow-lg rst:ring-1 rst:focus:outline-hidden",
+  "rst:z-50 rst:rounded-md rst:py-1 rst:elevation-anchored rst:ring-1 rst:focus:outline-hidden",
   "rst:bg-[var(--roster-popover-bg)] rst:text-[var(--roster-popover-text)] rst:ring-[var(--roster-popover-border)]",
   "rst:[--anchor-gap:4px]",
 ].join(" ");

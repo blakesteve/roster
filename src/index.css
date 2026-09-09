@@ -752,6 +752,126 @@
   --roster-popover-text: var(--roster-gray-100, #f5f5f4);
 }
 
+/* ─── Elevation ───────────────────────────────────────────────────────────────
+   --roster-elevation-raised, -anchored and -overlay.
+
+   Three levels, because there are three real relationships a surface can have
+   to the page, and the library previously expressed them with whatever shadow
+   the author reached for that day: `Dialog` used `shadow-xl` AND `shadow-2xl`,
+   `Toast` used `shadow-lg` AND `shadow-2xl`, and `Avatar` used `shadow-sm` in
+   its variants and `shadow-xl` in the component. Four Tailwind steps across
+   sixteen call sites, assigned ad hoc. Nothing looked foreground because nothing
+   agreed on what foreground meant.
+
+     raised    a surface resting ON the page and scrolling with it — Card,
+               Table, CallToAction.
+     anchored  fixed to something and drawn above the page — a trigger, or an
+               edge of the viewport. The Select, Combobox and MultiSelect
+               panels, Tooltip, the Avatar popover, ActionBar, and Navbar's
+               user menu and mobile panel.
+
+               Named `anchored` rather than `floating` for two reasons. It says
+               what the surface's RELATIONSHIP is, which is what `raised` and
+               `overlay` do, where `floating` only said how it looked. And
+               `floating` already meant something else in this library: the
+               "Floating surface colors" section covers `--roster-popover-*`
+               and calls Dialog a floating surface, which this scale calls an
+               overlay.
+
+               The Navbar BAR is deliberately absent. It has a `border-b` and
+               no shadow: a solid bar flush to the top edge, with content
+               scrolling under it, is separated by that border already. Its
+               menus are anchored; the bar is not.
+     overlay   detached from the page entirely — Dialog, Toast.
+
+   The scale describes SURFACES THAT CONTAIN CONTENT, and controls are not
+   surfaces. Button, the Select trigger and the Avatar ring keep their own
+   `shadow-sm` and stay out of it: a button and a card do not have the same
+   relationship to the page, and giving a 32px control the depth of a card is
+   how a scale stops meaning anything. If a new component is asking which level
+   it is, the question to answer first is whether it holds content.
+
+   Depth only. These deliberately do NOT set a background, because Card's
+   `slate`, `primary` and `glass` each NAME a surface, and a token that meant
+   something different inside each name would not be a token — the same call
+   the popover family makes above. Fill stays with `--roster-card-*`,
+   `--roster-popover-*` and `--roster-control-*`.
+
+   `raised` is deliberately a touch heavier than the `shadow-sm` it replaced.
+   The first pass made it lighter, which inverted the hierarchy it exists to
+   create: `Button` keeps `shadow-sm`, so a button cast a darker shadow than
+   the card containing it.
+
+   Dark is the honest limit here. A black shadow on a near-black ground has
+   almost no range to work in — at full alpha over `gray-950` the darkest it
+   can go is a few units — so the dark values lean much heavier and still do
+   less than their light counterparts. On the darkest grounds the BORDER is
+   what separates a surface, not the shadow, and these levels are a lift on top
+   of that rather than a replacement for it.
+   ────────────────────────────────────────────────────────────────────────── */
+:root {
+  --roster-elevation-raised:
+    0 1px 3px 0 rgb(0 0 0 / 0.12), 0 2px 6px -2px rgb(0 0 0 / 0.10);
+  --roster-elevation-anchored:
+    0 2px 6px -2px rgb(0 0 0 / 0.08), 0 6px 16px -4px rgb(0 0 0 / 0.12);
+  --roster-elevation-overlay:
+    0 4px 12px -4px rgb(0 0 0 / 0.12), 0 18px 44px -8px rgb(0 0 0 / 0.22);
+}
+
+.dark {
+  --roster-elevation-raised:
+    0 1px 3px 0 rgb(0 0 0 / 0.7), 0 2px 6px -2px rgb(0 0 0 / 0.6);
+  --roster-elevation-anchored:
+    0 2px 6px -2px rgb(0 0 0 / 0.75), 0 6px 14px -4px rgb(0 0 0 / 0.7);
+  --roster-elevation-overlay:
+    0 4px 12px -4px rgb(0 0 0 / 0.7), 0 16px 36px -8px rgb(0 0 0 / 0.65);
+}
+
+/* Each level sets `--tw-shadow` and then re-states Tailwind's own composition,
+   rather than assigning `box-shadow` directly.
+
+   Setting `box-shadow` raw looked equivalent and quietly deleted every ring on
+   the same element: a ring IS a box-shadow in Tailwind, composed through
+   `--tw-ring-shadow`, so a bare assignment overwrites it. The Select trigger
+   draws its border as `ring-1 ring-inset`, and an existing story caught it
+   losing that border entirely. Composing the same way `shadow-*` does keeps
+   rings, inset rings and ring offsets intact. */
+@utility elevation-raised {
+  --tw-shadow: var(--roster-elevation-raised);
+  box-shadow:
+    var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+    var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+
+@utility elevation-anchored {
+  --tw-shadow: var(--roster-elevation-anchored);
+  box-shadow:
+    var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+    var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+
+  /* Forced-colors mode drops `box-shadow` entirely. On these two levels that
+     takes the surface's whole visible EDGE with it, not just its depth: the
+     Select, Combobox and MultiSelect panels, Navbar's menu and mobile panel,
+     the Avatar popover and Tooltip all draw their border as `ring-1`, which is
+     itself a box-shadow. Without this they become unbordered rectangles on the
+     same ground as the content behind them.
+
+     `outline`, not `border`, because an outline does not participate in layout
+     — a border here would shift every one of those panels by a pixel in the
+     one mode nobody tests. `raised` needs none of this: every surface at that
+     level draws a real border already. */
+  @media (forced-colors: active) {
+    outline: 1px solid CanvasText;
+  }
+}
+
+@utility elevation-overlay {
+  --tw-shadow: var(--roster-elevation-overlay);
+  box-shadow:
+    var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+    var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+
 @utility custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--roster-scrollbar-thumb) var(--roster-scrollbar-track);
@@ -772,5 +892,25 @@
        than filling the gutter edge to edge. */
     border: 2px solid transparent;
     background-clip: content-box;
+  }
+}
+
+/* The anchored outline again, at a weight that survives focus.
+
+   `@utility` emits `.rst\:elevation-anchored`, one class, (0,1,0). The panels
+   this protects also carry `rst:focus:outline-hidden`, whose own forced-colors
+   rule is `.rst\:focus\:outline-hidden:focus { outline: 2px solid transparent }`
+   at (0,2,0) — and those panels are focused for the whole time they are open.
+   So the utility's outline was being overridden on exactly the two surfaces its
+   comment names, the Select family panel and Navbar's user menu.
+
+   Unlayered on purpose: this sits outside `layer(roster)`, so it wins on layer
+   order rather than on a specificity race nobody can see. Scoped to
+   forced-colors, where the alternative is a panel with no edge at all. */
+@media (forced-colors: active) {
+  .rst\:elevation-anchored:focus,
+  .rst\:elevation-anchored:focus-visible {
+    outline: 1px solid CanvasText;
+    outline-offset: 0;
   }
 }

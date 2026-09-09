@@ -11,7 +11,7 @@ export const tableWrapperVariants = cva(
         subtle:
           "rst:border rst:border-gray-100 rst:dark:border-gray-800 rst:bg-gray-50 rst:dark:bg-gray-900",
         primary:
-          "rst:border rst:border-primary-200 rst:dark:border-primary-900/50 rst:bg-white rst:dark:bg-gray-950 rst:shadow-sm",
+          "rst:border rst:border-primary-200 rst:dark:border-primary-900/50 rst:bg-white rst:dark:bg-gray-950 rst:elevation-raised",
       },
     },
     defaultVariants: { variant: "default" },

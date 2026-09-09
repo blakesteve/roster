@@ -13,7 +13,7 @@ export const cardVariants = cva(
         // so no dark: variants are needed. Defaults match the previous
         // white / gray-900 pair exactly.
         white:
-          "rst:bg-[var(--roster-card-bg)] rst:border rst:border-[var(--roster-card-border)] rst:text-[var(--roster-card-text)] rst:shadow-sm",
+          "rst:bg-[var(--roster-card-bg)] rst:border rst:border-[var(--roster-card-border)] rst:text-[var(--roster-card-text)] rst:elevation-raised",
         
         // crisp light mode (gray-50) and translucent stained-glass dark mode
         soft:  
@@ -21,11 +21,11 @@ export const cardVariants = cva(
         
         // Moody slate, baby.
         slate: 
-          "rst:bg-gray-700 rst:border rst:border-gray-600 rst:text-gray-100 rst:shadow-sm rst:dark:bg-gray-800 rst:dark:border-gray-700 rst:dark:text-gray-100",
+          "rst:bg-gray-700 rst:border rst:border-gray-600 rst:text-gray-100 rst:elevation-raised rst:dark:bg-gray-800 rst:dark:border-gray-700 rst:dark:text-gray-100",
         
         // Primary: Fully drenched in brand color.
         primary: 
-          "rst:bg-primary-600 rst:border rst:border-primary-700 rst:text-white rst:shadow-sm rst:dark:bg-primary-900 rst:dark:border-primary-800 rst:dark:text-primary-50",
+          "rst:bg-primary-600 rst:border rst:border-primary-700 rst:text-white rst:elevation-raised rst:dark:bg-primary-900 rst:dark:border-primary-800 rst:dark:text-primary-50",
         
         // Outline: Transparent background, just the structural border.
         outline:
@@ -37,7 +37,7 @@ export const cardVariants = cva(
         
         // Upgraded to match the ActionBar's exact /50 frosted glass formula
         glass:
-          "rst:bg-white/50 rst:border rst:border-white/20 rst:backdrop-blur-md rst:text-gray-900 rst:shadow-sm rst:dark:bg-gray-950/50 rst:dark:border-white/10 rst:dark:text-gray-100 rst:dark:shadow-black/50",
+          "rst:bg-white/50 rst:border rst:border-white/20 rst:backdrop-blur-md rst:text-gray-900 rst:elevation-raised rst:dark:bg-gray-950/50 rst:dark:border-white/10 rst:dark:text-gray-100",
       },
       padding: {
         none: "rst:p-0",
