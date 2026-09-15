@@ -288,6 +288,30 @@ describe("CheckboxGroup", () => {
     },
   );
 
+  describe("the options container's className", () => {
+    const panelOf = () =>
+      screen.getAllByRole("checkbox")[0].closest(".rst\\:grid")!.parentElement;
+
+    it("takes `optionsClassName`", () => {
+      render(<Stateful optionsClassName="new-hook" />);
+      expect(panelOf()).toHaveClass("new-hook");
+    });
+
+    it("still takes the deprecated `panelClassName`", () => {
+      /* Live call sites in at least one consuming app, so it keeps working.
+         Renaming it outright is a major bump for a cosmetic gain. */
+      render(<Stateful panelClassName="old-hook" />);
+      expect(panelOf()).toHaveClass("old-hook");
+    });
+
+    it("lets the current name win when both are passed", () => {
+      render(<Stateful panelClassName="rst:p-1" optionsClassName="rst:p-6" />);
+      const panel = panelOf();
+      expect(panel).toHaveClass("rst:p-6");
+      expect(panel?.className).not.toMatch(/rst:p-1\b/);
+    });
+  });
+
   it("renders nothing selectable for an empty option list", () => {
     render(<CheckboxGroup options={[]} value={[]} onChange={() => {}} label="Empty" />);
     expect(screen.queryAllByRole("checkbox")).toHaveLength(0);

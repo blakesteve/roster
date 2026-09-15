@@ -629,16 +629,17 @@ Every field therefore has a second prop, **named for the element it reaches**:
 | `Select`       | `className` | `triggerClassName`   | `optionsClassName`  |
 | `Textarea`     | `className` | `textareaClassName`  | —                   |
 | `Combobox`     | `className` | `inputClassName`     | `optionsClassName`  |
-| `CheckboxGroup`| `className` | —                    | `panelClassName`    |
+| `CheckboxGroup`| `className` | —                    | `optionsClassName`  |
 | `RadioGroup`   | `className` | `radioClassName`     | `optionsClassName`, `optionClassName`, `labelClassName`, `optionLabelClassName`, `descriptionClassName`, `messageClassName` |
 
-`CheckboxGroup` and `RadioGroup` have no single "control" to reach — they hold
-one per option — so `RadioGroup`'s `radioClassName` lands on every radio rather
-than on one. The two groups also disagree on one name: the element holding the
-options is `panelClassName` on `CheckboxGroup` and `optionsClassName` on
-`RadioGroup`. `panel` names a `CheckboxGroup` variant that draws a box, which
-`RadioGroup` does not have, so the newer component is named for the element
-instead. If the pair should agree, `CheckboxGroup` is the one to rename.
+`CheckboxGroup` and `RadioGroup` have no single "control" to reach, since they
+hold one per option, so `RadioGroup`'s `radioClassName` lands on every radio
+rather than on one.
+
+`CheckboxGroup`'s options container was `panelClassName`, which named a variant
+rather than the element it reaches. Both groups now use `optionsClassName`.
+`panelClassName` still works and is deprecated; pass both and the current name
+wins.
 
 `Select` is the first component with two styleable inner parts, which is the
 case the naming scheme was chosen for: `optionsClassName` reaches the popup

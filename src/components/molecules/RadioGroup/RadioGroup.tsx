@@ -95,12 +95,9 @@ export interface RadioGroupProps
    * option's label inside its neighbor's target, and leaves
    * `aria-orientation` saying `vertical`.
    *
-   * Note for anyone moving between components: `Select` and `Combobox` use
-   * this name for their floating popup panel, and `CheckboxGroup` calls the
-   * same in-flow container `panelClassName`. The name here follows the rule
-   * the README states, which is that an escape hatch is named for the element
-   * it reaches; `panel` names a `CheckboxGroup` variant this component does
-   * not have.
+   * `Select` and `Combobox` use this name for their floating popup panel. The
+   * sense is the same, the element that holds the options, and `CheckboxGroup`
+   * spells it this way too.
    */
   optionsClassName?: string;
   /**
