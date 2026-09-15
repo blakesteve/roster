@@ -1,7 +1,31 @@
 import { cva } from "class-variance-authority";
 
+/* The hit area is a `before:` pseudo-element, and the reason it is not padding
+   is structural: this element IS the visible box. The border, the fill and the
+   size classes all sit on it, so padding would grow the box the user sees, and
+   a negative margin to cancel that would then fight the layout of every
+   consumer that puts a checkbox in a row.
+
+   A pseudo-element generates no layout box at all, so the control keeps its
+   exact dimensions at every size while the target reaches 44x44 — WCAG 2.5.5,
+   where the box alone gave 16, 20 and 24px. It needs `relative` to anchor to.
+
+   Sized and centered rather than inset by a per-size amount, and the
+   difference is 2px of silence. An absolutely positioned pseudo-element
+   resolves `inset` against its originator's PADDING box, so a negative inset
+   measured off each box's outer width lands 2px short at every size: the 1px
+   border on each side is not in the box it counts from. Measured 42x42 in the
+   browser and looked right in the source, which is the failure mode worth
+   spending four classes to rule out. `size-11` states the number the rule is
+   about, one class for every size, and it stays 44 whatever the border does.
+
+   Two consequences worth knowing rather than discovering. The target extends
+   past the box on all four sides, so in a tightly spaced column adjacent
+   targets overlap and the one later in the DOM takes the overlap. And an
+   ancestor with `overflow: hidden` clips the overhang, because clipping
+   applies to hit testing and not only to painting. */
 export const checkboxVariants = cva(
-  "rst:font-ui rst:flex rst:items-center rst:justify-center rst:shrink-0 rst:transition-colors rst:focus:outline-hidden rst:focus-visible:ring-ring rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:ring-offset-background",
+  "rst:font-ui rst:relative rst:flex rst:items-center rst:justify-center rst:shrink-0 rst:transition-colors rst:before:absolute rst:before:top-1/2 rst:before:left-1/2 rst:before:size-11 rst:before:-translate-x-1/2 rst:before:-translate-y-1/2 rst:before:content-[''] rst:focus:outline-hidden rst:focus-visible:ring-ring rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:ring-offset-background",
   {
     variants: {
       size: {

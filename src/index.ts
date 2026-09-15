@@ -59,6 +59,8 @@ export * from './components/molecules/Pullquote/Pullquote';
 export * from './components/molecules/Pullquote/pullquote-variants';
 export * from './components/molecules/CheckboxGroup/CheckboxGroup';
 export * from './components/molecules/CheckboxGroup/checkbox-group-variants';
+export * from './components/molecules/RadioGroup/RadioGroup';
+export * from './components/molecules/RadioGroup/radio-group-variants';
 export * from './components/molecules/Breadcrumbs/Breadcrumbs';
 export * from './components/molecules/Breadcrumbs/breadcrumb-variants';
 export * from './components/molecules/CallToAction/CallToAction';

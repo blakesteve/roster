@@ -142,8 +142,32 @@ const Combobox = ({
             onChange={(event) => setQuery(event.target.value)}
           />
           <ComboboxButton
+            /* `inset-y-0` already makes this the full height of the field, so
+               the target failed on width alone: the glyph plus its right
+               padding came to 30px at `sm` and 32px otherwise. `w-11` is the
+               fix, with `justify-end` so the glyph keeps sitting against the
+               right padding and does not move.
+
+               A width rather than left padding, because padding measures the
+               glyph and the glyph does not measure what its classes say. Font
+               Awesome injects `.svg-inline--fa { width: var(--fa-width,
+               1.25em) }` unlayered at runtime, so `w-3.5` here renders 20px
+               rather than 14 and padding computed against 14 overshoots to 50.
+
+               Height stays the field's, deliberately. Forcing 44 would make
+               the button taller than the control it sits inside and overflow
+               it, so this reaches 44 on width and inherits 36 / 40 / 44 on
+               height from `sm` / `default` / `lg`.
+
+               44 is wider than the `pr-9` the input reserves, so the button
+               sits over the tail of the text box: scanning from the field's
+               right edge, the button owns through 45px and the input starts at
+               46, so a click or a drag-select at the end of a long value opens
+               the panel instead of placing the caret. That is the cost of the
+               target. The alternative is capping the button at the clearance,
+               which is 36px and misses the rule. */
             className={cn(
-              "rst:absolute rst:inset-y-0 rst:right-0 rst:flex rst:cursor-pointer rst:items-center",
+              "rst:absolute rst:inset-y-0 rst:right-0 rst:flex rst:w-11 rst:cursor-pointer rst:items-center rst:justify-end",
               size === "sm" ? "rst:pr-2.5" : "rst:pr-3",
             )}
           >

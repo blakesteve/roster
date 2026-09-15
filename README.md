@@ -628,6 +628,18 @@ Every field therefore has a second prop, **named for the element it reaches**:
 | `PasswordInput`| `className` | `inputClassName`     | —                   |
 | `Select`       | `className` | `triggerClassName`   | `optionsClassName`  |
 | `Textarea`     | `className` | `textareaClassName`  | —                   |
+| `Combobox`     | `className` | `inputClassName`     | `optionsClassName`  |
+| `CheckboxGroup`| `className` | —                    | `optionsClassName`  |
+| `RadioGroup`   | `className` | `radioClassName`     | `optionsClassName`, `optionClassName`, `labelClassName`, `optionLabelClassName`, `descriptionClassName`, `messageClassName` |
+
+`CheckboxGroup` and `RadioGroup` have no single "control" to reach, since they
+hold one per option, so `RadioGroup`'s `radioClassName` lands on every radio
+rather than on one.
+
+`CheckboxGroup`'s options container was `panelClassName`, which named a variant
+rather than the element it reaches. Both groups now use `optionsClassName`.
+`panelClassName` still works and is deprecated; pass both and the current name
+wins.
 
 `Select` is the first component with two styleable inner parts, which is the
 case the naming scheme was chosen for: `optionsClassName` reaches the popup
@@ -1003,6 +1015,56 @@ invalid — the selection is — so nothing rings the individual controls.
 A rebuild sorts the result into declaration order, which reads tidier and
 silently drops any selected value whose option has not loaded yet.
 
+### One answer, and when it should not be a menu
+
+`RadioGroup` is `CheckboxGroup`'s sibling and deliberately the same component
+with one difference: `value` is a `string` and `onChange` receives a `string`,
+because a radio group has one answer. Label, per-option `description`, helper
+text and error message are the same shape in both, so a form using both does
+not read as two libraries.
+
+What it does not carry across is the point. There is no grouped form and no
+`maxHeight`:
+
+- **`RadioGroup`** when the options are few and the reader should see all of
+  them at once. Two to about six.
+- **`Select`** past that. A radio group with enough options to need scrolling
+  is a menu that forgot to close, and shipping a scroll cap here would invite
+  exactly that.
+
+Both hold one value of the same type, so moving between them is a prop change
+rather than a rewrite.
+
+```tsx
+<RadioGroup
+  label="Who can see this squad"
+  helperText="You can change this at any time."
+  value={visibility}
+  onChange={setVisibility}
+  options={[
+    { value: "public", label: "Public", description: "Anyone can find and join it." },
+    { value: "unlisted", label: "Unlisted", description: "Only people with the link." },
+    { value: "private", label: "Private", description: "Invite only." },
+  ]}
+/>
+```
+
+`orientation="horizontal"` lays the options out in a wrapping row, for the
+short scannable set that would otherwise spend three rows of a wide form. It
+sets `aria-orientation` to match.
+
+Every radio is a 44x44 target, and the component is built so that it stays one:
+each option's box is sized to contain its own target, which is why the options
+can sit close together without a target ever reaching into its neighbor.
+
+That containment is the option's own vertical padding, and `cn` is
+tailwind-merge, so it is the one thing `optionClassName` should leave alone. A
+background, a border, a radius and horizontal padding are all safe; a `py-*`,
+a height, or a `min-h` below `44px` replaces the padding and lets the target
+escape the box. Lay the options out across with `orientation` rather than
+through `optionsClassName`, for the same reason: the horizontal spacing that
+keeps two radios 44px apart rides on that prop.
+
 ### Components that render links
 
 `Breadcrumbs` renders a plain `<a>` by default, which is right for a static
@@ -1096,6 +1158,7 @@ function App() {
 | `ErrorState`      | Error display with retry action                                             |
 | `MatchupCard`     | Head-to-head comparison card                                                |
 | `Pullquote`       | A line lifted out of prose, as `<figure>` + `<blockquote>` + `<figcaption>` |
+| `RadioGroup`      | Radio set reporting one `string`; descriptions, error, 44px targets         |
 | `Toast`           | Transient floating notice; `Toaster` + the imperative `toast` handle        |
 
 ### Organisms

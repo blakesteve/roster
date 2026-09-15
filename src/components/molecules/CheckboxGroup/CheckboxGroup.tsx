@@ -66,6 +66,16 @@ export interface CheckboxGroupProps
   disabled?: boolean;
   colorScheme?: React.ComponentProps<typeof Checkbox>["colorScheme"];
   /** Classes for the options' container. `className` lands on the fieldset. */
+  optionsClassName?: string;
+  /**
+   * @deprecated Use `optionsClassName`. Both work, and `optionsClassName` wins
+   * if you pass both.
+   *
+   * Renamed so this component and `RadioGroup` spell one concept one way.
+   * `panel` named a variant rather than the element it reaches, which is the
+   * rule the README states. The old name stays because it has live call sites,
+   * and swapping it outright would be a major bump for a cosmetic gain.
+   */
   panelClassName?: string;
 }
 
@@ -104,6 +114,7 @@ const CheckboxGroup = ({
   columns,
   colorScheme,
   className,
+  optionsClassName,
   panelClassName,
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,
@@ -238,7 +249,9 @@ const CheckboxGroup = ({
           checkboxGroupPanelVariants({ variant, size, error: hasError }),
           scrollable &&
             "rst:overflow-y-auto rst:custom-scrollbar rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background",
+          /* Deprecated name first, so the current one wins when both are set. */
           panelClassName,
+          optionsClassName,
         )}
         style={scrollable ? { maxHeight } : undefined}
         /* A scroll region needs its own tab stop. Chrome and Firefox now focus
