@@ -228,4 +228,64 @@ describe("Combobox", () => {
       c.split(/\s+/).filter((x) => !x.includes("-width)")).sort();
     expect(shared(comboPanel)).toEqual(shared(selectPanel));
   });
+
+  describe("the chevron's touch target", () => {
+    /* jsdom computes no layout, so this asserts the classes that produce the
+       target rather than measuring it, for the same reason Input.test.tsx
+       asserts the cause rather than the symptom. Measured in a browser
+       instead: 44px wide at all three sizes, with the glyph 10 / 12 / 12px
+       from the field's right edge, exactly where it sat before.
+
+       `w-11` rather than left padding, because padding has to be computed
+       against the glyph and the glyph does not measure what its classes say.
+       Font Awesome injects an unlayered `.svg-inline--fa { width: var(--fa-
+       width, 1.25em) }` at runtime that outranks `w-3.5`, so the chevron is
+       20px rather than 14 and padding sized for 14 overshoots to 50. */
+    it("is 44px wide", () => {
+      /* One test, not one per size: `w-11` is unconditional on the button. The
+         only size-dependent class here is the right padding, which the two
+         tests below cover on both branches. A parameterized version passed
+         with the size hard-coded, which is the tell. */
+      cleanup();
+      render(<Combobox options={options} value={null} onChange={() => {}} />);
+      expect(screen.getByRole("button")).toHaveClass("rst:w-11");
+    });
+
+    it("keeps the glyph against the right padding rather than moving it", () => {
+      /* `justify-end` is what makes the width free. Without it the button
+         fills leftward and the chevron slides 18px inward, which is a visual
+         regression dressed as an accessibility fix. */
+      cleanup();
+      render(<Combobox options={options} value={null} onChange={() => {}} />);
+      const button = screen.getByRole("button");
+
+      expect(button).toHaveClass("rst:justify-end", "rst:pr-3");
+      expect(button.className).not.toMatch(/rst:pl-/);
+    });
+
+    it("uses the sm right padding only at sm", () => {
+      cleanup();
+      render(
+        <Combobox options={options} value={null} onChange={() => {}} size="sm" />,
+      );
+      expect(screen.getByRole("button")).toHaveClass("rst:pr-2.5");
+    });
+
+    it("takes its height from the field rather than forcing its own", () => {
+      /* `inset-y-0` already made this the full height of the input, so the
+         target only ever failed on width. Forcing 44 here would make the
+         button taller than the control it sits inside and overflow it, so the
+         height stays 36 / 40 / 44 from `sm` / `default` / `lg`. */
+      cleanup();
+      render(<Combobox options={options} value={null} onChange={() => {}} />);
+      const button = screen.getByRole("button");
+
+      expect(button).toHaveClass("rst:inset-y-0");
+      /* Every way of forcing a height, not just `h-`. `min-h-11` is the
+         tempting one — it reads as "make the target 44 tall" and it makes the
+         button taller than a 36px `sm` field, which is the regression this
+         test is named for. A `/rst:h-/` guard alone let that through. */
+      expect(button.className).not.toMatch(/rst:(min-|max-)?h-/);
+    });
+  });
 });

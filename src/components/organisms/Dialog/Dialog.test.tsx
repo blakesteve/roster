@@ -157,4 +157,48 @@ describe("Dialog Component", () => {
       }
     });
   });
+
+  describe("the close button's touch target", () => {
+    /* jsdom computes no layout, so this asserts the classes that produce the
+       target rather than measuring it, the way Input.test.tsx does for its own
+       spacing, for the same reason it asserts the cause rather than the
+       symptom. Measured in a browser instead: 44x44, sitting 13px inside the
+       panel on both edges it overhangs, with the header row the same 24px tall
+       it was before.
+
+       `size-11` rather than padding, and the test says which because the two
+       are not interchangeable here. Font Awesome injects an unlayered
+       `.svg-inline--fa { height: 1em }` at runtime that outranks the icon's own
+       `h-5`, so the glyph renders 20x16 and a padded button lands at 44x40 —
+       the failing shape, from a source that reads as though it passes. */
+    it("is 44x44", () => {
+      render(<Dialog {...defaultProps} />);
+      expect(screen.getByLabelText("Close dialog")).toHaveClass(
+        "rst:size-11",
+        "rst:inline-flex",
+        "rst:items-center",
+        "rst:justify-center",
+      );
+    });
+
+    it("gives back the layout box the target took", () => {
+      /* Without this the header row grows in both axes and the title moves.
+         The two halves ship together or not at all, so the second one is
+         asserted rather than assumed. */
+      render(<Dialog {...defaultProps} />);
+      expect(screen.getByLabelText("Close dialog")).toHaveClass("rst:-m-3");
+    });
+
+    it("says it is a button with the cursor", () => {
+      /* Nothing in the stack sets a cursor on a `button` — not Tailwind's
+         preflight, not Roster's opt-in one, and Roster's stylesheet ships no
+         global reset — so this inherited the UA default, or whatever the host
+         app's reset said. Inconsistent between consumers rather than uniformly
+         wrong, which is the harder version to notice. */
+      render(<Dialog {...defaultProps} />);
+      expect(screen.getByLabelText("Close dialog")).toHaveClass(
+        "rst:cursor-pointer",
+      );
+    });
+  });
 });

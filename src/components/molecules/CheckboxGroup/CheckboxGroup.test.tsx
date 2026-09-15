@@ -254,6 +254,40 @@ describe("CheckboxGroup", () => {
     expect(panel).toHaveAttribute("tabindex", "0");
   });
 
+  it.each([
+    ["sm", "rst:gap-y-3.5"],
+    ["md", "rst:gap-y-3"],
+    ["lg", "rst:gap-y-2.5"],
+  ] as const)(
+    "keeps the rows far enough apart that a click lands on its own option at %s",
+    (size, gap) => {
+      /* A regression guard with a measured cause. `Checkbox` grew a 44x44
+         pseudo-element target, which reaches `22 - (2 + box / 2)` above its own
+         row: 12, 10 and 8px. Anything of the option above that sits inside that
+         reach belongs to the lower option, and a click there operates the wrong
+         control.
+
+         What it has to clear is the LABEL, not the checkbox box. The label is a
+         hit target of its own, it is taller, and `py-0.5` puts its bottom edge
+         2px below the box's. A first pass at this measured the box, landed on
+         `gap-y-2.5`, and left the bottom-left 12px of every `sm` label
+         toggling the next option — confirmed by clicking it. The gap is now
+         the overhang plus 2px, which is why it runs opposite to the size
+         scale: a smaller box overhangs further.
+
+         jsdom computes no layout, so this asserts the class that produces the
+         pitch. The per-size expectation is the point: one shared value would
+         be wrong at two sizes, and an earlier version of this test asserted
+         the same class three times, which passed with the size hard-coded.
+         Measured after the change: no pixel of any box or any label routes to
+         a neighbor, at any size. */
+      render(<Stateful size={size} />);
+      const options = screen.getAllByRole("checkbox")[0].closest(".rst\\:grid");
+
+      expect(options).toHaveClass(gap);
+    },
+  );
+
   it("renders nothing selectable for an empty option list", () => {
     render(<CheckboxGroup options={[]} value={[]} onChange={() => {}} label="Empty" />);
     expect(screen.queryAllByRole("checkbox")).toHaveLength(0);

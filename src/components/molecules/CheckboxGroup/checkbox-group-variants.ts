@@ -63,9 +63,33 @@ export const checkboxGroupOptionsVariants = cva("rst:grid", {
       2: "rst:grid-cols-1 rst:sm:grid-cols-2",
       3: "rst:grid-cols-1 rst:sm:grid-cols-2 rst:lg:grid-cols-3",
     },
+    /* The row gaps are a touch-target constraint, not only a rhythm.
+       `Checkbox` extends its hit area with a 44x44 pseudo-element, so an
+       option's target reaches `22 - (2 + box / 2)` above its own row: 12, 10
+       and 8px. Let it reach far enough and it covers the option above, and a
+       click there operates the wrong control.
+
+       The thing it has to clear is the LABEL, not the checkbox. The label is a
+       hit target of its own, it is what a user actually clicks, and it is both
+       taller than the box and 2px lower: `py-0.5` puts its bottom edge at the
+       row's bottom while the checkbox stops 2px short of it. Measuring against
+       the box instead said `gap-y-2.5` was enough, and at `sm` it left the
+       bottom-left 12px of every label belonging to the next option, confirmed
+       by clicking it.
+
+       So the gap is exactly the overhang plus 2px of margin, which is why it
+       runs the opposite way to the size scale: a smaller box overhangs
+       further. `RadioGroup` avoids the inversion by giving each option a row
+       tall enough to contain its own target; doing that here would re-space
+       every checkbox list in every consumer, which is a bigger change than
+       this release should make.
+
+       This keeps a click on a control working on that control. It does NOT
+       stop the targets overlapping in the overhang itself, which would take
+       44px of pitch and `RadioGroup`'s row model. */
     size: {
-      sm: "rst:gap-x-4 rst:gap-y-1.5",
-      md: "rst:gap-x-4 rst:gap-y-2",
+      sm: "rst:gap-x-4 rst:gap-y-3.5",
+      md: "rst:gap-x-4 rst:gap-y-3",
       lg: "rst:gap-x-6 rst:gap-y-2.5",
     },
   },
