@@ -24,6 +24,9 @@
     "url": "https://github.com/blakesteve/roster/issues"
   },
   "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "files": [
     "dist"
   ],
