@@ -26,7 +26,7 @@ import { cva } from "class-variance-authority";
  * circle's outer width lands 2px short at every size, once for each 1px of
  * border, and looks correct in the source while measuring 42.
  */
-export const radioVariants = cva(
+export const radioVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:relative rst:flex rst:items-center rst:justify-center rst:shrink-0 rst:rounded-full rst:border rst:transition-colors rst:before:absolute rst:before:top-1/2 rst:before:left-1/2 rst:before:size-11 rst:before:-translate-x-1/2 rst:before:-translate-y-1/2 rst:before:content-[''] rst:focus:outline-hidden rst:focus-visible:ring-ring rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:ring-offset-background",
   {
     variants: {
@@ -70,7 +70,7 @@ export const radioVariants = cva(
  * 40% of the circle at every size — 6/16, 8/20, 10/24 — which is where a radio
  * reads as a radio rather than as a filled dot or a faint speck.
  */
-export const radioDotVariants = cva(
+export const radioDotVariants = /* @__PURE__ */ cva(
   "rst:pointer-events-none rst:rounded-full rst:bg-current rst:transition-opacity rst:duration-200",
   {
     variants: {
@@ -114,7 +114,7 @@ export const radioDotVariants = cva(
  * overlap however tall their boxes are. `min-w-11` guarantees it even for a
  * one-character label.
  */
-export const radioOptionVariants = cva(
+export const radioOptionVariants = /* @__PURE__ */ cva(
   "rst:flex rst:items-start rst:gap-2 rst:min-h-11",
   {
     variants: {
@@ -151,7 +151,7 @@ export const radioOptionVariants = cva(
  * gap separates two whole options rather than two stacked rows, and at the
  * vertical scale two options sat 0 to 4px apart and read as one control.
  */
-export const radioGroupOptionsVariants = cva("rst:flex", {
+export const radioGroupOptionsVariants = /* @__PURE__ */ cva("rst:flex", {
   variants: {
     orientation: {
       vertical: "rst:flex-col",

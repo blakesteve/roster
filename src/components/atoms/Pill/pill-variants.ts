@@ -11,7 +11,7 @@ import { cva } from "class-variance-authority";
  * sentence fragment. It is always fully rounded, has roomier horizontal
  * padding so words breathe, and can lead with a status dot.
  */
-export const pillVariants = cva(
+export const pillVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:inline-flex rst:items-center rst:rounded-full rst:font-medium rst:whitespace-nowrap rst:align-middle",
   {
     variants: {
@@ -70,7 +70,7 @@ export const pillVariants = cva(
  * The leading status dot. On solid pills it borrows the text color so it
  * stays legible against the filled background; elsewhere it takes the scheme.
  */
-export const pillDotVariants = cva("rst:shrink-0 rst:rounded-full", {
+export const pillDotVariants = /* @__PURE__ */ cva("rst:shrink-0 rst:rounded-full", {
   variants: {
     colorScheme: {
       primary: "rst:bg-primary-500 rst:dark:bg-primary-400",

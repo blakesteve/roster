@@ -7,7 +7,7 @@ import { cva } from "class-variance-authority";
  * every case. A pullquote is body copy that has been promoted, and tinting it
  * would demote it again.
  */
-export const pullquoteVariants = cva("rst:my-1", {
+export const pullquoteVariants = /* @__PURE__ */ cva("rst:my-1", {
   variants: {
     variant: {
       /** Accent rule down the left. The quiet default. */

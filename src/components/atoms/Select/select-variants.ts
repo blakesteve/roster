@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const selectTriggerVariants = cva(
+export const selectTriggerVariants = /* @__PURE__ */ cva(
   /* `h-10 pl-4 pr-10` are floors, not defaults, for the same reason Input's
      are: `VariantProps` admits `null`, so `size={fieldSize ?? null}`
      typechecks and would otherwise leave the trigger with no height and its
@@ -75,7 +75,7 @@ export const selectTriggerVariants = cva(
    already does this: every child is `text-inherit` so the surface token
    reaches them. The focus and selected states keep their own colors, because
    those name a state rather than the surface. */
-export const selectOptionVariants = cva(
+export const selectOptionVariants = /* @__PURE__ */ cva(
   /* Horizontal padding is a floor here, and tracks the trigger's so the label's
      left edge stays put between the closed trigger and the open menu. (The menu
      does not open OVER the trigger — it is anchored `bottom start` with a 4px

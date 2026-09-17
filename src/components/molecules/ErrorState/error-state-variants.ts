@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const errorStateVariants = cva(
+export const errorStateVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:flex rst:flex-col rst:items-center rst:justify-center rst:text-center rst:p-8 rst:rounded-lg rst:transition-colors",
   {
     variants: {

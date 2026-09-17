@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const inputVariants = cva(
+export const inputVariants = /* @__PURE__ */ cva(
   /* `h-10 px-4` are floors, not defaults. `VariantProps` admits `null`, so
      `size={fieldSize ?? null}` typechecks and `defaultVariants` cannot catch it
      — and because padding moved out of this base into the size scale, a null
@@ -69,7 +69,7 @@ export const inputVariants = cva(
   }
 );
 
-export const iconVariants = cva(
+export const iconVariants = /* @__PURE__ */ cva(
   "rst:absolute rst:top-1/2 rst:-translate-y-1/2 rst:transition-colors",
   {
     variants: {

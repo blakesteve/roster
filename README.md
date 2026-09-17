@@ -1331,9 +1331,9 @@ Output in `dist/`:
 
 | File               | Description                                                         |
 | ------------------ | ------------------------------------------------------------------- |
-| `roster.es.js`     | ES module bundle                                                    |
-| `roster.umd.js`    | UMD bundle                                                          |
-| `data-table.es.js` | DataTable entry, keeping the TanStack import out of the main bundle |
+| `roster.js`        | ES entry. Re-exports the module tree beside it, rather than bundling it |
+| `roster.cjs`       | The same entry in CommonJS                                          |
+| `data-table.js`    | DataTable entry, keeping the TanStack import out of the main graph  |
 | `roster.css`       | Compiled component styles, in the `roster` cascade layer            |
 | `tokens.css`       | Design token CSS variables                                          |
 | `preflight.css`    | Optional global reset (see Setup)                                   |

@@ -1,6 +1,21 @@
 import { cva } from "class-variance-authority";
 
-export const buttonVariants = cva(
+/**
+ * Every module-scope `cva(...)` in the library carries a PURE annotation, and
+ * this is the note explaining why rather than 54 copies of it.
+ *
+ * A bundler has to assume a top-level function call might do something, so an
+ * unannotated one pins the module it sits in, and with it the component that
+ * imports it. That cost is charged to every consumer, including the ones that
+ * never render the component. The annotation is what says otherwise: `cva`
+ * closes over its arguments and touches nothing outside itself, so dropping
+ * the call when nothing reads the result changes no behavior.
+ *
+ * Written by hand rather than produced by a plugin, so it is visible at the
+ * call site and costs no build dependency. If a variant table ever needs a
+ * call that is genuinely not pure, leave that one unannotated.
+ */
+export const buttonVariants = /* @__PURE__ */ cva(
   // Base styles
   "rst:font-ui rst:inline-flex rst:items-center rst:justify-center rst:cursor-pointer rst:whitespace-nowrap rst:rounded-md rst:text-sm rst:font-medium rst:ring-offset-background rst:transition-colors rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:disabled:pointer-events-none rst:disabled:opacity-50",
   {

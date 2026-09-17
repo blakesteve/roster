@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const footerVariants = cva(
+export const footerVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:w-full rst:py-6 rst:mt-auto rst:transition-colors rst:duration-200",
   {
     variants: {

@@ -24,7 +24,7 @@ import { cva } from "class-variance-authority";
    targets overlap and the one later in the DOM takes the overlap. And an
    ancestor with `overflow: hidden` clips the overhang, because clipping
    applies to hit testing and not only to painting. */
-export const checkboxVariants = cva(
+export const checkboxVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:relative rst:flex rst:items-center rst:justify-center rst:shrink-0 rst:transition-colors rst:before:absolute rst:before:top-1/2 rst:before:left-1/2 rst:before:size-11 rst:before:-translate-x-1/2 rst:before:-translate-y-1/2 rst:before:content-[''] rst:focus:outline-hidden rst:focus-visible:ring-ring rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:ring-offset-background",
   {
     variants: {

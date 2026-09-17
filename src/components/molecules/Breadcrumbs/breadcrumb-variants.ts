@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const breadcrumbVariants = cva(
+export const breadcrumbVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:flex rst:items-center rst:text-sm rst:font-medium rst:transition-colors",
   {
     variants: {

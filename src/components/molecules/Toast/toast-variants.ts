@@ -18,7 +18,7 @@ import { cva } from "class-variance-authority";
  * floating object needs a complete edge to read as detached from the page
  * rather than as something that fell out of the layout.
  */
-export const toastVariants = cva(
+export const toastVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:pointer-events-auto rst:flex rst:items-start rst:gap-2.5 rst:rounded-lg rst:border rst:elevation-overlay rst:px-4 rst:py-3 rst:text-sm",
   {
     variants: {

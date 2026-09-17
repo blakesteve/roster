@@ -6,7 +6,7 @@ import { cva } from "class-variance-authority";
  * `sm` is the default because this component's usual home is a sidebar panel,
  * where the list is reference material rather than reading material.
  */
-export const descriptionListVariants = cva("rst:m-0", {
+export const descriptionListVariants = /* @__PURE__ */ cva("rst:m-0", {
   variants: {
     layout: {
       /** Term and description on one row, term column sized to content. */

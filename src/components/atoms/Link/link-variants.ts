@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const linkVariants = cva(
+export const linkVariants = /* @__PURE__ */ cva(
   "rst:inline-flex rst:items-center rst:gap-1.5 rst:font-semibold rst:transition-colors rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:rounded-sm rst:cursor-pointer",
   {
     variants: {

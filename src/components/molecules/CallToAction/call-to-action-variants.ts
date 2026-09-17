@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const ctaVariants = cva(
+export const ctaVariants = /* @__PURE__ */ cva(
   /* `@container` on the card itself, with the flex layout moved to an inner
      element. The row/column switch is a CONTAINER query, not `md:`: `md:`
      asks how wide the WINDOW is, so a 228px card on a 1200px page laid itself

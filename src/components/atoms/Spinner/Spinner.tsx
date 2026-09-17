@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 
-const spinnerVariants = cva("rst:animate-spin rst:rounded-full rst:transition-colors", {
+const spinnerVariants = /* @__PURE__ */ cva("rst:animate-spin rst:rounded-full rst:transition-colors", {
   variants: {
     variant: {
       primary: "rst:border-primary-600 rst:dark:border-primary-500",

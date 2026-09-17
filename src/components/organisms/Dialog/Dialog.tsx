@@ -12,7 +12,7 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 
-const dialogVariants = cva(
+const dialogVariants = /* @__PURE__ */ cva(
   "rst:relative rst:w-full rst:transform rst:overflow-hidden rst:rounded-2xl rst:p-6 rst:text-left rst:align-middle rst:elevation-overlay rst:transition-all rst:border",
   {
     variants: {
@@ -83,9 +83,9 @@ const dialogVariants = cva(
   },
 );
 
-const titleVariants = cva("rst:text-xl rst:font-bold rst:leading-6 rst:text-inherit");
+const titleVariants = /* @__PURE__ */ cva("rst:text-xl rst:font-bold rst:leading-6 rst:text-inherit");
 
-const descriptionVariants = cva("rst:mt-1 rst:text-sm rst:text-inherit rst:opacity-75");
+const descriptionVariants = /* @__PURE__ */ cva("rst:mt-1 rst:text-sm rst:text-inherit rst:opacity-75");
 
 /* `size-11` plus `-m-3` is the touch-target fix, and the two halves are not
    separable. The button has no fill of its own and wrapped nothing but the
@@ -115,7 +115,7 @@ const descriptionVariants = cva("rst:mt-1 rst:text-sm rst:text-inherit rst:opaci
    global reset at all. So the cursor was the UA's `default`, or whatever the
    host app's reset happened to say — inconsistent between consumers rather
    than uniformly wrong, which is the harder version to notice. */
-const closeVariants = cva(
+const closeVariants = /* @__PURE__ */ cva(
   "rst:inline-flex rst:size-11 rst:shrink-0 rst:items-center rst:justify-center rst:-m-3 rst:cursor-pointer rst:rounded-md rst:bg-transparent rst:text-inherit rst:opacity-50 rst:hover:opacity-100 rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background rst:transition-opacity",
 );
 

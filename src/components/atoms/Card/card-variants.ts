@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const cardVariants = cva(
+export const cardVariants = /* @__PURE__ */ cva(
   // Base: relative and overflow-hidden are crucial for the branded stripes to clip.
   // `isolate` makes the card its own stacking context, so children stay beneath
   // the z-10 stripes without needing a wrapper element around them. See Card.tsx.
