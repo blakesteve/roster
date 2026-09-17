@@ -31,23 +31,23 @@
     "dist"
   ],
   "main": "./dist/roster.umd.js",
-  "module": "./dist/roster.es.js",
+  "module": "./dist/roster.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/roster.es.js",
-      "require": "./dist/roster.umd.js"
+      "import": "./dist/roster.js",
+      "require": "./dist/roster.cjs"
     },
     "./data-table": {
       "types": "./dist/data-table.d.ts",
-      "import": "./dist/data-table.es.js",
-      "require": "./dist/data-table.cjs.js"
+      "import": "./dist/data-table.js",
+      "require": "./dist/data-table.cjs"
     },
     "./utils": {
       "types": "./dist/utils.d.ts",
-      "import": "./dist/utils.es.js",
-      "require": "./dist/utils.cjs.js"
+      "import": "./dist/utils.js",
+      "require": "./dist/utils.cjs"
     },
     "./style.css": "./dist/roster.css",
     "./tokens.css": "./dist/tokens.css",

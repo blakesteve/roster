@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const countdownTitleVariants = cva(
+export const countdownTitleVariants = /* @__PURE__ */ cva(
   "rst:font-semibold rst:uppercase rst:tracking-wider rst:mb-4 rst:transition-colors",
   {
     variants: {
@@ -18,7 +18,7 @@ export const countdownTitleVariants = cva(
   }
 );
 
-export const countdownNumberVariants = cva(
+export const countdownNumberVariants = /* @__PURE__ */ cva(
   "rst:font-mono rst:bg-clip-text rst:transition-all",
   {
     variants: {
@@ -43,7 +43,7 @@ export const countdownNumberVariants = cva(
   }
 );
 
-export const countdownLabelVariants = cva(
+export const countdownLabelVariants = /* @__PURE__ */ cva(
   /* Tracking steps down in a narrow container. The labels are what set each column's
      width — "SECONDS" is wider than any digit pair — and dropping 0.1em to
      0.025em across those 23 characters recovers about 17px, measured. The

@@ -12,7 +12,7 @@ import { extendTailwindMerge } from "tailwind-merge";
  * The failure is invisible in a snapshot and obvious in a browser, which is the
  * worst combination, so it is pinned by a unit test rather than trusted.
  */
-const merge = extendTailwindMerge({
+const merge = /* @__PURE__ */ extendTailwindMerge({
   prefix: "rst",
   extend: {
     classGroups: {

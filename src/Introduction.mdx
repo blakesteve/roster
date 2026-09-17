@@ -156,9 +156,9 @@ npm run build
 
 This generates:
 
-- `dist/roster.es.js` (Main library ES Modules)
+- `dist/roster.js` (Main library ES entry, re-exporting the module tree beside it)
 - `dist/tokens.es.js` (Token injection script)
-- `dist/data-table.es.js` (DataTable entry; keeps the TanStack import out of the main bundle)
+- `dist/data-table.js` (DataTable entry; keeps the TanStack import out of the main graph)
 - `dist/roster.css` (Compiled component styles, in the `roster` cascade layer)
 - `dist/tokens.css` (Design token CSS variables)
 - `dist/preflight.css` (Optional global reset — see Import Styles above)

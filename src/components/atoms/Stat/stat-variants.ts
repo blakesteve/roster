@@ -5,7 +5,7 @@ import { cva } from "class-variance-authority";
  * word, a Stat carries a magnitude and is meant to be scanned in a row of
  * siblings. Digits are tabular so a row of them lines up on the decimal.
  */
-export const statValueVariants = cva(
+export const statValueVariants = /* @__PURE__ */ cva(
   "rst:block rst:font-bold rst:leading-none rst:tracking-[-0.04em] rst:tabular-nums",
   {
     variants: {

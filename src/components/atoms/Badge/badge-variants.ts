@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const badgeVariants = cva(
+export const badgeVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:inline-flex rst:max-w-full rst:items-center rst:justify-center rst:font-medium rst:transition-colors rst:focus:outline-hidden rst:focus:ring-2 rst:focus:ring-ring rst:focus:ring-offset-2 rst:ring-offset-background rst:border",
   {
     variants: {

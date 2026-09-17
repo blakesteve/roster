@@ -20,7 +20,7 @@ import { cva } from "class-variance-authority";
  * reads as one should not look like different species. The difference the
  * viewer should notice is that this one responds.
  */
-export const chipVariants = cva(
+export const chipVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:inline-flex rst:items-center rst:rounded-full rst:font-medium rst:whitespace-nowrap rst:align-middle rst:transition-colors",
   {
     variants: {

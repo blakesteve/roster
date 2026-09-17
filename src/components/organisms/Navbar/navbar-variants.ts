@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const navbarVariants = cva(
+export const navbarVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:w-full rst:z-30 rst:border-b rst:transition-colors rst:duration-200",
   {
     variants: {

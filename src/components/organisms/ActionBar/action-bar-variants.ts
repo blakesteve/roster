@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const actionBarVariants = cva(
+export const actionBarVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:w-full rst:z-40 rst:elevation-anchored rst:backdrop-blur-md rst:transition-all",
   {
     variants: {

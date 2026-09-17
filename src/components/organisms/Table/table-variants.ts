@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const tableWrapperVariants = cva(
+export const tableWrapperVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:relative rst:w-full rst:overflow-auto rst:rounded-md rst:transition-colors rst:duration-200",
   {
     variants: {
@@ -18,7 +18,7 @@ export const tableWrapperVariants = cva(
   },
 );
 
-export const tableVariants = cva("rst:w-full rst:caption-bottom", {
+export const tableVariants = /* @__PURE__ */ cva("rst:w-full rst:caption-bottom", {
   variants: {
     size: {
       sm: "rst:text-xs",
@@ -29,7 +29,7 @@ export const tableVariants = cva("rst:w-full rst:caption-bottom", {
   defaultVariants: { size: "md" },
 });
 
-export const tableHeaderVariants = cva("rst:[&_tr]:border-b rst:transition-colors", {
+export const tableHeaderVariants = /* @__PURE__ */ cva("rst:[&_tr]:border-b rst:transition-colors", {
   variants: {
     variant: {
       default:
@@ -44,7 +44,7 @@ export const tableHeaderVariants = cva("rst:[&_tr]:border-b rst:transition-color
   defaultVariants: { variant: "default" },
 });
 
-export const tableRowVariants = cva(
+export const tableRowVariants = /* @__PURE__ */ cva(
   "rst:border-b rst:transition-colors rst:data-[state=selected]:bg-gray-100 rst:dark:data-[state=selected]:bg-gray-800",
   {
     variants: {
@@ -89,7 +89,7 @@ export const tableRowVariants = cva(
   },
 );
 
-export const tableHeadVariants = cva(
+export const tableHeadVariants = /* @__PURE__ */ cva(
   "rst:text-left rst:align-middle rst:font-semibold rst:tracking-wide rst:[&:has([role=checkbox])]:pr-0 rst:transition-colors",
   {
     variants: {
@@ -109,7 +109,7 @@ export const tableHeadVariants = cva(
   },
 );
 
-export const tableCellVariants = cva(
+export const tableCellVariants = /* @__PURE__ */ cva(
   "rst:align-middle rst:[&:has([role=checkbox])]:pr-0 rst:transition-colors",
   {
     variants: {

@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const switchTrackVariants = cva(
+export const switchTrackVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:group rst:relative rst:inline-flex rst:shrink-0 rst:cursor-pointer rst:rounded-full rst:border-2 rst:border-transparent rst:transition-colors rst:duration-200 rst:ease-in-out rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:ring-offset-background rst:disabled:cursor-not-allowed rst:disabled:opacity-50",
   {
     variants: {
@@ -24,7 +24,7 @@ export const switchTrackVariants = cva(
   }
 );
 
-export const switchThumbVariants = cva(
+export const switchThumbVariants = /* @__PURE__ */ cva(
   "rst:pointer-events-none rst:inline-block rst:rounded-full rst:bg-white rst:shadow rst:ring-0 rst:transition rst:duration-200 rst:ease-in-out rst:transform",
   {
     variants: {

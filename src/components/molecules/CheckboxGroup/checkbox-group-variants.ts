@@ -18,7 +18,7 @@ import { cva } from "class-variance-authority";
  * the page; this one has to read as the wall a scroll region ends at, and at
  * `gray-100` it did not.
  */
-export const checkboxGroupPanelVariants = cva("rst:flex rst:flex-col rst:text-left", {
+export const checkboxGroupPanelVariants = /* @__PURE__ */ cva("rst:flex rst:flex-col rst:text-left", {
   variants: {
     variant: {
       plain: "",
@@ -56,7 +56,7 @@ export const checkboxGroupPanelVariants = cva("rst:flex rst:flex-col rst:text-le
  * checkbox list on a 320px screen is two columns of truncated labels, which is
  * the layout this exists to avoid.
  */
-export const checkboxGroupOptionsVariants = cva("rst:grid", {
+export const checkboxGroupOptionsVariants = /* @__PURE__ */ cva("rst:grid", {
   variants: {
     columns: {
       1: "rst:grid-cols-1",

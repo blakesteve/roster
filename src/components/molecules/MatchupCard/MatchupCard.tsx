@@ -12,7 +12,7 @@ export interface TeamMatchupData {
   accessory?: React.ReactNode;
 }
 
-const teamWrapperVariants = cva("rst:flex rst:items-center rst:gap-2 rst:transition-all", {
+const teamWrapperVariants = /* @__PURE__ */ cva("rst:flex rst:items-center rst:gap-2 rst:transition-all", {
   variants: {
     state: {
       default: "",
@@ -24,7 +24,7 @@ const teamWrapperVariants = cva("rst:flex rst:items-center rst:gap-2 rst:transit
   defaultVariants: { state: "default" },
 });
 
-const logoVariants = cva("rst:h-8 rst:w-8 rst:object-contain rst:transition-all rst:rounded-full", {
+const logoVariants = /* @__PURE__ */ cva("rst:h-8 rst:w-8 rst:object-contain rst:transition-all rst:rounded-full", {
   variants: {
     state: {
       default: "",

@@ -27,7 +27,16 @@ type Message = ValueOrFunction<Renderable, Toast>;
  * as an error — a bug that survived because the wrapper was three lines long
  * and nobody re-read it.
  */
-export const toast = Object.assign(
+/* PURE for the same reason the variant tables are. Unannotated, it pins this
+   module, and this module is one of the two that reach for the toast library
+   (`Toaster` is the other), so an app that renders no toast still dragged the
+   import in through the barrel.
+
+   Safe because the target is the arrow function on the next line, freshly
+   created here. `Object.assign` mutates its target, so this would NOT be pure
+   if it were assigning onto the imported handle; it reads plain function
+   properties off that handle and writes only to the new object. */
+export const toast = /* @__PURE__ */ Object.assign(
   (message: Message, options?: ToastOptions) =>
     hotToast(message, tone(null, options)),
   {

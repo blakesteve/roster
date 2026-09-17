@@ -8,7 +8,7 @@ import { cva } from "class-variance-authority";
  * Monospace on purpose: at this size, tracked-out uppercase reads as chrome
  * rather than prose, which is the whole job.
  */
-export const eyebrowVariants = cva(
+export const eyebrowVariants = /* @__PURE__ */ cva(
   "rst:font-mono rst:uppercase rst:leading-none",
   {
     variants: {

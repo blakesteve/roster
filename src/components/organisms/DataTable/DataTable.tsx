@@ -48,7 +48,7 @@ import {
  *
  * Built statically at module scope, as v9 requires.
  */
-const dataTableFeatures = tableFeatures({
+const dataTableFeatures = /* @__PURE__ */ tableFeatures({
   rowSortingFeature,
   rowPaginationFeature,
   sortedRowModel: createSortedRowModel(),

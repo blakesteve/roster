@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const disclosureTriggerVariants = cva(
+export const disclosureTriggerVariants = /* @__PURE__ */ cva(
   "rst:font-ui rst:group rst:flex rst:w-full rst:items-center rst:justify-between rst:px-4 rst:py-3 rst:text-left rst:text-sm rst:font-medium rst:transition-all rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:cursor-pointer rst:z-10 rst:relative",
   {
     variants: {
@@ -23,7 +23,7 @@ export const disclosureTriggerVariants = cva(
   }
 );
 
-export const disclosureContentVariants = cva(
+export const disclosureContentVariants = /* @__PURE__ */ cva(
   "rst:px-4 rst:pb-4 rst:pt-2 rst:text-sm rst:transition-colors",
   {
     variants: {
