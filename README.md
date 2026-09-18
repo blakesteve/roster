@@ -9,7 +9,7 @@ Roster ships a curated set of accessible, theme-aware components organized aroun
 - **Atomic Design**: components organized as atoms, molecules, and organisms
 - **TypeScript first**: fully typed props with exported variant types for maximum DX
 - **Adaptive dark mode**: class-based toggling (`.dark`) independent of OS preferences
-- **`"use client"` pre-bundled**: all outputs include the directive for seamless Next.js App Router integration
+- **`"use client"` per component**: the directive sits on the modules that need it, not on the barrel, so a server component pays only for what it imports
 - **Accessible**: interactive components powered by [`@headlessui/react`](https://headlessui.com) and [`@radix-ui`](https://radix-ui.com)
 - **Tree-shakeable**: import only what you need
 
@@ -1205,16 +1205,24 @@ entry's value as `unknown` and recovers the real type per column through
 
 ### Server components
 
-The main entry carries a `"use client"` directive, because nearly everything in
-it is interactive. That is correct for components and wrong for a plain
-function, so `cn` ships from its own entry with no directive:
+The `"use client"` directive sits on each module that needs it, not on the
+package entry. A component carries it; a variant table, a token map and `cn` do
+not. That is what lets a server component import `Button` from the root and get
+a client reference for `Button` alone, rather than for all 102 exports.
+
+It changed in 5.0.0, and the difference is worth knowing if you are upgrading.
+Before, the entry itself carried the directive, so importing anything from the
+root pulled the whole namespace across the boundary. Now only the name you
+import crosses.
 
 ```tsx
 import { cn } from "@blakesteve/roster/utils";
 ```
 
-Importing `cn` from the package root still works on the client. In a React
-Server Component it typechecks and then throws at render — use `/utils` there.
+`cn` is still worth importing from `/utils`, but no longer because the root
+version breaks: the root resolves through a bare barrel to the same unstamped
+module and works in a server component. The subpath is the narrower import and
+the one that can not be affected by a future change to the barrel.
 
 ### Hooks
 
