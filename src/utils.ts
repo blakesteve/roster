@@ -1,14 +1,17 @@
 /**
  * Utilities, shipped from their own entry.
  *
- * The main bundle carries a `"use client"` directive, because the modules
- * inside it do and the bundler hoists the directive to the top of the chunk.
- * That makes everything exported from `@blakesteve/roster` a client reference,
- * which is correct for components but wrong for a plain function: importing
- * `cn` from the root and calling it inside a React Server Component
- * typechecks, then throws at render.
+ * This entry has no `"use client"` directive and no React, so `cn` is callable
+ * from either side of the boundary.
  *
- * This entry has no directive and no React, so `cn` is callable from either
- * side. It is still re-exported from the root for existing consumers.
+ * It used to be the only way to get that. The package entry carried the
+ * directive, which made everything exported from the root a client reference:
+ * importing `cn` from there and calling it inside a React Server Component
+ * typechecked, then threw at render. The directive now sits on the modules
+ * that need it, so the root resolves through a bare barrel to this same
+ * module and works too.
+ *
+ * The entry stays because it is the narrower import, and because it can not be
+ * affected by a later change to what the barrel does.
  */
 export { cn } from "./lib/utils";

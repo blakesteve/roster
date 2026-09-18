@@ -22,6 +22,20 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 const assetFileNames = (asset: { names?: string[] }) =>
   asset.names?.[0] === 'index.css' ? 'roster.css' : '[name][extname]';
 
+/**
+ * Packages that are themselves client modules. A first-party module importing
+ * one can not run on the server, so it takes the directive.
+ *
+ * `react-hot-toast` ships its own `"use client"`. It is on this list because
+ * leaving it off is what put a bare directive on the toast handle, which reads
+ * properties off that import at module scope and so fails on import rather
+ * than on call.
+ */
+const CLIENT_PACKAGES = ['react', 'react-dom', 'react-hot-toast'];
+
+/** Exact prefix for "this is Roster's own source", not a substring match. */
+const SRC_DIR = path.resolve(dirname, 'src') + path.sep;
+
 export default defineConfig({
   plugins: [
     react(),
@@ -89,27 +103,56 @@ export default defineConfig({
         preserveModulesRoot: 'src',
         entryFileNames: format === 'es' ? '[name].js' : '[name].cjs',
         assetFileNames,
-        /* Only the two public entries that contain components.
+        /* The client boundary sits on the components, not on the barrels.
 
-           Matched on the module's own id rather than on `chunk.isEntry &&
-           chunk.name`, which is what this used to read. Under `preserveModules`
-           a name is no longer a reliable handle: there are hundreds of chunks
-           and their names come from source paths, so the test depends on
-           nothing colliding. An id is the module itself and is unambiguous
-           under either build shape.
+           A directive on the barrel makes the BARREL the boundary, and Next
+           records it in its client reference manifest as `name: "*"`: every
+           export becomes a live root, because a namespace pin can not know
+           which names the server actually used. When the package was one
+           pre-bundled file that pin was satisfied cheaply. Emitting a module
+           per source file made the same pin far more expensive, because it is
+           now satisfied by hundreds of modules that scatter across route
+           chunks. Leaving the barrels bare is what lets Next traverse them and
+           resolve an imported name down to the one module that defines it.
 
-           What must NOT be stamped is as important as what must. Marking the
-           utility entry or the CSS shims as client references meant importing
-           `cn` from the root and calling it inside a React Server Component
-           typechecked and then threw at render. The directive belongs on the
-           module boundary a consumer imports, not on its implementation
-           details, and under `preserveModules` there are a great many more
-           implementation details to get this wrong on. */
+           The rule is "does this module depend on client-only code", read off
+           the chunk's own imports rather than off its path. Path is the
+           tempting test and the wrong one: every `*-variants` file sits beside
+           a component, exports through the same barrel, and is pure.
+
+           React is not the only signal, and assuming it was is how this rule
+           shipped with a hole. `react-hot-toast` carries its own `"use client"`
+           directive, so a module importing it is client too — and the toast
+           handle reads properties off that import at module scope, which in a
+           server graph is a client-reference proxy that throws on access
+           rather than on call. Stamping only React importers left that module
+           bare and turned a call-time failure into an import-time one.
+
+           So the test is React or any dependency that is itself a client
+           module. `react-dom` has no first-party importer today and is listed
+           anyway: a module reaching for `createPortal` is client, and finding
+           that out by shipping it is the expensive way.
+
+           What must NOT be stamped is as important. Marking the utility entry
+           or the CSS shims as client references meant importing `cn` from the
+           root and calling it inside a React Server Component typechecked and
+           then threw at render. `scripts/check-client-boundary.mjs` pins both
+           directions, because this rule is derived rather than enumerated and
+           the next module shaped like the toast handle would land bare in
+           silence. */
         banner: (chunk) => {
           const id = chunk.facadeModuleId ?? '';
-          return id.endsWith('/src/index.ts') || id.endsWith('/src/data-table.ts')
-            ? '"use client";'
-            : '';
+          /* Roster's own modules only. Vendored code is emitted here too and
+             uses React, but no `exports` subpath reaches it: it is only ever
+             arrived at THROUGH a stamped component, so a directive on it marks
+             a boundary nobody can cross. An exact prefix rather than a
+             substring, so a checkout path that happens to contain the word
+             cannot silently match nothing. */
+          const isOurs = id.startsWith(SRC_DIR);
+          const usesClientCode = chunk.imports.some((i) =>
+            CLIENT_PACKAGES.some((pkg) => i === pkg || i.startsWith(pkg + '/')),
+          );
+          return isOurs && usesClientCode ? '"use client";' : '';
         },
         globals: {
           react: 'React',
