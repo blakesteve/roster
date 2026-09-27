@@ -12,7 +12,7 @@ const meta = {
         component: `
 ### Precision Time Indicator
 
-The **Countdown** component provides a highly visual, animated timer for upcoming deadlines. Powered by \`date-fns\`, it guarantees precise calculations across timezones and daylight saving boundaries.
+The **Countdown** component provides a highly visual, animated timer for upcoming deadlines. It counts elapsed time from the difference between two timestamps rather than calendar time, so month ends and daylight saving changes do not shift the numbers, and the day count is the whole remaining total.
 
 #### 🎨 Design System Integrations
 * **Zero-Config Dark Mode:** No manual theme props required! The component natively listens to your app's \`.dark\` class and perfectly flips its text contrast, gradients, and shadows.
@@ -23,7 +23,7 @@ The **Countdown** component provides a highly visual, animated timer for upcomin
 ---
 
 #### 🧠 Headless Hook Option: \`useCountdown\`
-If you need the precision date-math but want to build a completely custom UI, import the underlying hook directly!
+If you want the same countdown with a completely custom UI, import the underlying hook directly. It counts elapsed time rather than calendar time, so \`days\` is the whole remaining total and reads correctly across month ends and daylight-saving changes.
 
 \`\`\`tsx
 import { useCountdown } from 'roster'; // Adjust import to match your library path
@@ -201,6 +201,61 @@ export const WidgetSmall: Story = {
       description: {
         story:
           "The `xs` variant with no title. Perfect for embedding within tight layouts like Sidebars, Cards, or compact list items.",
+      },
+    },
+  },
+};
+
+/**
+ * Three-digit days, beside two-digit days, at every size and at two container
+ * widths. The day count is the whole remaining total rather than a calendar
+ * remainder, so a target a few months out shows three digits and the days
+ * column has to hold them.
+ */
+export const ThreeDigitDays: Story = {
+  render: () => (
+    <div className="rst:flex rst:flex-col rst:gap-10">
+      {(["20rem", "40rem"] as const).map((width) => (
+        <div key={width} className="rst:flex rst:flex-col rst:gap-6">
+          <p className="rst:text-xs rst:font-mono rst:text-gray-500">
+            container {width}
+          </p>
+          {(["xs", "sm", "md", "lg", "xl"] as const).map((size) => (
+            <div
+              key={size}
+              data-case={`${width}-${size}`}
+              className="rst:flex rst:flex-col rst:gap-3"
+            >
+              {[9, 400].map((days) => (
+                <div
+                  key={days}
+                  data-days={days}
+                  className="rst:border rst:border-dashed rst:border-gray-300 rst:dark:border-gray-700"
+                  style={{ width }}
+                >
+                  <Countdown
+                    /* Built from a timestamp, not from calendar days, and
+                       given an hour of margin, so the count reads 9 and 400
+                       rather than 08 and 399. Adding calendar days loses an
+                       hour to any spring clock change in between, which
+                       would eat the margin exactly. */
+                    targetDate={new Date(Date.now() + days * 86_400_000 + 3_600_000)}
+                    size={size}
+                    variant="neutral"
+                  />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The days column holds the whole remaining total, so anything more than 99 days out shows three digits. Each pair renders the same size at 9 days and at 400 days inside the same dashed box, so a column that grows past its container is visible as an overhang.\n\nMeasured in the 20rem box: `xs` through `lg` hold three digits with room to spare. `xl`, the hero size, already overhangs a phone-width container by a few pixels at two digits, and the third digit widens that to about 20px on each side.",
       },
     },
   },

@@ -119,9 +119,10 @@ const Countdown = React.forwardRef<HTMLDivElement, CountdownProps>(
             drops from 225px to 189px, measured.
 
             These are CONTAINER steps, so a narrow column on a wide page is
-            handled — that was the whole point. One limit remains: `lg` and
-            `xl` still exceed a phone-width container even after the saving.
-            They are hero sizes and were never going to fit there. */}
+            handled — that was the whole point. One limit remains: `xl`, the
+            hero size, overhangs a 320px container by a few pixels at two
+            digits of days and by about 20px on each side at three. `lg` fits
+            that width at both. */}
         <div className="rst:flex rst:justify-center rst:gap-3 rst:@[22rem]:gap-6 rst:@[35rem]:gap-8">
           <CountdownItem
             value={days}
