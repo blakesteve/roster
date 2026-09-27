@@ -1228,7 +1228,7 @@ the one that can not be affected by a future change to the barrel.
 
 | Hook             | Description                                                                     |
 | ---------------- | ------------------------------------------------------------------------------- |
-| `useCountdown`   | Countdown timer logic without the UI                                            |
+| `useCountdown`   | Countdown timer logic without the UI; `days` counts the whole remaining total   |
 | `useKeySequence` | Fires a callback when a sequence of keys is typed in order. Ships `KONAMI_CODE` |
 
 ## Authoring components: the `rst:` prefix

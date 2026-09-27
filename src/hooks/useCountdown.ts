@@ -1,11 +1,19 @@
 import { useCallback, useState, useEffect } from 'react';
-import { intervalToDuration, isAfter } from 'date-fns';
 
 interface CountdownResult {
+  /**
+   * Whole days remaining, as the full total rather than a remainder within a
+   * month. A target a year out reads 365, so a display that assumes two digits
+   * needs room for three.
+   */
   days: number;
+  /** Hours past the whole days, 0 to 23. */
   hours: number;
+  /** Minutes past the whole hours, 0 to 59. */
   minutes: number;
+  /** Seconds past the whole minutes, 0 to 59. */
   seconds: number;
+  /** True once the target has passed. Stays false for an invalid target. */
   isFinished: boolean;
 }
 
@@ -17,25 +25,37 @@ export const useCountdown = (targetDate: Date): CountdownResult => {
   const targetTime = targetDate.getTime();
 
   const calculateTimeLeft = useCallback((): CountdownResult => {
-    const now = new Date();
-    const target = new Date(targetTime);
+    // An invalid target can never elapse. Every field reads 0 and isFinished
+    // stays false, so a bad input shows an idle clock rather than a false
+    // "done".
+    if (Number.isNaN(targetTime)) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0, isFinished: false };
+    }
 
-    if (isAfter(now, target)) {
+    const remaining = targetTime - Date.now();
+
+    if (remaining < 0) {
       return { days: 0, hours: 0, minutes: 0, seconds: 0, isFinished: true };
     }
 
-    // An invalid target yields {} here rather than throwing, so every field
-    // falls back to 0 and isFinished stays false.
-    const duration = intervalToDuration({
-      start: now,
-      end: target,
-    });
+    // A countdown measures elapsed time, not calendar time, so every field
+    // comes from the millisecond difference. `days` is the whole total and
+    // is allowed to run past 99.
+    //
+    // Calendar arithmetic gets this wrong in three separate ways. A calendar
+    // duration splits the gap into years, months and days, and a result that
+    // reads only the day part drops the rest: 45 days out reads as about 14.
+    // A calendar day is not 24 hours across a daylight-saving change, so a
+    // gap of 23 real hours reads as one day. And a month that is shorter than
+    // the one before it can leave the sub-day fields negative. A plain
+    // difference of two timestamps has none of those failure modes.
+    const totalSeconds = Math.floor(remaining / 1000);
 
     return {
-      days: duration.days ?? 0,
-      hours: duration.hours ?? 0,
-      minutes: duration.minutes ?? 0,
-      seconds: duration.seconds ?? 0,
+      days: Math.floor(totalSeconds / 86_400),
+      hours: Math.floor((totalSeconds % 86_400) / 3_600),
+      minutes: Math.floor((totalSeconds % 3_600) / 60),
+      seconds: totalSeconds % 60,
       isFinished: false,
     };
   }, [targetTime]);
