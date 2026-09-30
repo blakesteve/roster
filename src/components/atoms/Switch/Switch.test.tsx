@@ -152,8 +152,8 @@ describe("Switch Component", () => {
          row's own handler TWICE (the label's click bubbling, then the click
          Headless UI forwards to the switch, bubbling too) and the switch's
          onChange once. A row that toggles in its handler and ignores
-         onChange, as Navbar's theme row does, flips twice and lands where it
-         started. Pinned both ways, so the hazard is on record. */
+         onChange flips twice and lands where it started. Pinned both ways, so
+         the hazard is on record. */
       const toggles = vi.fn();
       const row = (labelClickable: boolean) => (
         <div onClick={toggles}>

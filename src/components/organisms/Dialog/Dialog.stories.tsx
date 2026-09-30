@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Dialog, type DialogProps } from "./Dialog";
 import { Button } from "../../atoms/Button/Button";
 import { Input } from "../../atoms/Input/Input";
@@ -344,4 +345,72 @@ export const GlassEffect: Story = {
       </div>
     ),
   ],
+};
+
+const page = within(document.body);
+
+/**
+ * While the dialog is open, everything behind it is `inert`: not focusable,
+ * not clickable, and out of a screen reader's reach. On close, focus goes back
+ * to whatever opened it.
+ */
+export const PageBehindIsInert: Story = {
+  args: { title: "Rename item", description: "Choose a new name.", children: <p>Body</p> },
+  render: (args) => <DialogWrapper {...args} />,
+  play: async ({ canvasElement }) => {
+    const opener = within(canvasElement).getByRole("button", { name: "Open Dialog" });
+    await expect(opener.closest("[inert]")).toBeNull();
+    await userEvent.click(opener);
+    const dialog = await page.findByRole("dialog");
+    await expect(dialog).toHaveAttribute("aria-modal", "true");
+    await waitFor(() => expect(opener.closest("[inert]")).not.toBeNull());
+    await expect(dialog.closest("[inert]")).toBeNull();
+    await waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true));
+
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(page.queryByRole("dialog")).not.toBeInTheDocument());
+    await expect(opener).toHaveFocus();
+    await expect(opener.closest("[inert]")).toBeNull();
+  },
+  parameters: { controls: { disable: true } },
+};
+
+/**
+ * A dialog that is open on its first render (from a deep link, say) animates
+ * in the way one opened by a click does, fading up from transparent and
+ * scaling up from 95%, and the page behind it is inert from the start.
+ */
+export const OpenOnFirstRender: Story = {
+  /* Also run with reduced motion on: the dialog must fade up from
+     transparent there too, not paint once at rest and then flicker. */
+  tags: ["reduced-motion"],
+  args: { title: "Welcome back", description: "Here is what changed.", children: <p>Body</p> },
+  render: function Render(args) {
+    const [open, setOpen] = useState(true);
+    return (
+      <>
+        <Button onClick={() => setOpen(true)}>Open Dialog</Button>
+        <Dialog {...args} isOpen={open} onClose={() => setOpen(false)} />
+      </>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const dialog = await page.findByRole("dialog");
+    const panel = dialog.querySelector(".rst\\:rounded-2xl") as HTMLElement;
+    // Caught on its way in: part-transparent, not painted at rest first.
+    await expect(Number(getComputedStyle(panel).opacity)).toBeLessThan(1);
+    await waitFor(() => expect(getComputedStyle(panel).opacity).toBe("1"));
+
+    /* `hidden: true` because the page behind is `aria-hidden` now, which is
+       the point, and role queries skip what assistive technology can not
+       reach. */
+    const opener = within(canvasElement).getByRole("button", { name: "Open Dialog", hidden: true });
+    await waitFor(() => expect(opener.closest("[inert]")).not.toBeNull());
+    await waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true));
+
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(page.queryByRole("dialog")).not.toBeInTheDocument());
+    await expect(opener.closest("[inert]")).toBeNull();
+  },
+  parameters: { controls: { disable: true } },
 };

@@ -221,36 +221,49 @@ export const DefaultTheme: Story = {
 };
 
 /**
- * The theme row in the user menu is the control, and the `xs` switch inside
- * it only shows the state: it is `pointer-events-none`, so its 44px target is
- * too, and a click anywhere on the row, the switch included, toggles once.
+ * The theme row in the user menu is the control: a `menuitemcheckbox` whose
+ * `aria-checked` is the theme. The track inside only draws the state; it is
+ * not focusable, not a switch, and not a pointer target, so a click anywhere
+ * on the row, over the track included, toggles once.
  */
 export const ThemeToggleRow: Story = {
   args: { ...DefaultTheme.args },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: /user menu/i }));
     const page = within(document.body);
-    /* The row is whatever holds both the words and the switch. Its role is
-       Headless UI's to set, so it is found by structure rather than role. */
-    const label = await page.findByText("Dark Mode");
-    const menu = label.closest('[role="menu"]') as HTMLElement;
-    const track = within(menu).getByRole("switch");
-    let row = label as HTMLElement;
-    while (!row.contains(track)) row = row.parentElement!;
+    await userEvent.click(canvas.getByRole("button", { name: /user menu/i }));
+    const row = await page.findByRole("menuitemcheckbox", { name: "Dark Mode" });
+    await expect(row).toHaveAttribute("aria-checked", "false");
+    // Nothing inside the row is a control of its own.
+    await expect(within(row).queryByRole("switch")).toBeNull();
+    await expect(row.querySelector("button, input, a, [tabindex]:not([tabindex='-1'])")).toBeNull();
 
+    const track = within(row).getByTestId("navbar-theme-track");
+    await expect(track).toHaveAttribute("aria-hidden", "true");
     const r = track.getBoundingClientRect();
     const cx = r.left + r.width / 2;
     const cy = r.top + r.height / 2;
     for (const [dx, dy] of [[0, 0], [0, -10], [0, 10]]) {
-      const hit = document.elementFromPoint(cx + dx, cy + dy);
-      await expect(hit?.closest('[role="switch"]')).toBeNull();
-      await expect(row.contains(hit)).toBe(true);
+      await expect(row.contains(document.elementFromPoint(cx + dx, cy + dy))).toBe(true);
     }
+    /* The track is drawn with the Switch's styles, and those include a 44px
+       hit area that would overhang this 36px row. It must not reach the item
+       next to it: the edge of "Log Out" belongs to "Log Out". */
+    const rowBox = row.getBoundingClientRect();
+    await expect(row.contains(document.elementFromPoint(cx, rowBox.bottom + 2))).toBe(false);
+    await expect(row.contains(document.elementFromPoint(cx, rowBox.top - 2))).toBe(false);
 
     await expect(canvasElement.querySelector(".dark")).toBeNull();
-    await userEvent.click(row);
+    // Whatever is under the track takes the click; the track itself can not.
+    await userEvent.click(document.elementFromPoint(cx, cy) as HTMLElement);
     await expect(canvasElement.querySelector(".dark")).not.toBeNull();
+
+    // The menu stays open on a toggle, and the row reports the new state.
+    await expect(page.getByRole("menuitemcheckbox", { name: "Dark Mode" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    await expect(canvas.getByRole("button", { name: /user menu/i })).toHaveAttribute("aria-expanded", "true");
   },
 };
 
@@ -418,19 +431,20 @@ export const MobileView: Story = {
   render: (args) => (
     <div style={{ width: 375, maxWidth: "100%", position: "relative", margin: "0 auto" }}>
       {/*
-        Scoped CSS that forces mobile Tailwind breakpoint classes regardless of viewport width.
-        md:flex  → desktop nav (must stay hidden)
-        md:hidden → hamburger + mobile panel items (must show)
-        max-md:hidden → desktop-only elements (must stay hidden)
-        .w-full.md:hidden → mobile action slot (block, not flex)
+        Scoped CSS that forces the mobile layout regardless of viewport width.
+        It targets Roster's prefixed classes (rst:md:flex, rst:md:hidden); the
+        unprefixed selectors this once used matched nothing, so the story showed
+        the desktop nav on a wide screen.
+        rst:md:flex → desktop nav (must stay hidden)
+        rst:md:hidden → hamburger + mobile panel items (must show)
+        rst:flex rst:md:hidden → the same, where it lays out as a row
       */}
       <style>{`
-        .mobile-story .md\\:flex          { display: none  !important; }
-        .mobile-story .max-md\\:hidden    { display: none  !important; }
-        .mobile-story .md\\:hidden        { display: block !important; }
-        .mobile-story .flex.md\\:hidden   { display: flex  !important; }
+        .navbar-mobile-demo .rst\\:md\\:flex               { display: none  !important; }
+        .navbar-mobile-demo .rst\\:md\\:hidden             { display: block !important; }
+        .navbar-mobile-demo .rst\\:flex.rst\\:md\\:hidden  { display: flex  !important; }
       `}</style>
-      <div className="rst:mobile-story">
+      <div className="navbar-mobile-demo">
         <InteractiveWrapper args={args} />
       </div>
     </div>
@@ -645,12 +659,11 @@ export const SlotClosesMobilePanel: Story = {
   render: (args) => (
     <div style={{ width: 375, maxWidth: "100%", position: "relative", margin: "0 auto" }}>
       <style>{`
-        .mobile-story .md\\:flex          { display: none  !important; }
-        .mobile-story .max-md\\:hidden    { display: none  !important; }
-        .mobile-story .md\\:hidden        { display: block !important; }
-        .mobile-story .flex.md\\:hidden   { display: flex  !important; }
+        .navbar-mobile-demo .rst\\:md\\:flex               { display: none  !important; }
+        .navbar-mobile-demo .rst\\:md\\:hidden             { display: block !important; }
+        .navbar-mobile-demo .rst\\:flex.rst\\:md\\:hidden  { display: flex  !important; }
       `}</style>
-      <div className="rst:mobile-story">
+      <div className="navbar-mobile-demo">
         <InteractiveWrapper args={args} />
       </div>
     </div>
@@ -732,5 +745,32 @@ export const ThemeModeAuto: Story = {
           "`themeMode=\"auto\"` follows the nearest ancestor carrying the `.dark` class, so a class-based dark app does not have to wire the nav into its theme state. Without it the mode is inferred from `variant`, which renders near-black links on a black bar until `themeMode` is passed manually. This story sets `.dark` on a wrapper and passes no theme state at all.",
       },
     },
+  },
+};
+
+/**
+ * The mobile panel's theme row is a `switch`: one tab stop, its state in
+ * `aria-checked`, toggled by a click, Space or Enter, once each.
+ */
+export const MobileThemeSwitch: Story = {
+  args: { ...MobileView.args },
+  render: MobileView.render,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: /open main menu/i }));
+    const page = within(document.body);
+    const row = await page.findByRole("switch", { name: "Dark Mode" });
+    await expect(row).toHaveAttribute("aria-checked", "false");
+    await expect(row).toHaveAttribute("tabindex", "0");
+    await expect(row.querySelector("button, input, a, [tabindex]")).toBeNull();
+    await expect(within(row).getByTestId("navbar-theme-track")).toHaveAttribute("aria-hidden", "true");
+
+    await userEvent.click(row);
+    await expect(row).toHaveAttribute("aria-checked", "true");
+    row.focus();
+    await userEvent.keyboard(" ");
+    await expect(row).toHaveAttribute("aria-checked", "false");
+    await userEvent.keyboard("{Enter}");
+    await expect(row).toHaveAttribute("aria-checked", "true");
   },
 };

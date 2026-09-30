@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
 import { Navbar, type NavbarProps } from "./Navbar";
 
 class ResizeObserverMock {
@@ -527,6 +528,72 @@ describe("Navbar mobile panel dismissal on navigation", () => {
 
     await waitFor(() => {
       expect(screen.queryByText("Family area")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("the theme rows are the control", () => {
+    it("desktop: a menuitemcheckbox with the theme in aria-checked, and nothing focusable inside", () => {
+      const { rerender } = render(
+        <Navbar {...defaultProps} user={mockUser} onThemeToggle={vi.fn()} themeMode="light" />,
+      );
+      fireEvent.click(screen.getByRole("button", { name: /user menu/i }));
+      const row = screen.getByRole("menuitemcheckbox", { name: "Dark Mode" });
+      expect(row).toHaveAttribute("aria-checked", "false");
+      expect(within(row).queryByRole("switch")).toBeNull();
+      expect(row.querySelector("button, input, a, [tabindex]:not([tabindex='-1'])")).toBeNull();
+      expect(within(row).getByTestId("navbar-theme-track")).toHaveAttribute("aria-hidden", "true");
+
+      rerender(<Navbar {...defaultProps} user={mockUser} onThemeToggle={vi.fn()} themeMode="dark" />);
+      expect(screen.getByRole("menuitemcheckbox", { name: "Dark Mode" })).toHaveAttribute("aria-checked", "true");
+    });
+
+    it("desktop: Enter on the item toggles once", async () => {
+      const user = userEvent.setup();
+      const onThemeToggle = vi.fn();
+      render(<Navbar {...defaultProps} user={mockUser} onThemeToggle={onThemeToggle} />);
+      screen.getByRole("button", { name: /user menu/i }).focus();
+      await user.keyboard("{Enter}");
+      const items = Array.from(screen.getByRole("menu").querySelectorAll("[role^='menuitem']"));
+      const index = items.findIndex((i) => i.getAttribute("role") === "menuitemcheckbox");
+      expect(index).toBeGreaterThanOrEqual(0);
+      for (let k = 0; k < index; k++) await user.keyboard("{ArrowDown}");
+      await user.keyboard("{Enter}");
+      expect(onThemeToggle).toHaveBeenCalledTimes(1);
+    });
+
+    it("mobile: a switch with one tab stop, toggled once by click, Space or Enter", async () => {
+      const user = userEvent.setup();
+      const onThemeToggle = vi.fn();
+      render(<Navbar {...defaultProps} user={mockUser} onThemeToggle={onThemeToggle} themeMode="dark" />);
+      fireEvent.click(screen.getByRole("button", { name: /open main menu/i }));
+      const row = await screen.findByRole("switch", { name: "Dark Mode" });
+      expect(row).toHaveAttribute("aria-checked", "true");
+      expect(row).toHaveAttribute("tabindex", "0");
+      expect(row.querySelector("button, input, a, [tabindex]")).toBeNull();
+
+      await user.click(row);
+      expect(onThemeToggle).toHaveBeenCalledTimes(1);
+      row.focus();
+      await user.keyboard(" ");
+      expect(onThemeToggle).toHaveBeenCalledTimes(2);
+      await user.keyboard("{Enter}");
+      expect(onThemeToggle).toHaveBeenCalledTimes(3);
+
+      // Held down, it toggles once, not once per repeat.
+      fireEvent.keyDown(row, { key: " ", repeat: true });
+      fireEvent.keyDown(row, { key: "Enter", repeat: true });
+      expect(onThemeToggle).toHaveBeenCalledTimes(3);
+    });
+
+    it.each([
+      ["desktop menu", /user menu/i],
+      ["mobile panel", /open main menu/i],
+    ])("renders no Switch control in the %s", async (_where, opener) => {
+      render(<Navbar {...defaultProps} user={mockUser} onThemeToggle={vi.fn()} />);
+      fireEvent.click(screen.getByRole("button", { name: opener }));
+      const track = await screen.findByTestId("navbar-theme-track");
+      expect(screen.queryAllByRole("switch", { name: "Toggle setting" })).toHaveLength(0);
+      expect(track.closest("button")).toBeNull();
     });
   });
 });

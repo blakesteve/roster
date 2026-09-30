@@ -1,10 +1,9 @@
-import { Fragment, type ReactNode } from "react";
+import { Fragment, useLayoutEffect, useState, type ReactNode } from "react";
 import {
   Dialog as HeadlessDialog,
   DialogPanel,
   DialogTitle,
   DialogBackdrop,
-  Transition,
   TransitionChild,
 } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -139,73 +138,100 @@ const Dialog = ({
   children,
   className,
 }: DialogProps) => {
-  return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <HeadlessDialog as="div" className="rst:font-ui rst:relative rst:z-50" onClose={onClose}>
-        <TransitionChild
-          as={Fragment}
-          enter="rst:ease-out rst:duration-300"
-          enterFrom="rst:opacity-0"
-          enterTo="rst:opacity-100"
-          leave="rst:ease-in rst:duration-200"
-          leaveFrom="rst:opacity-100"
-          leaveTo="rst:opacity-0"
-        >
-          <DialogBackdrop
-            className={cn(
-              "rst:fixed rst:inset-0 rst:transition-opacity",
-              variant === "glass"
-                ? "rst:bg-slate-900/40 rst:dark:bg-black/60"
-                : "rst:bg-slate-900/60 rst:dark:bg-black/80 rst:backdrop-blur-sm",
-            )}
-          />
-        </TransitionChild>
-        <div className="rst:fixed rst:inset-0 rst:overflow-y-auto">
-          <div className="rst:flex rst:min-h-full rst:items-center rst:justify-center rst:p-4 rst:text-center">
-            <TransitionChild
-              as={Fragment}
-              enter="rst:ease-out rst:duration-300"
-              enterFrom="rst:opacity-0 rst:scale-95"
-              enterTo="rst:opacity-100 rst:scale-100"
-              leave="rst:ease-in rst:duration-200"
-              leaveFrom="rst:opacity-100 rst:scale-100"
-              leaveTo="rst:opacity-0 rst:scale-95"
-            >
-              <DialogPanel
-                className={cn(
-                  dialogVariants({ size, variant, status }),
-                  className,
-                )}
-              >
-                <div className="rst:flex rst:items-start rst:justify-between">
-                  <div>
-                    <DialogTitle as="h2" className={cn(titleVariants())}>
-                      {title}
-                    </DialogTitle>
-                    {description && (
-                      <p className={cn(descriptionVariants())}>{description}</p>
-                    )}
-                  </div>
+  /* `open` goes to Headless UI's Dialog itself. It used to come from an outer
+     `<Transition show={isOpen}>`, and wrapped that way Headless UI 2.2.9 marks
+     nothing behind the dialog `inert` or `aria-hidden`: the focus trap held,
+     but a screen reader's virtual cursor could walk out onto the page. The
+     helper Headless UI uses to find the page is mounted by `Dialog`; under an
+     outer Transition it mounted only as the dialog opened, too late for the
+     code that makes the page inert.
 
-                  <div className="rst:ml-4 rst:flex rst:shrink-0">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className={cn(closeVariants())}
-                      aria-label="Close dialog"
-                    >
-                      <FontAwesomeIcon icon={faXmark} className="rst:h-5 rst:w-5" />
-                    </button>
-                  </div>
+     `mounted` keeps a dialog that is open on its first render closed for that
+     one render, and opens it in a layout effect, before anything is painted.
+     To Headless UI that is an ordinary open, so it animates in the way the
+     outer Transition's `appear` used to make it. Without it, Headless UI paints
+     the dialog at rest first and starts the enter a frame later, a visible
+     flicker; and the page-finding helper again resolves too late in React's
+     StrictMode. A layout effect, not an ordinary effect or a frame, so the
+     dialog is in the document as soon as the render that opened it is done. */
+  const [mounted, setMounted] = useState(false);
+  useLayoutEffect(() => {
+    /* The one extra render is the point: it is what turns the first render's
+       open into a closed-to-open change Headless UI animates. */
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a one-time mount signal, before paint
+    setMounted(true);
+  }, []);
+
+  return (
+    <HeadlessDialog
+      open={isOpen && mounted}
+      as="div"
+      className="rst:font-ui rst:relative rst:z-50"
+      onClose={onClose}
+    >
+      <TransitionChild
+        as={Fragment}
+        enter="rst:ease-out rst:duration-300"
+        enterFrom="rst:opacity-0"
+        enterTo="rst:opacity-100"
+        leave="rst:ease-in rst:duration-200"
+        leaveFrom="rst:opacity-100"
+        leaveTo="rst:opacity-0"
+      >
+        <DialogBackdrop
+          className={cn(
+            "rst:fixed rst:inset-0 rst:transition-opacity",
+            variant === "glass"
+              ? "rst:bg-slate-900/40 rst:dark:bg-black/60"
+              : "rst:bg-slate-900/60 rst:dark:bg-black/80 rst:backdrop-blur-sm",
+          )}
+        />
+      </TransitionChild>
+      <div className="rst:fixed rst:inset-0 rst:overflow-y-auto">
+        <div className="rst:flex rst:min-h-full rst:items-center rst:justify-center rst:p-4 rst:text-center">
+          <TransitionChild
+            as={Fragment}
+            enter="rst:ease-out rst:duration-300"
+            enterFrom="rst:opacity-0 rst:scale-95"
+            enterTo="rst:opacity-100 rst:scale-100"
+            leave="rst:ease-in rst:duration-200"
+            leaveFrom="rst:opacity-100 rst:scale-100"
+            leaveTo="rst:opacity-0 rst:scale-95"
+          >
+            <DialogPanel
+              className={cn(
+                dialogVariants({ size, variant, status }),
+                className,
+              )}
+            >
+              <div className="rst:flex rst:items-start rst:justify-between">
+                <div>
+                  <DialogTitle as="h2" className={cn(titleVariants())}>
+                    {title}
+                  </DialogTitle>
+                  {description && (
+                    <p className={cn(descriptionVariants())}>{description}</p>
+                  )}
                 </div>
 
-                <div className="rst:mt-6">{children}</div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
+                <div className="rst:ml-4 rst:flex rst:shrink-0">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className={cn(closeVariants())}
+                    aria-label="Close dialog"
+                  >
+                    <FontAwesomeIcon icon={faXmark} className="rst:h-5 rst:w-5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="rst:mt-6">{children}</div>
+            </DialogPanel>
+          </TransitionChild>
         </div>
-      </HeadlessDialog>
-    </Transition>
+      </div>
+    </HeadlessDialog>
   );
 };
 

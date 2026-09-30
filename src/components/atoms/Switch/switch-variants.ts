@@ -18,7 +18,7 @@ import { cva } from "class-variance-authority";
    twice its figure because its 16px track sits in a 20px row.) An ancestor with `overflow: hidden` clips the overhang, because
    clipping applies to hit testing, not only to painting. And `className`
    lands on the wrapper, not the track, so `pointer-events-none` there turns
-   the target off by inheritance, which is how Navbar's theme rows work. */
+   the target off by inheritance. */
 export const switchTrackVariants = /* @__PURE__ */ cva(
   "rst:before:absolute rst:before:top-1/2 rst:before:left-1/2 rst:before:size-11 rst:before:-translate-x-1/2 rst:before:-translate-y-1/2 rst:before:content-[''] rst:font-ui rst:group rst:relative rst:inline-flex rst:shrink-0 rst:cursor-pointer rst:rounded-full rst:border-2 rst:border-transparent rst:transition-colors rst:duration-200 rst:ease-in-out rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:ring-offset-background rst:disabled:cursor-not-allowed rst:disabled:opacity-50",
   {
