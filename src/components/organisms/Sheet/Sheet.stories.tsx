@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Sheet, type SheetProps } from "./Sheet";
@@ -412,24 +412,44 @@ export const FieldInside: Story = {
 };
 
 /**
- * Follows `.dark` on the page, like every Roster surface.
+ * Follows `.dark` on the page, like every Roster surface. The story puts
+ * `.dark` on `<html>` only while its sheet is open, and takes it off when the
+ * sheet closes or the story goes away, so it never darkens the docs page or
+ * the stories around it.
  */
+function DarkPageDemo() {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const root = document.documentElement;
+    const hadDark = root.classList.contains("dark");
+    root.classList.add("dark");
+    return () => {
+      if (!hadDark) root.classList.remove("dark");
+    };
+  }, [open]);
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Open sheet</Button>
+      <Sheet isOpen={open} onClose={() => setOpen(false)} title="Details">
+        <Body />
+      </Sheet>
+    </>
+  );
+}
+
 export const Dark: Story = {
   args: { isOpen: false, onClose: () => {}, title: "Details", children: null },
-  render: () => <Demo />,
-  decorators: [
-    (Story) => {
-      document.documentElement.classList.add("dark");
-      return <Story />;
-    },
-  ],
+  render: () => <DarkPageDemo />,
   play: async ({ canvasElement }) => {
-    try {
-      const { panel } = await openSheet(canvasElement);
-      await expect(getComputedStyle(panel).backgroundColor).toBe("rgb(41, 37, 36)");
-    } finally {
-      document.documentElement.classList.remove("dark");
-    }
+    await expect(document.documentElement).not.toHaveClass("dark");
+    const { panel } = await openSheet(canvasElement);
+    await expect(document.documentElement).toHaveClass("dark");
+    await expect(getComputedStyle(panel).backgroundColor).toBe("rgb(41, 37, 36)");
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(page.queryByRole("dialog")).not.toBeInTheDocument());
+    // Put back as it was found, for whatever renders next.
+    await expect(document.documentElement).not.toHaveClass("dark");
   },
 };
 
