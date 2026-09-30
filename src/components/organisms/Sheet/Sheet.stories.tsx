@@ -308,6 +308,21 @@ export const HeaderActionsAndContentSwap: Story = {
        lands on Close, not on the first control it finds. */
     await waitFor(() => expect(page.getByRole("button", { name: "Close" })).toHaveFocus());
 
+    /* The header's geometry: the grip near the sheet's top edge, and the
+       title and the actions on the close button's center line. */
+    const top = panel.getBoundingClientRect().top;
+    const middle = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return r.top + r.height / 2;
+    };
+    const grip = page.getByTestId("sheet-handle").firstElementChild!.getBoundingClientRect();
+    await expect(grip.top - top).toBeLessThanOrEqual(12);
+    const close = middle(page.getByRole("button", { name: "Close" }));
+    await expect(Math.abs(middle(page.getByRole("heading", { level: 2 })) - close)).toBeLessThanOrEqual(1);
+    await expect(Math.abs(middle(page.getByRole("button", { name: "Next" })) - close)).toBeLessThanOrEqual(1);
+    // And the header sits close under the grip, not a whole strip below it.
+    await expect(page.getByRole("heading", { level: 2 }).getBoundingClientRect().top - grip.bottom).toBeLessThanOrEqual(32);
+
     await userEvent.click(page.getByRole("button", { name: "Next" }));
     const title = page.getByRole("heading", { name: "Second item" });
     await expect(title).toHaveFocus();

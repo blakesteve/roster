@@ -482,13 +482,18 @@ const Sheet = ({
                   aria-hidden="true"
                   data-testid="sheet-handle"
                   className={cn(
-                    "rst:flex rst:h-11 rst:items-center rst:justify-center",
+                    /* The grip sits near the top edge, where a sheet's grabber
+                       is expected, inside a 44px strip. The header below pulls
+                       up over the strip's lower part, so a touch there drags
+                       too (the header is a drag zone) and a mouse drags from
+                       the 32px above it, the full width of the sheet. */
+                    "rst:flex rst:h-11 rst:items-start rst:justify-center rst:pt-2",
                     dragToDismiss && "rst:cursor-grab rst:active:cursor-grabbing",
                   )}
                 >
                   <span className="rst:h-1 rst:w-10 rst:rounded-full rst:bg-current rst:opacity-30" />
                 </div>
-                <div className="rst:flex rst:items-start rst:gap-2 rst:px-5 rst:pb-4">
+                <div className="rst:-mt-3 rst:flex rst:items-start rst:gap-2 rst:px-5 rst:pb-4">
                   {/* pt-2 plus text-lg's own 28px line puts the first line's
                       middle at 22px, level with the 44px close button's. */}
                   <div className="rst:min-w-0 rst:flex-1 rst:pt-2">
@@ -514,7 +519,9 @@ const Sheet = ({
                     )}
                   </div>
                   {actions && (
-                    <div className="rst:flex rst:shrink-0 rst:items-center rst:gap-1">
+                    /* 44px tall like the close button, so actions of any
+                       height center on the same line as it. */
+                    <div className="rst:flex rst:h-11 rst:shrink-0 rst:items-center rst:gap-1">
                       {actions}
                     </div>
                   )}

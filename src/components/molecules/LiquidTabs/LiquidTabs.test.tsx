@@ -355,6 +355,36 @@ describe("LiquidTabs", () => {
       expect(screen.getByText("after")).toHaveFocus();
     });
 
+    it.each([
+      ["after", "gamma", "{ArrowLeft}", "beta"],
+      ["before", "alpha", "{ArrowRight}", "beta"],
+    ])(
+      "Tab leaves from an unselected tab, and Shift+Tab back in lands on the selected tab (selected %s it)",
+      async (_order, selected, arrow, unselected) => {
+        /* The WAI-ARIA tabs pattern in manual activation: Tab into the
+           tablist lands on the selected tab, and once focus has left, the
+           roving tab stop is the selected tab again. */
+        const user = userEvent.setup();
+        render(
+          <>
+            <button>before</button>
+            <LiquidTabs tabs={THREE_TABS} activeTab={selected} onChange={vi.fn()} activation="manual" />
+            <button>after</button>
+          </>,
+        );
+        screen.getByTestId(`liquid-tab-${selected}`).focus();
+        await user.keyboard(arrow);
+        expect(screen.getByTestId(`liquid-tab-${unselected}`)).toHaveFocus();
+        expect(screen.getByTestId(`liquid-tab-${unselected}`)).toHaveAttribute("aria-selected", "false");
+
+        await user.tab();
+        expect(screen.getByText("after")).toHaveFocus();
+
+        await user.tab({ shift: true });
+        expect(screen.getByTestId(`liquid-tab-${selected}`)).toHaveFocus();
+      },
+    );
+
     it("returns the stop to the selected tab once focus leaves", async () => {
       const user = userEvent.setup();
       render(
