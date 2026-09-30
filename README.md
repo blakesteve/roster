@@ -310,6 +310,7 @@ squeeze its own text until it overflowed. Three things follow:
   Give any `width: fit-content`, `inline-block` or table-cell ancestor a
   definite width, or the card measures zero.
 - **Container queries are required**: Chrome 105+, Safari 16+, Firefox 110+.
+  `Stat` lays out with CSS subgrid, which raises its own floor to Chrome 117.
   Without them a `CallToAction` renders in its narrow form at every width.
 
 #### Ink follows the fill
@@ -355,9 +356,9 @@ the supported way now.
 rule stops matching.** Solid Button, Badge, Pill and Checkbox no longer carry
 `rst:text-white` or `rst:text-gray-950`, so a selector naming either matches
 nothing. It fails silently, and it fails *partially*: those classes are still on
-`Card`, `Navbar`, `Dialog`, `ActionBar`, `Avatar`, `LiquidTabs` and
-`Breadcrumbs`, so a themed foreground keeps working there while reverting on
-every solid control. Replace the rule with the token:
+`Card`, `Navbar`, `Dialog`, `ActionBar`, `Avatar` and `Breadcrumbs`, so a
+themed foreground keeps working there while reverting on every solid control.
+Replace the rule with the token:
 
 ```css
 /* before */
@@ -366,6 +367,12 @@ every solid control. Replace the rule with the token:
 /* after — and it covers hover and dark mode, which the rule above did not */
 :root { --roster-primary-600-ink: #10142e; }
 ```
+
+`LiquidTabs` followed later: its active label reads `--roster-lt-text-active`,
+which defaults to `--roster-primary-500-ink`, the ink of the pill's default
+fill. A rule naming `rst:text-white` on a tab stops matching; a rule on
+`[role="tab"][aria-selected="true"]` still does. If you repaint the pill with
+`--roster-lt-pill`, set `--roster-lt-text-active` to match it.
 
 **If you pass a foreground through `className`, add the hover modifier.** Solid
 variants now carry `hover:text-*`, and `tailwind-merge` resolves conflicts per
@@ -458,6 +465,12 @@ direction and stagger to find what suits a bigger surface.
 It is hand-rolled rather than a dependency: seven utilities does not justify a
 package in a library that ships compiled CSS, and it keeps the stylesheet
 self-contained — the same reasoning as not bundling a preflight.
+
+`Sheet` has its own knobs, beside those: `--roster-sheet-enter-duration`
+(280ms), `--roster-sheet-leave-duration` (200ms), the two matching easings, and
+`--roster-sheet-fade-duration` (150ms), which is the whole of its motion under
+reduced motion: a fade, with no slide. Set them at `:root`; they are the same in
+both schemes, so they are not redeclared under `.dark`.
 
 `animate-shimmer` is a highlight travelling across a base, used by `Countdown`'s
 `gradient` variant. Retint it with two variables:
@@ -1083,6 +1096,12 @@ passing it from a server component fails the render with _Functions cannot be
 passed directly to Client Components_. A small `"use client"` wrapper binds it
 once, and the pages that use the wrapper stay server-rendered.
 
+`LiquidNav` takes a `linkComponent` too, with a wider contract: each link
+receives `href` and `to` with the same value, so React Router's `Link` works as
+well as `next/link`, plus `className`, `children`, `aria-current`, `onClick` and
+`data-tab-id`, which it must forward to the DOM. The props type is exported as
+`LiquidNavLinkProps`. The same client-component rule applies.
+
 `Eyebrow` takes the other approach: `as` accepts any element and the props
 follow it, so `<Eyebrow as="a" href="/work">` works, as does `as={NextLink}`.
 
@@ -1134,12 +1153,11 @@ function App() {
 | `Pill`               | Inline phrase chrome: social proof, live state, applied filters                                              |
 | `AvatarStrip`        | Stacked avatar row with overflow chip, dismiss button, trailing slot, and label area                         |
 | `CollapsibleSection` | Clamps any content (prose, chips, image grids) to a fixed height with a fade and expand/collapse toggle      |
-| `LiquidTabs`         | Controlled tab strip with a liquid sliding pill indicator: pill and filled variants                          |
 | `Select`             | Dropdown selector, on the same size scale as `Button` and `Input`                                            |
 | `SegmentBar`         | Proportional horizontal bar divided into colored segments with optional legend                               |
-| `Stat`               | A single figure with its label and, optionally, where the figure came from                                   |
+| `Stat`               | A figure with its label and, optionally, its source; a valid `<dl>` group, or `semantics="standalone"`       |
 | `Spinner`            | Loading indicator                                                                                            |
-| `Switch`             | Toggle switch                                                                                                |
+| `Switch`             | Toggle switch; its label toggles it, and every size is a 44px target                                         |
 | `Textarea`           | Multi-line text input                                                                                        |
 | `ThemeToggle`        | Flips class-based dark mode on the document root and remembers the choice; labels and icons are configurable |
 | `Tooltip`            | Radix-powered tooltip: hover/focus on desktop, tap-to-toggle on mobile                                       |
@@ -1156,6 +1174,8 @@ function App() {
 | `DescriptionList` | Label and value pairs as a real `<dl>`: inline, stacked, or split           |
 | `EmptyState`      | Zero-data placeholder with icon and action slot                             |
 | `ErrorState`      | Error display with retry action                                             |
+| `LiquidNav`       | `LiquidTabs`' strip as a `nav` of links; takes a router's link component    |
+| `LiquidTabs`      | Tab strip with a sliding pill; arrow keys, roving focus, 44px `lg` size     |
 | `MatchupCard`     | Head-to-head comparison card                                                |
 | `Pullquote`       | A line lifted out of prose, as `<figure>` + `<blockquote>` + `<figcaption>` |
 | `RadioGroup`      | Radio set reporting one `string`; descriptions, error, 44px targets         |
@@ -1171,6 +1191,7 @@ function App() {
 | `Dialog`    | Modal dialog                                                                                                                                                       |
 | `Footer`    | Site footer                                                                                                                                                        |
 | `Navbar`    | Responsive navigation bar with mobile slide-out                                                                                                                    |
+| `Sheet`     | Bottom sheet: drag, Escape or backdrop to dismiss; only its content scrolls; returns focus, even from a deep link                                                  |
 | `Table`     | Static data table                                                                                                                                                  |
 
 ### DataTable columns
@@ -1208,7 +1229,7 @@ entry's value as `unknown` and recovers the real type per column through
 The `"use client"` directive sits on each module that needs it, not on the
 package entry. A component carries it; a variant table, a token map and `cn` do
 not. That is what lets a server component import `Button` from the root and get
-a client reference for `Button` alone, rather than for all 102 exports.
+a client reference for `Button` alone, rather than for all 105 exports.
 
 It changed in 5.0.0, and the difference is worth knowing if you are upgrading.
 Before, the entry itself carried the directive, so importing anything from the

@@ -391,6 +391,15 @@
   --roster-lt-pill: var(--roster-primary-500, #0f6498);
   --roster-lt-text-inactive: var(--roster-gray-500, #65635f);
   --roster-lt-text-hover: var(--roster-gray-900, #1c1917);
+  /* The active label sits on the pill, so its ink is the pill's: the same
+     `-500-ink` a solid `primary-500` fill reads everywhere else. It was a
+     literal white, which a light pill could not survive.
+
+     Declared here and deliberately NOT again under `.dark`: the value is the
+     same in both schemes, and leaving it out of `.dark` means a consumer's
+     `:root` override holds in dark mode too instead of being discarded by the
+     later rule. */
+  --roster-lt-text-active: var(--roster-primary-500-ink, var(--roster-white, #ffffff));
 }
 
 .dark {
@@ -482,6 +491,36 @@
       animation: none;
     }
   }
+}
+
+/* ── Sheet ───────────────────────────────────────────────────────────────────
+   Motion and backdrop for `Sheet`, beside `--roster-enter-*` because they are
+   the same kind of knob: a duration and a curve a consumer may want to retune
+   for their own product's feel.
+
+   The enter curve is a fast start with a long settle, which reads as a panel
+   arriving rather than a box sliding. The leave is shorter and accelerates
+   away, because a dismissed thing should get out of the way. Under
+   `prefers-reduced-motion` the sheet fades for `--roster-sheet-fade-duration`
+   and does not slide at all.
+
+   The motion tokens are declared at `:root` only, for the reason
+   `--roster-lt-text-active` is: they are the same in both schemes, and a
+   consumer's `:root` override should survive dark mode. The backdrop differs
+   by scheme, so it is declared in both, and an override needs both too.
+   Defaults match `Dialog`'s backdrop, which is not itself themeable.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --roster-sheet-enter-duration: 280ms;
+  --roster-sheet-leave-duration: 200ms;
+  --roster-sheet-enter-easing: cubic-bezier(0.32, 0.72, 0, 1);
+  --roster-sheet-leave-easing: cubic-bezier(0.4, 0, 1, 1);
+  --roster-sheet-fade-duration: 150ms;
+  --roster-sheet-backdrop: rgb(15 23 42 / 0.6);
+}
+
+.dark {
+  --roster-sheet-backdrop: rgb(0 0 0 / 0.8);
 }
 
 /* ── Shimmer ─────────────────────────────────────────────────────────────────

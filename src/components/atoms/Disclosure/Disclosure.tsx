@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import { Transition } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
@@ -36,6 +36,15 @@ const Disclosure = ({
 
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
 
+  /* `aria-controls` may only name an element that exists, and `Transition`
+     unmounts the panel once it has finished closing. So the panel counts as
+     mounted from the moment it opens until its leave transition ends, and the
+     button points at it for exactly that long. Adjusted during render rather
+     than in an effect, so the attribute and the panel arrive together. */
+  const panelId = useId();
+  const [panelMounted, setPanelMounted] = useState(isOpen);
+  if (isOpen && !panelMounted) setPanelMounted(true);
+
   const handleClick = () => {
     const nextState = !isOpen;
 
@@ -53,6 +62,7 @@ const Disclosure = ({
         type="button"
         onClick={handleClick}
         aria-expanded={isOpen}
+        aria-controls={panelMounted ? panelId : undefined}
         className={cn(
           disclosureTriggerVariants({ variant }),
           // Dynamic rounding and border fix
@@ -66,7 +76,7 @@ const Disclosure = ({
         <span className="rst:flex-1 rst:text-left rst:text-inherit">{title}</span>
         <span
           className={cn(
-            "rst:ml-2 rst:flex rst:items-center rst:transition-transform rst:duration-200 rst:text-inherit",
+            "rst:ml-2 rst:flex rst:items-center rst:transition-transform rst:duration-200 rst:motion-reduce:transition-none rst:text-inherit",
             isOpen ? "rst:rotate-180" : "",
           )}
         >
@@ -79,18 +89,26 @@ const Disclosure = ({
         </span>
       </button>
 
-      {/* CONTENT PANEL (With Transition) */}
-      <Transition
-        show={isOpen}
-        enter="rst:transition rst:duration-100 rst:ease-out"
-        enterFrom="rst:transform rst:scale-95 rst:opacity-0"
-        enterTo="rst:transform rst:scale-100 rst:opacity-100"
-        leave="rst:transition rst:duration-75 rst:ease-out"
-        leaveFrom="rst:transform rst:scale-100 rst:opacity-100"
-        leaveTo="rst:transform rst:scale-95 rst:opacity-0"
-      >
+      {/* CONTENT PANEL (With Transition)
+
+          The scale is `motion-safe:` only, so under `prefers-reduced-motion`
+          the panel fades and does not grow. `motion-safe:` rather than a
+          `motion-reduce:` override, because an override is two rules for one
+          property and which wins then rests on how the stylesheet happens to
+          order its variants. The chevron above flips without turning, for the
+          same reason, by the other route: its `motion-reduce:transition-none`
+          overrides a utility with no variant, and Tailwind always emits
+          variant rules after those, so that pair has only one winner. */}
+      <Transition show={isOpen} afterLeave={() => setPanelMounted(false)}>
         <div
-          className={cn(disclosureContentVariants({ variant }), "rst:rounded-b-md")}
+          id={panelId}
+          data-testid="disclosure-panel"
+          className={cn(
+            disclosureContentVariants({ variant }),
+            "rst:rounded-b-md",
+            "rst:transition rst:duration-100 rst:ease-out rst:data-leave:duration-75",
+            "rst:data-closed:opacity-0 rst:motion-safe:data-closed:scale-95",
+          )}
         >
           {children}
         </div>

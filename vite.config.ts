@@ -193,6 +193,30 @@ export default defineConfig({
           },
           setupFiles: ['.storybook/vitest.setup.ts']
         }
+      },
+      {
+        /* The stories tagged `reduced-motion`, again, in a browser that prefers
+           reduced motion. Their play functions check whichever mode they run
+           in, so without this project the reduced branch never ran at all. */
+        extends: true,
+        plugins: [
+          storybookTest({
+            configDir: path.join(dirname, '.storybook'),
+            tags: { include: ['reduced-motion'] }
+          })
+        ],
+        test: {
+          name: 'storybook-reduced-motion',
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({ contextOptions: { reducedMotion: 'reduce' } }),
+            instances: [{
+              browser: 'chromium'
+            }]
+          },
+          setupFiles: ['.storybook/vitest.setup.ts']
+        }
       }
     ]
   }
