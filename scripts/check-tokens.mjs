@@ -33,6 +33,19 @@ const MOTION = ["enter-duration", "enter-easing"];
    using it, which is how a scale quietly becomes three unused tokens. */
 const ELEVATION = ["elevation-raised", "elevation-anchored", "elevation-overlay"];
 
+/* Component tokens Roster defines at `:root` and a component reads. Same
+   invariant as the elevation levels: still defined, still read. A component
+   that stops reading one leaves a knob in the docs that turns nothing. */
+const COMPONENT = [
+  "lt-text-active",
+  "sheet-enter-duration",
+  "sheet-leave-duration",
+  "sheet-enter-easing",
+  "sheet-leave-easing",
+  "sheet-fade-duration",
+  "sheet-backdrop",
+];
+
 if (!existsSync(CSS)) {
   console.error(`[check-tokens] ${CSS} not found — run the build first.`);
   process.exit(1);
@@ -98,6 +111,23 @@ for (const token of ELEVATION) {
   }
 }
 
+/* The bodies of the plain `:root { … }` rules. Checked there specifically: a
+   token declared only under `.dark` would pass a whole-file search and leave
+   light mode with nothing, a transparent backdrop for instance. */
+const ROOT = [...css.matchAll(/(?:^|[}\s]):root\s*\{([^{}]*)\}/g)].map((m) => m[1]).join(";");
+
+for (const token of COMPONENT) {
+  if (!ROOT.includes(`--roster-${token}:`)) {
+    problems.push(`\`--roster-${token}\` is never defined at \`:root\`.`);
+  }
+  if (!css.includes(`var(--roster-${token})`)) {
+    problems.push(
+      `\`--roster-${token}\` is defined but nothing reads it, so setting it ` +
+        `changes nothing.`,
+    );
+  }
+}
+
 if (problems.length > 0) {
   console.error("[check-tokens] promised tokens are not themeable:\n");
   for (const problem of problems) console.error(`  - ${problem}\n`);
@@ -105,5 +135,5 @@ if (problems.length > 0) {
 }
 
 console.log(
-  `✓ ${ROLES.length} font roles, ${MOTION.length} motion knobs and ${ELEVATION.length} elevation levels are themeable via --roster-*`,
+  `✓ ${ROLES.length} font roles, ${MOTION.length} motion knobs, ${ELEVATION.length} elevation levels and ${COMPONENT.length} component tokens are themeable via --roster-*`,
 );

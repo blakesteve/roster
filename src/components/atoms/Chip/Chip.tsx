@@ -62,6 +62,35 @@ const CONTROL =
   "rst:cursor-pointer rst:disabled:cursor-not-allowed rst:rounded-full rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:ring-offset-background rst:focus-visible:ring-offset-2";
 
 /**
+ * A 44px-tall hit area for a chip that is one whole button.
+ *
+ * Vertical only, and the constraint is what shapes it. Chips sit in rows, and
+ * an overhanging pseudo-element can not resolve an overlap by nearest: between
+ * two chips the later one wins, and against anything not positioned the
+ * target wins, before or after it. A target that reached sideways would take
+ * clicks off the visible box of the chip beside it, which is the one thing a
+ * larger target must never do. Above and below there is only the row gap.
+ *
+ * So the target is the chip's own width and 44px tall, centered: 8px of
+ * overhang each side at `md` (28px), 12px at `sm` (20px). Centered with a
+ * translate rather than inset, because an absolutely positioned pseudo-element
+ * resolves `inset` against the padding box and the `outline` variant's border
+ * would take a pixel off each side.
+ *
+ * What the layout owes it, shown in the stories, and the same clearance
+ * applies to any other control above or below a row of chips:
+ * - a wrapping row needs a row gap of twice the overhang for every chip to keep
+ *   its full 44px (16px at `md`, 24px at `sm`). Any gap of at least the
+ *   overhang keeps each chip's visible box its own; below that, a lower chip's
+ *   target covers the bottom of the chip above it.
+ * - a horizontally scrolling row needs block padding of the overhang, because
+ *   `overflow-x: auto` clips the vertical overflow too, and clipping applies
+ *   to hit testing.
+ */
+const SELECTABLE_TARGET =
+  "rst:relative rst:before:absolute rst:before:inset-x-0 rst:before:top-1/2 rst:before:h-11 rst:before:-translate-y-1/2 rst:before:content-['']";
+
+/**
  * A chip: a label that does something. Removable, selectable, or both.
  *
  * The element it renders depends on what it can do, because that is what
@@ -202,7 +231,7 @@ const Chip = React.forwardRef<HTMLElement, ChipProps>(
             onClick?.(event as React.MouseEvent<HTMLSpanElement>);
             onSelectedChange(!selected);
           }}
-          className={cn(shell, CONTROL)}
+          className={cn(shell, CONTROL, SELECTABLE_TARGET)}
         >
           {label}
         </button>

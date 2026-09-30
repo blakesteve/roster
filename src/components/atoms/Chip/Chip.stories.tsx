@@ -325,3 +325,126 @@ export const WhenNotToUseIt: Story = {
     },
   },
 };
+
+const FILTERS = ["Baseball", "Fishing", "Outdoors", "Hiking", "Camping", "Cycling", "Running", "Climbing"];
+
+function FilterRow({ className, size }: { className: string; size?: "sm" | "md" }) {
+  const [on, setOn] = useState<string[]>(["Fishing"]);
+  const toggle = (tag: string) =>
+    setOn((t) => (t.includes(tag) ? t.filter((x) => x !== tag) : [...t, tag]));
+  return (
+    <div className={className}>
+      {FILTERS.map((tag) => (
+        <Chip
+          key={tag}
+          selected={on.includes(tag)}
+          onSelectedChange={() => toggle(tag)}
+          colorScheme={on.includes(tag) ? "primary" : "neutral"}
+          variant={on.includes(tag) ? "solid" : "outline"}
+          size={size}
+        >
+          {tag}
+        </Chip>
+      ))}
+    </div>
+  );
+}
+
+/** What `document.elementFromPoint` finds, as the chip it belongs to. */
+const chipAt = (x: number, y: number) =>
+  (document.elementFromPoint(x, y) as HTMLElement | null)?.closest("button") ?? null;
+
+/**
+ * Probes 1px inside and 1px outside the 44px target, above and below the
+ * chip's own box. Derived from the chip's rendered height, since the
+ * `outline` variant's border makes a `md` chip 30px rather than 28.
+ */
+async function expectTarget(chip: HTMLElement) {
+  const r = chip.getBoundingClientRect();
+  const x = r.left + r.width / 2;
+  const overhang = (44 - r.height) / 2;
+  await expect(chipAt(x, r.top - overhang + 1)).toBe(chip);
+  await expect(chipAt(x, r.bottom + overhang - 1)).toBe(chip);
+  await expect(chipAt(x, r.top - overhang - 1)).not.toBe(chip);
+  await expect(chipAt(x, r.bottom + overhang + 1)).not.toBe(chip);
+}
+
+/**
+ * A selectable chip's hit area is 44px tall: about 8px above and below a `md`
+ * chip, about 12px at `sm`. It never reaches sideways, where it would cover
+ * the chip beside it.
+ *
+ * **A wrapping row needs a row gap of twice that overhang** for every chip to
+ * keep the full 44px: 16px at `md`, as here (`gap-y-4`). A gap of at least the
+ * overhang keeps each chip's own box its own; under that, a lower chip's
+ * target covers the bottom of the chip above, because the later sibling wins.
+ * Any other control above or below the row needs the same clearance, and loses
+ * to the chip's target whichever comes first, unless it is positioned itself.
+ */
+export const TargetInAWrappingRow: Story = {
+  args: { children: "placeholder" },
+  render: () => (
+    <div style={{ width: 280, paddingBlock: 16 }}>
+      <FilterRow className="rst:flex rst:flex-wrap rst:gap-x-2 rst:gap-y-4" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const chips = within(canvasElement).getAllByRole("button");
+    // At least two rows, so the row gap is under test.
+    await expect(chips[chips.length - 1].getBoundingClientRect().top).toBeGreaterThan(
+      chips[0].getBoundingClientRect().bottom,
+    );
+    for (const chip of chips) await expectTarget(chip);
+
+    // Sideways, the target stops at the chip's own edges.
+    for (const chip of chips) {
+      const r = chip.getBoundingClientRect();
+      const y = r.top + r.height / 2;
+      await expect(chipAt(r.left - 1, y)).not.toBe(chip);
+      await expect(chipAt(r.right + 1, y)).not.toBe(chip);
+    }
+  },
+};
+
+/**
+ * **A horizontally scrolling row needs block padding of the overhang.**
+ * `overflow-x: auto` clips vertical overflow too, and clipping applies to
+ * hit testing, so without it the target stops at the chip's edge. `py-2`
+ * gives a `md` row its 8px.
+ */
+export const TargetInAScrollingRow: Story = {
+  args: { children: "placeholder" },
+  render: () => (
+    <div style={{ width: 280, paddingBlock: 16 }}>
+      <FilterRow className="rst:flex rst:gap-2 rst:overflow-x-auto rst:py-2" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    await expectTarget(within(canvasElement).getAllByRole("button")[0]);
+  },
+};
+
+/**
+ * At `sm` the chip is shorter, so its target overhangs further: about 12px
+ * each side, and a wrapping row needs 24px between rows for the full 44px.
+ */
+export const TargetAtSmallSize: Story = {
+  args: { children: "placeholder" },
+  render: () => (
+    <div style={{ width: 240, paddingBlock: 16 }}>
+      {/* The row gap is inline because every class a story uses ships in Roster's stylesheet. */}
+      <div style={{ display: "flex", flexWrap: "wrap", columnGap: 8, rowGap: 24 }}>
+        <FilterRow className="rst:contents" size="sm" />
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const chips = within(canvasElement).getAllByRole("button");
+    await expect(Math.round(chips[0].getBoundingClientRect().height)).toBeLessThanOrEqual(22);
+    await expect(chips[chips.length - 1].getBoundingClientRect().top).toBeGreaterThan(
+      chips[0].getBoundingClientRect().bottom,
+    );
+    for (const chip of chips) await expectTarget(chip);
+  },
+};
+

@@ -234,6 +234,19 @@ describe("MultiSelect", () => {
     expect(trigger()).toHaveAttribute("aria-expanded", "false");
   });
 
+  it("keeps its removable chips as they were: no selectable target on them", () => {
+    /* A selectable Chip grew a 44px-tall hit area. These chips are removable
+       only, so neither the shell nor the dismiss control may pick it up: the
+       shell is inert over the trigger on purpose, and the dismiss control
+       keeps its own smaller target. */
+    render(<Stateful initial={["nfl", "nba"]} />);
+    const dismiss = screen.getByRole("button", { name: "Remove NFL" });
+    expect(dismiss).toHaveClass("rst:after:-inset-2");
+    expect(dismiss.className).not.toContain("before:h-11");
+    expect(dismiss.parentElement!.className).not.toContain("before:h-11");
+    expect(dismiss.parentElement!).toHaveClass("rst:pointer-events-none");
+  });
+
   it("names each dismiss control after its own chip", () => {
     render(<Stateful initial={["nfl", "nba"]} />);
 

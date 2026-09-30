@@ -55,6 +55,9 @@ jobs:
       - name: Run Storybook tests
         run: npx vitest run --project storybook
 
+      - name: Run Storybook tests under reduced motion
+        run: npx vitest run --project storybook-reduced-motion
+
   build:
     name: Build
     runs-on: ubuntu-latest

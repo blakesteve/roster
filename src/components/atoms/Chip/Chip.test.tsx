@@ -251,4 +251,60 @@ describe("Chip", () => {
       expect(button.className).toContain("rst:focus-visible:ring-ring");
     }
   });
+
+  describe("the selectable chip's 44px target", () => {
+    /* Literal classes: the target is a pseudo-element, which jsdom does not
+       lay out. The Chip stories measure the real thing with
+       `elementFromPoint` in a browser. */
+    const TARGET = [
+      "rst:relative",
+      "rst:before:absolute",
+      "rst:before:inset-x-0",
+      "rst:before:top-1/2",
+      "rst:before:h-11",
+      "rst:before:-translate-y-1/2",
+      "rst:before:content-['']",
+    ];
+
+    it.each(["sm", "md"] as const)("is 44px tall at size %s", (size) => {
+      render(
+        <Chip size={size} onSelectedChange={() => {}}>
+          Baseball
+        </Chip>,
+      );
+      expect(screen.getByRole("button", { name: "Baseball" })).toHaveClass(...TARGET);
+    });
+
+    it("reaches up and down only, never sideways onto a neighbor", () => {
+      render(<Chip onSelectedChange={() => {}}>Baseball</Chip>);
+      const classes = screen.getByRole("button").className;
+      expect(classes).not.toMatch(/before:-inset|before:-?left-|before:-?right-|before:w-/);
+    });
+
+    it("leaves a removable chip alone", () => {
+      /* The dismiss control keeps its own `after:-inset-2`, and the shell
+         around it gets nothing: it is not a control. */
+      const { container } = render(<Chip onRemove={() => {}}>Fishing</Chip>);
+      const shell = container.firstElementChild as HTMLElement;
+      expect(shell.tagName).toBe("SPAN");
+      expect(shell.className).not.toContain("before:h-11");
+      expect(screen.getByRole("button", { name: "Remove Fishing" })).toHaveClass(
+        "rst:after:-inset-2",
+      );
+    });
+
+    it("leaves the selectable-and-removable pair alone", () => {
+      const { container } = render(
+        <Chip onSelectedChange={() => {}} onRemove={() => {}}>
+          Outdoors
+        </Chip>,
+      );
+      expect(container.innerHTML).not.toContain("before:h-11");
+    });
+
+    it("leaves a plain chip alone", () => {
+      const { container } = render(<Chip>Static</Chip>);
+      expect(container.innerHTML).not.toContain("before:h-11");
+    });
+  });
 });

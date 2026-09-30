@@ -14,6 +14,16 @@ export interface SwitchProps extends VariantProps<typeof switchTrackVariants> {
   label?: string;
   description?: string;
   disabled?: boolean;
+  /**
+   * Whether clicking the label toggles the switch, as clicking any other
+   * control's label does. On by default.
+   *
+   * Turn it off when an ancestor already has a click handler of its own that
+   * toggles. With both, one click on the label reaches that handler twice
+   * (the label's click, then the one forwarded to the switch, both bubbling)
+   * and `onChange` once.
+   */
+  labelClickable?: boolean;
   className?: string;
   ariaLabel?: string;
 }
@@ -24,6 +34,7 @@ const Switch = ({
   label,
   description,
   disabled = false,
+  labelClickable = true,
   size,
   variant,
   className,
@@ -40,9 +51,14 @@ const Switch = ({
         <span className="rst:flex rst:flex-col">
           {label && (
             <Label
-              passive
+              /* Passive drops the label's `for` and its click handler, which
+                 left the track as the only target on a row the reader sees as
+                 one object. Headless UI's handler toggles once and refuses a
+                 disabled switch. */
+              passive={!labelClickable}
               className={cn(
                 "rst:text-sm rst:font-medium rst:text-gray-900 rst:dark:text-gray-100",
+                labelClickable && !disabled && "rst:cursor-pointer",
                 disabled && "rst:opacity-50",
               )}
             >

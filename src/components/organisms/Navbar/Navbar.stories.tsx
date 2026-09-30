@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within } from "storybook/test";
 import { Navbar, type NavbarProps } from "./Navbar";
 import { Badge } from "../../atoms/Badge/Badge";
 
@@ -216,6 +217,40 @@ export const DefaultTheme: Story = {
           "The **Default** variant is the true baseline. It uses pure white in light mode and deep `gray-950` in dark mode to blend perfectly into the application background. **Click the user avatar in this interactive story** to test the fully functional theme toggle switch.",
       },
     },
+  },
+};
+
+/**
+ * The theme row in the user menu is the control, and the `xs` switch inside
+ * it only shows the state: it is `pointer-events-none`, so its 44px target is
+ * too, and a click anywhere on the row, the switch included, toggles once.
+ */
+export const ThemeToggleRow: Story = {
+  args: { ...DefaultTheme.args },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole("button", { name: /user menu/i }));
+    const page = within(document.body);
+    /* The row is whatever holds both the words and the switch. Its role is
+       Headless UI's to set, so it is found by structure rather than role. */
+    const label = await page.findByText("Dark Mode");
+    const menu = label.closest('[role="menu"]') as HTMLElement;
+    const track = within(menu).getByRole("switch");
+    let row = label as HTMLElement;
+    while (!row.contains(track)) row = row.parentElement!;
+
+    const r = track.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    for (const [dx, dy] of [[0, 0], [0, -10], [0, 10]]) {
+      const hit = document.elementFromPoint(cx + dx, cy + dy);
+      await expect(hit?.closest('[role="switch"]')).toBeNull();
+      await expect(row.contains(hit)).toBe(true);
+    }
+
+    await expect(canvasElement.querySelector(".dark")).toBeNull();
+    await userEvent.click(row);
+    await expect(canvasElement.querySelector(".dark")).not.toBeNull();
   },
 };
 

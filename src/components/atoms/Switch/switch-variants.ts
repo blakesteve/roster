@@ -1,7 +1,26 @@
 import { cva } from "class-variance-authority";
 
+/* The 44px target is a `before:` pseudo-element on the track, the way
+   Checkbox's is, and for the same reasons: the track IS the visible control,
+   so padding would grow it, and a pseudo-element takes no layout.
+
+   Sized and centered, never inset. The track has `border-2`, and an absolutely
+   positioned pseudo-element resolves `inset` against its originator's padding
+   box, so an inset measured off the outer size lands 4px short. `size-11`
+   states the 44 the rule is about, at every size.
+
+   What it asks of the layout. The target overhangs the track, and it is
+   positioned, so it wins any overlap with a non-positioned neighbor, before
+   or after it; between two switches the later one wins. In a stacked list of
+   one-line rows, keep 10px between rows at `xs` and `md`, 12px at `sm` and 8px
+   at `lg` for each track to stay its own, and 24px at `xs` and `sm`, 20px at
+   `md` and 16px at `lg` for every target to stay 44px. (`xs` needs more than
+   twice its figure because its 16px track sits in a 20px row.) An ancestor with `overflow: hidden` clips the overhang, because
+   clipping applies to hit testing, not only to painting. And `className`
+   lands on the wrapper, not the track, so `pointer-events-none` there turns
+   the target off by inheritance, which is how Navbar's theme rows work. */
 export const switchTrackVariants = /* @__PURE__ */ cva(
-  "rst:font-ui rst:group rst:relative rst:inline-flex rst:shrink-0 rst:cursor-pointer rst:rounded-full rst:border-2 rst:border-transparent rst:transition-colors rst:duration-200 rst:ease-in-out rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:ring-offset-background rst:disabled:cursor-not-allowed rst:disabled:opacity-50",
+  "rst:before:absolute rst:before:top-1/2 rst:before:left-1/2 rst:before:size-11 rst:before:-translate-x-1/2 rst:before:-translate-y-1/2 rst:before:content-[''] rst:font-ui rst:group rst:relative rst:inline-flex rst:shrink-0 rst:cursor-pointer rst:rounded-full rst:border-2 rst:border-transparent rst:transition-colors rst:duration-200 rst:ease-in-out rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-offset-2 rst:ring-offset-background rst:disabled:cursor-not-allowed rst:disabled:opacity-50",
   {
     variants: {
       variant: {

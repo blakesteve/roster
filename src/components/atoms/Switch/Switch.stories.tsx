@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, within } from "storybook/test";
 import { Switch, type SwitchProps } from "./Switch";
 
 const meta = {
@@ -13,6 +14,10 @@ const meta = {
 ### The Binary Toggle
 
 The **Switch** component is used to toggle a single setting on or off **immediately**. 
+
+**The label and the track are the control.** Clicking the label toggles the switch, as clicking any control's label does. Pass \`labelClickable={false}\` when an ancestor already has a click handler that toggles: with both, one click on the label reaches that handler twice.
+
+**Every size is a 44x44 target**, centered on the track, without changing the track's size. It overhangs the track, so it needs room: in a stacked list of one-line rows, 10px between rows at \`xs\` and \`md\`, 12px at \`sm\`, 8px at \`lg\`, or the target takes clicks meant for the neighbor. For every row's full 44px: 24px at \`xs\` and \`sm\`, 20px at \`md\`, 16px at \`lg\`. An ancestor with \`overflow: hidden\` clips the overhang.
 
 **UX Best Practices:**
 * **Use a Switch** for "Activation" (e.g., Airplane Mode, Dark Mode). The action should take effect immediately.
@@ -42,6 +47,15 @@ The **Switch** component is used to toggle a single setting on or off **immediat
       control: "boolean",
       description: "The state of the switch (controlled).",
     },
+    label: { control: "text", description: "Visible label; clicking it toggles the switch." },
+    description: { control: "text", description: "Secondary text under the label." },
+    labelClickable: {
+      control: "boolean",
+      description:
+        "Whether clicking the label toggles. Turn off when an ancestor already toggles on click.",
+      table: { defaultValue: { summary: "true" } },
+    },
+    ariaLabel: { control: "text", description: "Accessible name when there is no visible label." },
   },
 } satisfies Meta<typeof Switch>;
 
@@ -152,4 +166,102 @@ export const Disabled: Story = {
     disabled: true,
   },
   render: (args) => <SwitchWithState {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const control = canvas.getByRole("switch", { name: "Enforced Setting" });
+    await userEvent.click(canvas.getByText("Enforced Setting"));
+    await expect(control).toHaveAttribute("aria-checked", "true");
+    await expect(control).toBeDisabled();
+  },
 };
+
+/**
+ * 44x44 at every size, centered on the track. Measured: a point 21px from the
+ * track's center toggles it in all four directions, and 23px above or below
+ * does not.
+ */
+export const TargetSize: Story = {
+  render: () => (
+    <div className="rst:flex rst:items-center rst:gap-12 rst:p-8">
+      {(["xs", "sm", "md", "lg"] as const).map((size) => (
+        <SwitchWithState key={size} size={size} ariaLabel={`Size ${size}`} checked={false} />
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    for (const el of within(canvasElement).getAllByRole("switch")) {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const at = (x: number, y: number) => document.elementFromPoint(x, y)?.closest('[role="switch"]');
+      for (const [dx, dy] of [[0, -21], [0, 21], [-21, 0], [21, 0]]) {
+        await expect(at(cx + dx, cy + dy)).toBe(el);
+      }
+      for (const [dx, dy] of [[0, -23], [0, 23]]) {
+        await expect(at(cx + dx, cy + dy)).not.toBe(el);
+      }
+    }
+  },
+  parameters: { controls: { disable: true } },
+};
+
+/**
+ * Clicking the label toggles the switch.
+ */
+export const ClickableLabel: Story = {
+  args: { label: "Show seconds", checked: false },
+  render: (args) => <SwitchWithState {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const control = canvas.getByRole("switch", { name: "Show seconds" });
+    await expect(control).toHaveAttribute("aria-checked", "false");
+    await userEvent.click(canvas.getByText("Show seconds"));
+    await expect(control).toHaveAttribute("aria-checked", "true");
+  },
+};
+
+/**
+ * A settings list. At \`gap-3\` (12px) every track is its own at every size:
+ * a point just inside a track's top or bottom edge toggles that switch, not
+ * its neighbor.
+ */
+export const StackedList: Story = {
+  render: () => (
+    <div className="rst:flex rst:w-72 rst:flex-col rst:gap-3">
+      {(["xs", "sm", "md", "lg"] as const).flatMap((size) =>
+        [1, 2].map((n) => (
+          <SwitchWithState key={`${size}-${n}`} size={size} label={`Setting ${size} ${n}`} checked={false} />
+        )),
+      )}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    for (const el of within(canvasElement).getAllByRole("switch")) {
+      const r = el.getBoundingClientRect();
+      const x = r.left + r.width / 2;
+      const at = (y: number) => document.elementFromPoint(x, y)?.closest('[role="switch"]');
+      await expect(at(r.top + 1)).toBe(el);
+      await expect(at(r.bottom - 1)).toBe(el);
+    }
+  },
+  parameters: { controls: { disable: true } },
+};
+
+/**
+ * `labelClickable={false}`: the label names the switch but does not toggle it.
+ * Only the track does.
+ */
+export const LabelNotClickable: Story = {
+  args: { label: "Show seconds", checked: false, labelClickable: false },
+  render: (args) => <SwitchWithState {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const control = canvas.getByRole("switch", { name: "Show seconds" });
+    await userEvent.click(canvas.getByText("Show seconds"));
+    await expect(control).toHaveAttribute("aria-checked", "false");
+    await userEvent.click(control);
+    await expect(control).toHaveAttribute("aria-checked", "true");
+  },
+};
+
+

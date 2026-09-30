@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Accordion } from "./Accordion";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Button } from "../../atoms/Button/Button";
@@ -135,6 +136,24 @@ export const Default: Story = {
   args: {
     items: basicItems,
     variant: "soft",
+  },
+  play: async ({ canvasElement }) => {
+    /* Rendered twice, light and dark; this works on the first. Single-open:
+       opening a second section closes the first, and each trigger names its
+       own panel only while that panel exists. */
+    const buttons = within(canvasElement).getAllByRole("button").slice(0, basicItems.length);
+    const [one, two] = buttons;
+    await userEvent.click(one);
+    const idOne = one.getAttribute("aria-controls")!;
+    await expect(document.getElementById(idOne)).not.toBeNull();
+
+    await userEvent.click(two);
+    const idTwo = two.getAttribute("aria-controls")!;
+    await expect(idTwo).not.toBe(idOne);
+    await expect(document.getElementById(idTwo)).not.toBeNull();
+    await expect(one).toHaveAttribute("aria-expanded", "false");
+    await waitFor(() => expect(one).not.toHaveAttribute("aria-controls"));
+    await expect(document.getElementById(idOne)).toBeNull();
   },
 };
 

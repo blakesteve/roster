@@ -77,4 +77,24 @@ describe("Accordion Molecule", () => {
     expect(btn2).toHaveAttribute("aria-expanded", "false");
     expect(btn3).toHaveAttribute("aria-expanded", "true");
   });
+
+  it("wires each trigger to its own panel while open, and only then", async () => {
+    /* Accordion is built on Disclosure, so this is Disclosure's aria-controls
+       seen through it: single-open, so opening one closes another. */
+    render(<Accordion items={items} />);
+    const btn1 = screen.getByRole("button", { name: /section 1/i });
+    const btn2 = screen.getByRole("button", { name: /section 2/i });
+
+    fireEvent.click(btn1);
+    const id1 = btn1.getAttribute("aria-controls");
+    expect(document.getElementById(id1!)).toHaveTextContent("Content 1");
+
+    fireEvent.click(btn2);
+    const id2 = btn2.getAttribute("aria-controls");
+    expect(id2).not.toBe(id1);
+    expect(document.getElementById(id2!)).toHaveTextContent("Content 2");
+
+    await waitFor(() => expect(btn1).not.toHaveAttribute("aria-controls"));
+    expect(btn2).toHaveAttribute("aria-controls", id2!);
+  });
 });
