@@ -1,16 +1,16 @@
-import { Fragment, type ReactNode } from "react";
+import { Fragment, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import {
   Dialog as HeadlessDialog,
   DialogPanel,
   DialogTitle,
   DialogBackdrop,
-  Transition,
   TransitionChild,
 } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { lockPage } from "../../../internal/page-inert";
 
 const dialogVariants = /* @__PURE__ */ cva(
   "rst:relative rst:w-full rst:transform rst:overflow-hidden rst:rounded-2xl rst:p-6 rst:text-left rst:align-middle rst:elevation-overlay rst:transition-all rst:border",
@@ -139,9 +139,52 @@ const Dialog = ({
   children,
   className,
 }: DialogProps) => {
+  /* `open` goes to Headless UI's Dialog itself. It used to come from an outer
+     `<Transition show={isOpen}>`, and wrapped that way Headless UI 2.2.9 marks
+     nothing behind the dialog `inert` or `aria-hidden`: the focus trap held,
+     but a screen reader's virtual cursor could walk out onto the page. The
+     helper Headless UI uses to find the page is mounted by `Dialog`; under an
+     outer Transition it mounted only as the dialog opened, too late for the
+     code that makes the page inert.
+
+     `mounted` keeps a dialog that is open on its first render closed for that
+     one render, and opens it in a layout effect, before anything is painted.
+     To Headless UI that is an ordinary open, so it animates in the way the
+     outer Transition's `appear` used to make it. Without it, Headless UI paints
+     the dialog at rest first and starts the enter a frame later, a visible
+     flicker; and the page-finding helper again resolves too late in React's
+     StrictMode. A layout effect, not an ordinary effect or a frame, so the
+     dialog is in the document as soon as the render that opened it is done. */
+  const [mounted, setMounted] = useState(false);
+  useLayoutEffect(() => {
+    /* The one extra render is the point: it is what turns the first render's
+       open into a closed-to-open change Headless UI animates. */
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a one-time mount signal, before paint
+    setMounted(true);
+  }, []);
+  const open = isOpen && mounted;
+
+  /* Headless UI marks only the part of the page the dialog is written in;
+     `lockPage` marks the rest, so a header or footer beside it is not left
+     reachable, and a toast is. The span is where the dialog is written, which
+     is how `lockPage` finds the part to leave to Headless UI. Rendered only
+     while open, so a closed dialog still leaves nothing in the page. A layout
+     effect, so the page is never painted open and live. */
+  const anchorRef = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    if (!open) return;
+    return lockPage(anchorRef.current);
+  }, [open]);
+
   return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <HeadlessDialog as="div" className="rst:font-ui rst:relative rst:z-50" onClose={onClose}>
+    <>
+      {open && <span ref={anchorRef} hidden />}
+      <HeadlessDialog
+        open={open}
+        as="div"
+        className="rst:font-ui rst:relative rst:z-50"
+        onClose={onClose}
+      >
         <TransitionChild
           as={Fragment}
           enter="rst:ease-out rst:duration-300"
@@ -205,7 +248,7 @@ const Dialog = ({
           </div>
         </div>
       </HeadlessDialog>
-    </Transition>
+    </>
   );
 };
 

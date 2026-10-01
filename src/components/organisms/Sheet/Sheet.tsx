@@ -10,6 +10,7 @@ import {
 import { cn } from "../../../lib/utils";
 import { useDarkScope } from "../../../internal/popup";
 import { useReducedMotion } from "../../../internal/motion";
+import { lockPage } from "../../../internal/page-inert";
 import {
   exceedsSheetTapSlop,
   sheetDragOutcome,
@@ -176,14 +177,17 @@ type DragState = {
  * is a sibling of the scroller rather than sticky inside it, so it can never
  * cover the element that has focus.
  *
- * Built on Headless UI's `Dialog`, so the focus trap, `inert` on the rest of
- * the page, Escape and the scroll lock are its. The scroll lock pads `<html>`
+ * Built on Headless UI's `Dialog`, so the focus trap, Escape and the scroll
+ * lock are its. The rest of the page is made `inert` and `aria-hidden` by
+ * Headless UI and Roster together, every child of `<body>` but the dialog
+ * layer and the toast host. The scroll lock pads `<html>`
  * for the scrollbar it hides; a fixed element elsewhere on the page can still
  * shift by that width.
  *
  * Renders an empty `<span hidden>` where it is placed, to find out whether it
- * sits inside a scoped `.dark` subtree. The sheet itself is portaled to
- * `<body>`, so it could not tell otherwise.
+ * sits inside a scoped `.dark` subtree and which part of the page it was
+ * opened from. The sheet itself is portaled to `<body>`, so it could not tell
+ * otherwise.
  *
  * The bottom padding includes `env(safe-area-inset-bottom)`, which is 0 unless
  * the page's viewport meta sets `viewport-fit=cover`.
@@ -207,6 +211,15 @@ const Sheet = ({
 }: SheetProps) => {
   const { ref: scopeRef, inDarkScope } = useDarkScope<HTMLSpanElement>();
   const reducedMotion = useReducedMotion();
+
+  /* Headless UI marks only the part of the page the sheet is written in;
+     `lockPage` marks the rest, the header and footer beside it, and leaves the
+     toast host live. The scope span is where the sheet is written, which is
+     how it finds the part to leave to Headless UI. */
+  React.useLayoutEffect(() => {
+    if (!isOpen) return;
+    return lockPage(scopeRef.current);
+  }, [isOpen, scopeRef]);
 
   const panelRef = React.useRef<HTMLDivElement>(null);
   const handleRef = React.useRef<HTMLDivElement>(null);

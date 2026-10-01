@@ -5,7 +5,11 @@ import {
   type ToasterProps as HotToasterProps,
   type Toast as HotToast,
 } from "react-hot-toast";
+import { useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { Toast } from "./Toast";
+import { useDarkScope } from "../../../internal/popup";
+import { TOASTER_MARKER } from "../../../internal/page-inert";
 import { Spinner } from "../../atoms/Spinner/Spinner";
 import { TONE_PREFIX } from "./toast-api";
 import type { ToastProps } from "./Toast";
@@ -41,6 +45,13 @@ export interface ToasterProps
  * someone else's markup. That is what lets `Toast` be tested and viewed on its
  * own, and what lets a toast carry a title, a dismiss control and the popover
  * tokens.
+ *
+ * Rendered into `<body>` rather than where it is placed, carrying
+ * `data-roster-toaster`. An open `Dialog` or `Sheet` makes every other child of
+ * `<body>` inert and hidden from assistive technology, and a toast host inside
+ * one of them would go silent with it: a "Saved" or a failure fired from the
+ * dialog would be shown and never announced. Where it is placed, it leaves an
+ * empty `<span hidden>`, which is how it carries a scoped `.dark` across.
  */
 export function Toaster({
   position = "bottom-right",
@@ -51,7 +62,12 @@ export function Toaster({
   reverseOrder,
   containerClassName,
 }: ToasterProps) {
-  return (
+  const { ref: scopeRef, inDarkScope } = useDarkScope<HTMLSpanElement>();
+  /* Nothing on the server or during hydration, which has no `<body>` to
+     render into and must match the server; the host mounts right after. */
+  const onClient = useSyncExternalStore(noSubscribe, isClient, isServer);
+
+  const queue = (
     <HotToaster
       position={position}
       gutter={gutter}
@@ -119,7 +135,30 @@ export function Toaster({
       }}
     </HotToaster>
   );
+
+  return (
+    <>
+      <span ref={scopeRef} hidden />
+      {onClient &&
+        createPortal(
+          /* `display: contents`, so the wrapper adds no box to `<body>`: the
+             queue inside is `position: fixed` and lays itself out. */
+          <div
+            {...TOASTER_MARKER}
+            className={inDarkScope ? "dark" : undefined}
+            style={{ display: "contents" }}
+          >
+            {queue}
+          </div>,
+          document.body,
+        )}
+    </>
+  );
 }
+
+const noSubscribe = () => () => {};
+const isClient = () => true;
+const isServer = () => false;
 
 const TONES = ["info", "warning"] as const;
 const MARKED_SCHEME = {

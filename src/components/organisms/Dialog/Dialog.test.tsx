@@ -1,6 +1,11 @@
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { StrictMode, useState } from "react";
+import { render, screen, fireEvent, cleanup, waitFor, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { Dialog } from "./Dialog";
+import { Toaster } from "../../molecules/Toast/Toaster";
+import { toast } from "../../molecules/Toast/toast-api";
+import { pageRegions, hiddenFromAssistiveTech } from "../../../test/page-regions";
 
 // Headless UI requires ResizeObserver, which JSDOM lacks
 class ResizeObserverMock {
@@ -199,6 +204,141 @@ describe("Dialog Component", () => {
       expect(screen.getByLabelText("Close dialog")).toHaveClass(
         "rst:cursor-pointer",
       );
+    });
+  });
+
+  describe("the page behind it", () => {
+    function Harness() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <button onClick={() => setOpen(true)}>Open</button>
+          <Dialog isOpen={open} onClose={() => setOpen(false)} title="Test Dialog">
+            <p>Body</p>
+          </Dialog>
+        </>
+      );
+    }
+
+    it("is inert while the dialog is open, and only then", async () => {
+      /* Headless UI sets the `inert` PROPERTY, which a browser reflects to the
+         attribute and jsdom does not, so this reads the property. The Dialog
+         stories check the attribute in a real browser. */
+      const { container } = render(<Harness />);
+      const inert = () => (container as HTMLElement & { inert?: boolean }).inert;
+      expect(inert()).toBeFalsy();
+      await userEvent.click(screen.getByText("Open"));
+      await screen.findByRole("dialog");
+      await waitFor(() => expect(inert()).toBe(true));
+      expect(container).toHaveAttribute("aria-hidden", "true");
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() => expect(inert()).toBeFalsy());
+      expect(container).not.toHaveAttribute("aria-hidden");
+    });
+
+    it("marks the header and footer beside it too, and restores them after", async () => {
+      /* Headless UI marks only the body child the dialog is rendered from,
+         here `<main>`. A header and footer beside it stayed reachable. */
+      const page = pageRegions();
+      try {
+        render(<Harness />, { container: page.main });
+        await userEvent.click(screen.getByText("Open"));
+        await screen.findByRole("dialog");
+        await waitFor(() => expect(hiddenFromAssistiveTech(page.main)).toBe(true));
+        expect(hiddenFromAssistiveTech(page.header)).toBe(true);
+        expect(hiddenFromAssistiveTech(page.footer)).toBe(true);
+        expect(hiddenFromAssistiveTech(screen.getByRole("dialog"))).toBe(false);
+
+        await userEvent.keyboard("{Escape}");
+        await waitFor(() => expect(hiddenFromAssistiveTech(page.main)).toBe(false));
+        for (const el of [page.header, page.footer]) {
+          expect(hiddenFromAssistiveTech(el)).toBe(false);
+          expect(el).not.toHaveAttribute("aria-hidden");
+        }
+      } finally {
+        page.remove();
+      }
+    });
+
+    it.each([
+      ["while open", false],
+      ["part-way through closing", true],
+    ])("gives the whole page back when unmounted %s", async (_, closeFirst) => {
+      /* A route change unmounts a dialog without closing it. Headless UI and
+         Roster each mark part of the page, and if both marked the same
+         element the one restoring second would put back the other's inert. */
+      const page = pageRegions();
+      try {
+        const { unmount } = render(<Harness />, { container: page.main });
+        await userEvent.click(screen.getByText("Open"));
+        await screen.findByRole("dialog");
+        await waitFor(() => expect(hiddenFromAssistiveTech(page.main)).toBe(true));
+        await waitFor(() => expect(hiddenFromAssistiveTech(page.header)).toBe(true));
+        if (closeFirst) await userEvent.keyboard("{Escape}");
+        unmount();
+        await waitFor(() => {
+          for (const el of [page.header, page.main, page.footer]) {
+            expect(hiddenFromAssistiveTech(el)).toBe(false);
+          }
+        });
+      } finally {
+        page.remove();
+      }
+    });
+
+    it("leaves a toast fired over it announced", async () => {
+      /* The toast host was inside the region Headless UI marks, so a "Saved"
+         fired from the dialog was shown and never read out. */
+      render(
+        <>
+          <Toaster />
+          <Harness />
+        </>,
+      );
+      await userEvent.click(screen.getByText("Open"));
+      await screen.findByRole("dialog");
+      await act(async () => {
+        toast.error("Could not save");
+      });
+      const message = await screen.findByText("Could not save");
+      expect(hiddenFromAssistiveTech(message)).toBe(false);
+      expect(message.closest("[data-roster-toaster]")).not.toBeNull();
+      act(() => toast.remove());
+    });
+
+    it("gives focus back to whatever opened it", async () => {
+      render(<Harness />);
+      const opener = screen.getByText("Open");
+      await userEvent.click(opener);
+      const dialog = await screen.findByRole("dialog");
+      await waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true));
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() => expect(opener).toHaveFocus());
+    });
+  });
+
+  describe("a dialog open on its first render", () => {
+    it("is in the document as soon as the render is done, not a frame later", () => {
+      /* Synchronous on purpose: consumers' tests render an open Dialog and
+         query it straight away. */
+      render(<Dialog {...defaultProps} />);
+      expect(screen.getByRole("dialog")).toHaveAccessibleName("Test Dialog");
+      expect(screen.getByLabelText("Close dialog")).toBeInTheDocument();
+    });
+
+    it("makes the page inert and takes focus, under StrictMode too", async () => {
+      /* StrictMode mounts twice in development; before the mount gate, the
+         helper Headless UI uses to find the page resolved too late there. */
+      const { container } = render(
+        <StrictMode>
+          <button>Behind</button>
+          <Dialog {...defaultProps} />
+        </StrictMode>,
+      );
+      const inert = () => (container as HTMLElement & { inert?: boolean }).inert;
+      await waitFor(() => expect(inert()).toBe(true));
+      const dialog = screen.getByRole("dialog");
+      await waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true));
     });
   });
 });

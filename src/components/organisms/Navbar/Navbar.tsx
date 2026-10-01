@@ -23,8 +23,41 @@ import { Button } from "../../atoms/Button/Button";
 import { Link } from "../../atoms/Link/Link";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Avatar } from "../../atoms/Avatar/Avatar";
-import { Switch } from "../../atoms/Switch/Switch";
+import { switchThumbVariants, switchTrackVariants } from "../../atoms/Switch/switch-variants";
 import { navbarVariants } from "./navbar-variants";
+
+/**
+ * The theme rows' switch, drawn and nothing else.
+ *
+ * Each theme row is itself the control, so the track must not be one too: a
+ * real `Switch` here was a second tab stop nested inside the row, named
+ * "Toggle setting". This renders the same track and thumb from the same
+ * variants, hidden from assistive technology, with no focus and no pointer
+ * target of its own.
+ */
+function ThemeTrack({ on, size }: { on: boolean; size: "xs" | "sm" }) {
+  return (
+    <span
+      aria-hidden="true"
+      data-testid="navbar-theme-track"
+      data-checked={on ? "" : undefined}
+      className={cn(switchTrackVariants({ size, variant: "neutral" }), "rst:pointer-events-none")}
+    >
+      <span className={cn(switchThumbVariants({ size }))} />
+    </span>
+  );
+}
+
+/* Headless UI's `MenuItem` writes `role="menuitem"` over whatever role its
+   element is given, and has no checkbox item. An on/off row in a menu is a
+   `menuitemcheckbox` (a `switch` is not a valid child of `role="menu"`), so
+   the role is set on the element once it mounts. It stays: React writes an
+   attribute only when its prop changes, and `MenuItem` passes the same
+   "menuitem" every render. Headless UI finds its items by id and their text,
+   never by role, so arrows, Home, End and typeahead still reach the row. */
+const asMenuItemCheckbox = (el: HTMLElement | null) => {
+  el?.setAttribute("role", "menuitemcheckbox");
+};
 
 /**
  * Content for a consumer-supplied slot. Pass a plain node, or a function that
@@ -410,23 +443,21 @@ const Navbar = ({
                         {onThemeToggle && (
                           <MenuItem>
                             {({ focus }) => (
+                              /* The row is the control. Headless UI keeps
+                                 focus on the menu and clicks the active item
+                                 on Enter or Space, so the row needs no key
+                                 handler of its own. */
                               <div
+                                ref={asMenuItemCheckbox}
+                                aria-checked={isDarkMode}
                                 onClick={(e) => {
                                   e.preventDefault();
                                   onThemeToggle();
                                 }}
-                                role="button"
-                                tabIndex={0}
                                 className={cn(
                                   "rst:flex rst:w-full rst:items-center rst:justify-between rst:px-4 rst:py-2 rst:text-sm rst:text-gray-700 rst:dark:text-gray-200 rst:cursor-pointer rst:transition-colors",
                                   focus && "rst:bg-gray-50 rst:dark:bg-gray-700",
                                 )}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" || e.key === " ") {
-                                    e.preventDefault();
-                                    onThemeToggle();
-                                  }
-                                }}
                               >
                                 <div className="rst:flex rst:items-center rst:gap-2">
                                   <FontAwesomeIcon
@@ -440,13 +471,7 @@ const Navbar = ({
                                   />
                                   <span className="rst:font-medium">Dark Mode</span>
                                 </div>
-                                <Switch
-                                  checked={isDarkMode}
-                                  onChange={() => {}}
-                                  size="xs"
-                                  variant="neutral"
-                                  className="rst:pointer-events-none rst:m-0"
-                                />
+                                <ThemeTrack on={isDarkMode} size="xs" />
                               </div>
                             )}
                           </MenuItem>
@@ -717,14 +742,20 @@ const Navbar = ({
 
                         {/* THEME TOGGLE (MOBILE) */}
                         {onThemeToggle && (
+                          /* The row is the switch: one tab stop, its
+                             state in `aria-checked`, its name from its text. */
                           <div
                             onClick={(e) => {
                               e.preventDefault();
                               onThemeToggle();
                             }}
-                            role="button"
+                            role="switch"
+                            aria-checked={isDarkMode}
                             tabIndex={0}
                             onKeyDown={(e) => {
+                              /* Held down, a key repeats; a switch toggles
+                                 once per press, as a native one does. */
+                              if (e.repeat) return;
                               if (e.key === "Enter" || e.key === " ") {
                                 e.preventDefault();
                                 onThemeToggle();
@@ -742,13 +773,7 @@ const Navbar = ({
                               />
                               <span>Dark Mode</span>
                             </div>
-                            <Switch
-                              checked={isDarkMode}
-                              onChange={() => {}}
-                              size="sm"
-                              variant="neutral"
-                              className="rst:pointer-events-none rst:m-0"
-                            />
+                            <ThemeTrack on={isDarkMode} size="sm" />
                           </div>
                         )}
 
