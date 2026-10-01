@@ -1,4 +1,4 @@
-import { Fragment, useLayoutEffect, useState, type ReactNode } from "react";
+import { Fragment, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import {
   Dialog as HeadlessDialog,
   DialogPanel,
@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { lockPage } from "../../../internal/page-inert";
 
 const dialogVariants = /* @__PURE__ */ cva(
   "rst:relative rst:w-full rst:transform rst:overflow-hidden rst:rounded-2xl rst:p-6 rst:text-left rst:align-middle rst:elevation-overlay rst:transition-all rst:border",
@@ -161,77 +162,93 @@ const Dialog = ({
     // eslint-disable-next-line react-hooks/set-state-in-effect -- a one-time mount signal, before paint
     setMounted(true);
   }, []);
+  const open = isOpen && mounted;
+
+  /* Headless UI marks only the part of the page the dialog is written in;
+     `lockPage` marks the rest, so a header or footer beside it is not left
+     reachable, and a toast is. The span is where the dialog is written, which
+     is how `lockPage` finds the part to leave to Headless UI. Rendered only
+     while open, so a closed dialog still leaves nothing in the page. A layout
+     effect, so the page is never painted open and live. */
+  const anchorRef = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    if (!open) return;
+    return lockPage(anchorRef.current);
+  }, [open]);
 
   return (
-    <HeadlessDialog
-      open={isOpen && mounted}
-      as="div"
-      className="rst:font-ui rst:relative rst:z-50"
-      onClose={onClose}
-    >
-      <TransitionChild
-        as={Fragment}
-        enter="rst:ease-out rst:duration-300"
-        enterFrom="rst:opacity-0"
-        enterTo="rst:opacity-100"
-        leave="rst:ease-in rst:duration-200"
-        leaveFrom="rst:opacity-100"
-        leaveTo="rst:opacity-0"
+    <>
+      {open && <span ref={anchorRef} hidden />}
+      <HeadlessDialog
+        open={open}
+        as="div"
+        className="rst:font-ui rst:relative rst:z-50"
+        onClose={onClose}
       >
-        <DialogBackdrop
-          className={cn(
-            "rst:fixed rst:inset-0 rst:transition-opacity",
-            variant === "glass"
-              ? "rst:bg-slate-900/40 rst:dark:bg-black/60"
-              : "rst:bg-slate-900/60 rst:dark:bg-black/80 rst:backdrop-blur-sm",
-          )}
-        />
-      </TransitionChild>
-      <div className="rst:fixed rst:inset-0 rst:overflow-y-auto">
-        <div className="rst:flex rst:min-h-full rst:items-center rst:justify-center rst:p-4 rst:text-center">
-          <TransitionChild
-            as={Fragment}
-            enter="rst:ease-out rst:duration-300"
-            enterFrom="rst:opacity-0 rst:scale-95"
-            enterTo="rst:opacity-100 rst:scale-100"
-            leave="rst:ease-in rst:duration-200"
-            leaveFrom="rst:opacity-100 rst:scale-100"
-            leaveTo="rst:opacity-0 rst:scale-95"
-          >
-            <DialogPanel
-              className={cn(
-                dialogVariants({ size, variant, status }),
-                className,
-              )}
+        <TransitionChild
+          as={Fragment}
+          enter="rst:ease-out rst:duration-300"
+          enterFrom="rst:opacity-0"
+          enterTo="rst:opacity-100"
+          leave="rst:ease-in rst:duration-200"
+          leaveFrom="rst:opacity-100"
+          leaveTo="rst:opacity-0"
+        >
+          <DialogBackdrop
+            className={cn(
+              "rst:fixed rst:inset-0 rst:transition-opacity",
+              variant === "glass"
+                ? "rst:bg-slate-900/40 rst:dark:bg-black/60"
+                : "rst:bg-slate-900/60 rst:dark:bg-black/80 rst:backdrop-blur-sm",
+            )}
+          />
+        </TransitionChild>
+        <div className="rst:fixed rst:inset-0 rst:overflow-y-auto">
+          <div className="rst:flex rst:min-h-full rst:items-center rst:justify-center rst:p-4 rst:text-center">
+            <TransitionChild
+              as={Fragment}
+              enter="rst:ease-out rst:duration-300"
+              enterFrom="rst:opacity-0 rst:scale-95"
+              enterTo="rst:opacity-100 rst:scale-100"
+              leave="rst:ease-in rst:duration-200"
+              leaveFrom="rst:opacity-100 rst:scale-100"
+              leaveTo="rst:opacity-0 rst:scale-95"
             >
-              <div className="rst:flex rst:items-start rst:justify-between">
-                <div>
-                  <DialogTitle as="h2" className={cn(titleVariants())}>
-                    {title}
-                  </DialogTitle>
-                  {description && (
-                    <p className={cn(descriptionVariants())}>{description}</p>
-                  )}
+              <DialogPanel
+                className={cn(
+                  dialogVariants({ size, variant, status }),
+                  className,
+                )}
+              >
+                <div className="rst:flex rst:items-start rst:justify-between">
+                  <div>
+                    <DialogTitle as="h2" className={cn(titleVariants())}>
+                      {title}
+                    </DialogTitle>
+                    {description && (
+                      <p className={cn(descriptionVariants())}>{description}</p>
+                    )}
+                  </div>
+
+                  <div className="rst:ml-4 rst:flex rst:shrink-0">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className={cn(closeVariants())}
+                      aria-label="Close dialog"
+                    >
+                      <FontAwesomeIcon icon={faXmark} className="rst:h-5 rst:w-5" />
+                    </button>
+                  </div>
                 </div>
 
-                <div className="rst:ml-4 rst:flex rst:shrink-0">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className={cn(closeVariants())}
-                    aria-label="Close dialog"
-                  >
-                    <FontAwesomeIcon icon={faXmark} className="rst:h-5 rst:w-5" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="rst:mt-6">{children}</div>
-            </DialogPanel>
-          </TransitionChild>
+                <div className="rst:mt-6">{children}</div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
         </div>
-      </div>
-    </HeadlessDialog>
+      </HeadlessDialog>
+    </>
   );
 };
 

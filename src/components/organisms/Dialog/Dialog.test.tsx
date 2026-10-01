@@ -1,8 +1,11 @@
 import { StrictMode, useState } from "react";
-import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { Dialog } from "./Dialog";
+import { Toaster } from "../../molecules/Toast/Toaster";
+import { toast } from "../../molecules/Toast/toast-api";
+import { pageRegions, hiddenFromAssistiveTech } from "../../../test/page-regions";
 
 // Headless UI requires ResizeObserver, which JSDOM lacks
 class ResizeObserverMock {
@@ -231,6 +234,76 @@ describe("Dialog Component", () => {
       await userEvent.keyboard("{Escape}");
       await waitFor(() => expect(inert()).toBeFalsy());
       expect(container).not.toHaveAttribute("aria-hidden");
+    });
+
+    it("marks the header and footer beside it too, and restores them after", async () => {
+      /* Headless UI marks only the body child the dialog is rendered from,
+         here `<main>`. A header and footer beside it stayed reachable. */
+      const page = pageRegions();
+      try {
+        render(<Harness />, { container: page.main });
+        await userEvent.click(screen.getByText("Open"));
+        await screen.findByRole("dialog");
+        await waitFor(() => expect(hiddenFromAssistiveTech(page.main)).toBe(true));
+        expect(hiddenFromAssistiveTech(page.header)).toBe(true);
+        expect(hiddenFromAssistiveTech(page.footer)).toBe(true);
+        expect(hiddenFromAssistiveTech(screen.getByRole("dialog"))).toBe(false);
+
+        await userEvent.keyboard("{Escape}");
+        await waitFor(() => expect(hiddenFromAssistiveTech(page.main)).toBe(false));
+        for (const el of [page.header, page.footer]) {
+          expect(hiddenFromAssistiveTech(el)).toBe(false);
+          expect(el).not.toHaveAttribute("aria-hidden");
+        }
+      } finally {
+        page.remove();
+      }
+    });
+
+    it.each([
+      ["while open", false],
+      ["part-way through closing", true],
+    ])("gives the whole page back when unmounted %s", async (_, closeFirst) => {
+      /* A route change unmounts a dialog without closing it. Headless UI and
+         Roster each mark part of the page, and if both marked the same
+         element the one restoring second would put back the other's inert. */
+      const page = pageRegions();
+      try {
+        const { unmount } = render(<Harness />, { container: page.main });
+        await userEvent.click(screen.getByText("Open"));
+        await screen.findByRole("dialog");
+        await waitFor(() => expect(hiddenFromAssistiveTech(page.main)).toBe(true));
+        await waitFor(() => expect(hiddenFromAssistiveTech(page.header)).toBe(true));
+        if (closeFirst) await userEvent.keyboard("{Escape}");
+        unmount();
+        await waitFor(() => {
+          for (const el of [page.header, page.main, page.footer]) {
+            expect(hiddenFromAssistiveTech(el)).toBe(false);
+          }
+        });
+      } finally {
+        page.remove();
+      }
+    });
+
+    it("leaves a toast fired over it announced", async () => {
+      /* The toast host was inside the region Headless UI marks, so a "Saved"
+         fired from the dialog was shown and never read out. */
+      render(
+        <>
+          <Toaster />
+          <Harness />
+        </>,
+      );
+      await userEvent.click(screen.getByText("Open"));
+      await screen.findByRole("dialog");
+      await act(async () => {
+        toast.error("Could not save");
+      });
+      const message = await screen.findByText("Could not save");
+      expect(hiddenFromAssistiveTech(message)).toBe(false);
+      expect(message.closest("[data-roster-toaster]")).not.toBeNull();
+      act(() => toast.remove());
     });
 
     it("gives focus back to whatever opened it", async () => {

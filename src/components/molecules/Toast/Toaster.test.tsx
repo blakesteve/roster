@@ -138,6 +138,53 @@ describe("Toaster", () => {
     expect(await screen.findByText("PARTY")).toBeInTheDocument();
   });
 
+  describe("where it renders", () => {
+    it("renders into body, marked, not where it is placed", async () => {
+      /* An open Dialog or Sheet marks every child of body but this one, so a
+         host left inside the app's root went silent with the rest of it. */
+      const { container } = render(<Toaster />);
+      fire(() => toast.success("Saved"));
+      const message = await screen.findByText("Saved");
+
+      expect(container.contains(message)).toBe(false);
+      const host = message.closest("[data-roster-toaster]");
+      expect(host?.parentElement).toBe(document.body);
+    });
+
+    it("leaves only a hidden span where it is placed", () => {
+      const { container } = render(<Toaster />);
+      expect(container.children).toHaveLength(1);
+      expect(container.firstElementChild).toHaveProperty("hidden", true);
+    });
+
+    it("carries a scoped .dark across to the queue", async () => {
+      /* Rendered in place, the queue inherited a `.dark` subtree; rendered
+         into body, it has to be told. */
+      render(
+        <div className="dark">
+          <Toaster />
+        </div>,
+      );
+      fire(() => toast.success("Saved"));
+      const message = await screen.findByText("Saved");
+      expect(message.closest("[data-roster-toaster]")).toHaveClass("dark");
+    });
+
+    it("does not claim .dark outside a dark subtree", async () => {
+      render(<Toaster />);
+      fire(() => toast.success("Saved"));
+      const message = await screen.findByText("Saved");
+      expect(message.closest("[data-roster-toaster]")).not.toHaveClass("dark");
+    });
+
+    it("takes its host out of body when it unmounts", () => {
+      const { unmount } = render(<Toaster />);
+      expect(document.body.querySelectorAll("[data-roster-toaster]")).toHaveLength(1);
+      unmount();
+      expect(document.body.querySelectorAll("[data-roster-toaster]")).toHaveLength(0);
+    });
+  });
+
   it("can be told not to offer dismiss controls", async () => {
     render(<Toaster dismissible={false} />);
     fire(() => toast.success("Saved"));

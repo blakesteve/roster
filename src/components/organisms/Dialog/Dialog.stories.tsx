@@ -1,10 +1,14 @@
 import { useState } from "react";
+import { Dialog as HeadlessDialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Dialog, type DialogProps } from "./Dialog";
 import { Button } from "../../atoms/Button/Button";
 import { Input } from "../../atoms/Input/Input";
 import { Textarea } from "../../atoms/Textarea/Textarea";
+import { Toaster } from "../../molecules/Toast/Toaster";
+import { toast } from "../../molecules/Toast/toast-api";
+import { PageRegions } from "../../../test/PageRegions";
 
 const meta = {
   title: "Organisms/Dialog",
@@ -371,6 +375,159 @@ export const PageBehindIsInert: Story = {
     await waitFor(() => expect(page.queryByRole("dialog")).not.toBeInTheDocument());
     await expect(opener).toHaveFocus();
     await expect(opener.closest("[inert]")).toBeNull();
+  },
+  parameters: { controls: { disable: true } },
+};
+
+/**
+ * A page laid out as a header, a main and a footer, all children of `<body>`,
+ * with the toast host inside the main. While the dialog is open, all three are
+ * inert and hidden from a screen reader, and a toast fired from the dialog is
+ * still announced. On close, each gets back exactly what it had.
+ */
+export const PageAroundIsInert: Story = {
+  /* Kept off the docs page: it renders into `<body>`, so there it would land
+     below everything else. */
+  tags: ["!autodocs"],
+  args: { title: "Rename item", description: "Choose a new name.", children: null },
+  render: function Render(args) {
+    const [open, setOpen] = useState(false);
+    return (
+      <PageRegions>
+        <Toaster />
+        <Button onClick={() => setOpen(true)}>Open Dialog</Button>
+        <Dialog {...args} isOpen={open} onClose={() => setOpen(false)}>
+          <Button onClick={() => toast.success("Saved")}>Save</Button>
+        </Dialog>
+      </PageRegions>
+    );
+  },
+  play: async () => {
+    const header = page.getByTestId("page-header");
+    const main = page.getByTestId("page-main");
+    const footer = page.getByTestId("page-footer");
+    const hidden = "[inert], [aria-hidden='true']";
+    for (const region of [header, main, footer]) {
+      await expect(region.closest(hidden)).toBeNull();
+    }
+
+    await userEvent.click(page.getByRole("button", { name: "Open Dialog" }));
+    const dialog = await page.findByRole("dialog");
+    await waitFor(() => expect(main).toHaveAttribute("inert"));
+    for (const region of [header, footer]) {
+      await expect(region).toHaveAttribute("inert");
+      await expect(region).toHaveAttribute("aria-hidden", "true");
+    }
+    await expect(dialog.closest(hidden)).toBeNull();
+
+    await userEvent.click(within(dialog).getByRole("button", { name: "Save" }));
+    const saved = await page.findByText("Saved");
+    await expect(saved.closest(hidden)).toBeNull();
+    await expect(saved.closest("[aria-live]")).toHaveAttribute("aria-live", "polite");
+    await expect(saved.closest("[data-roster-toaster]")?.parentElement).toBe(document.body);
+
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(page.queryByRole("dialog")).not.toBeInTheDocument());
+    await expect(header).not.toHaveAttribute("inert");
+    await expect(header).toHaveAttribute("aria-hidden", "false");
+    for (const region of [main, footer]) {
+      await expect(region).not.toHaveAttribute("inert");
+      await expect(region).not.toHaveAttribute("aria-hidden");
+    }
+    toast.remove();
+  },
+  parameters: { controls: { disable: true } },
+};
+
+/**
+ * A route change unmounts a dialog without closing it. The page around it
+ * comes back whole: Headless UI and Roster each mark part of it, and neither
+ * leaves its part behind.
+ */
+export const UnmountedWhileOpen: Story = {
+  tags: ["!autodocs"],
+  args: { title: "Leave this page?", children: null },
+  render: function Render(args) {
+    const [open, setOpen] = useState(false);
+    const [mounted, setMounted] = useState(true);
+    return (
+      <PageRegions>
+        <Button onClick={() => setOpen(true)}>Open Dialog</Button>
+        {mounted && (
+          <Dialog {...args} isOpen={open} onClose={() => setOpen(false)}>
+            <Button onClick={() => setMounted(false)}>Go to another page</Button>
+          </Dialog>
+        )}
+      </PageRegions>
+    );
+  },
+  play: async () => {
+    const regions = ["page-header", "page-main", "page-footer"].map((id) => page.getByTestId(id));
+    await userEvent.click(page.getByRole("button", { name: "Open Dialog" }));
+    const dialog = await page.findByRole("dialog");
+    await waitFor(() => {
+      for (const region of regions) expect(region).toHaveAttribute("inert");
+    });
+
+    await userEvent.click(within(dialog).getByRole("button", { name: "Go to another page" }));
+    await waitFor(() => expect(page.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => {
+      for (const region of regions) expect(region).not.toHaveAttribute("inert");
+    });
+    await expect(regions[0]).toHaveAttribute("aria-hidden", "false");
+    await expect(regions[1]).not.toHaveAttribute("aria-hidden");
+    await expect(regions[2]).not.toHaveAttribute("aria-hidden");
+  },
+  parameters: { controls: { disable: true } },
+};
+
+/**
+ * A Roster Dialog opened from inside a dialog built on Headless UI directly,
+ * which has no lock of its own. Headless UI has already marked `<main>` when
+ * the inner one opens, and that is left to it: closing both gives the page
+ * back whole, not with `<main>` stuck inert.
+ */
+export const InsideAHeadlessUIDialog: Story = {
+  tags: ["!autodocs"],
+  args: { title: "Are you sure?", children: null },
+  render: function Render(args) {
+    const [outer, setOuter] = useState(false);
+    const [inner, setInner] = useState(false);
+    return (
+      <PageRegions>
+        <Button onClick={() => setOuter(true)}>Open outer</Button>
+        <HeadlessDialog open={outer} onClose={() => setOuter(false)}>
+          <DialogPanel style={{ position: "fixed", inset: "24px", background: "white", padding: "16px" }}>
+            <DialogTitle>Outer</DialogTitle>
+            <Button onClick={() => setInner(true)}>Open inner</Button>
+            <Button onClick={() => setOuter(false)}>Close outer</Button>
+            <Dialog {...args} isOpen={inner} onClose={() => setInner(false)}>
+              <Button onClick={() => setInner(false)}>Done</Button>
+            </Dialog>
+          </DialogPanel>
+        </HeadlessDialog>
+      </PageRegions>
+    );
+  },
+  play: async () => {
+    const regions = ["page-header", "page-main", "page-footer"].map((id) => page.getByTestId(id));
+    await userEvent.click(page.getByRole("button", { name: "Open outer" }));
+    await userEvent.click(await page.findByRole("button", { name: "Open inner" }));
+    const inner = await page.findByRole("dialog", { name: "Are you sure?" });
+    await waitFor(() => {
+      for (const region of regions) expect(region).toHaveAttribute("inert");
+    });
+
+    await userEvent.click(within(inner).getByRole("button", { name: "Done" }));
+    await waitFor(() => expect(page.queryByRole("dialog", { name: "Are you sure?" })).not.toBeInTheDocument());
+    await userEvent.click(page.getByRole("button", { name: "Close outer" }));
+    await waitFor(() => expect(page.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => {
+      for (const region of regions) expect(region).not.toHaveAttribute("inert");
+    });
+    await expect(regions[0]).toHaveAttribute("aria-hidden", "false");
+    await expect(regions[1]).not.toHaveAttribute("aria-hidden");
+    await expect(regions[2]).not.toHaveAttribute("aria-hidden");
   },
   parameters: { controls: { disable: true } },
 };

@@ -5,6 +5,9 @@ import { Sheet, type SheetProps } from "./Sheet";
 import { Button } from "../../atoms/Button/Button";
 import { Input } from "../../atoms/Input/Input";
 import { Textarea } from "../../atoms/Textarea/Textarea";
+import { Toaster } from "../../molecules/Toast/Toaster";
+import { toast } from "../../molecules/Toast/toast-api";
+import { PageRegions } from "../../../test/PageRegions";
 
 const meta = {
   title: "Organisms/Sheet",
@@ -511,4 +514,98 @@ export const ReducedMotion: Story = {
       await expect(style.transitionDuration).toBe("0.28s");
     }
   },
+};
+
+/**
+ * A page laid out as a header, a main and a footer, all children of `<body>`,
+ * with the toast host inside the main. While the sheet is open, all three are
+ * inert and hidden from a screen reader, and a toast fired from the sheet is
+ * still announced. On close, each gets back exactly what it had.
+ */
+export const PageAroundIsInert: Story = {
+  /* Kept off the docs page: it renders into `<body>`, so there it would land
+     below everything else. */
+  tags: ["!autodocs"],
+  args: { isOpen: false, onClose: () => {}, title: "Details", children: null },
+  render: function Render() {
+    const [open, setOpen] = useState(false);
+    return (
+      <PageRegions>
+        <Toaster />
+        <Button onClick={() => setOpen(true)}>Open sheet</Button>
+        <Sheet isOpen={open} onClose={() => setOpen(false)} title="Details">
+          <Button onClick={() => toast.error("Could not save")}>Save</Button>
+        </Sheet>
+      </PageRegions>
+    );
+  },
+  play: async () => {
+    const header = page.getByTestId("page-header");
+    const main = page.getByTestId("page-main");
+    const footer = page.getByTestId("page-footer");
+    const hidden = "[inert], [aria-hidden='true']";
+
+    await userEvent.click(page.getByRole("button", { name: "Open sheet" }));
+    const dialog = await page.findByRole("dialog");
+    await waitFor(() => expect(main).toHaveAttribute("inert"));
+    for (const region of [header, footer]) {
+      await expect(region).toHaveAttribute("inert");
+      await expect(region).toHaveAttribute("aria-hidden", "true");
+    }
+
+    await userEvent.click(within(dialog).getByRole("button", { name: "Save" }));
+    const failed = await page.findByText("Could not save");
+    await expect(failed.closest(hidden)).toBeNull();
+    await expect(failed.closest("[aria-live]")).toHaveAttribute("aria-live", "assertive");
+
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(main).not.toHaveAttribute("inert"));
+    await expect(header).not.toHaveAttribute("inert");
+    await expect(header).toHaveAttribute("aria-hidden", "false");
+    await expect(footer).not.toHaveAttribute("inert");
+    await expect(footer).not.toHaveAttribute("aria-hidden");
+    toast.remove();
+  },
+  parameters: { controls: { disable: true } },
+};
+
+/**
+ * A route change unmounts a sheet without closing it. The page around it
+ * comes back whole.
+ */
+export const UnmountedWhileOpen: Story = {
+  tags: ["!autodocs"],
+  args: { isOpen: false, onClose: () => {}, title: "Details", children: null },
+  render: function Render() {
+    const [open, setOpen] = useState(false);
+    const [mounted, setMounted] = useState(true);
+    return (
+      <PageRegions>
+        <Button onClick={() => setOpen(true)}>Open sheet</Button>
+        {mounted && (
+          <Sheet isOpen={open} onClose={() => setOpen(false)} title="Details">
+            <Button onClick={() => setMounted(false)}>Go to another page</Button>
+          </Sheet>
+        )}
+      </PageRegions>
+    );
+  },
+  play: async () => {
+    const regions = ["page-header", "page-main", "page-footer"].map((id) => page.getByTestId(id));
+    await userEvent.click(page.getByRole("button", { name: "Open sheet" }));
+    const dialog = await page.findByRole("dialog");
+    await waitFor(() => {
+      for (const region of regions) expect(region).toHaveAttribute("inert");
+    });
+
+    await userEvent.click(within(dialog).getByRole("button", { name: "Go to another page" }));
+    await waitFor(() => expect(page.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => {
+      for (const region of regions) expect(region).not.toHaveAttribute("inert");
+    });
+    await expect(regions[0]).toHaveAttribute("aria-hidden", "false");
+    await expect(regions[1]).not.toHaveAttribute("aria-hidden");
+    await expect(regions[2]).not.toHaveAttribute("aria-hidden");
+  },
+  parameters: { controls: { disable: true } },
 };

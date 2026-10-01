@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import "@testing-library/jest-dom";
 import { Sheet, type SheetProps } from "./Sheet";
+import { pageRegions, hiddenFromAssistiveTech } from "../../../test/page-regions";
 
 /* Headless UI keeps a panel mounted while it transitions, so these tests
    assert state (`aria-modal`, `inert`, focus, callbacks) rather than whether a
@@ -88,6 +89,53 @@ describe("Sheet", () => {
       await userEvent.keyboard("{Escape}");
       await waitFor(() => expect(inert()).toBeFalsy());
       expect(container).not.toHaveAttribute("aria-hidden");
+    });
+
+    it("marks the header and footer beside it too, and restores them after", async () => {
+      /* Headless UI marks only the body child the sheet is rendered from. */
+      const page = pageRegions();
+      page.header.setAttribute("aria-hidden", "false");
+      try {
+        render(<Harness />, { container: page.main });
+        await userEvent.click(screen.getByText("Open"));
+        await screen.findByRole("dialog");
+        await waitFor(() => expect(hiddenFromAssistiveTech(page.main)).toBe(true));
+        expect(hiddenFromAssistiveTech(page.header)).toBe(true);
+        expect(hiddenFromAssistiveTech(page.footer)).toBe(true);
+
+        await userEvent.keyboard("{Escape}");
+        await waitFor(() => expect(hiddenFromAssistiveTech(page.main)).toBe(false));
+        expect(hiddenFromAssistiveTech(page.footer)).toBe(false);
+        expect(page.footer).not.toHaveAttribute("aria-hidden");
+        /* What the page had, not a blank. */
+        expect(page.header).toHaveAttribute("aria-hidden", "false");
+      } finally {
+        page.remove();
+      }
+    });
+
+    it.each([
+      ["while open", false],
+      ["part-way through closing", true],
+    ])("gives the whole page back when unmounted %s", async (_, closeFirst) => {
+      /* A route change unmounts a sheet without closing it. */
+      const page = pageRegions();
+      try {
+        const { unmount } = render(<Harness />, { container: page.main });
+        await userEvent.click(screen.getByText("Open"));
+        await screen.findByRole("dialog");
+        await waitFor(() => expect(hiddenFromAssistiveTech(page.main)).toBe(true));
+        await waitFor(() => expect(hiddenFromAssistiveTech(page.header)).toBe(true));
+        if (closeFirst) await userEvent.keyboard("{Escape}");
+        unmount();
+        await waitFor(() => {
+          for (const el of [page.header, page.main, page.footer]) {
+            expect(hiddenFromAssistiveTech(el)).toBe(false);
+          }
+        });
+      } finally {
+        page.remove();
+      }
     });
   });
 

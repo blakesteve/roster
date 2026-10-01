@@ -730,6 +730,32 @@ toast `status` / `polite`, and a polite live region is read when the reader
 next pauses — which for a message that disappears in four seconds can mean
 never.
 
+**The queue renders into `<body>`, not where `Toaster` is placed.** While a
+`Dialog` or `Sheet` is open, every child of `<body>` is `inert` and
+`aria-hidden` except the dialog layer and anything carrying
+`data-roster-toaster`, which `Toaster`'s host does. So a toast fired from an
+open dialog is still announced, wherever in the app `Toaster` is mounted.
+
+A toast host Roster does not render, such as `react-hot-toast`'s own
+`Toaster`, goes silent while a dialog is open unless it opts in. Wrap it in an
+element that is a direct child of `<body>` (render it through a portal if it is
+mounted deeper) and carries the attribute:
+
+```tsx
+<div data-roster-toaster="" style={{ display: "contents" }}>
+  <Toaster />
+</div>
+```
+
+Two consequences of rendering into `<body>`:
+
+- `--roster-*` tokens set on a wrapper inside your app do not reach the toasts.
+  Set them on `:root`. A scoped `.dark` is carried across.
+- Anything else another library mounts straight into `<body>` while a dialog
+  is open, such as a date picker's or an autocomplete's popup, is inert too,
+  so it can't be clicked. Roster's own popups render into Headless UI's portal
+  root and are unaffected.
+
 `variant` on `Toaster` sets the fill for the whole queue:
 
 - **`soft`** (default) — the tinted fill `Alert` uses. Quiet enough that a stack
