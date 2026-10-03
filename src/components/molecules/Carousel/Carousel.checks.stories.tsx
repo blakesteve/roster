@@ -447,6 +447,48 @@ export const NothingStaysArmedAfterADrag: Story = {
 };
 
 /**
+ * R2's threshold, with literal distances: a mouse press that moves 7px is a
+ * drag, and the click it ends with is dropped; one that moves 6px is a click,
+ * and goes through. Synthetic events, so the click lands on the item whatever
+ * the pointer capture would have done, and only the threshold decides.
+ */
+export const DragThreshold: Story = {
+  args: { "aria-label": "Picks", children: null },
+  render: () => <DragStrip />,
+  play: async () => {
+    const row = list("Picks");
+    const log = page.getByTestId("log");
+    await waitFor(() => expect(row).toHaveAttribute("data-overflowing"));
+    const item = row.children[1].querySelector("button")!;
+    const pressMoveRelease = (dx: number) => {
+      const send = (type: string, x: number) =>
+        row.dispatchEvent(
+          new PointerEvent(type, { bubbles: true, pointerId: 5, pointerType: "mouse", isPrimary: true, button: 0, clientX: x, clientY: 50 }),
+        );
+      send("pointerdown", 400);
+      send("pointermove", 400 - dx);
+      send("pointerup", 400 - dx);
+      // The click the release ends with, in the same moment, as a browser sends it.
+      item.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, detail: 1 }));
+    };
+
+    // 7px: past the threshold, a drag. Its click is dropped.
+    pressMoveRelease(7);
+    await new Promise((r) => setTimeout(r, 50));
+    await expect(log).toHaveTextContent("none");
+    await settled(row);
+
+    // 6px: at the threshold, still a click. It goes through, and the row
+    // never moved.
+    const at = row.scrollLeft;
+    pressMoveRelease(6);
+    await waitFor(() => expect(log).toHaveTextContent("Song 2"));
+    await expect(row).not.toHaveAttribute("data-dragging");
+    await expect(row.scrollLeft).toBe(at);
+  },
+};
+
+/**
  * Under reduced motion every scroll the component makes is instant: an arrow
  * lands within one frame. With motion, the same arrow glides there.
  */
