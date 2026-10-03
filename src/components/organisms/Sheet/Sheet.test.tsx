@@ -623,6 +623,66 @@ describe("Sheet", () => {
       }
     });
 
+    it("takes a node as its title, named by the node's text", async () => {
+      render(
+        <Harness
+          initiallyOpen
+          sheet={{
+            title: (
+              <>
+                Night of <time dateTime="2026-10-02">2 Oct</time>
+              </>
+            ),
+          }}
+        />,
+      );
+      expect(await screen.findByRole("dialog")).toHaveAccessibleName("Night of 2 Oct");
+      expect(screen.getByRole("heading", { level: 2, name: "Night of 2 Oct" })).toBeInTheDocument();
+    });
+
+    it("does not count a node title re-created with the same words as a swap", async () => {
+      /* A node is a new object every render. Compared as the prop, every
+         re-render of the parent moved focus to the title. */
+      function Rerendering() {
+        const [n, setN] = useState(0);
+        return (
+          <Sheet
+            isOpen
+            onClose={() => {}}
+            title={<span>Night of 2 Oct</span>}
+            actions={<button onClick={() => setN((x) => x + 1)}>Re-render {n}</button>}
+          >
+            x
+          </Sheet>
+        );
+      }
+      render(<Rerendering />);
+      const button = await screen.findByRole("button", { name: /Re-render/ });
+      button.focus();
+      await userEvent.click(button);
+      await userEvent.click(button);
+      expect(screen.getByRole("button", { name: "Re-render 2" })).toHaveFocus();
+    });
+
+    it("counts a node title whose words change as a swap", async () => {
+      function Swapping() {
+        const [n, setN] = useState(1);
+        return (
+          <Sheet
+            isOpen
+            onClose={() => {}}
+            title={<span>Night {n}</span>}
+            actions={<button onClick={() => setN((x) => x + 1)}>Next</button>}
+          >
+            x
+          </Sheet>
+        );
+      }
+      render(<Swapping />);
+      await userEvent.click(await screen.findByRole("button", { name: "Next" }));
+      expect(screen.getByRole("heading", { name: "Night 2" })).toHaveFocus();
+    });
+
     it("still returns focus to the original opener after a swap", async () => {
       function Swapping() {
         const [open, setOpen] = useState(false);

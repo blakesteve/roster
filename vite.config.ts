@@ -7,6 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath } from 'node:url';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { playwright } from '@vitest/browser-playwright';
+import { realInputCommands } from './.storybook/real-input';
 
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
@@ -178,7 +179,8 @@ export default defineConfig({
         extends: true,
         plugins: [
           storybookTest({
-            configDir: path.join(dirname, '.storybook')
+            configDir: path.join(dirname, '.storybook'),
+            tags: { exclude: ['real-input'] }
           })
         ],
         test: {
@@ -187,6 +189,36 @@ export default defineConfig({
             enabled: true,
             headless: true,
             provider: playwright({}),
+            commands: realInputCommands,
+            instances: [{
+              browser: 'chromium'
+            }]
+          },
+          setupFiles: ['.storybook/vitest.setup.ts']
+        }
+      },
+      {
+        /* The stories tagged `real-input`: a real wheel or mouse drag, or a
+           viewport change (see .storybook/real-input.ts). There is one mouse
+           and one viewport per browser page, and story files share a page when
+           they run in parallel, so these get a project of their own and run
+           one file at a time. In the main project a drag aimed at one story
+           landed on another's frame, and both timed out. */
+        extends: true,
+        plugins: [
+          storybookTest({
+            configDir: path.join(dirname, '.storybook'),
+            tags: { include: ['real-input'] }
+          })
+        ],
+        test: {
+          name: 'storybook-real-input',
+          fileParallelism: false,
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({}),
+            commands: realInputCommands,
             instances: [{
               browser: 'chromium'
             }]
@@ -211,6 +243,7 @@ export default defineConfig({
             enabled: true,
             headless: true,
             provider: playwright({ contextOptions: { reducedMotion: 'reduce' } }),
+            commands: realInputCommands,
             instances: [{
               browser: 'chromium'
             }]

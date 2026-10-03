@@ -65,6 +65,7 @@ export * from './components/molecules/Breadcrumbs/breadcrumb-variants';
 export * from './components/molecules/LiquidTabs/LiquidTabs';
 export * from './components/molecules/LiquidTabs/LiquidNav';
 export * from './components/molecules/LiquidTabs/liquid-tab-id';
+export * from './components/molecules/Carousel/Carousel';
 export * from './components/molecules/CallToAction/CallToAction';
 export * from './components/molecules/CallToAction/call-to-action-variants';
 export * from './components/molecules/EmptyState/EmptyState';

@@ -1,7 +1,10 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 
-const spinnerVariants = /* @__PURE__ */ cva("rst:animate-spin rst:rounded-full rst:transition-colors", {
+/* `motion-reduce:animate-none`: a spinner is motion the reader didn't ask for
+   and can't look away from, so under reduced motion it holds still. The arc
+   still reads as "loading", and the label says so. */
+const spinnerVariants = /* @__PURE__ */ cva("rst:animate-spin rst:motion-reduce:animate-none rst:rounded-full rst:transition-colors", {
   variants: {
     variant: {
       primary: "rst:border-primary-600 rst:dark:border-primary-500",
@@ -35,6 +38,11 @@ const spinnerVariants = /* @__PURE__ */ cva("rst:animate-spin rst:rounded-full r
 
 export interface SpinnerProps extends VariantProps<typeof spinnerVariants> {
   className?: string;
+  /**
+   * What a screen reader hears: "loading" by default. Say what is loading
+   * ("Loading results") when there is more than one on screen.
+   */
+  label?: string;
 }
 
 export const Spinner = ({
@@ -42,12 +50,13 @@ export const Spinner = ({
   size,
   animation,
   className,
+  label = "loading",
 }: SpinnerProps) => {
   return (
     <div
       className={cn(spinnerVariants({ variant, size, animation }), className)}
       role="status"
-      aria-label="loading"
+      aria-label={label}
     />
   );
 };

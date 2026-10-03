@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { Spinner } from "./Spinner";
 
 const meta = {
@@ -182,5 +183,26 @@ export const AllVariants: Story = {
           "A side-by-side look at all supported color variants. (Note the slightly tinted background added here so the `white` variant is visible in light mode).",
       },
     },
+  },
+};
+
+/**
+ * Under reduced motion the spinner holds still: the arc still reads as
+ * loading, and its label says so. Name it for what is loading when there is
+ * more than one on screen. Run in both motion modes by the test project.
+ */
+export const ReducedMotionAndLabel: Story = {
+  tags: ["reduced-motion"],
+  args: { label: "Loading results" },
+  play: async ({ canvasElement }) => {
+    // The decorator renders each story on a light and a dark surface.
+    const spinners = within(canvasElement).getAllByRole("status", { name: "Loading results" });
+    await expect(spinners.length).toBeGreaterThan(0);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    for (const spinner of spinners) {
+      const { animationName } = getComputedStyle(spinner);
+      if (reduced) await expect(animationName).toBe("none");
+      else await expect(animationName).not.toBe("none");
+    }
   },
 };
