@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect } from "storybook/test";
+import { expect, within } from "storybook/test";
 import { Input } from "./Input";
 import { Button } from "../Button/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -177,6 +177,31 @@ export const WithError: Story = {
     errorMessage: "This username is already taken.",
     variant: "soft",
     error: true,
+  },
+};
+
+/**
+ * A field a consumer marks invalid with `aria-invalid` stays marked, so a
+ * screen reader hears "invalid entry". `"false"` leaves it unmarked.
+ */
+export const ConsumerMarksItInvalid: Story = {
+  args: { label: "Username", defaultValue: "a b", "aria-invalid": "true", helperText: "No spaces, please." },
+  render: (args) => (
+    <div style={{ display: "grid", gap: 16 }}>
+      <Input {...args} />
+      <Input label="Display name" defaultValue="Ana" aria-invalid="false" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    // The decorator renders each story on a light and a dark surface.
+    const canvas = within(canvasElement);
+    for (const field of canvas.getAllByLabelText("Username")) {
+      await expect(field).toHaveAttribute("aria-invalid", "true");
+      await expect(field).toBeInvalid();
+    }
+    for (const field of canvas.getAllByLabelText("Display name")) {
+      await expect(field).not.toHaveAttribute("aria-invalid");
+    }
   },
 };
 

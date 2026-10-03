@@ -357,6 +357,31 @@ export const HiddenTitle: Story = {
 };
 
 /**
+ * A title can carry markup, a date in a `<time>` here. The sheet is named by
+ * its text, and the heading keeps the title's look.
+ */
+export const NodeTitle: Story = {
+  args: { isOpen: false, onClose: () => {}, title: "Details", children: null },
+  render: () => (
+    <Demo
+      title={
+        <>
+          Night of <time dateTime="2026-10-02" style={{ fontStyle: "italic" }}>2 Oct</time>
+        </>
+      }
+    >
+      <p>What the sky did that night.</p>
+    </Demo>
+  ),
+  play: async ({ canvasElement }) => {
+    const { dialog } = await openSheet(canvasElement);
+    await expect(dialog).toHaveAccessibleName("Night of 2 Oct");
+    const heading = within(dialog).getByRole("heading", { level: 2, name: "Night of 2 Oct" });
+    await expect(heading.querySelector("time")).toHaveAttribute("dateTime", "2026-10-02");
+  },
+};
+
+/**
  * `busy` marks the content `aria-busy` while it loads. The header shows at
  * once, with whatever title is already known.
  */

@@ -491,6 +491,9 @@ the sweep stops and the highlight parks off-frame. The highlight is deliberately
 exempt from that bar: it is a specular pass on screen for a fraction of a second
 per glyph, and holding it to 3:1 would flatten the effect.
 
+`Spinner` holds still under reduced motion: the arc still reads as loading, and
+its `label` (default "loading") says so.
+
 ### Scrollbars
 
 `custom-scrollbar` gives any scrollable surface a slim themed scrollbar.
@@ -1104,6 +1107,47 @@ escape the box. Lay the options out across with `orientation` rather than
 through `optionsClassName`, for the same reason: the horizontal spacing that
 keeps two radios 44px apart rides on that prop.
 
+### Carousel
+
+A sideways row: a row of cards, a selection strip, or a gallery of one per
+view. It is a real scroll container with CSS scroll snap, so touch, trackpad,
+Shift with the wheel and keyboard focus all scroll it without script, and every
+item is in the server render. No clones, no virtualization, no loop, and
+nothing moves on its own.
+
+```tsx
+<Carousel aria-label="Songs" itemWidth={240} gap={12} gutter={16}>
+  {songs.map((song) => <SongCard key={song.id} song={song} />)}
+</Carousel>
+```
+
+Each child is one item, wrapped in the `li` the row snaps to. Size the items
+with `itemWidth` (fixed) or `perView` (fluid: `{ base: 1.3, md: 2.5 }`, where
+the fraction is the peek of the next item). `gutter` is both the inline padding
+and the scroll padding, so a snapped item lines up with the text above it, and
+`bleed` pulls the row out by one gutter to run edge to edge.
+
+Script adds what a mouse is missing:
+
+- **Drag.** A mouse drags the row one to one and it settles on the nearest
+  item. A drag past 6px drops the one click that ends it, and nothing else.
+  Touch and pen keep native scrolling.
+- **Arrows.** Previous and next page by as many items as are wholly in view,
+  measured each time, and land on an item's edge. At an end the arrow is
+  `disabled`, out of the tab order. They show where a pointer can hover, on a
+  line above the row by default (`arrowPlacement="overlay"` floats them over
+  the ends; `renderArrows` puts them anywhere, such as a heading line). They
+  are 44px, drawn with inline SVG, and named "Next" plus the row's label.
+- **Keyboard focus** snaps its item into place at once. If no item can take
+  focus, the list itself is the tab stop.
+
+A vertical wheel over the row scrolls the page, and sideways overscroll is
+contained. Under reduced motion every scroll the component makes is instant.
+`ref` gives `scrollToIndex(i)`, `scrollPrev()` and `scrollNext()`;
+`onIndexChange` reports the first item wholly in view. For a gallery,
+`showPosition` shows "2 of 5", which is also each item's name and is announced
+politely when it changes.
+
 ### Components that render links
 
 `Breadcrumbs` renders a plain `<a>` by default, which is right for a static
@@ -1171,7 +1215,7 @@ function App() {
 | `Disclosure`         | Show/hide toggle using HeadlessUI                                                                            |
 | `Eyebrow`            | Small tracked-out uppercase label above a heading or beside a rule; polymorphic via `as`                     |
 | `InlineCode`         | Inline `<code>` for identifiers in running prose                                                             |
-| `Input`              | Text input with label, error state, icon slots, and a size scale matching `Button`                           |
+| `Input`              | Text input with label, error state, icon slots, and a size scale matching `Button`; keeps a passed `aria-invalid` |
 | `LabeledDivider`     | Horizontal rule carrying a label, with an optional trailing count                                            |
 | `Link`               | Styled anchor with variant support                                                                           |
 | `MultiSelect`        | A `Select` that holds more than one value: dismissible chips, same panel                                     |
@@ -1197,8 +1241,9 @@ function App() {
 | `Breadcrumbs`     | Navigation trail; pass `linkComponent` to keep navigation client-side       |
 | `CheckboxGroup`   | Checkbox set reporting one `string[]`; groups, columns, scroll, error       |
 | `CallToAction`    | Prominent hero-style CTA block                                              |
+| `Carousel`        | Sideways row of items on native scroll snap; mouse drag, paging arrows, no autoplay |
 | `DescriptionList` | Label and value pairs as a real `<dl>`: inline, stacked, or split           |
-| `EmptyState`      | Zero-data placeholder with icon and action slot                             |
+| `EmptyState`      | Zero-data placeholder with icon and action slot; `headingLevel` sets its title's `h1` to `h6` |
 | `ErrorState`      | Error display with retry action                                             |
 | `LiquidNav`       | `LiquidTabs`' strip as a `nav` of links; takes a router's link component    |
 | `LiquidTabs`      | Tab strip with a sliding pill; arrow keys, roving focus, 44px `lg` size     |
@@ -1217,7 +1262,7 @@ function App() {
 | `Dialog`    | Modal dialog                                                                                                                                                       |
 | `Footer`    | Site footer                                                                                                                                                        |
 | `Navbar`    | Responsive navigation bar with mobile slide-out                                                                                                                    |
-| `Sheet`     | Bottom sheet: drag, Escape or backdrop to dismiss; only its content scrolls; returns focus, even from a deep link                                                  |
+| `Sheet`     | Bottom sheet: drag, Escape or backdrop to dismiss; only its content scrolls; returns focus, even from a deep link; the title may be a node |
 | `Table`     | Static data table                                                                                                                                                  |
 
 ### DataTable columns
@@ -1369,6 +1414,15 @@ where a dead class cannot be fixed in the same sitting: add it there with a
 reason and the build goes green on the state it inherited while still failing on
 anything new. It also fails when a listed class starts emitting, so a fix cannot
 leave a stale entry behind. Run it with `--verbose` to print the list.
+
+Story tests that need the user's own input, a wheel or a mouse drag, get it
+from `.storybook/real-input.ts`: Vitest browser commands that drive
+Playwright's mouse, whose events are trusted. A synthetic wheel or pointer
+event never scrolls anything, so "a vertical wheel scrolls the page, not the
+row" can't be tested without them. The commands fail loudly when the pointer
+isn't over their target, rather than letting a wheel land on the page and a
+test pass for the wrong reason. Storybook's own UI has no such input, so those
+steps are skipped there.
 
 `src/lib/utils.test.ts` pins `cn`. `tailwind-merge` has to be configured with the
 prefix or it stops recognising Roster's classes as utilities and silently

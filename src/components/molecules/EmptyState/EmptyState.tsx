@@ -11,6 +11,12 @@ export interface EmptyStateProps
   description?: string;
   icon?: React.ReactNode;
   action?: React.ReactNode;
+  /**
+   * The title's heading level. `3` by default; set it to follow the heading
+   * the empty state sits under, so the page's outline doesn't skip a level.
+   * Only the element changes; its classes are the same at every level.
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
 const EmptyState = ({
@@ -18,10 +24,12 @@ const EmptyState = ({
   description,
   icon,
   action,
+  headingLevel = 3,
   variant,
   className,
   ...props
 }: EmptyStateProps) => {
+  const Heading = `h${headingLevel}` as const;
   return (
     <div className={cn(emptyStateVariants({ variant }), className)} {...props}>
       {icon && (
@@ -30,7 +38,7 @@ const EmptyState = ({
         </div>
       )}
 
-      <h3 className="rst:text-lg rst:font-semibold rst:text-gray-900 rst:dark:text-gray-100">{title}</h3>
+      <Heading className="rst:text-lg rst:font-semibold rst:text-gray-900 rst:dark:text-gray-100">{title}</Heading>
       {description && (
         <p className="rst:mt-1 rst:max-w-sm rst:text-sm rst:text-gray-500 rst:dark:text-gray-400">{description}</p>
       )}

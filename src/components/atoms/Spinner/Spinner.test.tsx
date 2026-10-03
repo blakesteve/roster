@@ -17,6 +17,18 @@ describe("Spinner Component", () => {
     expect(spinner).toHaveClass("rst:animate-spin");
   });
 
+  it("takes a label, and keeps 'loading' as the default name", () => {
+    const { rerender } = render(<Spinner />);
+    expect(screen.getByRole("status")).toHaveAccessibleName("loading");
+    rerender(<Spinner label="Loading results" />);
+    expect(screen.getByRole("status")).toHaveAccessibleName("Loading results");
+  });
+
+  it("holds still under reduced motion", () => {
+    render(<Spinner />);
+    expect(screen.getByRole("status")).toHaveClass("rst:motion-reduce:animate-none");
+  });
+
   // 2. Default Props (Testing the CVA defaults)
   it("applies primary, medium, classic styles by default", () => {
     render(<Spinner />);

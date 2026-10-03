@@ -26,6 +26,19 @@ describe("EmptyState Molecule", () => {
     expect(screen.getByTestId("icon")).toBeInTheDocument();
   });
 
+  it("titles itself with an h3 unless told the level", () => {
+    const { rerender } = render(<EmptyState title="No songs yet" />);
+    const h3 = screen.getByRole("heading", { name: "No songs yet" });
+    expect(h3.tagName).toBe("H3");
+    const classes = h3.className;
+    rerender(<EmptyState title="No songs yet" headingLevel={2} />);
+    const h2 = screen.getByRole("heading", { level: 2, name: "No songs yet" });
+    expect(h2.tagName).toBe("H2");
+    // Only the element changes.
+    expect(h2.className).toBe(classes);
+    expect(screen.queryByRole("heading", { level: 3 })).toBeNull();
+  });
+
   it("applies variant classes", () => {
     const { container } = render(<EmptyState title="Test" variant="dashed" />);
     // Check for the border-dashed class on the container

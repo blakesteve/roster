@@ -55,6 +55,20 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ) => {
     const hasError = !!errorMessage || error;
 
+    /* Headless UI's input writes `aria-invalid` from its own `invalid` prop
+       and nothing else, over whatever was passed, so a consumer's
+       `aria-invalid="true"` was silently dropped. It is read here and handed
+       on as `invalid`, which Headless UI then writes as "true". `"grammar"`
+       and `"spelling"` come out as "true" too: a field is invalid or it isn't.
+       Headless UI's own `invalid`, passed straight through, still works. */
+    const {
+      "aria-invalid": ariaInvalid,
+      invalid: invalidProp,
+      ...inputProps
+    } = props as typeof props & { invalid?: boolean };
+    const invalid =
+      !!invalidProp || (ariaInvalid !== undefined && ariaInvalid !== false && ariaInvalid !== "false");
+
     return (
       /* No `space-y-*` here, deliberately. Headless UI's Field appends a
           hidden zero-height <span> after the control, and Tailwind v4 applies
@@ -114,7 +128,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               endIcon && (size === "sm" ? "rst:pr-9" : "rst:pr-10"),
               inputClassName,
             )}
-            {...props}
+            {...inputProps}
+            invalid={invalid}
           />
 
           {endIcon && (

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, within } from "storybook/test";
 import { EmptyState } from "./EmptyState";
 import { Button } from "../../atoms/Button/Button";
 import { Link } from "../../atoms/Link/Link";
@@ -154,6 +155,31 @@ export const Minimal: Story = {
           "Sometimes you don't need an action or an icon. Just text is enough for passive empty states.",
       },
     },
+  },
+};
+
+/**
+ * Under a page's `h1`, an empty state that is the section's only content
+ * titles itself as an `h2`, so the outline doesn't skip a level. The heading
+ * looks the same at every level.
+ */
+export const HeadingLevel: Story = {
+  args: { title: "No songs yet", description: "Listen to something and it shows up here.", headingLevel: 2 },
+  render: (args) => (
+    <div style={{ display: "grid", gap: 16 }}>
+      <EmptyState {...args} />
+      <EmptyState title="Default level" description="An h3, as before." />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const h2 = canvas.getByRole("heading", { level: 2, name: "No songs yet" });
+    const h3 = canvas.getByRole("heading", { level: 3, name: "Default level" });
+    const look = (el: Element) => {
+      const css = getComputedStyle(el);
+      return [css.fontSize, css.fontWeight, css.lineHeight, css.color, css.marginTop];
+    };
+    await expect(look(h2)).toEqual(look(h3));
   },
 };
 

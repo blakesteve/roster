@@ -61,6 +61,35 @@ describe("Input Component", () => {
     expect(screen.getByRole("textbox")).toBeDisabled();
   });
 
+  describe("aria-invalid", () => {
+    /* Headless UI's input wrote `aria-invalid` from its own `invalid` prop and
+       dropped one passed directly, so a consumer marking a field invalid for
+       assistive technology was silently overruled. */
+    it.each([
+      ["the string true", { "aria-invalid": "true" as const }],
+      ["the boolean true", { "aria-invalid": true }],
+      ["a token such as grammar", { "aria-invalid": "grammar" as const }],
+      ["Headless UI's own invalid prop", { invalid: true }],
+    ])("keeps it when the consumer passes %s", (_, props) => {
+      render(<Input label="Username" {...(props as object)} />);
+      expect(screen.getByLabelText("Username")).toHaveAttribute("aria-invalid", "true");
+    });
+
+    it.each([
+      ["nothing", {}],
+      ["the string false", { "aria-invalid": "false" as const }],
+      ["the boolean false", { "aria-invalid": false }],
+    ])("leaves it off when the consumer passes %s", (_, props) => {
+      render(<Input label="Username" {...(props as object)} />);
+      expect(screen.getByLabelText("Username")).not.toHaveAttribute("aria-invalid");
+    });
+
+    it("does not leak Headless UI's invalid prop onto the element as an attribute", () => {
+      render(<Input label="Username" aria-invalid="true" />);
+      expect(screen.getByLabelText("Username")).not.toHaveAttribute("invalid");
+    });
+  });
+
   describe("sizing", () => {
     /** The height utility that actually survives, e.g. "rst:h-10".
      *

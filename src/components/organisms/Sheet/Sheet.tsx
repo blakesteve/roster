@@ -17,6 +17,7 @@ import {
   sheetReleaseVelocity,
   type SheetDragSample,
 } from "./sheet-drag";
+import { titleSignature } from "./sheet-title";
 
 export interface SheetProps {
   isOpen: boolean;
@@ -33,12 +34,15 @@ export interface SheetProps {
    * The sheet's accessible name, rendered as an `h2`. Required, because a
    * dialog without a name is announced as "dialog" and nothing else.
    *
-   * Changing it while the sheet is open counts as a content swap: focus moves
-   * to the new title so a screen reader announces it. Not while `busy`: a
-   * title that changes during loading is a provisional one being refined, and
-   * the reader keeps their place.
+   * A node rather than only a string, so a title can carry markup (a date in
+   * a `<time>`, a word in another style); the name is its text either way.
+   *
+   * Changing its text while the sheet is open counts as a content swap: focus
+   * moves to the new title so a screen reader announces it. Not while `busy`:
+   * a title that changes during loading is a provisional one being refined,
+   * and the reader keeps their place.
    */
-  title: string;
+  title: React.ReactNode;
   /** Hides the title visually. It stays the accessible name. */
   hideTitle?: boolean;
   /** Wired to the dialog's `aria-describedby`. */
@@ -232,19 +236,23 @@ const Sheet = ({
      Only a change seen while the sheet was ALREADY open is a swap. A consumer
      that sets new content and opens in the same render is opening, and focus
      belongs on the close button then, not the title. */
-  const seen = React.useRef({ title, contentKey, open: isOpen, busy });
+  /* The title is compared by its signature, not as the prop: a node is a new
+     object on every render, and a title whose words did not change is not new
+     content. A string is its own signature. */
+  const signature = titleSignature(title);
+  const seen = React.useRef({ signature, contentKey, open: isOpen, busy });
   React.useEffect(() => {
     const previous = seen.current;
-    seen.current = { title, contentKey, open: isOpen, busy };
+    seen.current = { signature, contentKey, open: isOpen, busy };
     if (!previous.open || !isOpen) return;
     const keyChanged = previous.contentKey !== contentKey;
     /* A title that changes while the content was loading is the provisional
        title being refined, not new content. */
-    const titleChanged = previous.title !== title && !previous.busy;
+    const titleChanged = previous.signature !== signature && !previous.busy;
     if (!keyChanged && !titleChanged) return;
     titleRef.current?.focus();
     if (contentRef.current) contentRef.current.scrollTop = 0;
-  }, [title, contentKey, isOpen, busy]);
+  }, [signature, contentKey, isOpen, busy]);
 
   /* ── Touch devices ────────────────────────────────────────────────────────
      Headless UI skips `initialFocus` on a coarse pointer and focuses the dialog
