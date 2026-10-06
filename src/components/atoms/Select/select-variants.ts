@@ -10,8 +10,15 @@ export const selectTriggerVariants = /* @__PURE__ */ cva(
      Height used to be a side effect of `py-2.5` plus the line box, and the
      base carried `sm:leading-6` — which made this the only control in the
      library whose height changed at a breakpoint: 40px on mobile, 44px from
-     `sm` up. It is now an explicit height at every width. */
-  "rst:font-ui rst:relative rst:flex rst:w-full rst:cursor-pointer rst:disabled:cursor-not-allowed rst:disabled:opacity-50 rst:items-center rst:rounded-md rst:h-10 rst:pl-4 rst:pr-10 rst:text-left rst:text-sm rst:font-medium rst:shadow-sm rst:ring-1 rst:ring-inset rst:transition-all rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring",
+     `sm` up. It is now an explicit height at every width.
+
+     The trigger draws its edge as a bare `ring`, which reads
+     `--roster-border-width` so it matches Input's `border` at any width. Its
+     focus ring is that width plus a pixel rather than a literal `ring-2`:
+     with the edge set to 2px, a 2px focus ring would change only the color,
+     and focus would stop being a heavier line. Unset, it computes to 2px, as
+     before. */
+  "rst:font-ui rst:relative rst:flex rst:w-full rst:cursor-pointer rst:disabled:cursor-not-allowed rst:disabled:opacity-50 rst:items-center rst:rounded-md rst:h-10 rst:pl-4 rst:pr-10 rst:text-left rst:text-sm rst:font-medium rst:elevation-control rst:ring rst:ring-inset rst:transition-all rst:focus:outline-hidden rst:focus-visible:ring-[length:calc(var(--roster-border-width,1px)+1px)] rst:focus-visible:ring-ring",
   {
     variants: {
       variant: {

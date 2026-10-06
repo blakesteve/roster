@@ -56,7 +56,8 @@ describe("Accordion Molecule", () => {
     );
 
     // For 3 items, there should be exactly 2 dividers
-    const dividers = container.querySelectorAll(".rst\\:h-px");
+    /* A 1px rule that follows --roster-border-width (src/shape.test.ts). */
+    const dividers = container.querySelectorAll('[class~="rst:h-[var(--roster-border-width,1px)]"]');
     expect(dividers.length).toBe(2);
 
     // Verify our new dark mode implementation is present

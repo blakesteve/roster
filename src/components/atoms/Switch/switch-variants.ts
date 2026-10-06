@@ -44,7 +44,7 @@ export const switchTrackVariants = /* @__PURE__ */ cva(
 );
 
 export const switchThumbVariants = /* @__PURE__ */ cva(
-  "rst:pointer-events-none rst:inline-block rst:rounded-full rst:bg-white rst:shadow rst:ring-0 rst:transition rst:duration-200 rst:ease-in-out rst:transform",
+  "rst:pointer-events-none rst:inline-block rst:rounded-full rst:bg-white rst:elevation-control rst:ring-0 rst:transition rst:duration-200 rst:ease-in-out rst:transform",
   {
     variants: {
       size: {

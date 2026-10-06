@@ -21,9 +21,9 @@ export const buttonVariants = /* @__PURE__ */ cva(
   {
     variants: {
       variant: {
-        solid: "rst:border rst:border-transparent rst:shadow-sm",
+        solid: "rst:border rst:border-transparent rst:elevation-control",
         soft: "rst:border-transparent rst:shadow-none",
-        outline: "rst:border rst:bg-transparent rst:shadow-sm",
+        outline: "rst:border rst:bg-transparent rst:elevation-control",
         ghost: "rst:border rst:border-transparent rst:bg-transparent",
         link: "rst:bg-transparent rst:underline-offset-4 rst:hover:underline",
       },
@@ -38,7 +38,7 @@ export const buttonVariants = /* @__PURE__ */ cva(
         neutral: "",
       },
       size: {
-        xs: "rst:h-7 rst:rounded rst:px-2 rst:text-xs",
+        xs: "rst:h-7 rst:rounded-sm rst:px-2 rst:text-xs",
         sm: "rst:h-9 rst:rounded-md rst:px-3",
         default: "rst:h-10 rst:px-4 rst:py-2",
         lg: "rst:h-11 rst:rounded-md rst:px-8",

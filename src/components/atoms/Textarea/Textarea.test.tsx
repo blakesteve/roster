@@ -200,15 +200,17 @@ describe("Textarea spacing and escape hatch", () => {
       expect(textarea).not.toHaveClass("rst:border-transparent");
     });
 
-    it("does not restate the placeholder color the base already sets", () => {
-      /* Input's `outline` carries `dark:placeholder:text-gray-500` because
-         Input's base sets no placeholder rule. This base sets gray-400, so
-         copying that line across darkened the placeholder to 3.30:1 — under
-         the 4.5:1 placeholder text needs. Caught in review, not by eye. */
+    it("takes its placeholder from the text token, with no fixed step", () => {
+      /* A fixed step can't pass in both schemes and on every surface: the old
+         gray-400 was 2.52:1 on white, and Input's old dark gray-500 3.30:1 on
+         the dark page. The contrast itself is measured rendered, in
+         src/fills-and-fields.checks.stories.tsx; this pins the mechanism. */
       render(<Textarea />);
-      expect(screen.getByRole("textbox")).not.toHaveClass(
-        "rst:dark:placeholder:text-gray-500",
+      const classes = screen.getByRole("textbox").className.split(/\s+/);
+      expect(classes).toContain(
+        "rst:placeholder:text-[color-mix(in_srgb,var(--roster-control-text)_65%,transparent)]",
       );
+      expect(classes.filter((c) => /placeholder:text-(gray|error)-/.test(c))).toEqual([]);
     });
 
     it("leaves the opinionated variants alone", () => {

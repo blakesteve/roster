@@ -399,7 +399,7 @@ export const ThemedWithTokens: Story = {
     docs: {
       description: {
         story:
-          "`Select`'s `outline` variant reads the same `--roster-control-bg`, `-border` and `-text` custom properties as `Input`'s, rather than a `--roster-select-*` family of its own. These two controls sit in the same row of the same form and are drawn to look identical, so a consumer who could repaint one and not the other would have a bug, not a choice.\n\nThere is no `-border-focus` on the trigger: focus here is the shared `--roster-ring`, not a border color.\n\nSet the tokens in **both** `:root` and `.dark` in real usage. Roster's own `.dark` rule has equal specificity and comes later in the stylesheet, so a `:root`-only override is discarded in dark mode.",
+          "`Select`'s `outline` variant reads the same `--roster-control-bg`, `-border` and `-text` custom properties as `Input`'s, rather than a `--roster-select-*` family of its own. These two controls sit in the same row of the same form and are drawn to look identical, so a consumer who could repaint one and not the other would have a bug, not a choice.\n\nThere is no `-border-focus` on the trigger: focus here is the shared `--roster-ring`, not a border color.\n\nSet the tokens in **both** `:root` and `.dark` in real usage. What a `:root`-only override does in dark mode depends on load order, because Roster's own `.dark` rule has the same specificity: loaded before Roster's stylesheet it is discarded, loaded after it carries your light value onto a dark page. Either way it is wrong, so set both.",
       },
     },
   },

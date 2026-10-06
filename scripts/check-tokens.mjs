@@ -46,6 +46,29 @@ const COMPONENT = [
   "sheet-backdrop",
 ];
 
+/* Shape hooks: corner radius, edge width, the control level and the backdrop.
+   Each one maps to the utilities that must read it, because a hook read
+   somewhere is not the promise; the promise is that every Button corner, every
+   1px border and every overlay follows it. A selector here that emits nothing,
+   or emits without the hook, is a shape an app can no longer reach.
+
+   Matched on the rule's own selector, with `{` after it, so `rounded-sm` is
+   not satisfied by `rounded-sm\:hover` or the like. */
+const SHAPE = {
+  "radius-sm": [".rst\\:rounded-sm{"],
+  "radius-md": [".rst\\:rounded-md{"],
+  "radius-lg": [".rst\\:rounded-lg{"],
+  "radius-xl": [".rst\\:rounded-xl{"],
+  "radius-2xl": [".rst\\:rounded-2xl{"],
+  /* No component draws a 3xl corner, so there is no utility to require; the
+     token is wired for the first one that does. Requiring the utility would
+     pass only because a story happens to use it. */
+  "radius-3xl": [],
+  "border-width": [".rst\\:border{", ".rst\\:border-t{", ".rst\\:border-b{", ".rst\\:ring{"],
+  "elevation-control": [".rst\\:elevation-control{"],
+  "backdrop-blur": [".rst\\:backdrop-blur-backdrop{"],
+};
+
 if (!existsSync(CSS)) {
   console.error(`[check-tokens] ${CSS} not found — run the build first.`);
   process.exit(1);
@@ -128,6 +151,47 @@ for (const token of COMPONENT) {
   }
 }
 
+/* The rule bodies for a selector. A selector can appear in more than one rule
+   (an `@supports` fallback, a grouped selector), so every body is collected. */
+function bodiesOf(selector) {
+  const bodies = [];
+  let at = css.indexOf(selector);
+  while (at !== -1) {
+    const open = at + selector.length - 1;
+    bodies.push(css.slice(open + 1, css.indexOf("}", open)));
+    at = css.indexOf(selector, at + 1);
+  }
+  return bodies;
+}
+
+for (const [hook, selectors] of Object.entries(SHAPE)) {
+  for (const selector of selectors) {
+    const bodies = bodiesOf(selector);
+    if (bodies.length === 0) {
+      problems.push(`\`${selector.slice(0, -1)}\` emits no CSS, so nothing reads \`--roster-${hook}\` there.`);
+    } else if (!bodies.some((body) => body.includes(`var(--roster-${hook},`))) {
+      problems.push(
+        `\`${selector.slice(0, -1)}\` must read \`var(--roster-${hook}, <fallback>)\`. ` +
+          `It resolves to: ${bodies.join(" | ")}`,
+      );
+    }
+  }
+}
+
+/* The backdrop has no utility of its own: Dialog and Sheet each read it in an
+   arbitrary value with their own fallback. So the artifact can prove the hook
+   is read with a fallback, as for the motion knobs, and no more. Which
+   components read it is a source question, and the artifact can't answer it:
+   Tailwind scans tests and stories too, so a class string quoted in a test
+   keeps its rule emitted after the component stops using it. That reach is
+   pinned by src/shape.test.ts and, rendered, by src/shape.checks.stories.tsx. */
+const backdropReads = css.split("var(--roster-backdrop,").length - 1;
+if (backdropReads === 0) {
+  problems.push(
+    "`--roster-backdrop` is not read with a fallback, so Dialog and Sheet can't follow it.",
+  );
+}
+
 if (problems.length > 0) {
   console.error("[check-tokens] promised tokens are not themeable:\n");
   for (const problem of problems) console.error(`  - ${problem}\n`);
@@ -135,5 +199,5 @@ if (problems.length > 0) {
 }
 
 console.log(
-  `✓ ${ROLES.length} font roles, ${MOTION.length} motion knobs, ${ELEVATION.length} elevation levels and ${COMPONENT.length} component tokens are themeable via --roster-*`,
+  `✓ ${ROLES.length} font roles, ${MOTION.length} motion knobs, ${ELEVATION.length} surface elevation levels, ${COMPONENT.length} component tokens and ${Object.keys(SHAPE).length + 1} shape tokens, the control level among them (read by ${Object.values(SHAPE).flat().length} utilities, and the backdrop by ${backdropReads} rules) are themeable via --roster-*`,
 );

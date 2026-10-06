@@ -15,7 +15,7 @@ export const inlineCodeVariants = /* @__PURE__ */ cva("rst:font-mono rst:text-[0
     },
     surface: {
       none: "",
-      soft: "rst:rounded rst:bg-gray-100 rst:px-1 rst:py-0.5 rst:dark:bg-gray-800",
+      soft: "rst:rounded-sm rst:bg-gray-100 rst:px-1 rst:py-0.5 rst:dark:bg-gray-800",
     },
   },
   defaultVariants: { colorScheme: "primary", surface: "none" },

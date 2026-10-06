@@ -23,9 +23,10 @@ export const cardVariants = /* @__PURE__ */ cva(
         slate: 
           "rst:bg-gray-700 rst:border rst:border-gray-600 rst:text-gray-100 rst:elevation-raised rst:dark:bg-gray-800 rst:dark:border-gray-700 rst:dark:text-gray-100",
         
-        // Primary: Fully drenched in brand color.
+        // Primary: Fully drenched in brand color. Text is the fill's ink token,
+        // as on every other solid fill, so a light primary gets dark text.
         primary: 
-          "rst:bg-primary-600 rst:border rst:border-primary-700 rst:text-white rst:elevation-raised rst:dark:bg-primary-900 rst:dark:border-primary-800 rst:dark:text-primary-50",
+          "rst:bg-primary-600 rst:border rst:border-primary-700 rst:text-primary-600-ink rst:elevation-raised rst:dark:bg-primary-900 rst:dark:border-primary-800 rst:dark:text-primary-50",
         
         // Outline: Transparent background, just the structural border.
         outline:

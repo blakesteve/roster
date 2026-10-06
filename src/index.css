@@ -306,6 +306,63 @@
      ──────────────────────────────────────────────────────────────────────── */
   --color-ring: var(--roster-ring, #0f6498);
   --color-background: var(--roster-ring-offset, #ffffff);
+
+  /* ── Shape ───────────────────────────────────────────────────────────────
+     Corner radius, edge width and backdrop blur, each reachable through one
+     `--roster-*` property, wired the way `--roster-font-mono` is above.
+
+     Before these, color and surfaces were tokens and shape was not, so an app
+     that wanted square corners or heavier keylines had to patch every call
+     site: a radius class on each Button, a hand-rolled panel in place of Card,
+     a wrapper around Dialog for its border. Setting one property now reshapes
+     every component that uses that step.
+
+     Every fallback is Tailwind's own value, so an app that sets none of these
+     renders exactly as before. Hooks, not definitions: Roster never sets them
+     at `:root`, so an override at `:root` holds in dark mode too.
+
+       --roster-radius-sm     0.25rem   rounded-sm, and the six controls that
+                                        were bare `rounded` (the same 0.25rem)
+       --roster-radius-md     0.375rem  rounded-md
+       --roster-radius-lg     0.5rem    rounded-lg
+       --roster-radius-xl     0.75rem   rounded-xl
+       --roster-radius-2xl    1rem      rounded-2xl
+       --roster-radius-3xl    1.5rem    rounded-3xl, which no component uses
+                                        yet, so today it moves nothing
+       --roster-border-width  1px       every 1px edge: `border` and its
+                                        sides, `divide-y`, the `ring` that
+                                        Select's trigger and the anchored
+                                        panels draw their edge with, and the
+                                        rules in Accordion and LabeledDivider
+       --roster-backdrop-blur 8px       Dialog's backdrop
+
+     `rounded-full` is not a step and stays a circle. Edges that are
+     deliberately some other width stay literal: a 4px status bar or accent
+     rule, a 2px dashed drop zone, a spinner's stroke, a Switch track's 2px
+     inset, and every focus ring. (Select's trigger and MultiSelect's field
+     are the exception: their edge is a ring, so their focus ring is that
+     edge plus a pixel, and focus stays a heavier line.)
+
+     Radius steps are independent, not a scale: setting `--roster-radius-md`
+     alone leaves `-lg` where it was. A print look that wants every corner
+     square sets all six. */
+  --radius-sm: var(--roster-radius-sm, 0.25rem);
+  --radius-md: var(--roster-radius-md, 0.375rem);
+  --radius-lg: var(--roster-radius-lg, 0.5rem);
+  --radius-xl: var(--roster-radius-xl, 0.75rem);
+  --radius-2xl: var(--roster-radius-2xl, 1rem);
+  --radius-3xl: var(--roster-radius-3xl, 1.5rem);
+
+  /* Tailwind reads these two for the bare `border`, `border-t` and friends,
+     `divide-y`, and `ring`. A width written as a number (`border-2`,
+     `ring-2`) does not read them, which is what keeps focus rings and the
+     deliberate widths above out of it. */
+  --default-border-width: var(--roster-border-width, 1px);
+  --default-ring-width: var(--roster-border-width, 1px);
+
+  /* Its own step rather than a remap of `blur-sm`, so the backdrop token
+     moves the backdrop and nothing else that might ever ask for `blur-sm`. */
+  --blur-backdrop: var(--roster-backdrop-blur, 8px);
 }
 
 /* ── Focus tokens ────────────────────────────────────────────────────────────
@@ -506,9 +563,25 @@
 
    The motion tokens are declared at `:root` only, for the reason
    `--roster-lt-text-active` is: they are the same in both schemes, and a
-   consumer's `:root` override should survive dark mode. The backdrop differs
-   by scheme, so it is declared in both, and an override needs both too.
-   Defaults match `Dialog`'s backdrop, which is not itself themeable.
+   consumer's `:root` override should survive dark mode.
+
+   The backdrop is `--roster-backdrop`, and it is shared: Dialog and Sheet both
+   read it, so one property gives every overlay the same scrim. Roster does
+   not set it. Each component falls back to its own default, which keeps both
+   exactly as they were for an app that sets nothing:
+
+     Sheet         light rgb(15 23 42 / 0.6)      dark rgb(0 0 0 / 0.8)
+     Dialog        light slate-900 at 60%         dark --roster-black at 80%
+     Dialog glass  light slate-900 at 40%         dark --roster-black at 60%
+
+   Those defaults differ, in dark mode by more than rounding (a pure black
+   against Roster's warm one), which is why the token is a hook rather than
+   one value: a single default would move one of them. Set it at `:root` and
+   both follow in both schemes; set it in `.dark` too if dark wants its own.
+
+   `--roster-sheet-backdrop`, the earlier name, still works and still moves
+   Sheet alone, because it is Sheet's fallback. It is kept for apps that set
+   it; new code sets `--roster-backdrop`.
    ─────────────────────────────────────────────────────────────────────────── */
 :root {
   --roster-sheet-enter-duration: 280ms;
@@ -666,10 +739,15 @@
 
    Three of the four still default to what the outline variant already used.
    `--roster-control-border` does not: the 1.4.11 pass moved it two ramp steps,
-   so a consumer who sets none of these WILL see heavier field borders. Set them in BOTH scopes:
-   Roster's own `.dark` rule has equal specificity and comes later in this
-   stylesheet, so a `:root`-only override is discarded in dark mode. Same trap
-   as the scrollbar token above.
+   so a consumer who sets none of these WILL see heavier field borders. Set them in BOTH scopes.
+   What a `:root`-only override does in dark mode depends on where it loads,
+   because Roster's own `.dark` rule has the same specificity. Loaded before
+   Roster's stylesheet, or anywhere `.dark` sits below the root (Select,
+   Combobox and MultiSelect copy it onto their portaled panels, the Toaster
+   onto its queue), it is discarded and Roster's dark value
+   shows. Loaded after, with `.dark` on <html>, it wins, and the light value
+   lands on a dark page. Neither is what you want, so name both scopes. The
+   same holds for the scrollbar token above.
 
      :root { --roster-control-bg: …; --roster-control-border: …;
              --roster-control-text: …; --roster-control-border-focus: …; }
@@ -767,9 +845,10 @@
    ring moves from `black/5` to `--roster-gray-200`, which is the same hairline
    the rest of the library draws.
 
-   Set them in BOTH scopes — the `.dark` rule below has equal specificity and
-   comes later, so a `:root`-only override is discarded in dark mode. Same trap
-   as --roster-control-* above.
+   Set them in BOTH scopes. A `:root`-only override is either discarded in
+   dark mode or carries its light value onto a dark page, depending on whether
+   it loads before or after Roster's stylesheet; --roster-control-* above has
+   the detail.
 
    And set them at :root rather than on a container, which matters more here
    than it does for the control family. Select's menu and Tooltip's bubble are
@@ -824,11 +903,28 @@
      overlay   detached from the page entirely — Dialog, Toast.
 
    The scale describes SURFACES THAT CONTAIN CONTENT, and controls are not
-   surfaces. Button, the Select trigger and the Avatar ring keep their own
-   `shadow-sm` and stay out of it: a button and a card do not have the same
+   surfaces. Button, the Select trigger and the Avatar ring keep a lighter
+   lift of their own, `control` below, and stay out of it: a button and a card do not have the same
    relationship to the page, and giving a 32px control the depth of a card is
    how a scale stops meaning anything. If a new component is asking which level
    it is, the question to answer first is whether it holds content.
+
+     control   not a surface, a fourth level beside the three: the soft
+               lift under Button `solid` and `outline`, the Select trigger,
+               Avatar and the Switch thumb. Its own token, so an app can
+               flatten its controls, or give them a hard printed shadow,
+               without touching its cards. `--roster-elevation-control` is a
+               hook: Roster never sets it, and the fallback is Tailwind's
+               `shadow-sm` exactly, so an unset app sees no change and a
+               `:root` override holds in both schemes.
+
+   Never set any of the four to `none`. It deletes rings: a ring IS a
+   box-shadow, composed into the same declaration, so `none` empties the whole
+   declaration and the 1px edge of every Select, Combobox and MultiSelect
+   panel, Tooltip and Navbar menu vanishes with the shadow. On `control` it is
+   worse: the Select trigger loses its edge, and Button and Select lose their
+   focus ring, so a keyboard user can no longer see where they are. For "no
+   shadow", use `0 0 #0000`.
 
    Depth only. These deliberately do NOT set a background, because Card's
    `slate`, `primary` and `glass` each NAME a surface, and a token that meant
@@ -838,8 +934,8 @@
 
    `raised` is deliberately a touch heavier than the `shadow-sm` it replaced.
    The first pass made it lighter, which inverted the hierarchy it exists to
-   create: `Button` keeps `shadow-sm`, so a button cast a darker shadow than
-   the card containing it.
+   create: `Button` keeps `shadow-sm` (now the `control` level's default), so
+   a button cast a darker shadow than the card containing it.
 
    Dark is the honest limit here. A black shadow on a near-black ground has
    almost no range to work in — at full alpha over `gray-950` the darkest it
@@ -906,6 +1002,20 @@
 
 @utility elevation-overlay {
   --tw-shadow: var(--roster-elevation-overlay);
+  box-shadow:
+    var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+    var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+
+/* The fallback is Tailwind's `shadow-sm` as it emits it, `--tw-shadow-color`
+   included, so a `shadow-<color>` passed to a control still tints it, and the
+   computed shadow is the same string it was. */
+@utility elevation-control {
+  --tw-shadow: var(
+    --roster-elevation-control,
+    0 1px 3px 0 var(--tw-shadow-color, #0000001a),
+    0 1px 2px -1px var(--tw-shadow-color, #0000001a)
+  );
   box-shadow:
     var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
     var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);

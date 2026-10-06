@@ -11,7 +11,7 @@ export const inputVariants = /* @__PURE__ */ cva(
     variants: {
       variant: {
         white:
-          "rst:border-gray-300 rst:bg-white rst:text-gray-900 rst:placeholder:text-gray-400 rst:focus-visible:border-primary-500 rst:dark:border-gray-700 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:placeholder:text-gray-500",
+          "rst:border-gray-300 rst:bg-white rst:text-gray-900 rst:placeholder:text-gray-500 rst:focus-visible:border-primary-500 rst:dark:border-gray-700 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:placeholder:text-gray-400",
         /* A boundary that does not depend on what is behind it. `soft` used
            `border-transparent` and leaned on its fill alone, which fails the
            moment the fill matches the surface — exactly 1.00:1 inside a
@@ -20,9 +20,9 @@ export const inputVariants = /* @__PURE__ */ cva(
            the variant. The border is the same token `outline` reads, so a
            consumer repaints both at once. */
         soft:
-          "rst:border-[var(--roster-control-border)] rst:bg-gray-100 rst:text-gray-900 rst:placeholder:text-gray-400 rst:focus-visible:bg-white rst:focus-visible:border-primary-500 rst:dark:focus-visible:border-primary-400 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:placeholder:text-gray-500 rst:dark:focus-visible:bg-gray-900",
+          "rst:border-[var(--roster-control-border)] rst:bg-gray-100 rst:text-gray-900 rst:placeholder:text-gray-500 rst:focus-visible:bg-white rst:focus-visible:border-primary-500 rst:dark:focus-visible:border-primary-400 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:placeholder:text-gray-400 rst:dark:focus-visible:bg-gray-900",
         slate:
-          "rst:border-transparent rst:bg-gray-700 rst:text-gray-100 rst:placeholder:text-gray-400 rst:focus-visible:bg-gray-600 rst:dark:bg-gray-900 rst:dark:placeholder:text-gray-500 rst:dark:focus-visible:bg-gray-800",
+          "rst:border-transparent rst:bg-gray-700 rst:text-gray-100 rst:placeholder:text-gray-300 rst:focus-visible:bg-gray-600 rst:dark:bg-gray-900 rst:dark:placeholder:text-gray-400 rst:dark:focus-visible:bg-gray-800",
         /* The default variant, and the only one that reads tokens.
            `Button`'s colors resolve through `--roster-*`, so remapping a palette
            carries; these were hardcoded, so a consumer wanting a field border in
@@ -37,11 +37,21 @@ export const inputVariants = /* @__PURE__ */ cva(
            know, and `soft` leaning on fill alone made it invisible at 1.00:1
            inside a `white` Dialog in dark mode. `white`, `slate` and `ghost`
            stay fully opinionated — each names a specific surface, and a token
-           that meant something different in each would not be a token. */
+           that meant something different in each would not be a token.
+
+           Placeholders have to reach 4.5:1; gray-400, which every variant
+           used, is 2.52:1 on white. Here the placeholder is the text token at
+           65%, so it follows whatever surface the text was chosen for (5.46:1
+           on a white page, 7.76 on the dark one, 5.02 inside the `slate`
+           Dialog, where a fixed gray-500 would fall to 1.71; measured
+           rendered, src/fills-and-fields.checks.stories.tsx). The opinionated
+           variants name a step per scheme instead, measured on their own
+           fill. An error leaves the placeholder alone: a red that passes is
+           too close to the typed text's red to tell them apart. */
         outline:
-          "rst:border-[var(--roster-control-border)] rst:bg-[var(--roster-control-bg)] rst:text-[var(--roster-control-text)] rst:placeholder:text-gray-400 rst:focus-visible:border-[var(--roster-control-border-focus)] rst:dark:placeholder:text-gray-500",
+          "rst:border-[var(--roster-control-border)] rst:bg-[var(--roster-control-bg)] rst:text-[var(--roster-control-text)] rst:placeholder:text-[color-mix(in_srgb,var(--roster-control-text)_65%,transparent)] rst:focus-visible:border-[var(--roster-control-border-focus)]",
         ghost:
-          "rst:border-transparent rst:bg-transparent rst:text-gray-900 rst:placeholder:text-gray-400 rst:hover:bg-gray-100 rst:focus-visible:bg-gray-100 rst:dark:text-gray-100 rst:dark:placeholder:text-gray-500 rst:dark:hover:bg-gray-800 rst:dark:focus-visible:bg-gray-800",
+          "rst:border-transparent rst:bg-transparent rst:text-gray-900 rst:placeholder:text-gray-500 rst:hover:bg-gray-100 rst:focus-visible:bg-gray-100 rst:dark:text-gray-100 rst:dark:placeholder:text-gray-400 rst:dark:hover:bg-gray-800 rst:dark:focus-visible:bg-gray-800",
       },
       /* Deliberately the same three heights as Button: h-9 / h-10 / h-11.
          Input was a fixed 42px, which agreed with Button at no size at all, so
@@ -57,7 +67,7 @@ export const inputVariants = /* @__PURE__ */ cva(
         lg: "rst:h-11 rst:px-4",
       },
       error: {
-        true: "rst:border-error-500 rst:focus-visible:ring-error-500 rst:text-error-600 rst:placeholder:text-error-300 rst:dark:border-error-500 rst:dark:text-error-400 rst:dark:placeholder:text-error-800 rst:dark:focus-visible:ring-error-400",
+        true: "rst:border-error-500 rst:focus-visible:ring-error-500 rst:text-error-600 rst:dark:border-error-500 rst:dark:text-error-400 rst:dark:focus-visible:ring-error-400",
         false: "",
       },
     },

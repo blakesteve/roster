@@ -61,11 +61,15 @@ const dialogVariants = /* @__PURE__ */ cva(
            4.07 / 6.93 for the border.
 
            `white` and `glass` are not here on purpose: both follow the page's
-           scheme, so the page-level tokens are already right for them. */
+           scheme, so the page-level tokens are already right for them.
+
+           `primary`'s text is its fill's ink token, as on every other solid
+           fill, so a light primary gets dark text. Dark stays white: that
+           fill is primary-950, which has no ink token. */
         slate:
           "rst:bg-gray-700 rst:border-gray-600 rst:text-gray-100 rst:dark:bg-gray-900 rst:dark:border-gray-800 rst:[--roster-ring:var(--roster-primary-400,#5ea3de)] rst:[--roster-ring-offset:var(--roster-gray-700,#44403c)] rst:dark:[--roster-ring-offset:var(--roster-gray-900,#1c1917)] rst:[--roster-control-text:var(--roster-gray-100,#f5f5f4)] rst:[--roster-control-border:var(--roster-gray-400,#a8a29e)] rst:[--roster-control-border-focus:var(--roster-primary-400,#5ea3de)]",
         primary:
-          "rst:bg-primary-700 rst:border-primary-600 rst:text-white rst:dark:bg-primary-950 rst:dark:border-primary-900 rst:[--roster-ring:var(--roster-primary-400,#5ea3de)] rst:[--roster-ring-offset:var(--roster-primary-700,#084063)] rst:dark:[--roster-ring-offset:var(--roster-primary-950,#021724)] rst:[--roster-control-text:var(--roster-gray-100,#f5f5f4)] rst:[--roster-control-border:var(--roster-gray-400,#a8a29e)] rst:[--roster-control-border-focus:var(--roster-primary-400,#5ea3de)]",
+          "rst:bg-primary-700 rst:border-primary-600 rst:text-primary-700-ink rst:dark:text-white rst:dark:bg-primary-950 rst:dark:border-primary-900 rst:[--roster-ring:var(--roster-primary-400,#5ea3de)] rst:[--roster-ring-offset:var(--roster-primary-700,#084063)] rst:dark:[--roster-ring-offset:var(--roster-primary-950,#021724)] rst:[--roster-control-text:var(--roster-gray-100,#f5f5f4)] rst:[--roster-control-border:var(--roster-gray-400,#a8a29e)] rst:[--roster-control-border-focus:var(--roster-primary-400,#5ea3de)]",
         glass:
           "rst:bg-white/80 rst:border-white/20 rst:backdrop-blur-xl rst:text-gray-900 rst:dark:bg-slate-900/80 rst:dark:border-slate-700/50 rst:dark:text-white",
       },
@@ -194,12 +198,20 @@ const Dialog = ({
           leaveFrom="rst:opacity-100"
           leaveTo="rst:opacity-0"
         >
+          {/* `--roster-backdrop` is the scrim Sheet reads too, so one property
+              gives every overlay the same one. The fallbacks are this
+              component's own, exactly as they were, which is why they're
+              written out here rather than shared with Sheet: the two never
+              agreed (src/index.css, the Sheet block). `glass` reads the token
+              as well, so a retinted app doesn't get one slate scrim back on
+              its glass dialogs; unset, glass keeps its lighter tint and no
+              blur, since the panel's own blur is the point of it. */}
           <DialogBackdrop
             className={cn(
               "rst:fixed rst:inset-0 rst:transition-opacity",
               variant === "glass"
-                ? "rst:bg-slate-900/40 rst:dark:bg-black/60"
-                : "rst:bg-slate-900/60 rst:dark:bg-black/80 rst:backdrop-blur-sm",
+                ? "rst:bg-[var(--roster-backdrop,color-mix(in_oklab,oklch(20.8%_0.042_265.755)_40%,transparent))] rst:dark:bg-[var(--roster-backdrop,color-mix(in_oklab,var(--roster-black,#1e1c1a)_60%,transparent))]"
+                : "rst:bg-[var(--roster-backdrop,color-mix(in_oklab,oklch(20.8%_0.042_265.755)_60%,transparent))] rst:dark:bg-[var(--roster-backdrop,color-mix(in_oklab,var(--roster-black,#1e1c1a)_80%,transparent))] rst:backdrop-blur-backdrop",
             )}
           />
         </TransitionChild>

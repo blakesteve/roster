@@ -94,7 +94,7 @@ const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
           onClick={onDismiss}
           aria-label={dismissLabel}
           className={cn(
-            "rst:-mr-1 rst:ml-auto rst:shrink-0 rst:cursor-pointer rst:rounded rst:opacity-70 rst:hover:opacity-100",
+            "rst:-mr-1 rst:ml-auto rst:shrink-0 rst:cursor-pointer rst:rounded-sm rst:opacity-70 rst:hover:opacity-100",
             "rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:ring-offset-background rst:focus-visible:ring-offset-2",
           )}
         >
