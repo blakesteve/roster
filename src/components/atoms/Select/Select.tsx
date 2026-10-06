@@ -144,7 +144,7 @@ const Select = ({
                wrapper div, which has no role — so there was no route to it from
                either side. Without this a screen reader reads the error text on
                focus but never reports the field as invalid. */
-            aria-invalid={invalid || undefined}
+            aria-invalid={hasError || undefined}
             className={cn(
               selectTriggerVariants({ variant, size, error: hasError }),
               triggerClassName,
