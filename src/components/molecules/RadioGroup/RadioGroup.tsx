@@ -8,6 +8,7 @@ import {
 } from "@headlessui/react";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
 import {
   radioDotVariants,
   radioGroupOptionsVariants,
@@ -64,9 +65,10 @@ export interface RadioGroupProps
    * `aria-describedby` is one of the props Headless UI controls on a
    * `RadioGroup`, and a controlled prop is spread last. Passing one is
    * therefore a no-op rather than an addition. `aria-invalid` is not one of
-   * Headless UI's, so a caller's survives its spread — and is then outranked
-   * by this component's own error state, which is a different thing from the
-   * token-list merge `CheckboxGroup` does for `aria-describedby`.
+   * Headless UI's: a caller's is read by the rule every Roster field follows
+   * (`src/internal/field-invalid.ts`), so any value but "false" marks the
+   * group invalid, as `"true"`, and an error message marks it invalid whatever
+   * the caller passed.
    */
   errorMessage?: string;
   /** Disables every option, and dims the label and helper text with them. */
@@ -173,6 +175,11 @@ const RadioGroup = ({
   ...props
 }: RadioGroupProps) => {
   const hasError = !!errorMessage;
+  /* By the rule every Roster field follows. A radio can't carry
+     `aria-invalid`, so the group says it: it is what a screen reader reports
+     on the way into the group. */
+  const invalid = isFieldInvalid(hasError, { ...props, "aria-invalid": ariaInvalid });
+  const groupProps = withoutInvalidProps(props);
   const resolvedSize = size ?? "md";
 
   return (
@@ -187,16 +194,11 @@ const RadioGroup = ({
       /* What keeps a caller from reporting an invalid group valid is the
          DESTRUCTURE above, not this spread order: `aria-invalid` is pulled out
          of `...props` by name, so it can never reach the element except
-         through the expression below. Spreading first is defense for the day
-         someone deletes that destructure, and it matches how `CheckboxGroup`
-         is written. It is stated this way round because the ordering alone
-         reads like the guard and is not — moving the spread below changes
-         nothing, which a mutation test is how you find out.
-
-         The expression's own order does matter: an error message means the
-         selection is invalid, so it outranks a caller's token. */
-      {...props}
-      aria-invalid={hasError || ariaInvalid || undefined}
+         through `invalid`. Spreading first is defense for the day someone
+         deletes that destructure, and it matches how `CheckboxGroup` is
+         written. */
+      {...groupProps}
+      aria-invalid={invalid || undefined}
       aria-orientation={orientation}
     >
       {/* A `Label` directly inside the group registers as its accessible name.

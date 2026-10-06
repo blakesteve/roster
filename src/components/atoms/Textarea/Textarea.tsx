@@ -8,6 +8,7 @@ import {
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 import { textareaVariants } from "./textarea-variants";
+import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
 
 export interface TextareaProps
   extends
@@ -44,6 +45,12 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     ref,
   ) => {
     const hasError = !!errorMessage || error;
+    /* Headless UI's textarea writes `aria-invalid` from its own `invalid` prop
+       and nothing else, over whatever was passed, the same as Input's. So the
+       field's error, a consumer's `aria-invalid` and Headless UI's `invalid`
+       are read here, by the rule every Roster field follows. */
+    const invalid = isFieldInvalid(hasError, props);
+    const textareaProps = withoutInvalidProps(props);
 
     return (
       /* No `space-y-*` here, for the reason documented on Input: Headless UI's
@@ -70,7 +77,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             textareaVariants({ variant, resize, error: hasError }),
             textareaClassName,
           )}
-          {...props}
+          {...textareaProps}
+          invalid={invalid}
         />
 
         {(helperText || errorMessage) && (

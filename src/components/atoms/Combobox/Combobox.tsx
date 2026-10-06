@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
 import { inputVariants } from "../Input/input-variants";
 import type { SelectOption } from "../Select/Select";
 import { PopupOption } from "../../../internal/PopupOption";
@@ -104,6 +105,11 @@ const Combobox = ({
   const [query, setQuery] = React.useState("");
   const { ref: fieldRef, inDarkScope } = useDarkScope<HTMLDivElement>();
   const hasError = !!errorMessage || error;
+  /* By the rule every Roster field follows. The consumer's `aria-invalid` and
+     Headless UI's `invalid` are taken off `props`, which land on the wrapper,
+     where they would do nothing, and said on the control. */
+  const invalid = isFieldInvalid(hasError, props);
+  const fieldProps = withoutInvalidProps(props);
   const filtered = filter(options, query);
   const selected = options.find((o) => o.value === value) ?? null;
 
@@ -111,7 +117,7 @@ const Combobox = ({
     <Field
       disabled={disabled}
       className={cn("rst:flex rst:flex-col rst:gap-1.5", className)}
-      {...props}
+      {...fieldProps}
     >
       {label && (
         <Label className="rst:block rst:text-sm rst:font-medium rst:text-[var(--roster-control-text)] rst:text-left">
@@ -126,7 +132,7 @@ const Combobox = ({
       >
         <div ref={fieldRef} className="rst:relative">
           <ComboboxInput
-            aria-invalid={hasError || undefined}
+            aria-invalid={invalid || undefined}
             /* `pr-9` AFTER `inputClassName`, unlike every other escape hatch
                in the library. It is structural rather than decorative: it is
                the room the chevron occupies, and a consumer passing

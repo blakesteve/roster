@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { playwright } from '@vitest/browser-playwright';
 import { realInputCommands } from './.storybook/real-input';
+import { axCommands } from './.storybook/ax-tree';
 
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
@@ -180,7 +181,7 @@ export default defineConfig({
         plugins: [
           storybookTest({
             configDir: path.join(dirname, '.storybook'),
-            tags: { exclude: ['real-input'] }
+            tags: { exclude: ['real-input', 'ax-tree'] }
           })
         ],
         test: {
@@ -219,6 +220,35 @@ export default defineConfig({
             headless: true,
             provider: playwright({}),
             commands: realInputCommands,
+            instances: [{
+              browser: 'chromium'
+            }]
+          },
+          setupFiles: ['.storybook/vitest.setup.ts']
+        }
+      },
+      {
+        /* The stories tagged `ax-tree`: checks that read Chromium's
+           accessibility tree (.storybook/ax-tree.ts). Their own project so
+           they can run last and alone (below). */
+        extends: true,
+        plugins: [
+          storybookTest({
+            configDir: path.join(dirname, '.storybook'),
+            tags: { include: ['ax-tree'] }
+          })
+        ],
+        test: {
+          name: 'storybook-ax-tree',
+          /* After every other project, not beside them: at the start of a full
+             parallel run the page was too busy to answer the DevTools
+             protocol for 15s and more. Run alone, a read takes milliseconds. */
+          sequence: { groupOrder: 1 },
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({}),
+            commands: { ...realInputCommands, ...axCommands },
             instances: [{
               browser: 'chromium'
             }]

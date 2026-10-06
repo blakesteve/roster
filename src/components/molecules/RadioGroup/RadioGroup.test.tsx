@@ -336,12 +336,16 @@ describe("RadioGroup", () => {
       );
     });
 
-    it("passes a caller's aria-invalid through when there is no error", () => {
+    it("keeps a caller's aria-invalid when there is no error, as true", () => {
+      /* Every Roster field follows one rule (src/internal/field-invalid.ts):
+         any value but "false" makes the field invalid, and it says "true".
+         A token such as "spelling" used to pass through here and nowhere else;
+         Headless UI's text fields can only write "true". */
       render(<Stateful label="Visibility" aria-invalid="spelling" />);
 
       expect(screen.getByRole("radiogroup", { name: "Visibility" })).toHaveAttribute(
         "aria-invalid",
-        "spelling",
+        "true",
       );
     });
 

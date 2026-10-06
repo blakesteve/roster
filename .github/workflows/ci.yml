@@ -58,6 +58,18 @@ jobs:
       - name: Run Storybook tests under reduced motion
         run: npx vitest run --project storybook-reduced-motion
 
+      # Stories that drive Playwright's real mouse and resize the viewport
+      # (.storybook/real-input.ts). Their own project, and their own step,
+      # because they need the page's one mouse and one viewport to themselves.
+      - name: Run Storybook tests with real input
+        run: npx vitest run --project storybook-real-input
+
+      # Checks that read Chromium's accessibility tree (.storybook/ax-tree.ts).
+      # Last, and alone: beside other story files the page didn't answer the
+      # DevTools protocol in time.
+      - name: Run accessibility-tree checks
+        run: npx vitest run --project storybook-ax-tree
+
   build:
     name: Build
     runs-on: ubuntu-latest

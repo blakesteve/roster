@@ -2,6 +2,7 @@ import React from "react";
 import { Description, Field, Fieldset, Label, Legend } from "@headlessui/react";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
 import { Checkbox } from "../../atoms/Checkbox/Checkbox";
 import { Eyebrow } from "../../atoms/Eyebrow/Eyebrow";
 import {
@@ -44,13 +45,15 @@ export interface CheckboxGroupProps
   helperText?: string;
   /**
    * The message for an invalid selection. Implies the error state, so a caller
-   * cannot color the text red and forget to say why.
+   * can not color the text red and forget to say why.
    *
    * What it repaints depends on `variant`, and the difference is worth
    * knowing: `panel` gets an error border, `plain` has no boundary to repaint
    * and so the message *is* the whole error state. Narrower than `Input`'s or
-   * `Select`'s, which both ring the control itself — a checkbox is not the
-   * thing that is invalid here, the selection is.
+   * `Select`'s, which both ring the control itself: what is invalid here is
+   * the selection. Each checkbox is still announced as invalid, though, since
+   * a checkbox is what a screen reader focuses
+   * (`src/internal/field-invalid.ts`).
    */
   errorMessage?: string;
   /**
@@ -121,6 +124,11 @@ const CheckboxGroup = ({
   ...props
 }: CheckboxGroupProps) => {
   const hasError = !!errorMessage;
+  /* By the rule every Roster field follows. Said on the group and on each
+     checkbox: a checkbox is what a screen reader focuses, and it can carry
+     `aria-invalid`, where a group's is announced at best on the way in. */
+  const invalid = isFieldInvalid(hasError, { ...props, "aria-invalid": ariaInvalid });
+  const groupProps = withoutInvalidProps(props);
   const scrollable = maxHeight !== undefined;
 
   /* Headless UI's `Fieldset` collects descendant `<Label>`s into its own
@@ -174,6 +182,7 @@ const CheckboxGroup = ({
         colorScheme={colorScheme}
         checked={value.includes(option.value)}
         onChange={(checked: boolean) => toggle(option.value, checked)}
+        aria-invalid={invalid || undefined}
         /* Nudged down to sit on the label's first line rather than centered
            against a block that may be two lines tall once `description` is
            set. `shrink-0` because the label is the flexible half. */
@@ -230,8 +239,8 @@ const CheckboxGroup = ({
          win over anything passed in. (`role` and `aria-disabled` are reserved
          only on its non-fieldset path, where it has to synthesize the
          semantics a real fieldset gives for free.) */
-      {...props}
-      aria-invalid={hasError || ariaInvalid || undefined}
+      {...groupProps}
+      aria-invalid={invalid || undefined}
       aria-describedby={describedBy}
     >
       {/* Headless UI's `Legend` renders a <div> that registers as the
