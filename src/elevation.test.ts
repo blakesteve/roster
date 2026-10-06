@@ -22,17 +22,16 @@ import { join } from "node:path";
 const SRC = __dirname;
 
 /**
- * Controls may carry a bare shadow, because the scale is about surfaces that
- * hold content and a control is not one. Each entry has to be argued for in
- * writing rather than acquired by forgetting.
+ * The controls that carry a lift, and the file each is in. They used to be
+ * exempt from the scale and keep a raw `shadow-sm` (the Switch thumb a bare
+ * `shadow`, the same value); they now have their own level, `control`, so an
+ * app can flatten or restyle them with one token, and the exemption is gone.
  */
-const CONTROLS_MAY_KEEP_A_HAIRLINE: Record<string, string> = {
-  "button-variants.ts": "a button is a control, not a surface it sits on",
-  "avatar-variants.ts": "the ring around an image, not a container",
-  "select-variants.ts": "the trigger is a control; its PANEL is anchored",
-  "switch-variants.ts":
-    "the thumb is a moving control part, and its bare `shadow` is what lifts " +
-    "it off the track rather than off the page",
+const CONTROLS: Record<string, string[]> = {
+  "button-variants.ts": ["solid", "outline"],
+  "select-variants.ts": ["the trigger"],
+  "avatar-variants.ts": ["the avatar"],
+  "switch-variants.ts": ["the thumb"],
 };
 
 function sourceFiles(): { name: string; path: string }[] {
@@ -58,7 +57,6 @@ describe("elevation scale", () => {
     const offenders: string[] = [];
 
     for (const file of sourceFiles()) {
-      if (file.name in CONTROLS_MAY_KEEP_A_HAIRLINE) continue;
       const source = readFileSync(file.path, "utf8");
       /* An optional variant prefix, and arbitrary values. Without the prefix
          group, `rst:dark:shadow-black/50` sailed past — and two of those were
@@ -88,22 +86,42 @@ describe("elevation scale", () => {
     expect(
       offenders,
       "these reach for a raw Tailwind shadow instead of rst:elevation-raised | " +
-        "-anchored | -overlay. If the component is genuinely a control rather " +
-        "than a surface, add it to CONTROLS_MAY_KEEP_A_HAIRLINE with a reason.",
+        "-anchored | -overlay, or rst:elevation-control on a control.",
     ).toEqual([]);
   });
 
-  it("keeps every exemption pointing at a file that still exists", () => {
-    /* Asserting the reason strings are long enough only restated three
-       literals declared forty lines above, which could not fail. What can
-       actually rot is an exemption outliving its file. */
-    const names = new Set(sourceFiles().map((file) => file.name));
-    for (const [file, reason] of Object.entries(CONTROLS_MAY_KEEP_A_HAIRLINE)) {
-      expect(names.has(file), `${file} is exempted but no longer exists`).toBe(
-        true,
-      );
-      expect(reason.length, `${file} needs a real reason`).toBeGreaterThan(20);
+  it("gives every control with a lift the control level", () => {
+    /* The guard above proves no raw shadow is left. This proves the lift
+       wasn't simply deleted along the way: each control still asks for one,
+       and asks for the level an app can set. */
+    const files = new Map(sourceFiles().map((file) => [file.name, file.path]));
+    for (const [name, sites] of Object.entries(CONTROLS)) {
+      const path = files.get(name);
+      expect(path, `${name} no longer exists`).toBeDefined();
+      const uses = readFileSync(path!, "utf8").split("rst:elevation-control").length - 1;
+      expect(uses, `${name}: ${sites.join(", ")}`).toBe(sites.length);
     }
+  });
+
+  it("makes the control level a hook whose fallback is Tailwind's shadow-sm", () => {
+    /* A hook, not a definition: same in both schemes, so an app's `:root`
+       override has to hold in dark mode, which a Roster `.dark` rule would
+       break. The fallback is `shadow-sm` as Tailwind 4 emits it, written
+       here as the requirement: an app that sets nothing sees the shadow its
+       controls had before. */
+    const css = readFileSync(join(__dirname, "index.css"), "utf8");
+    expect(css).not.toMatch(/--roster-elevation-control\s*:/);
+
+    const utility = css.slice(css.indexOf("@utility elevation-control {"));
+    const body = utility.slice(0, utility.indexOf("\n}")).replace(/\s+/g, " ");
+    expect(body).toContain(
+      "--tw-shadow: var( --roster-elevation-control, " +
+        "0 1px 3px 0 var(--tw-shadow-color, #0000001a), " +
+        "0 1px 2px -1px var(--tw-shadow-color, #0000001a) );",
+    );
+    /* Composed like the other levels, so a control's ring survives it: the
+       Select trigger draws its edge as one. */
+    expect(body).toContain("var(--tw-ring-shadow), var(--tw-shadow);");
   });
 
   it("defines all three levels in both schemes", () => {

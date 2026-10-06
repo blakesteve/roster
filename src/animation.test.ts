@@ -395,8 +395,9 @@ describe("the scrollbar", () => {
   });
 
   it("defines its colors in both themes", () => {
-    /* The story's own docs warn that a `:root`-only override is discarded in
-       dark mode. Roster should not make that mistake itself. */
+    /* The story's own docs tell consumers to set both scopes, because a
+       `:root`-only value is wrong in dark mode. Roster should not make that
+       mistake itself. */
     expect(definedIn(":root", "--roster-scrollbar-thumb")).toBe(true);
     expect(definedIn(".dark", "--roster-scrollbar-thumb")).toBe(true);
   });

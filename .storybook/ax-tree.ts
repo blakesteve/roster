@@ -1,7 +1,7 @@
 /**
  * Reads Chromium's accessibility tree for an element in the story under test:
- * its role, its name, and its `invalid` state, as a screen reader is handed
- * them. An attribute in the DOM is what the page asked for; this is what the
+ * its role, its name, its description and its `invalid` state, as a screen
+ * reader is handed them. An attribute in the DOM is what the page asked for; this is what the
  * browser made of it, which is what a requirement about "announced as invalid"
  * is actually about.
  *
@@ -12,7 +12,7 @@ import type { BrowserCommand } from "vitest/node";
 
 type AXValue = { value?: unknown };
 type AXProperty = { name: string; value: AXValue };
-type AXNode = { role?: AXValue; name?: AXValue; properties?: AXProperty[]; ignored?: boolean };
+type AXNode = { role?: AXValue; name?: AXValue; description?: AXValue; properties?: AXProperty[]; ignored?: boolean };
 type DOMNode = {
   nodeId: number;
   nodeName: string;
@@ -20,7 +20,7 @@ type DOMNode = {
   contentDocument?: DOMNode;
 };
 
-export type AXState = { role: string; name: string; invalid: string | null; ignored: boolean };
+export type AXState = { role: string; name: string; description: string; invalid: string | null; ignored: boolean };
 
 function documents(node: DOMNode, out: DOMNode[] = []): DOMNode[] {
   if (node.nodeName === "#document") out.push(node);
@@ -71,6 +71,7 @@ async function read(session: Session, selectors: string[]): Promise<AXState[]> {
     results.push({
       role: String(node.role?.value ?? ""),
       name: String(node.name?.value ?? ""),
+      description: String(node.description?.value ?? ""),
       invalid: invalid === undefined ? null : String(invalid),
       ignored: !!node.ignored,
     });

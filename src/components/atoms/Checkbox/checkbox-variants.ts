@@ -30,7 +30,7 @@ export const checkboxVariants = /* @__PURE__ */ cva(
     variants: {
       size: {
         sm: "rst:h-4 rst:w-4 rst:rounded-sm rst:border",
-        md: "rst:h-5 rst:w-5 rst:rounded rst:border",
+        md: "rst:h-5 rst:w-5 rst:rounded-sm rst:border",
         lg: "rst:h-6 rst:w-6 rst:rounded-md rst:border",
       },
       variant: {

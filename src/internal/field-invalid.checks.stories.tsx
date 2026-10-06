@@ -104,7 +104,13 @@ function Cases({ render, cases }: { render: (props: object) => ReactNode; cases:
  * is the role Chromium must give that control, so a negative case can't pass
  * by reading the wrong element or one the tree ignores.
  */
-async function checkCases(controls: string, role: string, cases: Case[]) {
+async function checkCases(
+  controls: string,
+  role: string,
+  cases: Case[],
+  /** What each case's control must be described as, where that is part of the requirement. */
+  describedAs?: (c: Case) => string,
+) {
   const input = realInputOrSkip();
   const probes: { c: Case; control: Element; selector: string }[] = [];
   for (const c of cases) {
@@ -129,6 +135,7 @@ async function checkCases(controls: string, role: string, cases: Case[]) {
        none, and nothing at all for one that doesn't support it. */
     if (EXPECTED[c].announced) await expect(states[i].invalid, `${c}: announced`).toBe("true");
     else await expect([null, "false"], `${c}: not announced`).toContain(states[i].invalid);
+    if (describedAs) await expect(states[i].description, `${c}: description`).toBe(describedAs(c));
   }
 }
 
@@ -174,12 +181,31 @@ export const RadioGroupField: Story = {
 
 export const CheckboxGroupField: Story = {
   render: () => (
-    <Cases cases={UNFLAGGED} render={(p) => <CheckboxGroup label="Notify me" options={options} value={[]} onChange={noop} {...p} />} />
+    <>
+      <Cases cases={UNFLAGGED} render={(p) => <CheckboxGroup label="Notify me" options={options} value={[]} onChange={noop} {...p} />} />
+      <div data-hinted>
+        <CheckboxGroup label="Notify me" helperText="Pick any." options={options} value={[]} onChange={noop} />
+      </div>
+    </>
   ),
   /* Each checkbox is a control a screen reader focuses, and the group says it
-     too. */
+     too. A checkbox announced as invalid also says why: the group's error is
+     its description. The cases without an `errorMessage` are the twins, with
+     no description at all. */
   play: async () => {
-    await checkCases('[role="checkbox"]', "checkbox", UNFLAGGED);
+    await checkCases('[role="checkbox"]', "checkbox", UNFLAGGED, (c) =>
+      "errorMessage" in CASES[c] ? "That isn't right." : "",
+    );
+    /* Twin: a hint is the group's to say once, not each checkbox's. */
+    const hinted = document.querySelector('[data-hinted] [role="checkbox"]')!;
+    const probe = `hinted-${Math.random().toString(36).slice(2)}`;
+    hinted.setAttribute("data-ax-probe", probe);
+    const input = realInputOrSkip();
+    if (input) {
+      const [state] = await input.commands.axStates([`[data-ax-probe="${probe}"]`]);
+      await expect(state.description, "helper text on a checkbox").toBe("");
+    }
+    hinted.removeAttribute("data-ax-probe");
     await checkCases("fieldset", "group", UNFLAGGED);
   },
 };

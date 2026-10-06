@@ -67,4 +67,14 @@ describe("cn", () => {
     );
   });
 
+  it("lets a consumer flatten or replace a control's elevation", () => {
+    /* `elevation-control` is the lift under Button, the Select trigger,
+       Avatar and the Switch thumb. Outside the shadow group, `cn` kept it
+       beside a caller's `shadow-none`, and stylesheet order picked the winner. */
+    expect(cn("rst:elevation-control", "rst:shadow-none")).toBe("rst:shadow-none");
+    expect(cn("rst:elevation-control", "rst:shadow-md")).toBe("rst:shadow-md");
+    expect(cn("rst:shadow-none", "rst:elevation-control")).toBe("rst:elevation-control");
+    expect(cn("rst:elevation-control", "rst:elevation-raised")).toBe("rst:elevation-raised");
+  });
+
 });

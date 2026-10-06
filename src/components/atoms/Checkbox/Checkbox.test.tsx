@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { useState } from "react";
+import { Field, Description } from "@headlessui/react";
 import { Checkbox, type CheckboxProps } from "./Checkbox";
 import "@testing-library/jest-dom";
 
@@ -170,5 +171,29 @@ describe("Checkbox Component", () => {
     expect(box?.className).toContain("rst:border-[var(--roster-control-border)]");
     expect(box?.className).not.toContain("rst:border-gray-300");
     expect(box?.className).not.toContain("rst:dark:border-gray-700");
+  });
+
+  describe("aria-describedby", () => {
+    /* Headless UI writes its own `aria-describedby` over the caller's, even
+       with nothing to put there, so a caller's ids used to vanish. */
+    it("keeps the caller's ids", () => {
+      render(<Checkbox checked={false} onChange={() => {}} aria-describedby="hint" />);
+      expect(screen.getByRole("checkbox")).toHaveAttribute("aria-describedby", "hint");
+    });
+
+    it("adds them after a Description in its Field", () => {
+      render(
+        <Field>
+          <Checkbox checked={false} onChange={() => {}} aria-describedby="hint" />
+          <Description id="own">Sent weekly.</Description>
+        </Field>,
+      );
+      expect(screen.getByRole("checkbox")).toHaveAttribute("aria-describedby", "own hint");
+    });
+
+    it("sets nothing when there is nothing to point at", () => {
+      render(<Checkbox checked={false} onChange={() => {}} />);
+      expect(screen.getByRole("checkbox")).not.toHaveAttribute("aria-describedby");
+    });
   });
 });

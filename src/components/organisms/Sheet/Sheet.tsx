@@ -462,7 +462,7 @@ const Sheet = ({
           transition
           data-testid="sheet-backdrop"
           className={cn(
-            "rst:fixed rst:inset-0 rst:bg-(--roster-sheet-backdrop)",
+            "rst:fixed rst:inset-0 rst:bg-[var(--roster-backdrop,var(--roster-sheet-backdrop))]",
             reducedMotion ? BACKDROP_FADE : BACKDROP_SLIDE,
           )}
         />

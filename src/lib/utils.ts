@@ -22,11 +22,16 @@ const merge = /* @__PURE__ */ extendTailwindMerge({
          kept BOTH and the winner fell to stylesheet order — which emits
          anchored, overlay, raised, so the family resolved in the inverse of
          its own depth order and a consumer's override was a no-op. Exactly the
-         degradation the comment above describes, on the newest utility. */
+         degradation the comment above describes, on the newest utility.
+
+         `elevation-control` is the same kind of utility on controls, and
+         `cn(buttonVariants(), "rst:shadow-none")` is how a caller flattens a
+         Button, so leaving it out would have kept both there too. */
       shadow: [
         "elevation-raised",
         "elevation-anchored",
         "elevation-overlay",
+        "elevation-control",
       ],
     },
   },

@@ -213,8 +213,9 @@ const MultiSelect = ({
               /* The ring is on the shell and fires from `focus-within`, because
                  the element that actually takes focus is the invisible button
                  stretched across it — and, deliberately, from a dismiss
-                 control too: those are inside the field and should light it. */
-              "rst:focus-within:ring-2 rst:focus-within:ring-ring",
+                 control too: those are inside the field and should light it.
+                 One pixel heavier than the edge, as Select's trigger is. */
+              "rst:focus-within:ring-[length:calc(var(--roster-border-width,1px)+1px)] rst:focus-within:ring-ring",
               disabled && "rst:opacity-50 rst:cursor-not-allowed",
               triggerClassName,
             )}

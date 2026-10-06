@@ -18,7 +18,7 @@ describe("InlineCode Component", () => {
 
   it("applies the soft surface", () => {
     const { container } = render(<InlineCode surface="soft">x</InlineCode>);
-    expect(container.firstChild).toHaveClass("rst:bg-gray-100", "rst:rounded");
+    expect(container.firstChild).toHaveClass("rst:bg-gray-100", "rst:rounded-sm");
   });
 
   it("can inherit the surrounding color", () => {

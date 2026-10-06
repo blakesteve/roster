@@ -85,10 +85,10 @@ export function Tooltip({
               "rst:data-[side=left]:slide-in-from-right-2",
               "rst:data-[side=right]:slide-in-from-left-2",
               variant === "themed"
-                ? "rst:bg-[var(--roster-popover-bg)] rst:text-[var(--roster-popover-text)] rst:ring-1 rst:ring-[var(--roster-popover-border)]"
+                ? "rst:bg-[var(--roster-popover-bg)] rst:text-[var(--roster-popover-text)] rst:ring rst:ring-[var(--roster-popover-border)]"
                 : variant === "dark"
-                  ? "rst:bg-zinc-900 rst:text-zinc-100 rst:ring-1 rst:ring-white/10"
-                  : "rst:bg-white rst:text-zinc-900 rst:ring-1 rst:ring-zinc-200",
+                  ? "rst:bg-zinc-900 rst:text-zinc-100 rst:ring rst:ring-white/10"
+                  : "rst:bg-white rst:text-zinc-900 rst:ring rst:ring-zinc-200",
               className,
             )}
           >

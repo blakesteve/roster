@@ -183,6 +183,12 @@ const CheckboxGroup = ({
         checked={value.includes(option.value)}
         onChange={(checked: boolean) => toggle(option.value, checked)}
         aria-invalid={invalid || undefined}
+        /* The error, not the helper text: a checkbox announced as invalid
+           should say why, where repeating a hint on every option would only
+           be noise. The group carries both, but a screen reader reads the
+           group's description once, on the way in, and not as each checkbox
+           takes focus. */
+        aria-describedby={hasError ? descriptionId : undefined}
         /* Nudged down to sit on the label's first line rather than centered
            against a block that may be two lines tall once `description` is
            set. `shrink-0` because the label is the flexible half. */

@@ -12,8 +12,10 @@ export interface RealInput {
       options?: { steps?: number; holdMs?: number; fx?: number; fy?: number },
     ) => Promise<void>;
     realClick: (selector: string, at?: { fx?: number; fy?: number }) => Promise<void>;
-    /** The accessibility tree's role, name and invalid state for each element (.storybook/ax-tree.ts). */
-    axStates: (selectors: string[]) => Promise<{ role: string; name: string; invalid: string | null; ignored: boolean }[]>;
+    /** The accessibility tree's role, name, description and invalid state for each element (.storybook/ax-tree.ts). */
+    axStates: (
+      selectors: string[],
+    ) => Promise<{ role: string; name: string; description: string; invalid: string | null; ignored: boolean }[]>;
   };
   page: { viewport: (width: number, height: number) => Promise<void> };
   userEvent: { keyboard: (text: string) => Promise<void>; tab: (options?: { shift?: boolean }) => Promise<void> };
