@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
 import { selectTriggerVariants } from "./select-variants";
 import { PopupOption } from "../../../internal/PopupOption";
 import {
@@ -86,6 +87,11 @@ const Select = ({
 }: SelectProps) => {
   const selectedOption = options.find((opt) => opt.value === value);
   const hasError = !!errorMessage || error;
+  /* By the rule every Roster field follows. The consumer's `aria-invalid` and
+     Headless UI's `invalid` are taken off `props`, which land on the wrapper,
+     where they would do nothing, and said on the trigger. */
+  const invalid = isFieldInvalid(hasError, props);
+  const fieldProps = withoutInvalidProps(props);
 
   /* The `.dark` carry and the panel's classes are shared with `Combobox` and
      `Multi-select` — see `src/internal/popup.ts` for why neither is inlined
@@ -115,7 +121,7 @@ const Select = ({
          broken rather than unavailable. */
       disabled={disabled}
       className={cn("rst:flex rst:flex-col rst:gap-1.5", className)}
-      {...props}
+      {...fieldProps}
     >
       {/* The label reads `--roster-control-text` rather than `text-inherit`,
           which fell to the UA default on a page that sets no body color. See
@@ -138,7 +144,7 @@ const Select = ({
                wrapper div, which has no role — so there was no route to it from
                either side. Without this a screen reader reads the error text on
                focus but never reports the field as invalid. */
-            aria-invalid={hasError || undefined}
+            aria-invalid={invalid || undefined}
             className={cn(
               selectTriggerVariants({ variant, size, error: hasError }),
               triggerClassName,

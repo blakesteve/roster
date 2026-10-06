@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
 import { selectTriggerVariants } from "../Select/select-variants";
 import { type SelectOption } from "../Select/Select";
 import { Chip } from "../Chip/Chip";
@@ -123,6 +124,11 @@ const MultiSelect = ({
   ...props
 }: MultiSelectProps) => {
   const hasError = !!errorMessage || error;
+  /* By the rule every Roster field follows. The consumer's `aria-invalid` and
+     Headless UI's `invalid` are taken off `props`, which land on the wrapper,
+     where they would do nothing, and said on the control. */
+  const invalid = isFieldInvalid(hasError, props);
+  const fieldProps = withoutInvalidProps(props);
   const hasSelection = value.length > 0;
 
   /* Mapped over `value` rather than over `options`, so a selected value whose
@@ -163,7 +169,7 @@ const MultiSelect = ({
     <Field
       disabled={disabled}
       className={cn("rst:flex rst:flex-col rst:gap-1.5", className)}
-      {...props}
+      {...fieldProps}
     >
       {label && (
         <Label className="rst:block rst:text-sm rst:font-medium rst:text-[var(--roster-control-text)] rst:text-left">
@@ -215,7 +221,7 @@ const MultiSelect = ({
           >
             <ListboxButton
               ref={triggerRef}
-              aria-invalid={hasError || undefined}
+              aria-invalid={invalid || undefined}
               className="rst:absolute rst:inset-0 rst:h-full rst:w-full rst:cursor-pointer rst:rounded-md rst:focus:outline-hidden rst:disabled:cursor-not-allowed"
             >
               {/* The button's only content, and the only thing in the accessible

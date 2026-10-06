@@ -8,6 +8,7 @@ import {
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 import { inputVariants, iconVariants } from "./input-variants";
+import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
 
 export interface InputProps
   extends
@@ -56,18 +57,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const hasError = !!errorMessage || error;
 
     /* Headless UI's input writes `aria-invalid` from its own `invalid` prop
-       and nothing else, over whatever was passed, so a consumer's
-       `aria-invalid="true"` was silently dropped. It is read here and handed
-       on as `invalid`, which Headless UI then writes as "true". `"grammar"`
-       and `"spelling"` come out as "true" too: a field is invalid or it isn't.
-       Headless UI's own `invalid`, passed straight through, still works. */
-    const {
-      "aria-invalid": ariaInvalid,
-      invalid: invalidProp,
-      ...inputProps
-    } = props as typeof props & { invalid?: boolean };
-    const invalid =
-      !!invalidProp || (ariaInvalid !== undefined && ariaInvalid !== false && ariaInvalid !== "false");
+       and nothing else, over whatever was passed. So the field's error, a
+       consumer's `aria-invalid` and Headless UI's `invalid` are all read here,
+       by the rule every Roster field follows, and handed on as `invalid`. */
+    const invalid = isFieldInvalid(hasError, props);
+    const inputProps = withoutInvalidProps(props);
 
     return (
       /* No `space-y-*` here, deliberately. Headless UI's Field appends a
