@@ -75,11 +75,25 @@ const sources = walk(SRC).filter(
 
 let expected = 0;
 for (const src of sources) {
-  const code = readFileSync(src, "utf8");
-  const imports = [...code.matchAll(/from\s*["']([^"']+)["']/g)].map((m) => m[1]);
-  const isClient = imports.some((i) =>
-    CLIENT_PACKAGES.some((pkg) => i === pkg || i.startsWith(pkg + "/")),
+  /* Type-only imports and exports are erased in the emit, so they reach for
+     nothing at runtime: a module that only borrows React's types (an action
+     table, a props interface) is as server-safe as one that names none, and
+     the banner rightly leaves it bare. Counting them failed exactly those. */
+  /* Only a whole `import type … from "…"` or `export type … from "…"`
+     statement: a type alias (`export type X = …`) is no import, and a lazy
+     match from one would run on to the next `from` in the file and erase a
+     real import or re-export on the way. */
+  const code = readFileSync(src, "utf8").replace(
+    /^\s*(?:import|export)\s+type\s+(?:\{[^}]*\}|\*(?:\s+as\s+\w+)?|\w+)\s*from\s*["'][^"']+["'];?/gm,
+    "",
   );
+  const imports = [...code.matchAll(/from\s*["']([^"']+)["']/g)].map((m) => m[1]);
+  /* JSX compiles to an import of `react/jsx-runtime`, which no source line
+     names. So a `.tsx` module is client code by its JSX alone, even when its
+     only `react` import is a type. */
+  const isClient =
+    src.endsWith(".tsx") ||
+    imports.some((i) => CLIENT_PACKAGES.some((pkg) => i === pkg || i.startsWith(pkg + "/")));
   if (!isClient) continue;
 
   const base = relative(SRC, src).replace(/\.tsx?$/, "");

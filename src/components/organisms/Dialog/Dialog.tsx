@@ -130,6 +130,14 @@ export interface DialogProps extends VariantProps<typeof dialogVariants> {
   description?: string;
   children: ReactNode;
   className?: string;
+  /**
+   * Called once the dialog has finished closing, after its leave transition.
+   * The place to move focus somewhere other than where it was before the
+   * dialog opened, for instance when that element no longer exists. Not
+   * called for a close cut short by reopening, nor when the dialog unmounts
+   * while open.
+   */
+  onAfterClose?: () => void;
 }
 
 const Dialog = ({
@@ -142,6 +150,7 @@ const Dialog = ({
   status,
   children,
   className,
+  onAfterClose,
 }: DialogProps) => {
   /* `open` goes to Headless UI's Dialog itself. It used to come from an outer
      `<Transition show={isOpen}>`, and wrapped that way Headless UI 2.2.9 marks
@@ -225,6 +234,7 @@ const Dialog = ({
               leave="rst:ease-in rst:duration-200"
               leaveFrom="rst:opacity-100 rst:scale-100"
               leaveTo="rst:opacity-0 rst:scale-95"
+              afterLeave={onAfterClose}
             >
               <DialogPanel
                 className={cn(

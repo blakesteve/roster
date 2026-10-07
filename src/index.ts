@@ -70,6 +70,7 @@ export * from './components/molecules/CallToAction/CallToAction';
 export * from './components/molecules/CallToAction/call-to-action-variants';
 export * from './components/molecules/EmptyState/EmptyState';
 export * from './components/molecules/EmptyState/empty-state-variants';
+export * from './components/molecules/MediaPreview/MediaPreview';
 export * from './components/molecules/ErrorState/ErrorState';
 export * from './components/molecules/ErrorState/error-state-variants';
 export * from './components/molecules/MatchupCard/MatchupCard';
@@ -83,6 +84,10 @@ export * from './components/organisms/Footer/Footer';
 export * from './components/organisms/Navbar/Navbar';
 export * from './components/organisms/Navbar/navbar-variants';
 export * from './components/organisms/Sheet/Sheet';
+export * from './components/organisms/ModerationQueue/ModerationQueue';
+export * from './components/organisms/ModerationQueue/queue-actions';
+export * from './components/organisms/ModerationQueue/QueueEditDialog';
+export * from './components/organisms/ModerationQueue/QueueEditSheet';
 export * from './components/organisms/Table/Table';
 export * from './components/organisms/Table/table-variants';
 /* DataTable is deliberately NOT exported here. It is the only component that
