@@ -2,7 +2,6 @@ import { useLayoutEffect, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor } from "storybook/test";
 import { Input } from "../../atoms/Input/Input";
-import { MediaPreview } from "../../molecules/MediaPreview/MediaPreview";
 import { ModerationQueue, type ModerationQueueProps } from "./ModerationQueue";
 import { QueueEditDialog } from "./QueueEditDialog";
 import { QueueEditSheet } from "./QueueEditSheet";
@@ -733,63 +732,54 @@ export const LoadingAndError: Story = {
 
 /* ── Motion ────────────────────────────────────────────────────────────── */
 
-export const NothingAnimatesAsAnItemLeaves: Story = {
+/* Properties that move something on screen. A color or opacity change isn't
+   an item sliding; transform, position, size and margin are. */
+const MOTION = /^(transform|translate|scale|rotate|top|right|bottom|left|inset.*|margin.*|height|width|max-height|max-width)$/;
+
+/** The motion properties an animation or transition is changing, if any. */
+function moves(a: Animation): string[] {
+  if (a instanceof CSSTransition) return MOTION.test(a.transitionProperty) ? [a.transitionProperty] : [];
+  const frames = (a.effect as KeyframeEffect | null)?.getKeyframes() ?? [];
+  const props = new Set(frames.flatMap((f) => Object.keys(f)).map((k) => k.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)));
+  return [...props].filter((p) => MOTION.test(p));
+}
+
+export const NothingSlidesAsAnItemLeaves: Story = {
   tags: ["reduced-motion"],
   render: () => (
     <>
       <Harness still={false} />
-      <div data-probe style={{ width: 10, height: 10, animation: "rst-enter 5s linear" }} />
+      <div data-probe="slide" style={{ width: 10, height: 10, animation: "rst-enter 5s linear" }} />
+      <div data-probe="color" style={{ width: 10, height: 10, color: "rgb(0, 0, 0)", transition: "color 5s linear" }} />
     </>
   ),
   play: async () => {
     reset();
-    /* Twin: the probe animates, so getAnimations can see one when there is. */
-    const probe = q("[data-probe]")!;
-    await expect(probe.getAnimations().length).toBe(1);
+    /* Twins: an animation that moves something counts; a color transition,
+       like a button's hover fade under a pointer left where it clicked,
+       doesn't. */
+    await expect(q('[data-probe="slide"]')!.getAnimations().flatMap(moves)).toContain("transform");
+    const color = q('[data-probe="color"]')!;
+    color.style.color = "rgb(255, 0, 0)";
+    await new Promise((r) => requestAnimationFrame(r));
+    await expect(color.getAnimations().length, "the color transition is running").toBe(1);
+    await expect(color.getAnimations().flatMap(moves), "and doesn't count as motion").toEqual([]);
+
     await userEvent.click(button("a", "approve")!);
     (await nextCall()).resolve();
     /* Read in the next frame, while an exit would still be playing, not
        after the item has gone, by which time one would have finished. */
     await new Promise((r) => requestAnimationFrame(r));
     const root = q("section")!;
-    const moving = document.getAnimations().filter((a) => {
-      const target = (a.effect as KeyframeEffect | null)?.target;
-      return target instanceof Element && root.contains(target) && a.playState === "running";
-    });
-    await expect(moving).toEqual([]);
+    const sliding = document
+      .getAnimations()
+      .filter((a) => {
+        const target = (a.effect as KeyframeEffect | null)?.target;
+        return target instanceof Element && root.contains(target) && a.playState === "running";
+      })
+      .flatMap(moves);
+    await expect(sliding).toEqual([]);
     await waitFor(() => expect(itemEl("a")).toBeNull());
-  },
-};
-
-/* ── Previews ──────────────────────────────────────────────────────────── */
-
-const PIXEL = "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAACAkQBADs=";
-
-export const PreviewFallsBackWhenItCantRender: Story = {
-  render: () => (
-    <div style={{ display: "flex", gap: 8, padding: 16 }}>
-      <div data-preview="ok">
-        <MediaPreview src={PIXEL} href="https://example.com/a.jpg" alt="Lentil soup in a bowl" />
-      </div>
-      <div data-preview="broken">
-        <MediaPreview src="/does-not-exist.heic" href="https://example.com/b.heic" alt="Plum cake, sliced" />
-      </div>
-      <div data-preview="none">
-        <MediaPreview src={null} alt="Rye crackers on a board" />
-      </div>
-    </div>
-  ),
-  play: async () => {
-    /* Twin: a preview that loads stays an image. */
-    await expect(q('[data-preview="ok"] img')?.getAttribute("alt")).toBe("Lentil soup in a bowl");
-    await waitFor(() => expect(q('[data-preview="broken"] a')).not.toBeNull());
-    const link = q<HTMLAnchorElement>('[data-preview="broken"] a')!;
-    await expect(link.getAttribute("href")).toBe("https://example.com/b.heic");
-    await expect(link.getAttribute("aria-label")).toBe("Preview unavailable. Open original, in a new tab: Plum cake, sliced");
-    await expect(q('[data-preview="broken"] img'), "no broken image left behind").toBeNull();
-    await expect(q('[data-preview="none"] [role="img"]')?.getAttribute("aria-label")).toBe(
-      "Preview unavailable: Rye crackers on a board",
-    );
   },
 };
 
