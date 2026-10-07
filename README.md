@@ -1208,6 +1208,87 @@ escape the box. Lay the options out across with `orientation` rather than
 through `optionsClassName`, for the same reason: the horizontal spacing that
 keeps two radios 44px apart rides on that prop.
 
+### ModerationQueue
+
+A queue of things waiting for a decision: submissions to approve, reports to
+resolve, claims to check before they publish. The app owns the data and every
+request; the queue owns the layout, the states, the steps and the keyboard.
+**It never fetches.** An action's `run` is the only path from a decision to
+the network, and the app says an item has left by removing it from `items`.
+
+```tsx
+import { ModerationQueue, QueueEditDialog } from "@blakesteve/roster";
+
+<ModerationQueue
+  label="New recipes"
+  items={recipes}
+  getKey={(r) => r.id}
+  itemLabel={(r) => `${r.title}, from ${r.by}`}
+  renderMeta={(r) => <Badge size="xs">{r.category}</Badge>}
+  renderContent={(r) => <p>{r.method}</p>}
+  status={loading ? "loading" : failed ? "error" : "ready"}
+  onRetry={reload}
+  actions={(a) => [
+    { id: "list", label: "List it", done: "Listed", tone: "success",
+      run: async (r) => { await api.list(r.id); await reload(); } },
+    a.edit({ id: "edit", label: "Edit and list", done: "Listed with edits",
+      edit: { title: "Tidy it up", submitLabel: "List it", surface: QueueEditDialog,
+              initial: (r) => ({ title: r.title }), Form: TitleForm,
+              validate: (d) => (d.title.trim() ? undefined : "Give it a title.") },
+      run: async (r, { draft }) => { await api.list(r.id, draft); await reload(); } }),
+    { id: "send-back", label: "Send back", done: "Sent back", tone: "danger",
+      reason: { prompt: "Why? The cook will see this.", required: true,
+                options: [{ value: "duplicate", label: "We already have this one" }] },
+      run: async (r, { reason }) => { await api.sendBack(r.id, reason); await reload(); } },
+  ]}
+/>;
+```
+
+**Four kinds of action.** One click (no step). `confirm` asks in place first.
+`reason` asks why in place: radios, a note, or both. `edit` opens a form the
+app supplies, inline by default or in a Dialog or Sheet (`QueueEditDialog`,
+`QueueEditSheet`, separate exports so a queue that doesn't use them doesn't
+ship them).
+
+**Drafts are typed.** An edit's draft is whatever its `initial` returns, and
+`validate`, the form and `run` all get that type. Inside JSX, pass `actions` as
+a function and write edits with the `edit` it's handed, as above; outside it,
+`editAction(…)` does the same in a list typed `QueueAction<Item>[]`. A literal
+`{ edit: … }` doesn't compile, because its draft could only be `any`.
+
+What it promises:
+
+- **Only the clicked action is busy, and it keeps focus.** It shows a spinner
+  and is `aria-disabled` rather than `disabled`, which would drop focus to the
+  page. That item's other actions wait; every other item stays live.
+- **A decision that lands and removes the item** is announced in a polite live
+  region ("Listed: Smoky red lentil soup, from Dana Okafor. 2 left."), and
+  focus moves to the next item, the previous one, or the empty state. Never to
+  the page. If the app keeps the item, the announcement drops the count and
+  focus stays. `run` may resolve with `{ announce }` to say something else
+  ("Already decided by someone else.").
+- **A decision that fails** leaves the item where it was with an Alert saying
+  why, and focus where it was. Inside a step, the step stays open with its
+  draft. A reviewer who moved to another item meanwhile isn't pulled back.
+- **Several outcomes in one render are said in one sentence**: "Approved:
+  Lentil soup. Approved: Rye crackers. 1 left."
+- **Steps are per item.** A reason half-written on one item survives another
+  item's decision.
+- **Steps take focus and give it back.** Escape or Cancel returns focus to the
+  button that opened the step.
+- **An item that disappears** (another reviewer, a reload) with its step open
+  closes the step without deciding, and is announced once as decided
+  elsewhere. Without a step, it moves focus only if focus was inside it.
+- **Headings follow the page.** `headingLevel` sets the queue's (2 by default),
+  and items sit one below unless `itemHeadingLevel` says otherwise.
+- **Phones.** Every button is 44px tall at every width, and nothing scrolls
+  sideways at 320px. Nothing animates as an item leaves.
+
+Counts for a tab badge need no API: the app holds the items, so it's
+`items.length`. `MediaPreview` is the thumbnail to use in an item: when the
+image can't render (an expired link, a format the browser can't draw), it
+falls back to a link to the original in the same footprint.
+
 ### Carousel
 
 A sideways row: a row of cards, a selection strip, or a gallery of one per
@@ -1349,6 +1430,7 @@ function App() {
 | `LiquidNav`       | `LiquidTabs`' strip as a `nav` of links; takes a router's link component    |
 | `LiquidTabs`      | Tab strip with a sliding pill; arrow keys, roving focus, 44px `lg` size     |
 | `MatchupCard`     | Head-to-head comparison card                                                |
+| `MediaPreview`    | Thumbnail that falls back to "Preview unavailable, open original" when it can't render |
 | `Pullquote`       | A line lifted out of prose, as `<figure>` + `<blockquote>` + `<figcaption>` |
 | `RadioGroup`      | Radio set reporting one `string`; descriptions, error, 44px targets         |
 | `Toast`           | Transient floating notice; `Toaster` + the imperative `toast` handle        |
@@ -1360,8 +1442,9 @@ function App() {
 | `ActionBar` | Sticky bottom action strip                                                                                                                                         |
 | `Countdown` | Live countdown timer                                                                                                                                               |
 | `DataTable` | Full-featured table with sorting and pagination via TanStack Table v9. Imported from `@blakesteve/roster/data-table` (see [DataTable columns](#datatable-columns)) |
-| `Dialog`    | Modal dialog                                                                                                                                                       |
+| `Dialog`    | Modal dialog; `onAfterClose` runs once it has finished closing                                                                                                     |
 | `Footer`    | Site footer                                                                                                                                                        |
+| `ModerationQueue` | Items waiting for a decision: busy per action, confirm, reason and edit steps, focus after an item leaves, a live region. Never fetches (see [ModerationQueue](#moderationqueue)) |
 | `Navbar`    | Responsive navigation bar with mobile slide-out                                                                                                                    |
 | `Sheet`     | Bottom sheet: drag, Escape or backdrop to dismiss; only its content scrolls; returns focus, even from a deep link; the title may be a node |
 | `Table`     | Static data table                                                                                                                                                  |
