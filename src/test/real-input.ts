@@ -3,6 +3,9 @@
  * .storybook/real-input.ts), or `undefined` in Storybook's own UI, where a
  * story skips the steps that need it.
  */
+/** A file for realSetFiles and realDropFiles: its bytes as base64, or `size` zero bytes. */
+export type RealFile = { name: string; mimeType: string; base64?: string; size?: number };
+
 export interface RealInput {
   commands: {
     realWheel: (selector: string, deltaX: number, deltaY: number) => Promise<void>;
@@ -12,10 +15,22 @@ export interface RealInput {
       options?: { steps?: number; holdMs?: number; fx?: number; fy?: number },
     ) => Promise<void>;
     realClick: (selector: string, at?: { fx?: number; fy?: number }) => Promise<void>;
-    /** The accessibility tree's role, name, description and invalid state for each element (.storybook/ax-tree.ts). */
-    axStates: (
-      selectors: string[],
-    ) => Promise<{ role: string; name: string; description: string; invalid: string | null; ignored: boolean }[]>;
+    /** Picks files in a file input through the browser's own chooser path (.storybook/real-input.ts). */
+    realSetFiles: (selector: string, files: RealFile[]) => Promise<void>;
+    /** Drops files on an element: dispatched drag events carrying real Files. */
+    realDropFiles: (selector: string, files: RealFile[]) => Promise<void>;
+    /** The accessibility tree's role, name, description and states for each element (.storybook/ax-tree.ts). */
+    axStates: (selectors: string[]) => Promise<
+      {
+        role: string;
+        name: string;
+        description: string;
+        invalid: string | null;
+        ignored: boolean;
+        disabled: boolean;
+        busy: boolean;
+      }[]
+    >;
   };
   page: { viewport: (width: number, height: number) => Promise<void> };
   userEvent: { keyboard: (text: string) => Promise<void>; tab: (options?: { shift?: boolean }) => Promise<void> };

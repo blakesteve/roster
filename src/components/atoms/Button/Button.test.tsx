@@ -37,12 +37,16 @@ describe("Button Component", () => {
 
     const button = screen.getByRole("button");
 
-    expect(button).toBeDisabled();
+    /* Busy, not disabled: a native `disabled` would drop focus to the page. */
+    expect(button).not.toBeDisabled();
+    expect(button).toHaveAttribute("aria-disabled", "true");
+    expect(button).toHaveAttribute("aria-busy", "true");
     expect(screen.getByText(/submit/i)).toBeInTheDocument();
 
     const spinner = screen.getByRole("status");
     expect(spinner).toBeInTheDocument();
     expect(spinner).toHaveClass("rst:border-current");
+    expect(spinner).toHaveAttribute("aria-label", "loading");
 
     expect(spinner.parentElement).toHaveClass(
       "rst:shrink-0",
@@ -50,12 +54,92 @@ describe("Button Component", () => {
       "rst:items-center",
     );
 
-    try {
-      await user.click(button);
-    } catch {
-      // Ignore error expecting interaction with disabled element
-    }
+    await user.click(button);
     expect(handleClick).not.toHaveBeenCalled();
+  });
+
+  it("names the spinner with loadingLabel", () => {
+    render(<Button isLoading loadingLabel="enviando">Enviar</Button>);
+    expect(screen.getByRole("status")).toHaveAttribute("aria-label", "enviando");
+  });
+
+  it("doesn't send its form a second time while loading, and does when it isn't", async () => {
+    const user = userEvent.setup();
+    const submit = vi.fn((e: React.FormEvent) => e.preventDefault());
+    const { rerender } = render(
+      <form onSubmit={submit}>
+        <Button type="submit" isLoading>Save</Button>
+      </form>,
+    );
+    await user.click(screen.getByRole("button"));
+    screen.getByRole("button").focus();
+    await user.keyboard("{Enter}");
+    await user.keyboard(" ");
+    expect(submit).not.toHaveBeenCalled();
+
+    /* The twin: the same button, done loading, submits. */
+    rerender(
+      <form onSubmit={submit}>
+        <Button type="submit">Save</Button>
+      </form>,
+    );
+    await user.click(screen.getByRole("button"));
+    expect(submit).toHaveBeenCalledTimes(1);
+  });
+
+  it("lets Tab leave a loading button even when the app handles its keys", async () => {
+    const user = userEvent.setup();
+    const onKeyDown = vi.fn();
+    render(
+      <>
+        <Button isLoading onKeyDown={onKeyDown}>Save</Button>
+        <Button>Next</Button>
+      </>,
+    );
+    screen.getByRole("button", { name: /save/i }).focus();
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Next" })).toHaveFocus();
+    expect(onKeyDown).not.toHaveBeenCalled();
+  });
+
+  it("ignores every press handler while loading, and keeps hover ones", async () => {
+    const user = userEvent.setup();
+    const calls: string[] = [];
+    const log = (name: string) => () => calls.push(name);
+    render(
+      <Button
+        isLoading
+        onClickCapture={log("clickCapture")}
+        onDoubleClick={log("doubleClick")}
+        onPointerDownCapture={log("pointerDownCapture")}
+        onMouseUp={log("mouseUp")}
+        onMouseEnter={log("mouseEnter")}
+      >
+        Save
+      </Button>,
+    );
+    await user.dblClick(screen.getByRole("button"));
+    expect(calls).toEqual(["mouseEnter"]);
+  });
+
+  it("stays natively disabled when disabled, loading or not", () => {
+    render(
+      <>
+        <Button disabled isLoading>Both</Button>
+        <Button disabled>Disabled</Button>
+      </>,
+    );
+    const both = screen.getByRole("button", { name: /both/i });
+    expect(both).toBeDisabled();
+    expect(both).not.toHaveAttribute("aria-busy");
+    expect(screen.getByRole("button", { name: "Disabled" })).toBeDisabled();
+  });
+
+  it("adds no aria-disabled or aria-busy when it isn't loading", () => {
+    render(<Button>Plain</Button>);
+    const button = screen.getByRole("button");
+    expect(button).not.toHaveAttribute("aria-disabled");
+    expect(button).not.toHaveAttribute("aria-busy");
   });
 
   it("respects the disabled prop", () => {

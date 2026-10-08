@@ -174,7 +174,12 @@ export const HeroLarge: Story = {
   decorators: [
     (Story) => (
       <div className="rst:p-8 rst:w-full rst:max-w-5xl rst:mx-auto">
-        <div className="dark rst:p-16 rst:bg-slate-900 rst:rounded-3xl rst:shadow-2xl rst:border rst:border-slate-800 rst:flex rst:justify-center rst:bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+        {/* The texture is an inline style, not a class: Tailwind scans stories
+            too, so a class here ships in roster.css to every app. */}
+        <div
+          className="dark rst:p-16 rst:bg-slate-900 rst:rounded-3xl rst:shadow-2xl rst:border rst:border-slate-800 rst:flex rst:justify-center"
+          style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }}
+        >
           <Story />
         </div>
       </div>
