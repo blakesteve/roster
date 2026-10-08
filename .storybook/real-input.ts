@@ -97,7 +97,48 @@ export const realClick: BrowserCommand<[selector: string, at?: { fx?: number; fy
   await context.page.mouse.click(x, y);
 };
 
-export const realInputCommands = { realWheel, realDrag, realClick };
+/** A file for the commands below: its bytes as base64, or `size` zero bytes. */
+export type RealFile = { name: string; mimeType: string; base64?: string; size?: number };
+const buffers = (files: RealFile[]) =>
+  files.map((f) => ({
+    name: f.name,
+    mimeType: f.mimeType,
+    buffer: f.base64 ? Buffer.from(f.base64, "base64") : Buffer.alloc(f.size ?? 0),
+  }));
+
+/**
+ * Picks `files` in the file input at `selector`, as the person would through
+ * the system's file chooser: Playwright hands them to the browser, which fires
+ * the input's own `input` and `change`. A script can't do that; it can only
+ * pretend with a DataTransfer.
+ */
+export const realSetFiles: BrowserCommand<[selector: string, files: RealFile[]]> = async (context, selector, files) => {
+  const frame = await context.frame();
+  await frame.setInputFiles(selector, buffers(files));
+};
+
+/**
+ * Drags `files` onto `selector` and drops them: dragenter, dragover and drop,
+ * carrying a DataTransfer that holds real File objects. No automation can
+ * drag a file in from the operating system, so these events are dispatched
+ * rather than trusted; what they test is the page's handling of a drop.
+ */
+export const realDropFiles: BrowserCommand<[selector: string, files: RealFile[]]> = async (context, selector, files) => {
+  const frame = await context.frame();
+  const payload = files.map((f) => ({ name: f.name, type: f.mimeType, base64: f.base64 ?? "", size: f.size ?? 0 }));
+  /* A string, so this Node-side file needs no DOM types: it runs in the page. */
+  const dataTransfer = await frame.evaluateHandle(`(() => {
+    const dt = new DataTransfer();
+    for (const f of ${JSON.stringify(payload)}) {
+      const bytes = f.base64 ? Uint8Array.from(atob(f.base64), (c) => c.charCodeAt(0)) : new Uint8Array(f.size);
+      dt.items.add(new File([bytes], f.name, { type: f.type }));
+    }
+    return dt;
+  })()`);
+  for (const type of ["dragenter", "dragover", "drop"]) await frame.dispatchEvent(selector, type, { dataTransfer });
+};
+
+export const realInputCommands = { realWheel, realDrag, realClick, realSetFiles, realDropFiles };
 
 declare module "vitest/browser" {
   interface BrowserCommands {
@@ -108,5 +149,7 @@ declare module "vitest/browser" {
       options?: { steps?: number; holdMs?: number; fx?: number; fy?: number },
     ) => Promise<void>;
     realClick: (selector: string, at?: { fx?: number; fy?: number }) => Promise<void>;
+    realSetFiles: (selector: string, files: RealFile[]) => Promise<void>;
+    realDropFiles: (selector: string, files: RealFile[]) => Promise<void>;
   }
 }

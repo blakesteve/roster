@@ -35,8 +35,12 @@ describe("Navbar Component", () => {
 
     expect(screen.getByText("MegaSquad")).toBeInTheDocument();
 
-    const logo = screen.getByRole("img", { name: /MegaSquad Logo/i });
-    expect(logo).toHaveAttribute("src", "/logo.png");
+    /* The logo is decorative: the name beside it names the link, so it
+       isn't read a second time. */
+    expect(screen.queryByRole("img")).toBeNull();
+    const logo = document.querySelector('img[src="/logo.png"]');
+    expect(logo).toHaveAttribute("alt", "");
+    expect(screen.getByRole("link", { name: defaultProps.brandName })).toContainElement(logo as HTMLElement);
   });
 
   // The default variant is driven by --roster-nav-* rather than literal
@@ -207,7 +211,7 @@ describe("Navbar Component", () => {
 
     expect(screen.getByTestId("custom-brand")).toBeInTheDocument();
     expect(screen.getByTestId("custom-brand")).toHaveTextContent("CUSTOM BRAND");
-    // The plain brandName string should not appear as visible text outside the img alt
+    // The plain brandName string should not appear as visible text
     expect(screen.queryByText("MegaSquad")).not.toBeInTheDocument();
   });
 

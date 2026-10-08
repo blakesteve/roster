@@ -123,10 +123,11 @@ function without<V>(record: Record<string, V>, key: string): Record<string, V> {
 
 /**
  * A Button that stays focusable while it works or while it can't be pressed
- * yet. Button's own `isLoading` sets `disabled`, and a browser drops focus
- * from a disabled element to the page: a keyboard user who pressed Approve
- * would be sent back to the top. `aria-disabled` says the same thing to a
- * screen reader and keeps them where they are.
+ * yet. `isLoading` covers the first. For the second, `aria-disabled` rather
+ * than `disabled`: a browser drops focus from a disabled element to the page,
+ * so a keyboard user who pressed Approve would be sent back to the top.
+ * `aria-disabled` says the same thing to a screen reader and keeps them where
+ * they are.
  */
 function QueueButton({
   busy = false,
@@ -136,19 +137,17 @@ function QueueButton({
   className,
   ...props
 }: ButtonProps & { busy?: boolean; blocked?: boolean }) {
-  const inert = busy || blocked;
   return (
     <Button
       size="lg"
       {...props}
-      aria-disabled={inert || undefined}
-      aria-busy={busy || undefined}
-      startIcon={busy ? <Spinner size="sm" variant="current" /> : undefined}
+      isLoading={busy}
+      aria-disabled={blocked || undefined}
       className={cn(blocked && !busy && "rst:cursor-not-allowed rst:opacity-50", className)}
       onClick={(e) => {
         /* Headless UI's Button already drops click handlers on an
            `aria-disabled` element; this keeps the promise if it ever stops. */
-        if (inert) {
+        if (blocked) {
           e.preventDefault();
           return;
         }

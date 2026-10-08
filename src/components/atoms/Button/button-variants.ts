@@ -25,7 +25,9 @@ export const buttonVariants = /* @__PURE__ */ cva(
         soft: "rst:border-transparent rst:shadow-none",
         outline: "rst:border rst:bg-transparent rst:elevation-control",
         ghost: "rst:border rst:border-transparent rst:bg-transparent",
-        link: "rst:bg-transparent rst:underline-offset-4 rst:hover:underline",
+        // `border-0`: a <button> draws the browser's own border unless told
+        // otherwise, and an app without a reset would see it round a link.
+        link: "rst:border-0 rst:bg-transparent rst:underline-offset-4 rst:hover:underline",
       },
       colorScheme: {
         primary: "",

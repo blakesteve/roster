@@ -1289,6 +1289,98 @@ Counts for a tab badge need no API: the app holds the items, so it's
 image can't render (an expired link, a format the browser can't draw), it
 falls back to a link to the original in the same footprint.
 
+### FileUpload
+
+Picks files, uploads each one through the app, and shows where each stands.
+**It never sends anything itself.** The app passes `upload`, which is called
+once per file and returns a promise; FileUpload owns picking, the rules, the
+list, each file's state, the keyboard and what a screen reader hears.
+
+```tsx
+import { FileUpload } from "@blakesteve/roster";
+
+<FileUpload
+  label="Photos"
+  helperText="JPEG or PNG, up to 10 photos, 15 MB each."
+  types={["image/jpeg", "image/png"]}
+  maxFiles={10}
+  maxSize={15 * 1024 * 1024}
+  validate={(file) => (/\.hei[cf]$/i.test(file.name) ? "Export it as JPEG first." : undefined)}
+  upload={async (file, { onProgress, onProcessing, signal }) => {
+    const { id, url } = await api.presignPhoto(file.type, { signal });
+    await putWithProgress(url, file, { onProgress, signal });
+    onProcessing();
+    await api.completePhoto(id, { signal });
+    return id;
+  }}
+  onChange={(items) => setPhotoIds(items.filter((i) => i.status === "done").map((i) => i.result!))}
+/>;
+```
+
+`upload(file, { onProgress, onProcessing, signal })`:
+
+- **`onProgress(fraction)`** from 0 to 1, if the request can report it
+  (`fetch` can't; an `XMLHttpRequest`'s `upload.onprogress` can). Without it the
+  file reads Uploading with a bar that doesn't give a figure.
+- **`onProcessing()`** once the bytes are up and the app's server is working on
+  them. The file reads Finishing up until the promise settles.
+- **`signal`** aborts when the person removes the file, or the field unmounts.
+  Pass it to the request.
+- **Resolve** with what the form needs later, an id say; it comes back as that
+  file's `result` in `onChange`. **Reject** with an Error whose message says
+  why; it's shown, with Try again.
+
+Each file is `queued`, `uploading`, `processing`, `done`, `failed` or
+`rejected`. A few upload at once (`concurrency`, 3 by default) and the rest
+wait.
+
+**Rules** are checked as files arrive, picked or dropped: the same file picked
+twice is turned away first; then `validate(file)`, the app's own reason; then
+`types` (`image/jpeg`, `image/*`, `.png`,
+defaulting to `accept`); then `maxSize` in bytes; then `maxFiles`. A file
+turned away stays in the list with its reason and is never sent. A file that
+arrives with no type, as some cloud-backed picks on Android do, is judged by
+its extension.
+
+**Phones first.** `accept` defaults to `"image/*"`, with `multiple` and no
+`capture`. That combination is what opens Android's system photo picker, with
+albums and cloud photos; a list of exact types or an extension gets a file
+browser instead. Keep `accept` broad and narrow with `types`.
+
+What it promises:
+
+- **Disabled, it keeps focus.** Its buttons are `aria-disabled` and ignore
+  presses, so a form that disables the field while it sends doesn't drop
+  whoever was on Remove to the top of the page.
+- **Choosing is a button** that opens the picker. Dragging files onto the
+  field is an addition where there's a pointer, and the hint for it shows only
+  there. A file let go over the field never replaces the page, even while
+  disabled.
+- **Removing a file cancels its upload** and moves focus to the next file's
+  Remove, the previous one's, or the Choose button. Never to the page. Try
+  again moves focus to that file's Remove.
+- **A polite live region** says what happened, one sentence per moment: "3
+  photos added. big.jpg wasn't added. It's over 15 MB.", "2 of 3 uploaded.",
+  "c.jpg didn't upload. The server is busy." Of several counts at once, only
+  the latest is said.
+- **Thumbnails** come from object URLs, revoked when the file goes. A picture
+  the browser can't draw (HEIC outside Safari) shows a plain mark.
+- **Every word is replaceable** through `strings`, on screen and spoken.
+- **Phones.** Every button is a 44px target at 375px, and a long file name
+  truncates rather than pushing Remove off its row.
+
+### Buttons that load
+
+`isLoading` shows a spinner and ignores presses, and since 5.5.0 the button
+keeps focus while it does. It used to set `disabled`, and a browser drops focus
+from a disabled element to the page, so a keyboard or screen reader user who
+pressed Save was sent back to the top. A loading button is now `aria-disabled`
+and `aria-busy` instead, and ignores presses itself (clicks, Enter, Space, and the
+app's own press handlers, while hover ones still run), which also keeps a
+submit button from sending its form twice. It no longer dims, since
+the spinner says it's busy. `loadingLabel` names the spinner ("loading" by
+default). `disabled` is unchanged and wins over `isLoading`.
+
 ### Carousel
 
 A sideways row: a row of cards, a selection strip, or a gallery of one per
@@ -1431,6 +1523,7 @@ function App() {
 | `LiquidTabs`      | Tab strip with a sliding pill; arrow keys, roving focus, 44px `lg` size     |
 | `MatchupCard`     | Head-to-head comparison card                                                |
 | `MediaPreview`    | Thumbnail that falls back to "Preview unavailable, open original" when it can't render |
+| `FileUpload`      | Picks files and uploads each through the app's `upload`, with per-file progress, retry and rules |
 | `Pullquote`       | A line lifted out of prose, as `<figure>` + `<blockquote>` + `<figcaption>` |
 | `RadioGroup`      | Radio set reporting one `string`; descriptions, error, 44px targets         |
 | `Toast`           | Transient floating notice; `Toaster` + the imperative `toast` handle        |

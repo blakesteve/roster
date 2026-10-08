@@ -13,7 +13,11 @@ import { join } from "node:path";
  * components break some of them); a component joins GUARDED when it's new or
  * once it's been brought in line, and stays.
  */
-const GUARDED = ["components/organisms/ModerationQueue", "components/molecules/MediaPreview"];
+const GUARDED = [
+  "components/organisms/ModerationQueue",
+  "components/molecules/MediaPreview",
+  "components/molecules/FileUpload",
+];
 
 /* A class with any variants in front of it: `rst:dark:hover:`. */
 const V = String.raw`rst:(?:[\w@[\]&=.()/-]+:)*`;
@@ -68,6 +72,8 @@ describe("style guard", () => {
       "components/organisms/ModerationQueue/QueueEditSheet.tsx",
       "components/organisms/ModerationQueue/queue-actions.ts",
       "components/molecules/MediaPreview/MediaPreview.tsx",
+      "components/molecules/FileUpload/FileUpload.tsx",
+      "components/molecules/FileUpload/file-rules.ts",
     ]);
   });
 

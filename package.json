@@ -55,7 +55,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/check-prefix.mjs && node scripts/check-classes-emit.mjs && node scripts/check-tokens.mjs && node scripts/check-client-boundary.mjs",
+    "build": "tsc -b && vite build && node scripts/check-prefix.mjs && node scripts/check-classes-emit.mjs && node scripts/check-tokens.mjs && node scripts/check-client-boundary.mjs && node scripts/check-css-urls.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
@@ -67,7 +67,8 @@
     "check:classes-emit": "node scripts/check-classes-emit.mjs",
     "prepack": "npm run build && node scripts/write-meta.mjs",
     "check:tokens": "node scripts/check-tokens.mjs",
-    "check:client-boundary": "node scripts/check-client-boundary.mjs"
+    "check:client-boundary": "node scripts/check-client-boundary.mjs",
+    "check:css-urls": "node scripts/check-css-urls.mjs"
   },
   "peerDependencies": {
     "@tanstack/react-table": "^9.1.2",

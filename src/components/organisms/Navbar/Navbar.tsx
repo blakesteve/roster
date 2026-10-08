@@ -148,6 +148,8 @@ export interface NavbarProps
    * when you need mixed weights, colors, or other rich styling that a plain
    * string cannot express (e.g. bold "GAME" + thin "VERDICT").
    * The logo image is always rendered; this only affects the text element.
+   * The logo is decorative (empty alt) because this or the brand name names
+   * the link, so give it text a screen reader can read, visible or not.
    */
   brandElement?: React.ReactNode;
   /**
@@ -332,9 +334,11 @@ const Navbar = ({
                 surfaceColors.brand,
               )}
             >
+              {/* Empty alt: the brand's name sits beside it in the same link,
+                  so naming the logo too reads the brand twice. */}
               <img
                 src={logoSrc}
-                alt={`${brandName} Logo`}
+                alt=""
                 style={logoStyle}
                 className={cn("rst:shrink-0", logoClassName ?? "rst:rounded-md")}
               />
@@ -598,7 +602,7 @@ const Navbar = ({
                     <div className="rst:flex rst:items-center rst:gap-3">
                       <img
                         src={logoSrc}
-                        alt={brandName}
+                        alt=""
                         style={logoStyle}
                         className={cn("rst:shrink-0", logoClassName ?? "rst:rounded-md")}
                       />

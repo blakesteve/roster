@@ -1,6 +1,6 @@
 /**
  * Reads Chromium's accessibility tree for an element in the story under test:
- * its role, its name, its description and its `invalid` state, as a screen
+ * its role, its name, its description, and its invalid, disabled and busy states, as a screen
  * reader is handed them. An attribute in the DOM is what the page asked for; this is what the
  * browser made of it, which is what a requirement about "announced as invalid"
  * is actually about.
@@ -20,7 +20,15 @@ type DOMNode = {
   contentDocument?: DOMNode;
 };
 
-export type AXState = { role: string; name: string; description: string; invalid: string | null; ignored: boolean };
+export type AXState = {
+  role: string;
+  name: string;
+  description: string;
+  invalid: string | null;
+  ignored: boolean;
+  disabled: boolean;
+  busy: boolean;
+};
 
 function documents(node: DOMNode, out: DOMNode[] = []): DOMNode[] {
   if (node.nodeName === "#document") out.push(node);
@@ -67,13 +75,17 @@ async function read(session: Session, selectors: string[]): Promise<AXState[]> {
       nodes: AXNode[];
     };
     const node = nodes[0] ?? {};
-    const invalid = node.properties?.find((p) => p.name === "invalid")?.value.value;
+    const prop = (name: string) => node.properties?.find((p) => p.name === name)?.value.value;
+    const invalid = prop("invalid");
     results.push({
       role: String(node.role?.value ?? ""),
       name: String(node.name?.value ?? ""),
       description: String(node.description?.value ?? ""),
       invalid: invalid === undefined ? null : String(invalid),
       ignored: !!node.ignored,
+      /* Chromium reports `busy` as 1 rather than true. */
+      disabled: !!prop("disabled"),
+      busy: !!prop("busy"),
     });
   }
   return results;

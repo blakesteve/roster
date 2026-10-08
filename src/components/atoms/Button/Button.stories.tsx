@@ -245,7 +245,7 @@ export const Loading: Story = {
     docs: {
       description: {
         story:
-          "When `isLoading` is true, a spinner is prepended. The spinner automatically inherits the button's dynamic text color.",
+          "When `isLoading` is true, a spinner is prepended and presses are ignored, while the button keeps focus: it's `aria-busy` and `aria-disabled` rather than `disabled`, which would drop a keyboard user to the top of the page. The spinner inherits the button's text color, and `loadingLabel` names it for a screen reader.",
       },
     },
   },
