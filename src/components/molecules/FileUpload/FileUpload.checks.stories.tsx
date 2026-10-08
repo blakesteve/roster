@@ -92,8 +92,12 @@ export const EachStateReadsAsItself: Story = {
     const bar = (name: string) => rowOf(name).querySelector<HTMLElement>("[data-file-progress] > div");
     const share = (name: string) =>
       bar(name)!.getBoundingClientRect().width / rowOf(name).querySelector("[data-file-progress]")!.getBoundingClientRect().width;
+    /* The fills grow over a transition, so wait for each to arrive rather
+       than read it once: a read mid-transition caught 0.99999976. The bar
+       with no figure never moves, so it's exact. */
     await waitFor(() => expect(share("uploading.jpg")).toBeCloseTo(0.25, 2));
-    await expect([share("no-figure-yet.jpg"), share("processing.jpg")]).toEqual([0, 1]);
+    await waitFor(() => expect(share("processing.jpg")).toBeCloseTo(1, 2));
+    await expect(share("no-figure-yet.jpg")).toBe(0);
     await expect([bar("done.jpg"), bar("failed.jpg"), bar("rejected.jpg")]).toEqual([null, null, null]);
     /* The rejected file was never sent. */
     await expect(harness.calls.map((c) => c.file.name)).not.toContain("rejected.jpg");
