@@ -18,6 +18,12 @@ const GUARDED = [
   "components/molecules/MediaPreview",
   "components/molecules/FileUpload",
   "components/molecules/Pagination",
+  "components/atoms/Skeleton",
+  "components/atoms/Progress",
+  "components/atoms/LoadingDots",
+  "components/molecules/SkeletonPresets",
+  "components/molecules/ProgressField",
+  "components/molecules/StepProgress",
 ];
 
 /* A class with any variants in front of it: `rst:dark:hover:`. */
@@ -77,6 +83,13 @@ describe("style guard", () => {
       "components/molecules/FileUpload/file-rules.ts",
       "components/molecules/Pagination/Pagination.tsx",
       "components/molecules/Pagination/page-items.ts",
+      "components/atoms/Skeleton/Skeleton.tsx",
+      "components/atoms/Progress/Progress.tsx",
+      "components/atoms/Progress/progress-values.ts",
+      "components/atoms/LoadingDots/LoadingDots.tsx",
+      "components/molecules/SkeletonPresets/SkeletonPresets.tsx",
+      "components/molecules/ProgressField/ProgressField.tsx",
+      "components/molecules/StepProgress/StepProgress.tsx",
     ]);
   });
 

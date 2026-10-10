@@ -10,6 +10,7 @@ import {
 } from "react";
 import { cn } from "../../../lib/utils";
 import { Button } from "../../atoms/Button/Button";
+import { Progress } from "../../atoms/Progress/Progress";
 import { acceptList, formatBytes, matchesType, sameFile } from "./file-rules";
 
 /** Where a file is: waiting its turn, on its way, being handled by the app's server, or finished one way or another. */
@@ -594,30 +595,16 @@ function FileUpload<R = unknown>({
                     </span>
                   </p>
                   {moving && (
-                    <div
-                      role="progressbar"
-                      aria-label={item.file.name}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={item.status === "uploading" && item.progress !== null ? Math.round(item.progress * 100) : undefined}
-                      className={cn(
-                        "rst:mt-1.5 rst:h-1.5 rst:overflow-hidden rst:rounded-full rst:bg-gray-200 rst:dark:bg-gray-700",
-                        /* Under way with no figure yet: the track pulses and the
-                           fill waits at zero, so the first figure grows it
-                           rather than shrinking a full bar. */
-                        item.status === "uploading" && item.progress === null && "rst:animate-pulse rst:motion-reduce:animate-none",
-                      )}
-                      data-file-progress=""
-                    >
-                      <div
-                        className={cn(
-                          "rst:h-full rst:origin-left rst:rounded-full rst:bg-primary-600 rst:transition-transform rst:motion-reduce:transition-none rst:dark:bg-primary-400",
-                          /* On the server: full, and pulsing, since there's no figure to give. */
-                          item.status === "processing" && "rst:animate-pulse rst:motion-reduce:animate-none",
-                        )}
-                        style={{
-                          transform: `scaleX(${item.status === "processing" ? 1 : item.status === "uploading" ? (item.progress ?? 0) : 0})`,
-                        }}
+                    <div className="rst:mt-1.5" data-file-progress="">
+                      {/* No figure yet, or the server finishing: the value stands
+                          and the bar breathes, so the first figure grows it rather
+                          than shrinking a full bar. Its status is the line above,
+                          so the bar says nothing itself. */}
+                      <Progress
+                        size="sm"
+                        value={item.status === "processing" ? 100 : item.status === "uploading" ? (item.progress ?? 0) * 100 : 0}
+                        busy={item.status === "processing" || (item.status === "uploading" && item.progress === null)}
+                        announce={false}
                       />
                     </div>
                   )}

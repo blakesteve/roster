@@ -591,6 +591,14 @@ per glyph, and holding it to 3:1 would flatten the effect.
 `Spinner` holds still under reduced motion: the arc still reads as loading, and
 its `label` (default "loading") says so.
 
+The loading system has its own: `--roster-skeleton` and
+`--roster-skeleton-highlight` are the skeleton's fill and the light that
+crosses it, and the empty part of every progress bar (gray-200 and gray-100,
+gray-700 and gray-600 in dark). Three durations, unset by default, change the
+pace: `--roster-skeleton-duration` (1.8s), `--roster-progress-travel-duration`
+(1.4s, the indeterminate pill) and `--roster-dots-duration` (1.2s). Under
+reduced motion all three stop on a resting frame.
+
 ### Scrollbars
 
 `custom-scrollbar` gives any scrollable surface a slim themed scrollbar.
@@ -1381,6 +1389,97 @@ submit button from sending its form twice. It no longer dims, since
 the spinner says it's busy. `loadingLabel` names the spinner ("loading" by
 default). `disabled` is unchanged and wins over `isLoading`.
 
+### The loading system
+
+Five components for the time between asking and having, chosen by what the
+wait is:
+
+| The wait | Use |
+| --- | --- |
+| Content is coming, and you know its shape | `Skeleton`, or a preset, inside `SkeletonRegion` |
+| A task with a fraction (bytes, pages, items) | `ProgressField` (a `Progress` with its label and value) |
+| A count of discrete things | `ProgressField` or `Progress`, `variant="segmented"` |
+| Named stages of a flow | `StepProgress` |
+| A model generating, before its first token | `LoadingDots` |
+| A short wait with nothing to show | `Spinner` |
+
+`SegmentBar` isn't one of these: it shows how a whole divides into parts (a
+vote split, a budget), not how much of a task is done.
+
+**Skeleton.** A placeholder in the shape of what's loading, so a page keeps
+its layout and nothing moves when data lands.
+
+```tsx
+import { SkeletonRegion, SkeletonCard } from "@blakesteve/roster";
+
+<SkeletonRegion loading={!trails} label="Loading trails" skeleton={<SkeletonCard media={140} lines={2} />}>
+  {trails && <TrailCard trail={trails[0]} />}
+</SkeletonRegion>;
+```
+
+- A `line` is one line box of its text size: `sm` (12/16), `md` (14/20), `lg`
+  (16/24), or `inherit`. It's a no-break space set in that size with a bar
+  drawn over it, so `lines={3}` is exactly the height of three lines of that
+  text. A `block` takes a `height`; a `circle` takes Avatar's sizes.
+- Presets draw the real component's box: `SkeletonCard` (a Card with optional
+  media, a `text-base` title and `text-sm` body lines 8px under it),
+  `SkeletonTableRow` (Table's own cells), `SkeletonAvatar`, `SkeletonStat`.
+- `SkeletonRegion` sets `aria-busy` while loading, hides the skeleton from
+  screen readers and says `label` once (a polite status beside the region,
+  empty until a moment after loading starts). For a grid of cards, wrap the
+  grid in one region, or pass `announce={false}` to all but one. Skeletons are
+  always `aria-hidden`. `SkeletonTableRow` is a `tr`, so it can't sit in a
+  region: set `aria-busy` on the table yourself.
+- `SkeletonRegion` renders two siblings, the hidden status and then the
+  region, so the status counts in a parent's `first:` and `nth-child`
+  selectors. It takes no room.
+- The fill is `--roster-skeleton` (gray-200, gray-700 in dark), with
+  `--roster-skeleton-highlight` crossing it. Neutral rather than the brand
+  shimmer Countdown uses, and its own pair, so retinting one never recolors the
+  other. Under reduced motion it holds still.
+
+**Progress and ProgressField.** `ProgressField` is the form to reach for: the
+label and value on one baseline above the bar, an optional detail line below.
+
+```tsx
+<ProgressField label="Uploading photos" value={sent} max={total} detail={`${mb(sent)} of ${mb(total)}`} />
+<ProgressField label="Picks" variant="segmented" segments={["done", "done", "na", "current", "remaining"]} />
+```
+
+- Leave `value` out for indeterminate (a pill crossing the track). Set `busy`
+  when a value stands but work goes on: the bar breathes in place.
+- Four statuses (`default`, `success`, `warning`, `error`), solid fills only:
+  each clears 3:1 against the track and the page in both themes, where a
+  translucent fill would fade into whatever is behind it. Two sizes, 6px and
+  10px.
+- Segments take `done`, `current`, `remaining` and `na` (not part of this
+  one: dashed, and not counted). They're capsules unless `rounded={false}`.
+- The bar is `aria-hidden`. A status region beside it says the value as text,
+  at most every 1.5 seconds and the end at once, because a changed
+  `aria-label` isn't reliably announced and a `progressbar` may beep or speak
+  on every update. `announce={false}` when something else already says it.
+- On dark glass in the light theme, set `--roster-skeleton` on that surface to
+  `var(--roster-primary-200)`: the empty cells take it and the bar keeps its
+  extent (primary-600 against primary-200 is 6.4:1). Not in the dark theme,
+  where the fill is primary-400 and that pair is about 2:1; there the default
+  gray-700 track keeps done against remaining at 3.8:1, though its edge is
+  faint on the glass.
+- In forced colors the fill keeps the system highlight color, the track and
+  empty cells an outline, and the current cell its border.
+
+**StepProgress.** Named stages: `variant="stepper"` shows every step with a
+numbered marker and connectors that fill behind the current one;
+`"segmented"` is the compact form, always with "Step 2 of 5". The current
+step is `aria-current="step"`, finished ones say "done", and the position is
+said when it changes.
+
+**LoadingDots.** Only for a model generating before its first token. It takes
+the surrounding text's size and color, rests at 1, 0.6 and 0.3 opacity (also
+what reduced motion shows), and is replaced by the text once it starts: never
+shown beside it.
+
+Every string in all five is a prop with an English default.
+
 ### Pagination
 
 Moves through pages of a list, built for a long list browsed on a phone.
@@ -1573,7 +1672,10 @@ function App() {
 | `AvatarStrip`        | Stacked avatar row with overflow chip, dismiss button, trailing slot, and label area                         |
 | `CollapsibleSection` | Clamps any content (prose, chips, image grids) to a fixed height with a fade and expand/collapse toggle      |
 | `Select`             | Dropdown selector, on the same size scale as `Button` and `Input`                                            |
-| `SegmentBar`         | Proportional horizontal bar divided into colored segments with optional legend                               |
+| `SegmentBar`         | Proportional horizontal bar divided into colored segments with optional legend (a split, not progress)       |
+| `Skeleton`           | Line, block or circle placeholder at the content's exact size; `SkeletonRegion` sets `aria-busy`              |
+| `Progress`           | Continuous or segmented progress bar: determinate, indeterminate or busy; per-segment state                   |
+| `LoadingDots`        | Three dots for a model generating before its first token; replaced by the text                                |
 | `Stat`               | A figure with its label and, optionally, its source; a valid `<dl>` group, or `semantics="standalone"`       |
 | `Spinner`            | Loading indicator                                                                                            |
 | `Switch`             | Toggle switch; its label toggles it, and every size is a 44px target                                         |
@@ -1600,6 +1702,9 @@ function App() {
 | `MediaPreview`    | Thumbnail that falls back to "Preview unavailable, open original" when it can't render |
 | `FileUpload`      | Picks files and uploads each through the app's `upload`, with per-file progress, retry and rules |
 | `Pagination`      | Page numbers with gaps, or a compact page picker on narrow screens; buttons or real links, 44px targets |
+| `SkeletonCard`, `SkeletonTableRow`, `SkeletonAvatar`, `SkeletonStat` | Skeleton presets in the real component's box |
+| `ProgressField`   | Progress with a label and value on one baseline and a detail line: the form to reach for |
+| `StepProgress`    | Named steps: a stepper with markers and connectors, or a compact segmented "Step x of y" |
 | `Pullquote`       | A line lifted out of prose, as `<figure>` + `<blockquote>` + `<figcaption>` |
 | `RadioGroup`      | Radio set reporting one `string`; descriptions, error, 44px targets         |
 | `Toast`           | Transient floating notice; `Toaster` + the imperative `toast` handle        |

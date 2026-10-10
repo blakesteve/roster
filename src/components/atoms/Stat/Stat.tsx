@@ -1,7 +1,7 @@
 import React from "react";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
-import { statValueVariants } from "./stat-variants";
+import { statSourceClass, statValueVariants } from "./stat-variants";
 import { Eyebrow } from "../Eyebrow/Eyebrow";
 
 export interface StatProps
@@ -27,12 +27,7 @@ export interface StatProps
   semantics?: "definition" | "standalone";
 }
 
-/* `font-normal` and `normal-nums` because in the definition markup the source
-   sits inside the value's `dd` and would otherwise inherit its bold, tabular
-   figures. In both markups this also means the source no longer inherits a
-   weight from outside the Stat: it is always regular. */
-const SOURCE =
-  "rst:block rst:font-mono rst:text-[0.53125rem] rst:font-normal rst:normal-nums rst:leading-none rst:tracking-[0.06em] rst:text-gray-500 rst:opacity-75 rst:dark:text-gray-400";
+const SOURCE = statSourceClass;
 
 /**
  * A figure with its label, and optionally where it came from.

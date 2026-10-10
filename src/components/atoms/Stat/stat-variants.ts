@@ -26,3 +26,13 @@ export const statValueVariants = /* @__PURE__ */ cva(
     defaultVariants: { size: "md", colorScheme: "neutral" },
   },
 );
+
+/* The source line's classes, shared with SkeletonStat so a skeleton's source
+   row is the same height as the real one.
+
+   `font-normal` and `normal-nums` because in the definition markup the source
+   sits inside the value's `dd` and would otherwise inherit its bold, tabular
+   figures. In both markups this also means the source no longer inherits a
+   weight from outside the Stat: it is always regular. */
+export const statSourceClass =
+  "rst:block rst:font-mono rst:text-[0.53125rem] rst:font-normal rst:normal-nums rst:leading-none rst:tracking-[0.06em] rst:text-gray-500 rst:opacity-75 rst:dark:text-gray-400";

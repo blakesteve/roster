@@ -31,6 +31,10 @@ const INHERITS_ON_PURPOSE: Record<string, string> = {
   Card: "a container for host content; restyling it would override the page",
   Link: "sits inline inside host prose and must match its surroundings",
   Spinner: "renders no text",
+  Progress: "renders no visible text; its status is screen-reader only",
+  LoadingDots: "stands in for the host's text, so it takes that text's size and color",
+  Skeleton: "a line must be the host text's line box exactly, which needs the host's font",
+  SkeletonPresets: "each is the real component's container (Card inherits), set to the content's metrics",
 };
 
 /**

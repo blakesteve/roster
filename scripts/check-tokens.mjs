@@ -44,6 +44,8 @@ const COMPONENT = [
   "sheet-leave-easing",
   "sheet-fade-duration",
   "sheet-backdrop",
+  "skeleton",
+  "skeleton-highlight",
 ];
 
 /* Shape hooks: corner radius, edge width, the control level and the backdrop.
