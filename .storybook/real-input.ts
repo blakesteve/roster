@@ -138,7 +138,12 @@ export const realDropFiles: BrowserCommand<[selector: string, files: RealFile[]]
   for (const type of ["dragenter", "dragover", "drop"]) await frame.dispatchEvent(selector, type, { dataTransfer });
 };
 
-export const realInputCommands = { realWheel, realDrag, realClick, realSetFiles, realDropFiles };
+/** Emulates media features for the page, such as forced colors; `null` clears one. */
+export const realEmulateMedia: BrowserCommand<[features: { forcedColors?: "active" | "none" | null }]> = async (context, features) => {
+  await context.page.emulateMedia(features);
+};
+
+export const realInputCommands = { realWheel, realDrag, realClick, realSetFiles, realDropFiles, realEmulateMedia };
 
 declare module "vitest/browser" {
   interface BrowserCommands {
@@ -151,5 +156,6 @@ declare module "vitest/browser" {
     realClick: (selector: string, at?: { fx?: number; fy?: number }) => Promise<void>;
     realSetFiles: (selector: string, files: RealFile[]) => Promise<void>;
     realDropFiles: (selector: string, files: RealFile[]) => Promise<void>;
+    realEmulateMedia: (features: { forcedColors?: "active" | "none" | null }) => Promise<void>;
   }
 }

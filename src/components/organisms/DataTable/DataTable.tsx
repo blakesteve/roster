@@ -13,17 +13,10 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCaretUp,
-  faCaretDown,
-  faAngleLeft,
-  faAngleRight,
-  faAnglesLeft,
-  faAnglesRight,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCaretUp, faCaretDown } from "@fortawesome/free-solid-svg-icons";
 
 import { cn } from "../../../lib/utils";
-import { Button } from "../../atoms/Button/Button";
+import { Pagination, type PaginationLabels } from "../../molecules/Pagination/Pagination";
 import {
   Table,
   TableHeader,
@@ -74,6 +67,12 @@ export interface DataTableProps<TData extends RowData> {
   variant?: TableProps["variant"];
   size?: TableProps["size"];
   hoverable?: boolean;
+  /**
+   * Replaces the pager's words; see Pagination's `labels`. `status` also
+   * replaces the "Page N of M" line beside it. ("No results found." is
+   * DataTable's own and isn't covered.)
+   */
+  paginationLabels?: Partial<PaginationLabels>;
 }
 
 export function DataTable<TData extends RowData>({
@@ -85,6 +84,7 @@ export function DataTable<TData extends RowData>({
   variant = "default",
   size = "md",
   hoverable = false,
+  paginationLabels,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -182,57 +182,30 @@ export function DataTable<TData extends RowData>({
         )}
       >
         <div className="rst:text-sm rst:font-medium rst:text-gray-500 rst:dark:text-gray-400">
-          Page{" "}
-          <strong className="rst:text-gray-900 rst:dark:text-gray-100">
-            {table.state.pagination.pageIndex + 1}
-          </strong>{" "}
-          of{" "}
-          <strong className="rst:text-gray-900 rst:dark:text-gray-100">
-            {table.getPageCount()}
-          </strong>
+          {paginationLabels?.status ? (
+            paginationLabels.status(table.state.pagination.pageIndex + 1, table.getPageCount())
+          ) : (
+            <>
+              Page{" "}
+              <strong className="rst:text-gray-900 rst:dark:text-gray-100">
+                {table.state.pagination.pageIndex + 1}
+              </strong>{" "}
+              of{" "}
+              <strong className="rst:text-gray-900 rst:dark:text-gray-100">
+                {table.getPageCount()}
+              </strong>
+            </>
+          )}
         </div>
-        <div className="rst:flex rst:items-center rst:space-x-2">
-          <Button
-            variant="outline"
-            colorScheme="neutral"
-            size="sm"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-            aria-label="Go to first page"
-          >
-            <FontAwesomeIcon icon={faAnglesLeft} />
-          </Button>
-          <Button
-            variant="outline"
-            colorScheme="neutral"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            aria-label="Go to previous page"
-          >
-            <FontAwesomeIcon icon={faAngleLeft} />
-          </Button>
-          <Button
-            variant="outline"
-            colorScheme="neutral"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            aria-label="Go to next page"
-          >
-            <FontAwesomeIcon icon={faAngleRight} />
-          </Button>
-          <Button
-            variant="outline"
-            colorScheme="neutral"
-            size="sm"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-            aria-label="Go to last page"
-          >
-            <FontAwesomeIcon icon={faAnglesRight} />
-          </Button>
-        </div>
+        <Pagination
+          layout="arrows"
+          align="end"
+          variant="outline"
+          page={table.state.pagination.pageIndex + 1}
+          pageCount={table.getPageCount()}
+          onPageChange={(page) => table.setPageIndex(page - 1)}
+          labels={paginationLabels}
+        />
       </div>
     </div>
   );

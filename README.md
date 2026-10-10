@@ -1381,6 +1381,81 @@ submit button from sending its form twice. It no longer dims, since
 the spinner says it's busy. `loadingLabel` names the spinner ("loading" by
 default). `disabled` is unchanged and wins over `isLoading`.
 
+### Pagination
+
+Moves through pages of a list, built for a long list browsed on a phone.
+Controlled: you hold `page` and `pageCount`.
+
+```tsx
+import { Pagination } from "@blakesteve/roster";
+
+// Pages in your own state: every control is a button.
+<Pagination page={page} pageCount={79} onPageChange={setPage} />
+
+// Pages that are URLs: every control is a real link.
+<Pagination
+  page={page}
+  pageCount={79}
+  getPageHref={(p) => `/catalog?page=${p}`}
+  linkComponent={NextLink}   // from a "use client" wrapper
+  navigate={router.push}     // for the compact form's page picker
+/>
+```
+
+**Buttons or links.** Without `getPageHref`, controls are buttons and
+`onPageChange(page)` is the only thing that changes the page. With it, every
+control is an `<a href>` (crawlable, shareable, openable in a new tab) rendered
+through `linkComponent` (a plain `<a>` by default; it gets `href` and `to`, so
+`next/link` and React Router's `Link` both work). `onPageChange` is then called
+on a plain click before the link is followed. The compact form's page picker
+has no link to follow, so it calls `navigate(href)`, or loads the page.
+
+**Two forms, chosen by the pager's own width** (a container query, so it's
+right in a sidebar and needs no measuring):
+
+- **448px and up:** previous, the first page, the current page with a
+  neighbor each side, the last page, gaps between, and next. That's always
+  seven equal slots, so the buttons don't shift under the pointer as you page.
+  The words "Previous" and "Next" join the arrows from 576px.
+- **Under 448px:** previous, a page picker ("Page 40 of 79"), and next, with
+  the first and last pages joining from 384px. Any page is two taps away, and
+  on a phone the picker is the system's own list.
+
+`layout` picks one form (`"pages"`, `"compact"`), or `"arrows"` for first,
+previous, next and last beside a count the app shows itself, which is what
+DataTable uses.
+
+What it promises:
+
+- **Every control is a 44px target,** at every width.
+- **The current page is `aria-current="page"`,** the pager is a `nav` named by
+  `labels.nav`, and every control's name says the page it goes to ("Next page
+  (41)"). A new page is said in a polite live region ("Page 41 of 79").
+- **Focus stays on the control that was pressed.** A page number is the same
+  element afterwards, and an arrow that reaches the end stays focusable,
+  `aria-disabled` rather than `disabled`. To take a reader to the top of the
+  new page, focus your list's heading in `onPageChange`.
+- **Every word is a `labels` entry,** page numbers included (`labels.number`).
+- **No Font Awesome:** the chevrons are inline SVG.
+- **The picker waits for the keyboard.** A pick from its list goes at once.
+  Arrow keys on the closed picker (which step it on Windows and Linux) hold the
+  choice until Enter or leaving it; Escape puts it back.
+
+Things to know:
+
+- **Give the pager a width.** It sizes its form by the width it's given, so in
+  a slot that sizes to its content (an `ml-auto` box beside a heading, an `auto`
+  grid column) it falls back to 18rem, the compact form. For numbers there,
+  give the slot a width (`flex-1`, a `1fr` column) or pass `layout="pages"`.
+- **`siblings` above 1** needs more room than the 448px switch allows for;
+  force `layout` if you widen it.
+- **When you move focus yourself,** pass `announce={false}`: the heading you
+  focus says the new page, and the live region would say it again.
+- **In jsdom tests,** where no CSS applies, `layout="auto"` renders both forms;
+  pass a `layout`, or query inside `[data-pagination-layout="pages"]`.
+- **Wire it fully.** With neither `onPageChange` nor `getPageHref` nothing
+  pages, and in link mode without `navigate` the picker does a full page load.
+
 ### Carousel
 
 A sideways row: a row of cards, a selection strip, or a gallery of one per
@@ -1524,6 +1599,7 @@ function App() {
 | `MatchupCard`     | Head-to-head comparison card                                                |
 | `MediaPreview`    | Thumbnail that falls back to "Preview unavailable, open original" when it can't render |
 | `FileUpload`      | Picks files and uploads each through the app's `upload`, with per-file progress, retry and rules |
+| `Pagination`      | Page numbers with gaps, or a compact page picker on narrow screens; buttons or real links, 44px targets |
 | `Pullquote`       | A line lifted out of prose, as `<figure>` + `<blockquote>` + `<figcaption>` |
 | `RadioGroup`      | Radio set reporting one `string`; descriptions, error, 44px targets         |
 | `Toast`           | Transient floating notice; `Toaster` + the imperative `toast` handle        |
@@ -1534,7 +1610,7 @@ function App() {
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `ActionBar` | Sticky bottom action strip                                                                                                                                         |
 | `Countdown` | Live countdown timer                                                                                                                                               |
-| `DataTable` | Full-featured table with sorting and pagination via TanStack Table v9. Imported from `@blakesteve/roster/data-table` (see [DataTable columns](#datatable-columns)) |
+| `DataTable` | Full-featured table with sorting and pagination via TanStack Table v9; its pager is `Pagination`'s arrows, worded through `paginationLabels`. Imported from `@blakesteve/roster/data-table` (see [DataTable columns](#datatable-columns)) |
 | `Dialog`    | Modal dialog; `onAfterClose` runs once it has finished closing                                                                                                     |
 | `Footer`    | Site footer                                                                                                                                                        |
 | `ModerationQueue` | Items waiting for a decision: busy per action, confirm, reason and edit steps, focus after an item leaves, a live region. Never fetches (see [ModerationQueue](#moderationqueue)) |

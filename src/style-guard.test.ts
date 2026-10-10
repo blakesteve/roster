@@ -17,6 +17,7 @@ const GUARDED = [
   "components/organisms/ModerationQueue",
   "components/molecules/MediaPreview",
   "components/molecules/FileUpload",
+  "components/molecules/Pagination",
 ];
 
 /* A class with any variants in front of it: `rst:dark:hover:`. */
@@ -74,6 +75,8 @@ describe("style guard", () => {
       "components/molecules/MediaPreview/MediaPreview.tsx",
       "components/molecules/FileUpload/FileUpload.tsx",
       "components/molecules/FileUpload/file-rules.ts",
+      "components/molecules/Pagination/Pagination.tsx",
+      "components/molecules/Pagination/page-items.ts",
     ]);
   });
 
