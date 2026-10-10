@@ -72,6 +72,7 @@ export * from './components/molecules/EmptyState/EmptyState';
 export * from './components/molecules/EmptyState/empty-state-variants';
 export * from './components/molecules/MediaPreview/MediaPreview';
 export * from './components/molecules/FileUpload/FileUpload';
+export * from './components/molecules/Pagination/Pagination';
 export * from './components/molecules/ErrorState/ErrorState';
 export * from './components/molecules/ErrorState/error-state-variants';
 export * from './components/molecules/MatchupCard/MatchupCard';

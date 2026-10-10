@@ -50,12 +50,8 @@ describe("DataTable Component", () => {
     expect(screen.getByText("User 1")).toBeInTheDocument();
     expect(screen.queryByText("User 11")).not.toBeInTheDocument();
 
-    const nextPageButton = screen.getByRole("button", {
-      name: /go to next page/i,
-    });
-
-    // Click Next Page
-    fireEvent.click(nextPageButton);
+    // Each arrow's name says the page it goes to.
+    fireEvent.click(screen.getByRole("button", { name: "Next page (2)" }));
 
     // Now User 11 and 12 should be visible
     expect(screen.getByText("User 11")).toBeInTheDocument();
@@ -63,6 +59,34 @@ describe("DataTable Component", () => {
 
     // User 1 should be gone
     expect(screen.queryByText("User 1")).not.toBeInTheDocument();
+
+    // At the last page, Next stays focusable but goes nowhere; Previous comes back.
+    const next = screen.getByRole("button", { name: "Next page" });
+    expect(next).toHaveAttribute("aria-disabled", "true");
+    fireEvent.click(next);
+    expect(screen.getByText("User 11")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "First page (1)" }));
+    expect(screen.getByText("User 1")).toBeInTheDocument();
+  });
+
+  it("names its pager and takes its words", () => {
+    render(
+      <DataTable
+        columns={columns}
+        data={mockData}
+        paginationLabels={{ nav: "Users pages", nextPage: (p) => (p ? `Siguiente (${p})` : "Siguiente") }}
+      />,
+    );
+    expect(screen.getByRole("navigation", { name: "Users pages" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Siguiente (2)" })).toBeInTheDocument();
+    /* The twin: the default words are gone. */
+    expect(screen.queryByRole("button", { name: "Next page (2)" })).toBeNull();
+  });
+
+  it("words its count line through the status label", () => {
+    render(<DataTable columns={columns} data={mockData} paginationLabels={{ status: (p, c) => `Página ${p} de ${c}` }} />);
+    expect(screen.getByText("Página 1 de 2")).toBeInTheDocument();
+    expect(screen.queryByText(/^Page/)).toBeNull();
   });
 
   it("sorts data when clicking a sortable header", () => {

@@ -19,6 +19,8 @@ export interface RealInput {
     realSetFiles: (selector: string, files: RealFile[]) => Promise<void>;
     /** Drops files on an element: dispatched drag events carrying real Files. */
     realDropFiles: (selector: string, files: RealFile[]) => Promise<void>;
+    /** Emulates media features for the page, such as forced colors; `null` clears one. */
+    realEmulateMedia: (features: { forcedColors?: "active" | "none" | null }) => Promise<void>;
     /** The accessibility tree's role, name, description and states for each element (.storybook/ax-tree.ts). */
     axStates: (selectors: string[]) => Promise<
       {
