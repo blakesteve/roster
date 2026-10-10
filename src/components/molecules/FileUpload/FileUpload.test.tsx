@@ -78,11 +78,16 @@ describe("FileUpload", () => {
     pick(photo("pier.jpg"));
     act(() => calls[0].context.onProgress(0.416));
     expect(status("pier.jpg")).toBe("2 KB · Uploading, 42%");
-    expect(within(row("pier.jpg")).getByRole("progressbar")).toHaveAttribute("aria-valuenow", "42");
+    /* The bar draws it; the status line above says it, so the bar is hidden. */
+    const fill = () => row("pier.jpg").querySelector<HTMLElement>("[data-progress-fill]")!;
+    expect(fill().style.width).toBe("42%");
+    expect(row("pier.jpg").querySelector("[data-progress-track]")).toHaveAttribute("aria-hidden", "true");
+    expect(within(row("pier.jpg")).queryByRole("progressbar")).toBeNull();
     act(() => calls[0].context.onProcessing());
     expect(status("pier.jpg")).toBe("2 KB · Finishing up");
-    /* Processing has no figure: the bar is indeterminate. */
-    expect(within(row("pier.jpg")).getByRole("progressbar")).not.toHaveAttribute("aria-valuenow");
+    /* The server's turn: full, and breathing. */
+    expect(fill().style.width).toBe("100%");
+    expect(row("pier.jpg").querySelector("[data-progress-track]")).toHaveClass("rst:animate-pulse");
   });
 
   it("uploads a few at a time, and the rest wait their turn", async () => {

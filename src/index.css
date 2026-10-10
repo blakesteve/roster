@@ -689,6 +689,106 @@
   }
 }
 
+/* ── Skeleton and progress track ────────────────────────────────────────────
+   One neutral surface for both: what a skeleton is drawn in, and the part of a
+   progress bar not yet filled. Neutral rather than the brand shimmer above:
+   that pair colors Countdown's numerals, and a page of placeholders in the
+   brand color reads as content, not as content on its way. Its own pair, too,
+   so retinting Countdown never recolors every loading state, and back.
+
+   Gray-200 on light and gray-700 on dark. Against the track, every status fill
+   clears 3:1 (primary-600 6.9, success-600 4.0, amber-700 4.0, error-600 6.6
+   on light; the 400 steps 3.7 to 6.2 on dark), which is the pair that tells
+   done from not yet. A darker dark track (gray-800) was 1.15:1 against a
+   gray-900 card, so a skeleton all but vanished.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --roster-skeleton: var(--roster-gray-200, #e7e5e4);
+  --roster-skeleton-highlight: var(--roster-gray-100, #f5f5f4);
+}
+
+.dark {
+  --roster-skeleton: var(--roster-gray-700, #44403c);
+  --roster-skeleton-highlight: var(--roster-gray-600, #57534e);
+}
+
+/* The shimmer's travel, on the skeleton pair. Same sweep and resting gap as
+   `animate-shimmer`, faster, since a placeholder is waited on rather than
+   read. Under reduced motion it stops on the flat fill, which is the resting
+   frame: the band parks out of frame, so nothing is left half-lit. */
+@utility animate-skeleton {
+  background-color: var(--roster-skeleton);
+  background-image: linear-gradient(
+    90deg,
+    var(--roster-skeleton) 42%,
+    var(--roster-skeleton-highlight) 50%,
+    var(--roster-skeleton) 58%
+  );
+  background-size: 260% auto;
+  background-repeat: no-repeat;
+  animation: rst-shimmer var(--roster-skeleton-duration, 1.8s) linear infinite;
+}
+
+@layer roster {
+  @media (prefers-reduced-motion: reduce) {
+    .rst\:animate-skeleton {
+      animation: none;
+    }
+  }
+}
+
+/* An indeterminate bar: a 30% pill crossing the track and leaving it. The pill
+   is 30% of the track wide, so translating it by its own width moves it in
+   steps of 30% of the track: from just off the left to just off the right is
+   -100% to 333%. Under reduced motion it rests in the middle, which can't be
+   mistaken for a value: a determinate bar always starts at the left. */
+@keyframes rst-progress-travel {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(333.3%);
+  }
+}
+
+@utility animate-progress-travel {
+  animation: rst-progress-travel var(--roster-progress-travel-duration, 1.4s) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@layer roster {
+  @media (prefers-reduced-motion: reduce) {
+    .rst\:animate-progress-travel {
+      animation: none;
+      transform: translateX(116.7%);
+    }
+  }
+}
+
+/* Three dots, each fading on its own beat. The resting frame (no animation)
+   is 1, 0.6, 0.3, set on the dots themselves, so a still frame still reads as
+   movement from left to right. */
+@keyframes rst-dot {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+@utility animate-dot {
+  animation: rst-dot var(--roster-dots-duration, 1.2s) ease-in-out infinite;
+}
+
+@layer roster {
+  @media (prefers-reduced-motion: reduce) {
+    .rst\:animate-dot {
+      animation: none;
+    }
+  }
+}
+
 /* ── Scrollbar ───────────────────────────────────────────────────────────────
    `custom-scrollbar` sat on Textarea referencing nothing — the class was never
    defined in this stylesheet, in Storybook's, or anywhere else, so the field got

@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor } from "storybook/test";
 import { FileUpload, type FileUploadContext, type FileUploadProps } from "./FileUpload";
+import { Progress } from "../../atoms/Progress/Progress";
 import { asRealFile, pickFiles, samplePhoto, sizedFile } from "../../../test/sample-files";
 import { realInputOrSkip } from "../../../test/real-input";
 
@@ -89,9 +90,9 @@ export const EachStateReadsAsItself: Story = {
     /* Only the failed file offers Try again. */
     await expect(rows.map((li) => !!li.querySelector("[data-file-retry]"))).toEqual([false, false, false, false, true, false]);
     /* The bar shows where an upload is, and none on a finished file. */
-    const bar = (name: string) => rowOf(name).querySelector<HTMLElement>("[data-file-progress] > div");
+    const bar = (name: string) => rowOf(name).querySelector<HTMLElement>("[data-file-progress] [data-progress-fill]");
     const share = (name: string) =>
-      bar(name)!.getBoundingClientRect().width / rowOf(name).querySelector("[data-file-progress]")!.getBoundingClientRect().width;
+      bar(name)!.getBoundingClientRect().width / rowOf(name).querySelector("[data-file-progress] [data-progress-track]")!.getBoundingClientRect().width;
     /* The fills grow over a transition, so wait for each to arrive rather
        than read it once: a read mid-transition caught 0.99999976. The bar
        with no figure never moves, so it's exact. */
@@ -101,6 +102,44 @@ export const EachStateReadsAsItself: Story = {
     await expect([bar("done.jpg"), bar("failed.jpg"), bar("rejected.jpg")]).toEqual([null, null, null]);
     /* The rejected file was never sent. */
     await expect(harness.calls.map((c) => c.file.name)).not.toContain("rejected.jpg");
+  },
+};
+
+/* The bar is Progress now, and it keeps 5.6.0's height, colors, rounding and
+   spacing, the values that version rendered, at the same 150ms. Three things
+   differ on purpose: a tiny value is a dot rather than a sliver, the fill's
+   ends stay round as it grows (scaling squashed them), and while the server
+   finishes the whole bar breathes, not only its fill. */
+export const TheBarLooksAsItDid: Story = {
+  render: () => (
+    <>
+      <Harness />
+      {/* The twin: Progress at its other size, which would be a visible change. */}
+      <div style={{ width: 300 }} data-other-size="">
+        <Progress value={50} size="md" announce={false} />
+      </div>
+    </>
+  ),
+  play: async () => {
+    reset();
+    pickFiles(input(), [await samplePhoto("pier.jpg", 200)]);
+    await waitFor(() => expect(harness.calls).toHaveLength(1));
+    harness.calls[0].context.onProgress(0.5);
+    const wrap = rowOf("pier.jpg").querySelector<HTMLElement>("[data-file-progress]")!;
+    const track = wrap.querySelector<HTMLElement>("[data-progress-track]")!;
+    const fill = wrap.querySelector<HTMLElement>("[data-progress-fill]")!;
+    await waitFor(() => expect(fill.style.width).toBe("50%"));
+    const t = getComputedStyle(track);
+    const f = getComputedStyle(fill);
+    await expect({
+      gap: getComputedStyle(wrap).marginTop,
+      height: t.height,
+      track: t.backgroundColor,
+      fill: f.backgroundColor,
+      round: parseFloat(t.borderTopLeftRadius) >= 3 && parseFloat(f.borderTopLeftRadius) >= 3,
+      clips: t.overflow,
+    }).toEqual({ gap: "6px", height: "6px", track: "rgb(231, 229, 228)", fill: "rgb(10, 79, 122)", round: true, clips: "hidden" });
+    await expect(getComputedStyle(document.querySelector("[data-other-size] [data-progress-track]")!).height).toBe("10px");
   },
 };
 
@@ -127,10 +166,11 @@ export const BarsMoveUnlessMotionIsReduced: Story = {
     callFor("slow.jpg").context.onProcessing();
     callFor("moving.jpg").context.onProgress(0.5);
     await waitFor(() => expect(rowOf("slow.jpg").dataset.status).toBe("processing"));
-    const track = (name: string) => getComputedStyle(rowOf(name).querySelector("[data-file-progress]")!);
-    const fill = (name: string) => getComputedStyle(rowOf(name).querySelector("[data-file-progress] > div")!);
+    const track = (name: string) => getComputedStyle(rowOf(name).querySelector("[data-file-progress] [data-progress-track]")!);
+    const fill = (name: string) => getComputedStyle(rowOf(name).querySelector("[data-file-progress] [data-progress-fill]")!);
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    await expect([fill("slow.jpg").animationName, track("unsure.jpg").animationName, /\btransform\b/.test(fill("moving.jpg").transitionProperty)]).toEqual(
+    /* The server's turn and no figure yet both breathe; a moving figure slides. */
+    await expect([track("slow.jpg").animationName, track("unsure.jpg").animationName, /\bwidth\b/.test(fill("moving.jpg").transitionProperty)]).toEqual(
       reduced ? ["none", "none", false] : ["pulse", "pulse", true],
     );
     /* The twin: a bar with a figure doesn't pulse in either mode. */
@@ -363,7 +403,7 @@ export const NamesAndRoles: Story = {
       q("[data-file-upload]")!,
       choose(),
       rowOf("pier.jpg").querySelector("img")!,
-      rowOf("pier.jpg").querySelector("[data-file-progress]")!,
+      rowOf("pier.jpg").querySelector("[data-file-progress] [data-progress-track]")!,
       removeOf("pier.jpg"),
       q("[data-file-live]")!,
     ];
@@ -378,7 +418,8 @@ export const NamesAndRoles: Story = {
       ["group", "Photos", ""],
       ["button", "Choose photos", "JPEG or PNG. Add at least one photo."],
       ["none", "", ""],
-      ["progressbar", "pier.jpg", ""],
+      /* The bar is a picture: the status line beside it says how far. */
+      ["none", "", ""],
       ["button", "Remove pier.jpg", ""],
       ["status", "", ""],
     ]);

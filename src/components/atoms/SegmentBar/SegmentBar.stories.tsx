@@ -45,6 +45,7 @@ const meta = {
       description: {
         component:
           "**SegmentBar** renders a proportional horizontal bar divided into colored segments.\n\n" +
+          "**SegmentBar or Progress?** SegmentBar shows how a whole divides into parts: a vote split, a budget, a mix. Progress shows how much of a task is done, continuous or one cell per item. Don't draw progress with SegmentBar, or a split with Progress.\n\n" +
           "### Usage\n" +
           "Pass an array of `segments` with `key`, `label`, `value`, and `color`. " +
           "Percentages are computed automatically from the sum of all `value` fields — " +
