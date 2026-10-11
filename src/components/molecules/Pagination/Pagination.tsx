@@ -1,5 +1,6 @@
 import { useId, useMemo, useRef, useState, type ComponentType, type MouseEvent, type ReactNode } from "react";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { Button } from "../../atoms/Button/Button";
 import { buttonVariants } from "../../atoms/Button/button-variants";
 import { selectTriggerVariants } from "../../atoms/Select/select-variants";
@@ -136,6 +137,7 @@ export interface PaginationProps {
   variant?: "ghost" | "outline";
   /** Say the new page in a polite live region when it changes. */
   announce?: boolean;
+  /** The component's own words, replaced; any left out stay English. */
   labels?: Partial<PaginationLabels>;
   className?: string;
 }
@@ -280,7 +282,7 @@ function Pagination({
   labels: overrides,
   className,
 }: PaginationProps) {
-  const l = { ...LABELS, ...overrides };
+  const l = withLabels(LABELS, overrides);
   /* A count still loading (NaN) or divided by a page size of 0 (Infinity)
      reads as no pages, rather than rendering forever or not at all. */
   const pageCount = Number.isFinite(rawCount) ? Math.max(0, Math.floor(rawCount)) : 0;

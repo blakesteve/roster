@@ -8,6 +8,7 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { useDarkScope } from "../../../internal/popup";
 import { useReducedMotion } from "../../../internal/motion";
 import { lockPage } from "../../../internal/page-inert";
@@ -18,6 +19,14 @@ import {
   type SheetDragSample,
 } from "./sheet-drag";
 import { titleSignature } from "./sheet-title";
+
+/** Every word Sheet says of its own. Pass any of them in `labels` to replace it. */
+export interface SheetLabels {
+  /** The close button's name. */
+  close: string;
+}
+
+const LABELS: SheetLabels = { close: "Close" };
 
 export interface SheetProps {
   isOpen: boolean;
@@ -72,6 +81,8 @@ export interface SheetProps {
    * that changes under an unchanged title.
    */
   contentKey?: React.Key;
+  /** The component's own words, replaced; any left out stay English. */
+  labels?: Partial<SheetLabels>;
   /** Applied to the panel. */
   className?: string;
   children: React.ReactNode;
@@ -210,9 +221,11 @@ const Sheet = ({
   busy = false,
   dragToDismiss = true,
   contentKey,
+  labels,
   className,
   children,
 }: SheetProps) => {
+  const l = withLabels(LABELS, labels);
   const { ref: scopeRef, inDarkScope } = useDarkScope<HTMLSpanElement>();
   const reducedMotion = useReducedMotion();
 
@@ -550,7 +563,7 @@ const Sheet = ({
                     ref={closeRef}
                     type="button"
                     onClick={onClose}
-                    aria-label="Close"
+                    aria-label={l.close}
                     className="rst:inline-flex rst:size-11 rst:shrink-0 rst:-mr-2 rst:cursor-pointer rst:items-center rst:justify-center rst:rounded-md rst:bg-transparent rst:text-inherit rst:opacity-60 rst:transition-opacity rst:hover:opacity-100 rst:focus:outline-hidden rst:focus-visible:opacity-100 rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background"
                   >
                     <CloseGlyph />

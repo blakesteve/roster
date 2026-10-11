@@ -406,6 +406,53 @@ export const TouchUsesNativeScrolling: Story = {
 };
 
 /**
+ * A drag's settle ends where the row arrives. The drag's last move queues a
+ * scrollend of its own, which lands a frame after the release has asked for
+ * the glide back and before the glide has moved; a settle that ended on it
+ * put snapping back with the row still where the drag left it, and anything
+ * waiting on the settle (this file's own `settled`) could read the row there.
+ * Move and release in one task, so that scrollend always lands after the
+ * release, as it does when the release follows the last move within a frame.
+ */
+export const ASettleEndsWhereItArrives: Story = {
+  args: { "aria-label": "Songs", itemWidth: 240, children: null },
+  render: (args) => (
+    <Frame width={720}>
+      <Carousel {...args}>
+        {songs.map((s) => (
+          <SongCard key={s} title={s} />
+        ))}
+      </Carousel>
+    </Frame>
+  ),
+  play: async () => {
+    const row = list("Songs");
+    await waitFor(() => expect(row).toHaveAttribute("data-overflowing"));
+    const ends: number[] = [];
+    const released: number[] = [];
+    const onEnd = () => ends.push(row.scrollLeft);
+    const watch = new MutationObserver(() => {
+      if (!row.hasAttribute("data-settling")) released.push(row.scrollLeft);
+    });
+    row.addEventListener("scrollend", onEnd);
+    watch.observe(row, { attributes: true, attributeFilter: ["data-settling"] });
+    const send = (type: string, x: number) =>
+      row.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 9, pointerType: "mouse", isPrimary: true, button: 0, clientX: x, clientY: 50 }));
+    send("pointerdown", 400);
+    send("pointermove", 300);
+    send("pointerup", 300);
+    await settled(row);
+    watch.disconnect();
+    row.removeEventListener("scrollend", onEnd);
+    /* The trap was there: a scrollend at the drag's 100px, after the release. */
+    await expect(ends[0]).toBe(100);
+    /* The settle ended once, back at the start, not at 100. */
+    await expect(released).toEqual([0]);
+    await expect(row.scrollLeft).toBe(0);
+  },
+};
+
+/**
  * Only the click a drag ends with is dropped. A drag that ends with no click
  * at all (released off the row, say) leaves nothing armed: Enter on an item
  * right away, and a click a moment later, both go through. Synthetic events,

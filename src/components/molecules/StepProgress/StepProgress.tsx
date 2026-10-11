@@ -1,4 +1,5 @@
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { Progress } from "../../atoms/Progress/Progress";
 
 /** Every word StepProgress shows or says. Pass any of them in `labels` to replace it. */
@@ -33,6 +34,7 @@ export interface StepProgressProps {
    *   come with them.
    */
   variant?: "stepper" | "segmented";
+  /** The component's own words, replaced; any left out stay English. */
   labels?: Partial<StepProgressLabels>;
   className?: string;
 }
@@ -51,7 +53,7 @@ const Check = () => (
  * changes.
  */
 function StepProgress({ steps, current: rawCurrent, variant = "stepper", labels: overrides, className }: StepProgressProps) {
-  const l = { ...LABELS, ...overrides };
+  const l = withLabels(LABELS, overrides);
   const total = steps.length;
   if (total === 0) return null;
   const current = Math.min(Math.max(1, Math.floor(Number.isFinite(rawCurrent) ? rawCurrent : 1)), total + 1);

@@ -9,13 +9,17 @@ import { cva } from "class-variance-authority";
  * rather than prose, which is the whole job.
  */
 export const eyebrowVariants = /* @__PURE__ */ cva(
-  "rst:font-mono rst:uppercase rst:leading-none",
+  "rst:font-mono rst:uppercase",
   {
     variants: {
+      /* `leading-none` after each size, never before it: tailwind-merge
+         drops a line height that comes before a font size, because a size
+         can carry its own. Placed first, it was lost, and the line was 1.5
+         times the size instead of 1. */
       size: {
-        xs: "rst:text-[0.625rem] rst:tracking-[0.16em]",
-        sm: "rst:text-[0.6875rem] rst:tracking-[0.14em]",
-        md: "rst:text-xs rst:tracking-[0.12em]",
+        xs: "rst:text-[0.625rem] rst:leading-none rst:tracking-[0.16em]",
+        sm: "rst:text-[0.6875rem] rst:leading-none rst:tracking-[0.14em]",
+        md: "rst:text-xs rst:leading-none rst:tracking-[0.12em]",
       },
       tone: {
         faint: "rst:text-gray-500 rst:dark:text-gray-400",

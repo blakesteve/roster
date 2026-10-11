@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { Button } from "../../atoms/Button/Button";
 import { Progress } from "../../atoms/Progress/Progress";
 import { acceptList, formatBytes, matchesType, sameFile } from "./file-rules";
@@ -223,7 +224,7 @@ function FileUpload<R = unknown>({
   strings: overrides,
   className,
 }: FileUploadProps<R>) {
-  const t = { ...STRINGS, ...overrides };
+  const t = withLabels(STRINGS, overrides);
   const id = useId();
   const labelId = `${id}-label`;
   const helpId = `${id}-help`;

@@ -16,6 +16,7 @@ function QueueEditDialog({
   children,
   submitButton,
   cancelButton,
+  closeLabel,
 }: QueueSurfaceProps) {
   return (
     <Dialog
@@ -27,6 +28,7 @@ function QueueEditDialog({
       description={description}
       size="lg"
       onAfterClose={onAfterClose}
+      labels={closeLabel === undefined ? undefined : { close: closeLabel }}
     >
       <div className="rst:flex rst:flex-col rst:gap-6">
         {children}

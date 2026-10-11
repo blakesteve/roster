@@ -14,6 +14,7 @@ export interface ProgressFieldProps
   valueText?: string;
   /** A line under the bar: bytes, a step counter, a time left. */
   detail?: ReactNode;
+  /** The component's own words, replaced; any left out stay English. */
   labels?: Partial<ProgressLabels>;
   className?: string;
 }

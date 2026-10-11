@@ -19,6 +19,7 @@ function QueueEditSheet({
   onAfterClose,
   children,
   submitButton,
+  closeLabel,
 }: QueueSurfaceProps) {
   return (
     <Sheet
@@ -31,6 +32,7 @@ function QueueEditSheet({
       description={description}
       actions={submitButton}
       onAfterClose={onAfterClose}
+      labels={closeLabel === undefined ? undefined : { close: closeLabel }}
     >
       {children}
     </Sheet>

@@ -96,17 +96,15 @@ export interface SkeletonStatProps {
 /**
  * A Stat loading. Stat's own markup in each of its forms, with lines in place
  * of its words, so the figure that arrives is the height of what held it:
- * the label is the real Eyebrow, inline in a `dt` where Stat's is, so it
- * takes the same line box.
+ * the label is the real Eyebrow, a flex item where Stat's is, so it makes the
+ * same line.
  */
 function SkeletonStat({ size = "md", semantics = "definition", source = false, className }: SkeletonStatProps) {
   const valueClass = statValueVariants({ size, colorScheme: "neutral" });
   const value = <Skeleton size="inherit" width="2.5em" />;
-  /* Inline in a `dt`, as Stat's is, so it sits on the dt's line box; a block
-     in the standalone column, as Stat's is there. */
-  const label = (inline: boolean) => (
+  const label = (
     <Eyebrow size="xs">
-      <Skeleton size="inherit" width="9em" className={inline ? "rst:inline-block rst:align-baseline" : undefined} />
+      <Skeleton size="inherit" width="9em" />
     </Eyebrow>
   );
   const sourceLine = (
@@ -118,14 +116,14 @@ function SkeletonStat({ size = "md", semantics = "definition", source = false, c
     return (
       <span aria-hidden="true" className={cn("rst:flex rst:flex-col rst:gap-[3px]", className)} data-skeleton="stat">
         <span className={valueClass}>{value}</span>
-        {label(false)}
+        {label}
         {source && sourceLine}
       </span>
     );
   }
   return (
     <div aria-hidden="true" className={cn("rst:grid rst:content-start rst:gap-[3px]", className)} data-skeleton="stat">
-      <dt className="rst:relative rst:col-start-1 rst:row-start-2">{label(true)}</dt>
+      <dt className="rst:relative rst:col-start-1 rst:row-start-2 rst:flex">{label}</dt>
       {source ? (
         <dd className={cn("rst:m-0", valueClass, "rst:col-start-1 rst:row-span-3 rst:row-start-1 rst:grid rst:grid-rows-subgrid")}>
           <span className="rst:row-start-1">{value}</span>

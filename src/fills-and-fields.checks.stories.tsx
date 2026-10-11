@@ -5,12 +5,14 @@ import { Input } from "./components/atoms/Input/Input";
 import { Textarea } from "./components/atoms/Textarea/Textarea";
 import { Card } from "./components/atoms/Card/Card";
 import { Dialog } from "./components/organisms/Dialog/Dialog";
+import { Navbar } from "./components/organisms/Navbar/Navbar";
 
 /**
  * Two readability rules, checked rendered in Chromium.
  *
- * Text on Card's and Dialog's primary fill is that fill's ink token, as on
- * every other solid fill, so an app with a light primary can make it dark. And every
+ * Text on Card's, Dialog's and Navbar's primary fill is that fill's ink token,
+ * as on every other solid fill, so an app with a light primary can make it
+ * dark. And every
  * placeholder reaches 4.5:1 against the field it sits in, in both schemes,
  * measured from the colors Chromium actually paints, layers composited.
  *
@@ -100,6 +102,60 @@ export const PrimaryInkDialog: Story = {
     });
     await withTokens(INK, async () => {
       await expect(title(), "dark keeps white").toBe(WHITE);
+    }, true);
+  },
+};
+
+/* A light primary, where white fails: the gold of a warm theme's 400 step,
+   with the dark ink such a theme pairs it with. */
+const LIGHT_PRIMARY = { "--roster-primary-700": "#dfb93f", "--roster-primary-700-ink": "#0c0a09" };
+
+export const PrimaryInkNavbar: Story = {
+  render: () => (
+    <>
+      <style>{STILL}</style>
+      <Navbar
+        variant="primary"
+        position="static"
+        logoSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'/%3E"
+        brandName="Shelf"
+        items={[
+          { label: "Home", path: "/" },
+          { label: "Cabinets", path: "/cabinets" },
+        ]}
+        activePath="/"
+      />
+    </>
+  ),
+  play: async () => {
+    const bar = at("nav");
+    /* What a reader sees on the bar: the brand's name, each link at the
+       width the test page has, and the menu button where links fold away. */
+    const shown = () =>
+      [bar.querySelector("a span"), ...bar.querySelectorAll("a[href='/'], a[href='/cabinets'], [data-roster-hamburger] button")]
+        .filter((el): el is HTMLElement => !!el && el.getClientRects().length > 0)
+        .filter((el, i, all) => all.indexOf(el) === i);
+    const measure = () => {
+      const ground = backgroundOf(bar);
+      return shown().map((el) => contrast(paint([...ground, getComputedStyle(el).color]), paint(ground)));
+    };
+    /* Reach: the brand, and both links (the active one and another), so the
+       link colors are among what's measured. */
+    await expect(shown().map((el) => el.getAttribute("href") ?? el.tagName)).toEqual(expect.arrayContaining(["SPAN", "/", "/cabinets"]));
+    /* Roster's own primary: the ink is white, as before. */
+    for (const ratio of measure()) await expect(ratio, "default primary").toBeGreaterThanOrEqual(MINIMUM);
+    /* A light primary with its ink: every piece of text clears 4.5:1. */
+    await withTokens(LIGHT_PRIMARY, async () => {
+      for (const ratio of measure()) await expect(ratio, "light primary, with its ink").toBeGreaterThanOrEqual(MINIMUM);
+    });
+    /* Twin: the same light fill with the old white text fails the same
+       measurement, so the pass above is the ink's doing. */
+    await withTokens({ "--roster-primary-700": LIGHT_PRIMARY["--roster-primary-700"] }, async () => {
+      await expect(Math.min(...measure()), "light primary, white text").toBeLessThan(MINIMUM);
+    });
+    /* Dark: the fill is primary-950, which the ink doesn't describe. */
+    await withTokens(LIGHT_PRIMARY, async () => {
+      await expect(getComputedStyle(bar).color, "dark keeps white").toBe(WHITE);
     }, true);
   },
 };

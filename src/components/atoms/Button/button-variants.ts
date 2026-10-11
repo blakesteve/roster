@@ -22,11 +22,13 @@ export const buttonVariants = /* @__PURE__ */ cva(
     variants: {
       variant: {
         solid: "rst:border rst:border-transparent rst:elevation-control",
-        soft: "rst:border-transparent rst:shadow-none",
+        // `border-0`, here and on `link`: a <button> draws the browser's own
+        // border unless told otherwise, and an app without a reset would see
+        // it. Zero rather than the 1px the others have, because zero is what
+        // every app with a reset already draws: none of them moves.
+        soft: "rst:border-0 rst:shadow-none",
         outline: "rst:border rst:bg-transparent rst:elevation-control",
         ghost: "rst:border rst:border-transparent rst:bg-transparent",
-        // `border-0`: a <button> draws the browser's own border unless told
-        // otherwise, and an app without a reset would see it round a link.
         link: "rst:border-0 rst:bg-transparent rst:underline-offset-4 rst:hover:underline",
       },
       colorScheme: {

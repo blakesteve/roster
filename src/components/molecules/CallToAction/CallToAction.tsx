@@ -3,8 +3,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { ctaVariants } from "./call-to-action-variants";
 import { Button } from "../../atoms/Button/Button";
+
+/** Every word CallToAction says of its own. Pass any of them in `labels` to replace it. */
+export interface CallToActionLabels {
+  /** The dismiss button's name, with `onDismiss`. */
+  dismiss: string;
+}
+
+const LABELS: CallToActionLabels = { dismiss: "Dismiss" };
 
 export interface CallToActionProps
   extends
@@ -15,6 +24,8 @@ export interface CallToActionProps
   action?: React.ReactNode;
   icon?: React.ReactNode;
   onDismiss?: () => void;
+  /** The component's own words, replaced; any left out stay English. */
+  labels?: Partial<CallToActionLabels>;
 }
 
 const CallToAction = ({
@@ -24,9 +35,11 @@ const CallToAction = ({
   icon,
   variant,
   onDismiss,
+  labels,
   className,
   ...props
 }: CallToActionProps) => {
+  const l = withLabels(LABELS, labels);
   return (
     <div className={cn(ctaVariants({ variant }), className)} {...props}>
       {/* The layout lives one level inside the card because an element cannot
@@ -82,7 +95,7 @@ const CallToAction = ({
             size="sm"
             className="rst:h-8 rst:w-8 rst:rounded-full rst:p-0 rst:opacity-60 rst:hover:opacity-100 rst:dark:hover:bg-black/20"
             onClick={onDismiss}
-            aria-label="Dismiss"
+            aria-label={l.dismiss}
           >
             <FontAwesomeIcon icon={faXmark} className="rst:h-4 rst:w-4" />
           </Button>

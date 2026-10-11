@@ -97,6 +97,8 @@ export interface MultiSelectProps
    * tell apart, so this takes the label rather than being a constant.
    */
   removeLabel?: (label: string) => string;
+  /** With `display="count"`, how many are chosen: "3 selected". Shown, and said. */
+  countLabel?: (count: number) => string;
 }
 
 const MultiSelect = ({
@@ -121,6 +123,7 @@ const MultiSelect = ({
   chipVariant = "outline",
   clearLabel = "Clear selection",
   removeLabel = (label: string) => `Remove ${label}`,
+  countLabel = (count: number) => `${count} selected`,
   ...props
 }: MultiSelectProps) => {
   const hasError = !!errorMessage || error;
@@ -239,7 +242,7 @@ const MultiSelect = ({
                 {!hasSelection
                   ? placeholder
                   : display === "count"
-                    ? `${value.length} selected`
+                    ? countLabel(value.length)
                     : selected.map((item) => item.label).join(", ")}
               </span>
             </ListboxButton>
@@ -258,7 +261,7 @@ const MultiSelect = ({
                 aria-hidden="true"
                 className="rst:pointer-events-none rst:relative rst:block rst:truncate"
               >
-                {value.length} selected
+                {countLabel(value.length)}
               </span>
             )}
 

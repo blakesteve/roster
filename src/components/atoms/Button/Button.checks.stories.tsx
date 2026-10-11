@@ -216,3 +216,58 @@ export const ALinkButtonDrawsNoBorderWithoutAReset: Story = {
     await expect(width("[data-native]")).toBe("2px");
   },
 };
+
+export const ASoftButtonDrawsNoBorderWithoutAReset: Story = {
+  render: () => (
+    <div data-no-reset="">
+      <style>{NO_RESET}</style>
+      <Button variant="soft" data-soft="">
+        Shuffle
+      </Button>
+      <Button variant="soft" colorScheme="error" size="xs" data-soft-xs="">
+        Decline
+      </Button>
+      <button type="button" data-native="">
+        Native
+      </button>
+    </div>
+  ),
+  play: async () => {
+    const width = (s: string) => getComputedStyle(document.querySelector(s)!).borderTopWidth;
+    await expect([width("[data-soft]"), width("[data-soft-xs]")]).toEqual(["0px", "0px"]);
+    /* The twin: a plain button in the same place draws the browser's border. */
+    await expect(width("[data-native]")).toBe("2px");
+  },
+};
+
+/* What every app that uses Roster has: Tailwind's preflight, `border: 0
+   solid` on everything, in a layer under Roster's. A soft button drew no
+   border there before the fix, and draws none after, so no app moves. */
+const APP_RESET = `@layer base { [data-app-reset] *, [data-app-reset] ::before, [data-app-reset] ::after { border: 0 solid; } }`;
+
+export const ASoftButtonUnderAnAppResetIsUnchanged: Story = {
+  render: () => (
+    <div data-app-reset="">
+      <style>{APP_RESET}</style>
+      <Button variant="soft" data-soft="">
+        Shuffle
+      </Button>
+      <Button variant="outline" data-outline="">
+        Shuffle
+      </Button>
+    </div>
+  ),
+  play: async () => {
+    const box = (s: string) => {
+      const el = document.querySelector<HTMLElement>(s)!;
+      return [getComputedStyle(el).borderTopWidth, el.getBoundingClientRect().width];
+    };
+    const [softBorder, softWidth] = box("[data-soft]");
+    const [outlineBorder, outlineWidth] = box("[data-outline]");
+    await expect(softBorder).toBe("0px");
+    /* The twin: outline keeps its 1px in the same place, two pixels wider
+       for the same words. */
+    await expect(outlineBorder).toBe("1px");
+    await expect(Number(outlineWidth) - Number(softWidth)).toBeCloseTo(2, 1);
+  },
+};

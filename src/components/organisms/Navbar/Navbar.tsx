@@ -19,6 +19,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { Button } from "../../atoms/Button/Button";
 import { Link } from "../../atoms/Link/Link";
 import { Badge } from "../../atoms/Badge/Badge";
@@ -81,16 +82,61 @@ export interface NavItem {
   badge?: React.ReactNode;
 }
 
+/** Every word Navbar shows or says of its own. Pass any of them in `labels` to replace it. */
+export interface NavbarLabels {
+  /** The menu button's name, on a phone. */
+  openMainMenu: string;
+  /** The menu panel's close button. */
+  closeMainMenu: string;
+  /** The avatar button's name. */
+  openUserMenu: string;
+  /** The log-in button, without a `user`. */
+  logIn: string;
+  /** The log-out item, with `onLogout`. */
+  logOut: string;
+  /** The theme row, with `onThemeToggle`. */
+  darkMode: string;
+  /** The menu panel's inbox button, with `onInboxClick` and a `notificationCount`. */
+  pendingInvitations: string;
+  /** The user menu's inbox item, with `onInboxClick` and a `notificationCount`. */
+  inbox: (count: number) => string;
+}
+
+const LABELS: NavbarLabels = {
+  openMainMenu: "Open main menu",
+  closeMainMenu: "Close menu",
+  openUserMenu: "Open user menu",
+  logIn: "Log In",
+  logOut: "Log Out",
+  darkMode: "Dark Mode",
+  pendingInvitations: "Pending Invitations",
+  inbox: (count) => `Inbox (${count})`,
+};
+
 export interface NavbarProps
   extends
     React.HTMLAttributes<HTMLElement>,
     VariantProps<typeof navbarVariants> {
   logoSrc: string;
   /**
-   * Size of the logo image. Accepts any CSS length (`"2.75rem"`, `44`).
-   * Defaults to `2rem`, the previous hard-coded `h-8 w-8`.
+   * Size of a square logo: its width and its height. Accepts any CSS length
+   * (`"2.75rem"`, `44`). Defaults to `2rem`, the previous hard-coded `h-8 w-8`.
    */
   logoSize?: string | number;
+  /**
+   * The logo's height, for a logo that isn't square. A wide lockup takes
+   * `logoHeight` alone and keeps its own proportions: its width follows the
+   * image. Either this or `logoWidth` replaces `logoSize`. When you know the
+   * ratio, set both: the box is then held before the image loads, so the name
+   * beside it doesn't move.
+   */
+  logoHeight?: string | number;
+  /**
+   * The logo's width, for a logo that isn't square. Alone, the height follows
+   * the image; with `logoHeight`, the image is fitted inside that box,
+   * never stretched.
+   */
+  logoWidth?: string | number;
   /**
    * Classes applied to the logo image. Replaces the default rounding, so a
    * circular mark can pass `"rst:rounded-full"` and a square one `""`.
@@ -119,6 +165,8 @@ export interface NavbarProps
    * entirely and the mode is inferred from `variant`, as before.
    */
   themeMode?: "light" | "dark" | "auto";
+  /** The component's own words, replaced; any left out stay English. */
+  labels?: Partial<NavbarLabels>;
   notificationVariant?:
     | "primary"
     | "error"
@@ -239,6 +287,8 @@ function CloseOnNavigation({
 const Navbar = ({
   logoSrc,
   logoSize = "2rem",
+  logoHeight,
+  logoWidth,
   logoClassName,
   brandName,
   items,
@@ -257,15 +307,28 @@ const Navbar = ({
   variant = "default",
   position = "sticky",
   themeMode,
+  labels,
   notificationVariant = "error",
   notificationFill = "solid",
   ...props
 }: NavbarProps) => {
+  const l = withLabels(LABELS, labels);
   const hasNotifications = (user?.notificationCount || 0) > 0;
 
   // A bare number reads as px, matching how width/height attributes behave.
-  const logoDimension = typeof logoSize === "number" ? `${logoSize}px` : logoSize;
-  const logoStyle = { width: logoDimension, height: logoDimension };
+  const length = (value: string | number) => (typeof value === "number" ? `${value}px` : value);
+  /* Square from `logoSize` unless either side is given; then the side left
+     out follows the image, and a box set on both sides fits it, unstretched,
+     against the start edge (classes, so a right-to-left page mirrors it).
+     Both images, the bar's and the menu panel's, take the same box. */
+  const logoFree = logoHeight !== undefined || logoWidth !== undefined;
+  const logoStyle: React.CSSProperties = logoFree
+    ? {
+        width: logoWidth === undefined ? "auto" : length(logoWidth),
+        height: logoHeight === undefined ? "auto" : length(logoHeight),
+      }
+    : { width: length(logoSize), height: length(logoSize) };
+  const logoFit = logoFree && "rst:object-contain rst:object-left rst:rtl:object-right";
 
   const autoIsDark = useDarkClass(themeMode === "auto");
 
@@ -289,23 +352,39 @@ const Navbar = ({
 
   // Explicitly appending dark: prefixes to guarantee they overpower
   // the Link component's internal dark mode states
-  const surfaceColors = {
-    brand: isDarkSurface
-      ? "rst:text-white rst:dark:text-white rst:hover:text-gray-200 rst:dark:hover:text-gray-200"
-      : "rst:text-gray-900 rst:dark:text-gray-900 rst:hover:text-gray-600 rst:dark:hover:text-gray-600",
+  const surfaceColors =
+    variant === "primary"
+      ? {
+          // On primary-700, text is that fill's ink (the dimmer links at 80%),
+          // so a light primary gets dark text. The dark fill is primary-950,
+          // which the ink doesn't describe: there it stays the dark surface's
+          // white and grays.
+          brand:
+            "rst:text-primary-700-ink rst:hover:text-primary-700-ink/80 rst:dark:text-white rst:dark:hover:text-gray-200",
+          linkBase:
+            "rst:text-primary-700-ink/80 rst:hover:text-primary-700-ink rst:dark:text-gray-300 rst:dark:hover:text-white",
+          linkActive:
+            "rst:text-primary-700-ink rst:font-semibold rst:hover:text-primary-700-ink/80 rst:dark:text-primary-400 rst:dark:hover:text-primary-300",
+          hamburger:
+            "rst:text-primary-700-ink/80 rst:hover:bg-primary-700-ink/10 rst:hover:text-primary-700-ink rst:dark:text-gray-300 rst:dark:hover:bg-white/10 rst:dark:hover:text-white",
+        }
+      : {
+          brand: isDarkSurface
+            ? "rst:text-white rst:dark:text-white rst:hover:text-gray-200 rst:dark:hover:text-gray-200"
+            : "rst:text-gray-900 rst:dark:text-gray-900 rst:hover:text-gray-600 rst:dark:hover:text-gray-600",
 
-    linkBase: isDarkSurface
-      ? "rst:text-gray-300 rst:dark:text-gray-300 rst:hover:text-white rst:dark:hover:text-white"
-      : "rst:text-gray-600 rst:dark:text-gray-600 rst:hover:text-gray-900 rst:dark:hover:text-gray-900",
+          linkBase: isDarkSurface
+            ? "rst:text-gray-300 rst:dark:text-gray-300 rst:hover:text-white rst:dark:hover:text-white"
+            : "rst:text-gray-600 rst:dark:text-gray-600 rst:hover:text-gray-900 rst:dark:hover:text-gray-900",
 
-    linkActive: isDarkSurface
-      ? "rst:text-primary-400 rst:dark:text-primary-400 rst:font-semibold rst:hover:text-primary-300 rst:dark:hover:text-primary-300"
-      : "rst:text-primary-600 rst:dark:text-primary-600 rst:font-semibold rst:hover:text-primary-700 rst:dark:hover:text-primary-700",
+          linkActive: isDarkSurface
+            ? "rst:text-primary-400 rst:dark:text-primary-400 rst:font-semibold rst:hover:text-primary-300 rst:dark:hover:text-primary-300"
+            : "rst:text-primary-600 rst:dark:text-primary-600 rst:font-semibold rst:hover:text-primary-700 rst:dark:hover:text-primary-700",
 
-    hamburger: isDarkSurface
-      ? "rst:text-gray-300 rst:dark:text-gray-300 rst:hover:bg-white/10 rst:dark:hover:bg-white/10 rst:hover:text-white rst:dark:hover:text-white"
-      : "rst:text-gray-500 rst:dark:text-gray-500 rst:hover:bg-gray-100 rst:dark:hover:bg-gray-100 rst:hover:text-gray-700 rst:dark:hover:text-gray-700",
-  };
+          hamburger: isDarkSurface
+            ? "rst:text-gray-300 rst:dark:text-gray-300 rst:hover:bg-white/10 rst:dark:hover:bg-white/10 rst:hover:text-white rst:dark:hover:text-white"
+            : "rst:text-gray-500 rst:dark:text-gray-500 rst:hover:bg-gray-100 rst:dark:hover:bg-gray-100 rst:hover:text-gray-700 rst:dark:hover:text-gray-700",
+        };
 
   return (
     <Popover
@@ -340,7 +419,7 @@ const Navbar = ({
                 src={logoSrc}
                 alt=""
                 style={logoStyle}
-                className={cn("rst:shrink-0", logoClassName ?? "rst:rounded-md")}
+                className={cn("rst:shrink-0", logoFit, logoClassName ?? "rst:rounded-md")}
               />
               {brandElement ?? (
                 <span className="rst:text-xl rst:font-bold rst:tracking-tight">
@@ -383,9 +462,13 @@ const Navbar = ({
               {resolvedActions ?? (user ? (
                 <Menu as="div" className="rst:relative rst:ml-2">
                   <MenuButton className="rst:relative rst:flex rst:rounded-full rst:text-sm rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background">
-                    <span className="rst:sr-only">Open user menu</span>
+                    <span className="rst:sr-only">{l.openUserMenu}</span>
 
+                    {/* Hidden, photo and initials alike: the button is named by
+                        its label, which an alt or initials would add to. */}
                     <Avatar
+                      aria-hidden="true"
+                      alt=""
                       initials={user.initials}
                       src={user.avatarSrc}
                       size="sm"
@@ -437,7 +520,7 @@ const Navbar = ({
                                   />
                                 }
                               >
-                                Inbox ({user.notificationCount})
+                                {l.inbox(user.notificationCount ?? 0)}
                               </Button>
                             )}
                           </MenuItem>
@@ -473,7 +556,7 @@ const Navbar = ({
                                         : "rst:text-gray-400",
                                     )}
                                   />
-                                  <span className="rst:font-medium">Dark Mode</span>
+                                  <span className="rst:font-medium">{l.darkMode}</span>
                                 </div>
                                 <ThemeTrack on={isDarkMode} size="xs" />
                               </div>
@@ -529,7 +612,7 @@ const Navbar = ({
                                   />
                                 }
                               >
-                                Log Out
+                                {l.logOut}
                               </Button>
                             )}
                           </MenuItem>
@@ -540,7 +623,7 @@ const Navbar = ({
                 </Menu>
               ) : (
                 <Button size="sm" variant="solid" colorScheme="primary" onClick={onLogin}>
-                  Log In
+                  {l.logIn}
                 </Button>
               ))}
             </div>
@@ -553,7 +636,7 @@ const Navbar = ({
                   surfaceColors.hamburger,
                 )}
               >
-                <span className="rst:sr-only">Open main menu</span>
+                <span className="rst:sr-only">{l.openMainMenu}</span>
                 {open ? (
                   <FontAwesomeIcon
                     icon={faXmark}
@@ -604,7 +687,7 @@ const Navbar = ({
                         src={logoSrc}
                         alt=""
                         style={logoStyle}
-                        className={cn("rst:shrink-0", logoClassName ?? "rst:rounded-md")}
+                        className={cn("rst:shrink-0", logoFit, logoClassName ?? "rst:rounded-md")}
                       />
                       {brandElement ?? (
                         <span className="rst:font-bold rst:text-gray-900 rst:dark:text-white">
@@ -614,7 +697,7 @@ const Navbar = ({
                     </div>
                     <div className="rst:-mr-2">
                       <PopoverButton className="rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:text-gray-400 rst:hover:bg-gray-100 rst:dark:hover:bg-gray-700 rst:hover:text-gray-500 rst:dark:hover:text-white rst:focus:outline-hidden">
-                        <span className="rst:sr-only">Close menu</span>
+                        <span className="rst:sr-only">{l.closeMainMenu}</span>
                         <FontAwesomeIcon
                           icon={faXmark}
                           className="rst:h-6 rst:w-6"
@@ -716,7 +799,7 @@ const Navbar = ({
                         className="rst:w-full rst:justify-center"
                         onClick={() => { onLogin(); close(); }}
                       >
-                        Log In
+                        {l.logIn}
                       </Button>
                     ) : (
                       <>
@@ -740,7 +823,7 @@ const Navbar = ({
                               </Badge>
                             }
                           >
-                            Pending Invitations
+                            {l.pendingInvitations}
                           </Button>
                         )}
 
@@ -775,7 +858,7 @@ const Navbar = ({
                                   isDarkMode ? "rst:text-amber-500" : "rst:text-gray-400",
                                 )}
                               />
-                              <span>Dark Mode</span>
+                              <span>{l.darkMode}</span>
                             </div>
                             <ThemeTrack on={isDarkMode} size="sm" />
                           </div>
@@ -791,7 +874,7 @@ const Navbar = ({
                               close();
                             }}
                           >
-                            Log Out
+                            {l.logOut}
                           </Button>
                         )}
                       </>

@@ -1,6 +1,7 @@
 import React from "react";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { useCountdown } from "../../../hooks/useCountdown";
 import {
   countdownTitleVariants,
@@ -36,6 +37,25 @@ const CountdownItem = ({ value, label, size, variant }: CountdownItemProps) => (
   </div>
 );
 
+/**
+ * Every word Countdown shows of its own. Pass any of them in `labels` to
+ * replace it. Each takes the number beside it, for a language whose word
+ * changes with the count.
+ */
+export interface CountdownLabels {
+  days: (count: number) => string;
+  hours: (count: number) => string;
+  minutes: (count: number) => string;
+  seconds: (count: number) => string;
+}
+
+const LABELS: CountdownLabels = {
+  days: () => "Days",
+  hours: () => "Hours",
+  minutes: () => "Minutes",
+  seconds: () => "Seconds",
+};
+
 export interface CountdownProps
   extends
     React.HTMLAttributes<HTMLDivElement>,
@@ -44,6 +64,8 @@ export interface CountdownProps
   title?: string;
   completionText?: string;
   variant?: VariantProps<typeof countdownNumberVariants>["variant"];
+  /** Replaces the unit words under the numbers. */
+  labels?: Partial<CountdownLabels>;
 }
 
 const Countdown = React.forwardRef<HTMLDivElement, CountdownProps>(
@@ -55,10 +77,12 @@ const Countdown = React.forwardRef<HTMLDivElement, CountdownProps>(
       variant = "gradient",
       className,
       completionText,
+      labels,
       ...props
     },
     ref,
   ) => {
+    const l = withLabels(LABELS, labels);
     const { days, hours, minutes, seconds, isFinished } =
       useCountdown(targetDate);
 
@@ -126,25 +150,25 @@ const Countdown = React.forwardRef<HTMLDivElement, CountdownProps>(
         <div className="rst:flex rst:justify-center rst:gap-3 rst:@[22rem]:gap-6 rst:@[35rem]:gap-8">
           <CountdownItem
             value={days}
-            label="Days"
+            label={l.days(days)}
             size={size}
             variant={variant}
           />
           <CountdownItem
             value={hours}
-            label="Hours"
+            label={l.hours(hours)}
             size={size}
             variant={variant}
           />
           <CountdownItem
             value={minutes}
-            label="Minutes"
+            label={l.minutes(minutes)}
             size={size}
             variant={variant}
           />
           <CountdownItem
             value={seconds}
-            label="Seconds"
+            label={l.seconds(seconds)}
             size={size}
             variant={variant}
           />

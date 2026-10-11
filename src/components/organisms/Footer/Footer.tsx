@@ -1,12 +1,26 @@
 import React from "react";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { footerVariants } from "./footer-variants";
 
 export interface FooterLink {
   label: string;
   href: string;
 }
+
+/** Every word Footer shows or says of its own. Pass any of them in `labels` to replace it. */
+export interface FooterLabels {
+  /** The link row's name. */
+  nav: string;
+  /** The copyright line. */
+  copyright: (year: number, companyName: string) => string;
+}
+
+const LABELS: FooterLabels = {
+  nav: "Footer navigation",
+  copyright: (year, companyName) => `© ${year} ${companyName}, All rights reserved.`,
+};
 
 export interface FooterProps
   extends
@@ -27,14 +41,17 @@ export interface FooterProps
    * footer link is rendered with this element instead of a plain `<a>` tag.
    */
   routerElement?: React.ElementType;
+  /** The component's own words, replaced; any left out stay English. */
+  labels?: Partial<FooterLabels>;
 }
 
 const Footer = React.forwardRef<HTMLElement, FooterProps>(
   (
-    { className, variant, companyName = "Ball Collaborative", links, routerElement, ...props },
+    { className, variant, companyName = "Ball Collaborative", links, routerElement, labels, ...props },
     ref,
   ) => {
     const currentYear = new Date().getFullYear();
+    const l = withLabels(LABELS, labels);
     const LinkEl = routerElement ?? "a";
 
     return (
@@ -45,7 +62,7 @@ const Footer = React.forwardRef<HTMLElement, FooterProps>(
       >
         <div className="rst:container rst:mx-auto rst:px-4 rst:flex rst:flex-col rst:items-center rst:gap-2">
           {links && links.length > 0 && (
-            <nav aria-label="Footer navigation" className="rst:flex rst:flex-wrap rst:justify-center rst:gap-x-5 rst:gap-y-1">
+            <nav aria-label={l.nav} className="rst:flex rst:flex-wrap rst:justify-center rst:gap-x-5 rst:gap-y-1">
               {links.map((link) => (
                 <LinkEl
                   key={link.href}
@@ -59,7 +76,7 @@ const Footer = React.forwardRef<HTMLElement, FooterProps>(
             </nav>
           )}
           <p className="rst:text-center rst:text-sm rst:font-medium rst:text-inherit">
-            © {currentYear} {companyName}, All rights reserved.
+            {l.copyright(currentYear, companyName)}
           </p>
         </div>
       </footer>

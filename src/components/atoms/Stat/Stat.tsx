@@ -74,7 +74,10 @@ const Stat = React.forwardRef<HTMLDivElement, StatProps>(
          which pushed the label of a Stat without a source down to meet
          nothing. The flex column this replaced never did. */
       <div ref={ref} className={cn("rst:grid rst:content-start rst:gap-[3px]", className)} {...props}>
-        <dt className="rst:relative rst:col-start-1 rst:row-start-2">
+        {/* `flex`: the label is a flex item, so it makes its own line as it
+            does in the standalone column. Inline, it sat on the dt's line,
+            the page's size and line height, however tight its own. */}
+        <dt className="rst:relative rst:col-start-1 rst:row-start-2 rst:flex">
           <Eyebrow size="xs">{label}</Eyebrow>
         </dt>
         {source ? (
