@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   useTable,
   tableFeatures,
@@ -69,10 +69,11 @@ export interface DataTableProps<TData extends RowData> {
   hoverable?: boolean;
   /**
    * Replaces the pager's words; see Pagination's `labels`. `status` also
-   * replaces the "Page N of M" line beside it. ("No results found." is
-   * DataTable's own and isn't covered.)
+   * replaces the "Page N of M" line beside it.
    */
   paginationLabels?: Partial<PaginationLabels>;
+  /** What an empty table says. "No results found." by default. */
+  emptyMessage?: ReactNode;
 }
 
 export function DataTable<TData extends RowData>({
@@ -85,6 +86,7 @@ export function DataTable<TData extends RowData>({
   size = "md",
   hoverable = false,
   paginationLabels,
+  emptyMessage = "No results found.",
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -168,7 +170,7 @@ export function DataTable<TData extends RowData>({
                 colSpan={columns.length}
                 className="rst:h-24 rst:text-center rst:text-gray-500 rst:dark:text-gray-400 rst:italic"
               >
-                No results found.
+                {emptyMessage}
               </TableCell>
             </TableRow>
           )}

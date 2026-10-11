@@ -13,6 +13,8 @@ export interface MediaPreviewProps
   unavailableLabel?: string;
   /** The link's own words. */
   openLabel?: string;
+  /** Said with the link's name, since its arrow shows it only to the eye: "in a new tab". */
+  newTabLabel?: string;
   /** Called once when the thumbnail fails, for an app that keeps a count. */
   onUnavailable?: () => void;
 }
@@ -33,6 +35,7 @@ function MediaPreview({
   alt,
   unavailableLabel = "Preview unavailable",
   openLabel = "Open original",
+  newTabLabel = "in a new tab",
   onUnavailable,
   className,
   ...props
@@ -71,7 +74,7 @@ function MediaPreview({
         target="_blank"
         rel="noreferrer"
         className={cn(card, "rst:hover:bg-gray-50 rst:dark:hover:bg-gray-800 rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring")}
-        aria-label={`${unavailableLabel}. ${openLabel}, in a new tab: ${alt}`}
+        aria-label={`${unavailableLabel}. ${openLabel}, ${newTabLabel}: ${alt}`}
       >
         {body}
       </a>

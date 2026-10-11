@@ -16,9 +16,11 @@ export const navbarVariants = /* @__PURE__ */ cva(
         slate: 
           "rst:bg-gray-700 rst:border-gray-600 rst:text-gray-100 rst:dark:bg-gray-900 rst:dark:border-gray-800", 
         
-        // Primary: Bold brand color in light mode, deep rich brand color in dark mode
+        // Primary: Bold brand color in light mode, deep rich brand color in dark mode.
+        // Light text is primary-700's ink, as on every other solid fill, so an
+        // app with a light primary can make it dark; the dark fill keeps white.
         primary: 
-          "rst:bg-primary-700 rst:border-primary-600 rst:text-white rst:dark:bg-primary-950 rst:dark:border-primary-900", 
+          "rst:bg-primary-700 rst:border-primary-600 rst:text-primary-700-ink rst:dark:bg-primary-950 rst:dark:border-primary-900 rst:dark:text-white", 
         
         // White: Crisp white in light mode, elevated surface gray in dark mode
         white: 

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Button, type ButtonProps } from "../../atoms/Button/Button";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { prefersReducedMotion } from "../../../internal/motion";
 import {
   canScrollNext,
@@ -40,6 +41,14 @@ export interface CarouselArrowsRender {
   /** The "2 of 5" readout when `showPosition` is on, otherwise `null`. */
   position: React.ReactNode;
 }
+
+/** Every word Carousel shows or says of its own, past its arrows' names. Pass any of them in `labels` to replace it. */
+export interface CarouselLabels {
+  /** Where you are, with `showPosition`: the readout, and each item's name. "2 of 5". */
+  position: (current: number, total: number) => string;
+}
+
+const LABELS: CarouselLabels = { position: (current, total) => `${current} of ${total}` };
 
 export interface CarouselProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "aria-label" | "aria-labelledby"> {
@@ -120,6 +129,8 @@ export interface CarouselProps
    * name, and a change is announced politely.
    */
   showPosition?: boolean;
+  /** The component's own words, replaced; any left out stay English. */
+  labels?: Partial<CarouselLabels>;
   /** The first item wholly in view, whenever it changes. */
   onIndexChange?: (index: number) => void;
   /** Whether the row can move each way, whenever that changes. */
@@ -240,6 +251,7 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
     fade = false,
     scrollbar = false,
     showPosition = false,
+    labels,
     onIndexChange,
     onScrollStateChange,
     itemClassName,
@@ -250,6 +262,7 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
   },
   ref,
 ) {
+  const l = withLabels(LABELS, labels);
   const listRef = React.useRef<HTMLUListElement>(null);
   const listId = `${React.useId()}-list`;
   const items = React.Children.toArray(children);
@@ -407,13 +420,21 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
       }
       list.style.scrollSnapType = "none";
       list.dataset.settling = "";
-      const done = () => releaseCarry();
+      /* A drag's last move queues a scrollend of its own, which arrives a
+         frame after the release asks for this glide and before the glide has
+         moved. Ending on it would put snapping back with the row still where
+         the drag left it. Only an end once the row has left there counts. */
+      const from = list.scrollLeft;
+      const done = () => {
+        if (Math.abs(list.scrollLeft - from) < 0.5) return;
+        releaseCarry();
+      };
       carrying.current = {
-        timer: window.setTimeout(done, settleFallbackMs(Math.abs(list.scrollLeft - left))),
+        timer: window.setTimeout(releaseCarry, settleFallbackMs(Math.abs(list.scrollLeft - left))),
         done,
         target: left,
       };
-      list.addEventListener("scrollend", done, { once: true });
+      list.addEventListener("scrollend", done);
       list.scrollTo({ left, behavior: "smooth" });
     },
     [releaseCarry],
@@ -639,7 +660,7 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
        carousel owns. The items are the host's content, and not Roster's to
        restyle. */
     <p aria-live="polite" className="rst:font-ui rst:m-0 rst:text-sm rst:tabular-nums rst:opacity-75" data-carousel-position="">
-      {shownIndex + 1} of {count}
+      {l.position(shownIndex + 1, count)}
     </p>
   ) : null;
 
@@ -719,7 +740,7 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
             <li
               key={React.isValidElement(child) && child.key != null ? child.key : i}
               data-carousel-item=""
-              aria-label={showPosition ? `${i + 1} of ${count}` : undefined}
+              aria-label={showPosition ? l.position(i + 1, count) : undefined}
               style={itemStyle}
               className={cn(
                 "rst:shrink-0",

@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHome } from "@fortawesome/free-solid-svg-icons";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { breadcrumbVariants } from "./breadcrumb-variants";
 import { Link } from "../../atoms/Link/Link";
 
@@ -28,6 +29,16 @@ export type BreadcrumbItem = {
   /** Applied to this crumb only. */
   className?: string;
 };
+
+/** Every word Breadcrumbs says of its own. Pass any of them in `labels` to replace it. */
+export interface BreadcrumbsLabels {
+  /** The trail's name. */
+  nav: string;
+  /** The home icon's name, with `showHomeIcon`. */
+  home: string;
+}
+
+const LABELS: BreadcrumbsLabels = { nav: "Breadcrumb", home: "Home" };
 
 export interface BreadcrumbsProps
   extends
@@ -58,6 +69,8 @@ export interface BreadcrumbsProps
   linkComponent?: React.ComponentType<BreadcrumbLinkProps>;
   /** Applied to the current (last) crumb, for a per-page accent. */
   currentClassName?: string;
+  /** The component's own words, replaced; any left out stay English. */
+  labels?: Partial<BreadcrumbsLabels>;
 }
 
 const Breadcrumbs = ({
@@ -67,10 +80,12 @@ const Breadcrumbs = ({
   homeHref = "/",
   linkComponent,
   currentClassName,
+  labels,
   variant,
   className,
   ...props
 }: BreadcrumbsProps) => {
+  const l = withLabels(LABELS, labels);
   const Anchor = (linkComponent ?? Link) as React.ComponentType<BreadcrumbLinkProps>;
 
   const SeparatorIcon = separator ?? (
@@ -80,7 +95,7 @@ const Breadcrumbs = ({
   );
 
   return (
-    <nav aria-label="Breadcrumb" className={cn("rst:flex", className)} {...props}>
+    <nav aria-label={l.nav} className={cn("rst:flex", className)} {...props}>
       <ol className="rst:flex rst:items-center rst:space-x-2">
         {showHomeIcon && (
           <li className="rst:flex rst:items-center">
@@ -90,7 +105,7 @@ const Breadcrumbs = ({
                 breadcrumbVariants({ variant }),
                 "rst:hover:no-underline",
               )}
-              aria-label="Home"
+              aria-label={l.home}
             >
               <FontAwesomeIcon icon={faHome} className="rst:h-4 rst:w-4" />
             </Anchor>

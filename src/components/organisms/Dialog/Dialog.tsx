@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { lockPage } from "../../../internal/page-inert";
 
 const dialogVariants = /* @__PURE__ */ cva(
@@ -123,6 +124,14 @@ const closeVariants = /* @__PURE__ */ cva(
   "rst:inline-flex rst:size-11 rst:shrink-0 rst:items-center rst:justify-center rst:-m-3 rst:cursor-pointer rst:rounded-md rst:bg-transparent rst:text-inherit rst:opacity-50 rst:hover:opacity-100 rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background rst:transition-opacity",
 );
 
+/** Every word Dialog says of its own. Pass any of them in `labels` to replace it. */
+export interface DialogLabels {
+  /** The close button's name. */
+  close: string;
+}
+
+const LABELS: DialogLabels = { close: "Close dialog" };
+
 export interface DialogProps extends VariantProps<typeof dialogVariants> {
   isOpen: boolean;
   onClose: () => void;
@@ -138,6 +147,8 @@ export interface DialogProps extends VariantProps<typeof dialogVariants> {
    * while open.
    */
   onAfterClose?: () => void;
+  /** The component's own words, replaced; any left out stay English. */
+  labels?: Partial<DialogLabels>;
 }
 
 const Dialog = ({
@@ -151,7 +162,9 @@ const Dialog = ({
   children,
   className,
   onAfterClose,
+  labels,
 }: DialogProps) => {
+  const l = withLabels(LABELS, labels);
   /* `open` goes to Headless UI's Dialog itself. It used to come from an outer
      `<Transition show={isOpen}>`, and wrapped that way Headless UI 2.2.9 marks
      nothing behind the dialog `inert` or `aria-hidden`: the focus trap held,
@@ -257,7 +270,7 @@ const Dialog = ({
                       type="button"
                       onClick={onClose}
                       className={cn(closeVariants())}
-                      aria-label="Close dialog"
+                      aria-label={l.close}
                     >
                       <FontAwesomeIcon icon={faXmark} className="rst:h-5 rst:w-5" />
                     </button>

@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { Button, type ButtonProps } from "../../atoms/Button/Button";
 import { Card } from "../../atoms/Card/Card";
 import { Spinner } from "../../atoms/Spinner/Spinner";
@@ -28,6 +29,64 @@ import {
   type QueueRunResult,
   type QueueTone,
 } from "./queue-actions";
+
+/** Every word ModerationQueue shows or says of its own. Pass any of them in `labels` to replace it. */
+export interface ModerationQueueLabels {
+  /** The spinner's name while the queue loads, from its `label`. */
+  loading: (label: string) => string;
+  /** The whole-queue error when `error` gives none. */
+  loadFailed: string;
+  /** The whole-queue error's retry button. */
+  retry: string;
+  /** A button's spinner while its decision is in flight. */
+  busy: string;
+  /** A step's cancel button. */
+  cancel: string;
+  /** An item's action bar's name, from `itemLabel`. */
+  decide: (item: string) => string;
+  /** Said when a decision lands: the action's `done` (or `label`) and the item. */
+  decided: (action: string, item: string) => string;
+  /** Said when a decision fails, with the error's message. */
+  failed: (action: string, item: string, message: string) => string;
+  /** The message when a failed `run` throws without one. */
+  unknownError: string;
+  /** Said when an item with its step open leaves without a decision of ours. */
+  decidedElsewhere: (item: string) => string;
+  /** Said after an item leaves: how many are left. */
+  left: (count: number) => string;
+  /** Why a step with a required reason can't be submitted yet. */
+  pickReason: string;
+  /** Why a step with a required note can't be submitted yet. */
+  addNote: string;
+  /** The reason choices' label, required and optional. */
+  reason: string;
+  reasonOptional: string;
+  /** The note's label, required and optional, unless the step sets `noteLabel`. */
+  note: string;
+  noteOptional: string;
+  /** The close button of an edit's Dialog or Sheet. Unset, each keeps its own. */
+  close?: string;
+}
+
+const LABELS: ModerationQueueLabels = {
+  loading: (label) => `Loading ${label}`,
+  loadFailed: "The queue couldn't load.",
+  retry: "Retry",
+  busy: "loading",
+  cancel: "Cancel",
+  decide: (item) => `Decide: ${item}`,
+  decided: (action, item) => `${action}: ${item}.`,
+  failed: (action, item, message) => `${action} didn't go through for ${item}. ${message}`,
+  unknownError: "Something went wrong.",
+  decidedElsewhere: (item) => `${item} was decided elsewhere.`,
+  left: (count) => (count === 0 ? "None left." : `${count} left.`),
+  pickReason: "Pick a reason.",
+  addNote: "Add a note.",
+  reason: "Reason",
+  reasonOptional: "Reason (optional)",
+  note: "Note",
+  noteOptional: "Note (optional)",
+};
 
 export interface ModerationQueueProps<T> {
   /** The queue's heading, and the list's accessible name. */
@@ -68,6 +127,8 @@ export interface ModerationQueueProps<T> {
   density?: "comfortable" | "compact";
   /** After the list: "Load more", if the app pages. */
   footer?: ReactNode;
+  /** The component's own words, replaced; any left out stay English. */
+  labels?: Partial<ModerationQueueLabels>;
   className?: string;
 }
 
@@ -110,10 +171,9 @@ const KIT: QueueActionKit<unknown> = { edit: editAction };
 const editOf = <T,>(action: QueueAction<T>): QueueEditAction<T, unknown> | null =>
   action.edit ? (action as unknown as QueueEditAction<T, unknown>) : null;
 
-const countLeft = (n: number) => (n === 0 ? "None left." : `${n} left.`);
 const level = (n: number) => Math.min(6, Math.max(1, n)) as QueueHeadingLevel;
-const messageOf = (error: unknown) =>
-  error instanceof Error && error.message ? error.message : "Something went wrong.";
+const messageOf = (error: unknown, fallback: string) =>
+  error instanceof Error && error.message ? error.message : fallback;
 
 function without<V>(record: Record<string, V>, key: string): Record<string, V> {
   const next = { ...record };
@@ -200,8 +260,10 @@ function ModerationQueue<T>({
   empty = { title: "Nothing waiting" },
   density = "comfortable",
   footer,
+  labels,
   className,
 }: ModerationQueueProps<T>) {
+  const l = withLabels(LABELS, labels);
   const actions = typeof actionsProp === "function" ? actionsProp(KIT as QueueActionKit<T>) : actionsProp;
   const id = useId();
   const rootRef = useRef<HTMLElement>(null);
@@ -395,7 +457,7 @@ function ModerationQueue<T>({
       if (s && !(s.surface && !s.open)) {
         /* Decided by someone else, or reloaded away, with its step open:
            close the step without deciding, and say so. */
-        parts.push(`${s.label} was decided elsewhere.`);
+        parts.push(l.decidedElsewhere(s.label));
         departed = true;
         if (s.surface) closeSurface(s, target);
         else {
@@ -408,7 +470,7 @@ function ModerationQueue<T>({
       }
     }
 
-    if (parts.length) say(`${parts.join(" ")}${departed ? ` ${countLeft(keys.length)}` : ""}`);
+    if (parts.length) say(`${parts.join(" ")}${departed ? ` ${l.left(keys.length)}` : ""}`);
     // `keys` is recomputed each render; comparing it is the point.
   });
 
@@ -423,13 +485,13 @@ function ModerationQueue<T>({
       const result = await run(item, input);
       outcomes.current.set(key, {
         actionId: action.id,
-        sentence: `${action.done ?? action.label}: ${name}.`,
+        sentence: l.decided(action.done ?? action.label, name),
         announce: result ? result.announce : undefined,
       });
       setSettleTick((t) => t + 1);
     } catch (err) {
-      const message = messageOf(err);
-      say(`${action.label} didn't go through for ${name}. ${message}`);
+      const message = messageOf(err, l.unknownError);
+      say(l.failed(action.label, name, message));
       const s = stepsRef.current[key];
       if (goneWhilePending.current.delete(key)) {
         /* The item left anyway (a reload after a conflict, say). There's
@@ -481,7 +543,7 @@ function ModerationQueue<T>({
 
   const submit = (key: string) => {
     const s = stepsRef.current[key];
-    if (!s || pendingRef.current[key] || blockedReason(s, itemsRef.current.get(key) ?? s.item)) return;
+    if (!s || pendingRef.current[key] || blockedReason(s, itemsRef.current.get(key) ?? s.item, l)) return;
     if (s.action.edit) void decide(key, s.item, s.action, { draft: s.draft });
     else if (s.action.reason) void decide(key, s.item, s.action, { reason: cleanReason(s.reason) });
     else void decide(key, s.item, s.action, {});
@@ -507,12 +569,13 @@ function ModerationQueue<T>({
     const edit = editOf(action);
     const current = itemsRef.current.get(s.key) ?? s.item;
     const busy = !!pending[s.key];
-    const blocked = blockedReason(s, current);
+    const blocked = blockedReason(s, current, l);
     const messageId = `${id}-step-${index}-message`;
     const submitButton = (
       <QueueButton
         {...TONE[action.tone ?? "neutral"]}
         busy={busy}
+        loadingLabel={l.busy}
         blocked={!!blocked}
         aria-describedby={blocked ? messageId : undefined}
         onClick={() => submit(s.key)}
@@ -523,7 +586,7 @@ function ModerationQueue<T>({
     );
     const cancelButton = (
       <QueueButton variant="ghost" colorScheme="neutral" blocked={busy} onClick={() => cancel(s.key)}>
-        Cancel
+        {l.cancel}
       </QueueButton>
     );
     const fields = (
@@ -532,6 +595,7 @@ function ModerationQueue<T>({
           <ReasonFields
             id={`${id}-step-${index}`}
             step={action.reason}
+            labels={l}
             value={s.reason}
             disabled={busy}
             onChange={(reason) => setStep(s.key, { ...stepsRef.current[s.key], reason })}
@@ -566,7 +630,9 @@ function ModerationQueue<T>({
     const { submitButton, cancelButton, fields } = stepParts(s, index);
     const promptId = `${id}-step-${index}-prompt`;
     const edit = editOf(s.action);
-    const prompt = s.action.confirm?.prompt ?? s.action.reason?.prompt ?? edit?.edit.title;
+    /* Reason before confirm, as submit has it: the reason step's submit is
+       the confirmation, so its question is the one to ask. */
+    const prompt = s.action.reason?.prompt ?? s.action.confirm?.prompt ?? edit?.edit.title;
     return (
       <div
         role="group"
@@ -599,7 +665,7 @@ function ModerationQueue<T>({
   const actionBar = (item: T, key: string) => {
     const busyAction = pending[key];
     return (
-      <div role="group" aria-label={`Decide: ${itemLabel(item)}`} className="rst:flex rst:flex-wrap rst:gap-2">
+      <div role="group" aria-label={l.decide(itemLabel(item))} className="rst:flex rst:flex-wrap rst:gap-2">
         {actions
           .filter((a) => !a.hidden?.(item))
           .map((action) => (
@@ -608,6 +674,7 @@ function ModerationQueue<T>({
               {...TONE[action.tone ?? "neutral"]}
               data-queue-action={action.id}
               busy={busyAction === action.id}
+              loadingLabel={l.busy}
               blocked={!!busyAction && busyAction !== action.id}
               onClick={() => open(item, action)}
             >
@@ -654,15 +721,15 @@ function ModerationQueue<T>({
 
       {status === "loading" ? (
         <div className="rst:flex rst:justify-center rst:py-12" aria-busy="true">
-          <Spinner size="lg" label={`Loading ${label}`} />
+          <Spinner size="lg" label={l.loading(label)} />
         </div>
       ) : status === "error" ? (
         <Alert colorScheme="error">
           <div className="rst:flex rst:flex-col rst:items-start rst:gap-3">
-            <div>{error ?? "The queue couldn't load."}</div>
+            <div>{error ?? l.loadFailed}</div>
             {onRetry && (
               <Button size="lg" variant="outline" colorScheme="neutral" onClick={onRetry}>
-                Retry
+                {l.retry}
               </Button>
             )}
           </div>
@@ -740,6 +807,7 @@ function ModerationQueue<T>({
           onAfterClose={() => onSurfaceClosed(surfaceStep.key)}
           submitButton={surfaceParts.submitButton}
           cancelButton={surfaceParts.cancelButton}
+          closeLabel={l.close}
         >
           <div className="rst:flex rst:flex-col rst:gap-4">{surfaceParts.fields}</div>
         </Surface>
@@ -749,12 +817,15 @@ function ModerationQueue<T>({
 }
 
 /** Why a step can't be submitted yet, or nothing. */
-function blockedReason<T>(s: Step<T>, item: T): string | undefined {
+function blockedReason<T>(s: Step<T>, item: T, l: ModerationQueueLabels): string | undefined {
   const edit = editOf(s.action);
   if (edit) return edit.edit.validate?.(s.draft, item);
   if (s.action.reason) {
-    if (s.action.reason.required && !s.reason.value) return "Pick a reason.";
-    if (s.action.reason.note === "required" && !s.reason.note?.trim()) return "Add a note.";
+    /* Only with something to pick: the types refuse a required reason
+       without options, and an untyped caller's mustn't leave a step that can
+       never be sent. */
+    if (s.action.reason.required && s.action.reason.options?.length && !s.reason.value) return l.pickReason;
+    if (s.action.reason.note === "required" && !s.reason.note?.trim()) return l.addNote;
   }
   return undefined;
 }
@@ -770,9 +841,11 @@ function ReasonFields({
   value,
   disabled,
   onChange,
+  labels: l,
 }: {
   id: string;
   step: QueueReasonStep;
+  labels: ModerationQueueLabels;
   value: QueueReason;
   disabled: boolean;
   onChange: (next: QueueReason) => void;
@@ -782,7 +855,7 @@ function ReasonFields({
     <>
       {step.options && step.options.length > 0 && (
         <RadioGroup
-          label={step.required ? "Reason" : "Reason (optional)"}
+          label={step.required ? l.reason : l.reasonOptional}
           options={step.options}
           value={value.value ?? ""}
           onChange={(v) => onChange({ ...value, value: v })}
@@ -792,7 +865,7 @@ function ReasonFields({
       {note !== "none" && (
         <Textarea
           id={`${id}-note`}
-          label={step.noteLabel ?? (note === "required" ? "Note" : "Note (optional)")}
+          label={step.noteLabel ?? (note === "required" ? l.note : l.noteOptional)}
           rows={3}
           value={value.note ?? ""}
           onChange={(e) => onChange({ ...value, note: e.target.value })}

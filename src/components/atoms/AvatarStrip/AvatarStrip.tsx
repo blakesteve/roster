@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { Avatar } from "../Avatar/Avatar";
 
 export type AvatarStripColorScheme =
@@ -25,6 +26,16 @@ export interface AvatarStripItem {
   href?: string;
 }
 
+/** Every word AvatarStrip says of its own. Pass any of them in `labels` to replace it. */
+export interface AvatarStripLabels {
+  /** The dismiss button's name, with `onDismiss`. */
+  dismiss: string;
+  /** The overflow chip's title: how many more there are. */
+  more: (count: number) => string;
+}
+
+const LABELS: AvatarStripLabels = { dismiss: "Dismiss", more: (count) => `${count} more` };
+
 export interface AvatarStripProps {
   /** Ordered list of avatar items. */
   items: AvatarStripItem[];
@@ -48,6 +59,8 @@ export interface AvatarStripProps {
   trailingSlot?: ReactNode;
   /** Rendered to the right of the avatar stack. Accepts any React node. */
   label?: ReactNode;
+  /** The component's own words, replaced; any left out stay English. */
+  labels?: Partial<AvatarStripLabels>;
   /**
    * Tailwind class that sets the ring color around each avatar and the overflow chip.
    * Should match the background the strip is rendered on to produce the cutout stack effect.
@@ -79,8 +92,10 @@ export function AvatarStrip({
   trailingSlot,
   label,
   ringClass = "rst:ring-white rst:dark:ring-gray-900",
+  labels,
   className,
 }: AvatarStripProps) {
+  const l = withLabels(LABELS, labels);
   const visible = items
     .filter((item) => item.key !== excludeKey)
     .slice(0, maxDisplay);
@@ -101,7 +116,7 @@ export function AvatarStrip({
         <button
           type="button"
           onClick={onDismiss}
-          aria-label="Dismiss"
+          aria-label={l.dismiss}
           data-testid="avatar-strip-dismiss"
           className="rst:shrink-0 rst:text-gray-400/50 rst:dark:text-gray-500/50 rst:hover:text-gray-400 rst:dark:hover:text-gray-500 rst:transition-colors rst:cursor-pointer"
         >
@@ -119,6 +134,7 @@ export function AvatarStrip({
             <Avatar
               initials={item.label[0].toUpperCase()}
               src={item.src}
+              alt={item.label}
               colorScheme={item.colorScheme ?? "neutral"}
               size="xs"
             />
@@ -153,7 +169,7 @@ export function AvatarStrip({
 
         {overflow > 0 && (
           <div
-            title={`${overflow} more`}
+            title={l.more(overflow)}
             data-testid="avatar-strip-overflow"
             className={cn(
               "rst:relative rst:flex rst:h-6 rst:w-6 rst:items-center rst:justify-center rst:rounded-full rst:bg-gray-500/10 rst:ring-2",

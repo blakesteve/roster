@@ -30,18 +30,44 @@ export interface QueueReason {
   note?: string;
 }
 
-export interface QueueReasonStep {
+export interface QueueReasonOption {
+  value: string;
+  label: string;
+}
+
+interface QueueReasonStepBase {
   /** The question the step asks, and its accessible name. */
   prompt: string;
-  /** A short list, shown as radios. */
-  options?: { value: string; label: string }[];
-  /** An option must be picked before submitting. */
-  required?: boolean;
   /** Whether a free-text note is offered, and whether it's required. */
   note?: "none" | "optional" | "required";
   /** The note field's label. */
   noteLabel?: string;
 }
+
+/**
+ * A reason step. `required` asks for one of the `options`, so the types ask
+ * for `options` with it: a required reason with nothing to pick from could
+ * never be submitted. (An empty list gets past the types; the queue then
+ * doesn't block on a pick.) For a reason that is only a note, leave
+ * `required` off and set `note: "required"`.
+ *
+ * A type rather than an interface, to say that: extend it with `&`, not
+ * `extends`.
+ */
+export type QueueReasonStep = QueueReasonStepBase &
+  (
+    | {
+        /** An option must be picked before submitting. */
+        required: true;
+        /** A short list, shown as radios. */
+        options: QueueReasonOption[];
+      }
+    | {
+        required?: false;
+        /** A short list, shown as radios. */
+        options?: QueueReasonOption[];
+      }
+  );
 
 /**
  * Every action that isn't an edit: one click, or a step that asks first.
@@ -50,8 +76,8 @@ export interface QueueReasonStep {
  *   - `confirm`: asks in place, "Remove this post?", with the action and
  *     Cancel.
  *   - `reason`: asks why in place (options, a note, or both), and hands the
- *     answer to `run`. Takes precedence over `confirm`; its submit button is
- *     the confirmation.
+ *     answer to `run`. Takes precedence over `confirm`: its prompt is the one
+ *     asked, and its submit button is the confirmation.
  *
  * One type rather than three, so an action written as an object literal gets
  * its parameters typed: TypeScript can't tell three shapes apart by whether
@@ -91,6 +117,8 @@ export interface QueueSurfaceProps {
   children: ReactNode;
   submitButton: ReactNode;
   cancelButton: ReactNode;
+  /** The surface's own close button's name, when the queue's `labels` set one. */
+  closeLabel?: string;
 }
 
 export type QueueSurface = ComponentType<QueueSurfaceProps>;

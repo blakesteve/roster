@@ -6,13 +6,15 @@ import { cva } from "class-variance-authority";
  * siblings. Digits are tabular so a row of them lines up on the decimal.
  */
 export const statValueVariants = /* @__PURE__ */ cva(
-  "rst:block rst:font-bold rst:leading-none rst:tracking-[-0.04em] rst:tabular-nums",
+  "rst:block rst:font-bold rst:tracking-[-0.04em] rst:tabular-nums",
   {
     variants: {
+      /* `leading-none` after each size, as in Eyebrow: before it,
+         tailwind-merge drops it in favor of the size. */
       size: {
-        sm: "rst:text-xl",
-        md: "rst:text-[clamp(1.5rem,3.6vw,2.25rem)]",
-        lg: "rst:text-[clamp(2rem,5vw,3rem)]",
+        sm: "rst:text-xl rst:leading-none",
+        md: "rst:text-[clamp(1.5rem,3.6vw,2.25rem)] rst:leading-none",
+        lg: "rst:text-[clamp(2rem,5vw,3rem)] rst:leading-none",
       },
       colorScheme: {
         primary: "rst:text-primary-600 rst:dark:text-primary-400",

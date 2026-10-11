@@ -113,6 +113,12 @@ import "@blakesteve/roster/style.css";
 Skip it and components render against browser defaults: serif type, bulleted
 lists, and `content-box` sizing.
 
+One default Roster does undo itself: a `<button>`'s own border. A `link` or
+`soft` Button sets its border to zero (`soft` since 5.8.0). In an app without a
+reset, `link` drew the browser's 2px border, and `soft` kept it, transparent,
+which took 4px of extra room and showed in forced colors. Zero is what an app
+with Tailwind's reset already had, so no layout moves.
+
 ### Dark mode
 
 Every component reads a `.dark` class on an ancestor, so dark mode is whatever
@@ -452,8 +458,15 @@ the supported way now.
 rule stops matching.** Solid Button, Badge, Pill and Checkbox no longer carry
 `rst:text-white` or `rst:text-gray-950`, so a selector naming either matches
 nothing. It fails silently, and it fails *partially*: those classes are still on
-`Card`, `Navbar`, `Dialog`, `ActionBar`, `Avatar` and `Breadcrumbs`, so a
-themed foreground keeps working there while reverting on every solid control.
+`ActionBar`, `Avatar` and `Breadcrumbs`, so a themed foreground keeps working
+there while reverting on every solid control. The `primary` fills of `Card`,
+`Dialog` and, since 5.8.0, `Navbar` read their ink token too: Navbar's bar,
+brand and active link take `--roster-primary-700-ink`, and its other links and
+menu button the same ink at 80%. Each keeps white in dark mode, where its fill
+is a dark step the ink doesn't describe. A primary Navbar looks different even
+with no ink set: its links were `gray-300` and its active link `primary-400`,
+which was 4.04:1 on Roster's own primary, under the 4.5 text needs. Now they
+are white at 80% and white, the active one still semibold.
 Replace the rule with the token:
 
 ```css
@@ -1258,6 +1271,12 @@ app supplies, inline by default or in a Dialog or Sheet (`QueueEditDialog`,
 `QueueEditSheet`, separate exports so a queue that doesn't use them doesn't
 ship them).
 
+**A reason outranks a confirm.** An action with both asks the reason's
+question, and its submit button is the confirmation. A `required` reason asks
+for one of its `options`, so the types refuse `required` without them: a
+reason that is only a note is `note: "required"`. That makes `QueueReasonStep`
+a type rather than an interface (5.8.0), so extend it with `&`, not `extends`.
+
 **Drafts are typed.** An edit's draft is whatever its `initial` returns, and
 `validate`, the form and `run` all get that type. Inside JSX, pass `actions` as
 a function and write edits with the `edit` it's handed, as above; outside it,
@@ -1623,6 +1642,65 @@ well as `next/link`, plus `className`, `children`, `aria-current`, `onClick` and
 `Eyebrow` takes the other approach: `as` accepts any element and the props
 follow it, so `<Eyebrow as="a" href="/work">` works, as does `as={NextLink}`.
 
+### Every built-in word is replaceable
+
+Where a component writes words of its own (a close button's name, a menu
+button's, "Log In", a sentence a screen reader hears), each can be replaced
+and defaults to English. Most components take a `labels` prop; pass any entry
+and the rest stay:
+
+```tsx
+<Navbar labels={{ openMainMenu: t("nav.open"), closeMainMenu: t("nav.close") }} … />
+<Sheet labels={{ close: t("common.close") }} … />
+<Countdown labels={{ days: (n) => t("units.days", { count: n }) }} … />
+```
+
+Since 5.8.0 that covers `Navbar`, `Sheet`, `Dialog`, `Breadcrumbs`, `Footer`,
+`CallToAction`, `AvatarStrip`, `ErrorState`, `Countdown`, `Carousel` and
+`ModerationQueue` (whose `labels.close` names the close button of its edit
+Dialog or Sheet), alongside `Pagination`, the loading system and DataTable's
+`paginationLabels`. A few components name their words with single props
+instead, and 5.8.0 adds the ones that were missing: MultiSelect's
+`countLabel`, DataTable's `emptyMessage` and MediaPreview's `newTabLabel`, next
+to the existing `dismissLabel`, `placeholder`, `removeLabel`, `prevLabel` and
+the like. Words that take a number or a name are functions, so a language
+whose word changes with the count can say so. An entry passed as `undefined`
+(a catalog missing a key) keeps its English rather than leaving a control
+unnamed.
+
+`src/labels.test.tsx` renders each of these, in the states where its words
+appear, with every word pseudo-localized, and fails on any English left. A
+default it can't reach: `Avatar`'s alt is "Avatar" unless you pass one (`""`
+marks it decorative, since 5.8.0), and a team without a name in
+`MatchupCard` is "Team" and its id.
+
+**From a server component, pass only strings.** Every component is a client
+component, and functions can't cross the React Server Component boundary, so a
+function label (Footer's `copyright`, Countdown's units) has to be passed from
+a `"use client"` wrapper, as `linkComponent` does above.
+
+### Eyebrow and Stat line height
+
+An `Eyebrow`'s line is as tall as its letters, and so is a `Stat`'s figure and
+its label. Through 5.7.0 neither was: `leading-none` sat before the font size
+in their variant tables, and `cn()`'s tailwind-merge drops a line height that
+comes before a size. An Eyebrow drew a line 1.5 times its size (15px for the
+default `xs`, not 10), and a Stat's figure and label drew lines taller than
+their type.
+
+**Upgrading to 5.8.0 moves layouts.** An Eyebrow that makes its own line, as
+a flex or grid item or rendered as a block (`as="p"`, `as="h2"`), is a third
+shorter: 10px for `xs`, not 15. One inline in running text sits on its
+parent's line and doesn't change. A Stat in its default markup loses more:
+its figure's line was the size's own (28px for `sm`'s 20px figure) or the
+page's 1.5 (`md`, `lg`), and its label sat on the page's line (24px on a 16px,
+1.5 body). So a `sm` Stat goes from 55px tall to 33, and an `lg` one at 48px
+from 99 to 61. In the `standalone` markup only the label moves, 15px to 10.
+`LabeledDivider` sets its label in an Eyebrow of its own, so every rule is 5px
+shorter whatever label it's given. An Eyebrow that wraps now sets solid, its
+lines as close as its size. Spacing an app tuned against the old lines (a
+margin that cleared them) may want retuning.
+
 ## Quick start
 
 ```tsx
@@ -1715,11 +1793,13 @@ function App() {
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `ActionBar` | Sticky bottom action strip                                                                                                                                         |
 | `Countdown` | Live countdown timer                                                                                                                                               |
-| `DataTable` | Full-featured table with sorting and pagination via TanStack Table v9; its pager is `Pagination`'s arrows, worded through `paginationLabels`. Imported from `@blakesteve/roster/data-table` (see [DataTable columns](#datatable-columns)) |
+| `DataTable` | Table with sorting and paging via TanStack Table v9. Its pager is built on `Pagination` (since 5.6.0, the arrows layout), worded through `paginationLabels`; the page size is fixed at 10, with no prop to change it yet. Imported from `@blakesteve/roster/data-table` (see [DataTable columns](#datatable-columns)) |
 | `Dialog`    | Modal dialog; `onAfterClose` runs once it has finished closing                                                                                                     |
 | `Footer`    | Site footer                                                                                                                                                        |
 | `ModerationQueue` | Items waiting for a decision: busy per action, confirm, reason and edit steps, focus after an item leaves, a live region. Never fetches (see [ModerationQueue](#moderationqueue)) |
-| `Navbar`    | Responsive navigation bar with mobile slide-out                                                                                                                    |
+| `QueueEditDialog` | A ModerationQueue edit step in a Dialog: pass it as an edit's `surface`. A separate export, so a queue that never uses it doesn't ship it |
+| `QueueEditSheet` | A ModerationQueue edit step in a Sheet, for a long form: pass it as an edit's `surface`. A separate export, like `QueueEditDialog` |
+| `Navbar`    | Responsive navigation bar with mobile slide-out. A wide logo keeps its own proportions through `logoHeight` and `logoWidth`; its built-in words are in `labels` |
 | `Sheet`     | Bottom sheet: drag, Escape or backdrop to dismiss; only its content scrolls; returns focus, even from a deep link; the title may be a node |
 | `Table`     | Static data table                                                                                                                                                  |
 

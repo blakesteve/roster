@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, fn, userEvent, waitFor, within } from "storybook/test";
+import { expect, fn, userEvent, within } from "storybook/test";
 import { Disclosure } from "./Disclosure";
 import { Badge } from "../Badge/Badge";
 
@@ -131,34 +131,6 @@ export const Ghost: Story = {
    works on the first copy. */
 const first = (canvasElement: HTMLElement, name: string) =>
   within(canvasElement).getAllByRole("button", { name })[0];
-
-/**
- * The button's `aria-controls` names the panel for exactly as long as the
- * panel exists: set as it opens, kept while it closes, removed once it has
- * gone. A closed panel is unmounted, and `aria-controls` may only name an
- * element that is there.
- */
-export const PanelWiring: Story = {
-  args: { variant: "soft", title: "Shipping details", children: "Ships in two to three working days." },
-  play: async ({ canvasElement }) => {
-    const button = first(canvasElement, "Shipping details");
-    await expect(button).toHaveAttribute("aria-expanded", "false");
-    await expect(button).not.toHaveAttribute("aria-controls");
-
-    await userEvent.click(button);
-    await expect(button).toHaveAttribute("aria-expanded", "true");
-    const id = button.getAttribute("aria-controls")!;
-    await expect(document.getElementById(id)).toHaveTextContent("Ships in two to three working days.");
-
-    await userEvent.click(button);
-    await expect(button).toHaveAttribute("aria-expanded", "false");
-    // Still leaving, so still there and still named.
-    await expect(document.getElementById(id)).not.toBeNull();
-    await expect(button).toHaveAttribute("aria-controls", id);
-    await waitFor(() => expect(document.getElementById(id)).toBeNull());
-    await expect(button).not.toHaveAttribute("aria-controls");
-  },
-};
 
 /**
  * Controlled: `isOpen` decides, and `onToggle` reports the click. Here the

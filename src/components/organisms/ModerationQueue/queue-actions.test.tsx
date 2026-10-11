@@ -137,3 +137,17 @@ describe("typed drafts", () => {
     expect(queue).toBeTruthy();
   });
 });
+
+describe("a required reason", () => {
+  it("comes with options to pick from", () => {
+    const run = async () => {};
+    const actions: QueueAction<Recipe>[] = [
+      /* The twins: required with options, and a note-only reason. */
+      { id: "back", label: "Send back", reason: { prompt: "Why?", required: true, options: [{ value: "dup", label: "Already listed" }] }, run },
+      { id: "note", label: "Send back", reason: { prompt: "Why?", note: "required" }, run },
+      // @ts-expect-error required, with nothing to pick: it could never be sent
+      { id: "stuck", label: "Send back", reason: { prompt: "Why?", required: true }, run },
+    ];
+    expect(actions).toHaveLength(3);
+  });
+});

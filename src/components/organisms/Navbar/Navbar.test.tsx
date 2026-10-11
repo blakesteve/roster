@@ -1,5 +1,6 @@
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import { cleanup, render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
+import type { ReactElement } from "react";
 import userEvent from "@testing-library/user-event";
 import { Navbar, type NavbarProps } from "./Navbar";
 
@@ -29,6 +30,11 @@ const mockUser = {
   notificationCount: 5,
 };
 
+const cleanupAndRender = (ui: ReactElement) => {
+  cleanup();
+  return render(ui);
+};
+
 describe("Navbar Component", () => {
   it("renders the brand name and logo", () => {
     render(<Navbar {...defaultProps} />);
@@ -41,6 +47,33 @@ describe("Navbar Component", () => {
     const logo = document.querySelector('img[src="/logo.png"]');
     expect(logo).toHaveAttribute("alt", "");
     expect(screen.getByRole("link", { name: defaultProps.brandName })).toContainElement(logo as HTMLElement);
+  });
+
+  it("keeps the logo square from logoSize when no side is given", () => {
+    render(<Navbar {...defaultProps} />);
+    const logo = document.querySelector<HTMLImageElement>('img[src="/logo.png"]')!;
+    expect([logo.style.width, logo.style.height, logo.className]).toEqual(["2rem", "2rem", "rst:shrink-0 rst:rounded-md"]);
+    cleanupAndRender(<Navbar {...defaultProps} logoSize={44} />);
+    const sized = document.querySelector<HTMLImageElement>('img[src="/logo.png"]')!;
+    expect([sized.style.width, sized.style.height]).toEqual(["44px", "44px"]);
+  });
+
+  it("lets a logo that isn't square keep its own proportions, in the bar and the menu panel", async () => {
+    render(<Navbar {...defaultProps} logoSize="3rem" logoHeight={32} />);
+    await userEvent.click(screen.getByRole("button", { name: "Open main menu" }));
+    const logos = [...document.querySelectorAll<HTMLImageElement>('img[src="/logo.png"]')];
+    expect(logos).toHaveLength(2);
+    for (const logo of logos) {
+      expect([logo.style.width, logo.style.height, logo.getAttribute("alt")]).toEqual(["auto", "32px", ""]);
+      expect(logo).toHaveClass("rst:object-contain", "rst:object-left", "rst:rtl:object-right");
+    }
+    cleanupAndRender(<Navbar {...defaultProps} logoWidth="10rem" logoHeight="2rem" />);
+    const boxed = document.querySelector<HTMLImageElement>('img[src="/logo.png"]')!;
+    expect([boxed.style.width, boxed.style.height]).toEqual(["10rem", "2rem"]);
+    expect(boxed).toHaveClass("rst:object-contain");
+    cleanupAndRender(<Navbar {...defaultProps} logoWidth={120} />);
+    const wide = document.querySelector<HTMLImageElement>('img[src="/logo.png"]')!;
+    expect([wide.style.width, wide.style.height]).toEqual(["120px", "auto"]);
   });
 
   // The default variant is driven by --roster-nav-* rather than literal

@@ -3,8 +3,17 @@ import { type VariantProps } from "class-variance-authority";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { errorStateVariants } from "./error-state-variants";
 import { Button } from "../../atoms/Button/Button";
+
+/** Every word ErrorState shows of its own, past its `title`. Pass any of them in `labels` to replace it. */
+export interface ErrorStateLabels {
+  /** The retry button, with `onRetry`. */
+  retry: string;
+}
+
+const LABELS: ErrorStateLabels = { retry: "Try Again" };
 
 export interface ErrorStateProps
   extends
@@ -15,6 +24,8 @@ export interface ErrorStateProps
   onRetry?: () => void;
   action?: React.ReactNode;
   icon?: React.ReactNode;
+  /** The component's own words, replaced; any left out stay English. */
+  labels?: Partial<ErrorStateLabels>;
 }
 
 const ErrorState = ({
@@ -23,10 +34,12 @@ const ErrorState = ({
   onRetry,
   action,
   icon,
+  labels,
   variant,
   className,
   ...props
 }: ErrorStateProps) => {
+  const l = withLabels(LABELS, labels);
   return (
     <div className={cn(errorStateVariants({ variant }), className)} {...props}>
       <div className="rst:mb-4 rst:flex rst:h-12 rst:w-12 rst:items-center rst:justify-center rst:rounded-full rst:bg-error-100 rst:text-error-600 rst:dark:bg-error-500/15 rst:dark:text-error-400">
@@ -61,7 +74,7 @@ const ErrorState = ({
             colorScheme="error"
             variant={variant === "card" ? "outline" : "solid"}
           >
-            Try Again
+            {l.retry}
           </Button>
         ) : null}
       </div>

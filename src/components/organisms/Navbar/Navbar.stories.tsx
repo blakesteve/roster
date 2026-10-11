@@ -316,7 +316,7 @@ export const PrimaryTheme: Story = {
     docs: {
       description: {
         story:
-          "The **Primary** variant applies the brand's primary color as the background.",
+          "The **Primary** variant applies the brand's primary color as the background. Its text is `primary-700`'s ink token, as on every other solid fill: white by default, and an app with a light primary sets `--roster-primary-700-ink` to a dark color so the brand and links stay readable. In dark mode the fill is `primary-950` and the text stays white.",
       },
     },
   },
@@ -713,6 +713,67 @@ export const CustomLogoSize: Story = {
       description: {
         story:
           "`logoSize` accepts any CSS length (`\"2.75rem\"`) or a bare number read as pixels. `logoClassName` replaces the default rounding rather than adding to it, so a circular mark can pass `rounded-full` and a square one an empty string. Both default to the previous hard-coded `h-8 w-8 rounded-md`, so existing usage is unchanged.",
+      },
+    },
+  },
+};
+
+export const Translated: Story = {
+  args: {
+    logoSrc: mockLogo,
+    brandName: "Tidewater",
+    items: [
+      { label: "Calendario", path: "/schedule" },
+      { label: "Mis ligas", path: "/leagues" },
+    ],
+    activePath: "/schedule",
+    user: { ...mockUser, notificationCount: 2 },
+    onInboxClick: () => {},
+    onLogout: () => {},
+    onThemeToggle: () => {},
+    labels: {
+      openMainMenu: "Abrir el menú",
+      closeMainMenu: "Cerrar el menú",
+      openUserMenu: "Abrir el menú de usuario",
+      logIn: "Entrar",
+      logOut: "Salir",
+      darkMode: "Modo oscuro",
+      pendingInvitations: "Invitaciones pendientes",
+      inbox: (count) => `Bandeja (${count})`,
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Every word the Navbar writes itself is an entry in `labels`, with an English default: the menu buttons' names, Log In and Log Out, the theme row, and the inbox in the user menu and the menu panel. Pass any of them and the rest stay English. Open the user menu, or narrow the window and open the menu, to see them.",
+      },
+    },
+  },
+};
+
+/* A wide lockup, mark and wordmark in one image, drawn inline so the story
+   needs no network. */
+const mockLockup =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='32' viewBox='0 0 240 32'%3E%3Crect width='32' height='32' rx='6' fill='%234F46E5'/%3E%3Ctext x='44' y='23' font-family='system-ui,sans-serif' font-size='20' font-weight='700' fill='%234F46E5'%3ETidewater%3C/text%3E%3C/svg%3E";
+
+export const WideLogo: Story = {
+  args: {
+    logoSrc: mockLockup,
+    logoHeight: "2rem",
+    logoWidth: "15rem",
+    logoClassName: "",
+    brandName: "Tidewater",
+    brandElement: <span className="rst:sr-only">Tidewater</span>,
+    items: defaultItems,
+    variant: "default",
+    activePath: "/schedule",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A logo that isn't square takes `logoHeight` (or `logoWidth`) in place of `logoSize`, and keeps its own proportions; the menu panel's copy takes the same box. Here a 240 by 32 lockup is `2rem` by `15rem`: set both sides when you know the ratio, so the box is held before the image loads and the name beside it doesn't move. A box that doesn't match the image fits it inside, against the start edge, rather than stretching it. `logoHeight` alone works too, with the width following the image once it loads. Where the lockup already carries the name, keep the name for screen readers in a visually hidden `brandElement`: the logo's alt stays empty either way.",
       },
     },
   },

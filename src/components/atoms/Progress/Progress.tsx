@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "../../../lib/utils";
+import { withLabels } from "../../../lib/labels";
 import { progressValues, type SegmentState } from "./progress-values";
 
 export type ProgressStatus = "default" | "success" | "warning" | "error";
@@ -115,6 +116,7 @@ export interface ProgressProps {
   announce?: boolean;
   /** The least time between two announcements, in milliseconds. */
   announceEvery?: number;
+  /** The component's own words, replaced; any left out stay English. */
   labels?: Partial<ProgressLabels>;
   className?: string;
 }
@@ -143,7 +145,7 @@ function Progress({
   labels: overrides,
   className,
 }: ProgressProps) {
-  const l = { ...LABELS, ...overrides };
+  const l = withLabels(LABELS, overrides);
   const { known, fraction, percent, states, done, applicable, complete } = progressValues({ value, max, variant, segments });
   const valueText =
     valueOverride ?? (variant === "segmented" ? l.count(done, applicable) : known ? l.percent(percent) : l.indeterminate);

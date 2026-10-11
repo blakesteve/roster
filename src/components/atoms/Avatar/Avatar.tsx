@@ -10,6 +10,10 @@ export interface AvatarProps
     VariantProps<typeof avatarVariants> {
   initials?: string;
   src?: string;
+  /**
+   * The photo's text alternative. Defaults to "Avatar"; pass the person's
+   * name, or `""` where the avatar sits beside a name that already says who.
+   */
   alt?: string;
   title?: string;
 }
@@ -42,7 +46,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         {showImage ? (
           <img
             src={src}
-            alt={alt || "Avatar"}
+            alt={alt ?? "Avatar"}
             className="rst:h-full rst:w-full rst:object-cover"
             onError={() => setImageError(true)}
           />
