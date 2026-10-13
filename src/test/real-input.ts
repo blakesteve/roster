@@ -15,6 +15,8 @@ export interface RealInput {
       options?: { steps?: number; holdMs?: number; fx?: number; fy?: number },
     ) => Promise<void>;
     realClick: (selector: string, at?: { fx?: number; fy?: number }) => Promise<void>;
+    /** Rests the real mouse on an element, without pressing (.storybook/real-input.ts). */
+    realHover: (selector: string, at?: { fx?: number; fy?: number; steps?: number }) => Promise<void>;
     /** Picks files in a file input through the browser's own chooser path (.storybook/real-input.ts). */
     realSetFiles: (selector: string, files: RealFile[]) => Promise<void>;
     /** Drops files on an element: dispatched drag events carrying real Files. */
@@ -31,6 +33,9 @@ export interface RealInput {
         ignored: boolean;
         disabled: boolean;
         busy: boolean;
+        checked: string | null;
+        expanded: boolean | null;
+        hasPopup: string | null;
       }[]
     >;
   };

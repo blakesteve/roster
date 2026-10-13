@@ -119,3 +119,186 @@ export const AFittedLogoSitsAtTheStartEdge: Story = {
     await expect(fit("rtl")).toEqual(["contain", "100% 50%"]);
   },
 };
+
+/* The user menu, rebuilt on Roster's Menu, measured against the one it
+   replaced (5.8.0, Headless UI's): every literal below was read from that
+   menu in Chromium, the same story at the same width. Its rows grew from
+   36px to 44, Menu's minimum target, and that is the one change. */
+/* The fixture both user menu checks open. */
+const UserMenuFixture = () => (
+  /* Narrower than the screen, so a panel lined up with the avatar's left
+     edge would have the room to stay there: it has to line up right. */
+  <div style={{ minHeight: 360, width: 640 }}>
+    <Navbar
+      logoSrc={LOGO}
+      brandName="Tidewater"
+      position="static"
+      items={[{ label: "Charts", path: "/charts" }]}
+      user={{ initials: "TW", notificationCount: 2 }}
+      onInboxClick={() => {}}
+      onThemeToggle={() => {}}
+      onLogout={() => {}}
+      userMenuItems={[{ label: "Settings", path: "/settings" }]}
+    />
+  </div>
+);
+
+const openUserMenu = async (canvasElement: HTMLElement) => {
+  const trigger = canvasElement.querySelector<HTMLButtonElement>("nav button[aria-haspopup='menu']")!;
+  trigger.click();
+  const panel = await waitFor(() => {
+    const el = document.getElementById(trigger.getAttribute("aria-controls") ?? "");
+    expect(el).not.toBeNull();
+    return el!;
+  });
+  await waitFor(() => expect([panel.getAnimations().length, getComputedStyle(panel).scale]).toEqual([0, "none"]));
+  return { trigger, panel, rows: [...panel.querySelectorAll<HTMLElement>("[data-menu-item]")] };
+};
+
+/* A row's words as drawn: the element holding its first text, and where that
+   text starts from the panel's left edge. */
+const labelOf = (row: HTMLElement, panel: HTMLElement) => {
+  const walker = document.createTreeWalker(row, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.textContent?.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP) });
+  const text = walker.nextNode()!;
+  const range = document.createRange();
+  range.selectNodeContents(text);
+  return { style: getComputedStyle(text.parentElement!), x: Math.round(range.getBoundingClientRect().left - panel.getBoundingClientRect().left) };
+};
+
+/* Every literal in these two checks is 5.8.0's, read from its rendered menu in
+   Chromium, in both themes. The one change is the rows' height: 36px then,
+   44 now. */
+const looksAsItDid = async (canvasElement: HTMLElement) => {
+  const { trigger, panel, rows } = await openUserMenu(canvasElement);
+  const p = panel.getBoundingClientRect();
+  const t = trigger.getBoundingClientRect();
+  const style = getComputedStyle(panel);
+  const groups = [...panel.querySelectorAll<HTMLElement>(":scope > [role='group']")];
+  const icon = (r: HTMLElement) => {
+    const svg = r.querySelector("svg");
+    if (!svg) return null;
+    const b = svg.getBoundingClientRect();
+    return [b.left + b.width / 2 - p.left, b.width];
+  };
+  await expect({
+    width: p.width,
+    rightEdge: Math.round(p.right - t.right),
+    gap: Math.round(p.top - t.bottom),
+    fill: style.backgroundColor,
+    /* The twin: the app's color does reach the panel. */
+    token: style.getPropertyValue("--roster-popover-bg").trim(),
+    radius: style.borderTopLeftRadius,
+    /* Role, words, their color, size and weight, where they start, the cursor
+       and the row's corners. */
+    rows: rows.map((r) => {
+      const label = labelOf(r, panel);
+      return [r.getAttribute("role"), r.textContent?.replace(/\s+/g, " ").trim(), label.style.color, label.style.fontSize, label.style.fontWeight, label.x, label.style.cursor, getComputedStyle(r).borderTopLeftRadius];
+    }),
+    /* Each icon's middle and width: Font Awesome's own 1.25em, not a 16px slot. */
+    icons: rows.map(icon),
+    heights: rows.map((r) => r.getBoundingClientRect().height),
+    rule: getComputedStyle(groups[1]).borderTopColor,
+    sections: groups.map((g) => [getComputedStyle(g).paddingTop, getComputedStyle(g).paddingBottom]),
+  }).toEqual({
+    width: 192,
+    rightEdge: 0,
+    gap: 8,
+    fill: "rgb(255, 255, 255)",
+    token: "rgb(20, 40, 60)",
+    radius: "6px",
+    rows: [
+      ["menuitem", "Inbox (2)", "rgb(87, 83, 78)", "14px", "500", 43, "pointer", "0px"],
+      ["menuitemcheckbox", "Dark Mode", "rgb(68, 64, 60)", "14px", "500", 42, "pointer", "0px"],
+      ["menuitem", "Settings", "rgb(68, 64, 60)", "14px", "600", 16, "pointer", "4px"],
+      ["menuitem", "Log Out", "rgb(87, 83, 78)", "14px", "500", 43, "pointer", "0px"],
+    ],
+    icons: [[25.75, 17.5], [24.75, 17.5], null, [25.75, 17.5]],
+    heights: [44, 44, 44, 44],
+    rule: "rgb(245, 245, 244)",
+    sections: [
+      ["4px", "4px"],
+      ["4px", "4px"],
+      ["4px", "4px"],
+    ],
+  });
+  /* The ring is the old faint one, not the popover border a plain Menu draws. */
+  await expect(style.getPropertyValue("--tw-ring-color").trim()).toBe("color-mix(in oklab, #1e1c1a 5%, transparent)");
+  /* The avatar is 32px and its target 44: a press 5px outside the avatar,
+     inside the hit area, lands on the button. The twin: 8px outside doesn't. */
+  const hit = (dx: number) => document.elementFromPoint(t.left - dx, t.top + t.height / 2)?.closest("button") === trigger;
+  await expect([t.width, hit(5), hit(8)]).toEqual([32, true, false]);
+  trigger.click();
+};
+
+export const TheUserMenuLooksAsItDid: Story = {
+  render: () => <UserMenuFixture />,
+  play: async ({ canvasElement }) => {
+    /* An app that repaints Roster's popups, as one does with its card color,
+       doesn't repaint this menu: it was white before it was a Roster Menu. */
+    document.documentElement.style.setProperty("--roster-popover-bg", "rgb(20, 40, 60)");
+    try {
+      await looksAsItDid(canvasElement);
+    } finally {
+      document.documentElement.style.removeProperty("--roster-popover-bg");
+    }
+  },
+};
+
+
+export const TheUserMenuPointsAsItDid: Story = {
+  tags: ["real-input"],
+  render: () => <UserMenuFixture />,
+  play: async ({ canvasElement }) => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    const { trigger, panel, rows } = await openUserMenu(canvasElement);
+    rows.forEach((r, i) => r.setAttribute("data-check", `row-${i}`));
+    const under = async (i: number) => {
+      await real.commands.realHover(`[data-check="row-${i}"]`);
+      await waitFor(() => expect(document.activeElement).toBe(rows[i]));
+      const r = rows[i];
+      /* Read once the colors have finished easing in. */
+      await waitFor(() => expect(r.getAnimations({ subtree: true }).length).toBe(0));
+      return [getComputedStyle(r).backgroundColor, labelOf(r, panel).style.color];
+    };
+    /* Under the pointer, Inbox takes a ghost Button's own fill and Settings a
+       Link's darker words, each over the focused row's pale fill. The twin:
+       Dark Mode, a plain row then too, takes the pale fill and keeps its words. */
+    await expect([await under(0), await under(1), await under(2), await under(3)]).toEqual([
+      ["oklab(0.500224 0.000659585 0.00672197 / 0.1)", "rgb(87, 83, 78)"],
+      ["rgb(250, 250, 249)", "rgb(68, 64, 60)"],
+      ["rgb(250, 250, 249)", "rgb(28, 25, 23)"],
+      ["oklab(0.500224 0.000659585 0.00672197 / 0.1)", "rgb(87, 83, 78)"],
+    ]);
+    trigger.click();
+  },
+};
+
+export const TheOpenPanelCoversTheHamburger: Story = {
+  tags: ["real-input"],
+  render: () => <Navbar logoSrc={LOGO} brandName="Tidewater" position="static" items={[{ label: "Charts", path: "/charts" }]} />,
+  play: async ({ canvasElement }) => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    try {
+      await real.page.viewport(414, 800);
+      await waitFor(() => expect(window.innerWidth).toBe(414));
+      const hamburger = canvasElement.querySelector<HTMLButtonElement>("[data-roster-hamburger] button")!;
+      const box = hamburger.getBoundingClientRect();
+      const atHamburger = () => document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+      /* The twin first: shut, a press there lands on the hamburger. */
+      await expect(hamburger.contains(atHamburger())).toBe(true);
+      hamburger.setAttribute("data-check", "hamburger");
+      await real.commands.realClick('[data-check="hamburger"]');
+      await waitFor(() => expect(hamburger).toHaveAttribute("aria-expanded", "true"));
+      const panel = document.querySelector<HTMLElement>("[data-roster-mobile-panel]")!;
+      await waitFor(() => expect(panel.getAnimations({ subtree: true })).toHaveLength(0));
+      /* Open, the panel covers it: a press there lands on the panel, and
+         focus on the hamburger would be focus out of sight, so it closes the
+         panel (Navbar.test.tsx). */
+      await expect([panel.contains(atHamburger()), hamburger.contains(atHamburger())]).toEqual([true, false]);
+    } finally {
+      await real.page.viewport(1280, 720);
+    }
+  },
+};

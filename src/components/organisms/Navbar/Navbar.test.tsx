@@ -465,6 +465,42 @@ describe("Navbar mobile panel dismissal on navigation", () => {
     });
   };
 
+  it("moves focus into the panel when it opens, and closes it when focus leaves", async () => {
+    render(
+      <>
+        <Navbar {...defaultProps} />
+        <button type="button">Elsewhere</button>
+      </>,
+    );
+    await openPanel();
+    const close = await screen.findByRole("button", { name: "Close menu" });
+    await waitFor(() => expect(close).toHaveFocus());
+    /* The twin: focus moving within the panel leaves it open. */
+    within(document.querySelector("[data-roster-mobile-panel]") as HTMLElement).getByRole("link", { name: "Leagues" }).focus();
+    expect(screen.getByRole("button", { name: /open main menu/i })).toHaveAttribute("aria-expanded", "true");
+    screen.getByRole("button", { name: "Elsewhere" }).focus();
+    await expectPanelClosed();
+  });
+
+  it("closes the panel when focus goes back to the hamburger it covers", async () => {
+    render(<Navbar {...defaultProps} />);
+    const hamburger = screen.getByRole("button", { name: /open main menu/i });
+    await openPanel();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Close menu" })).toHaveFocus());
+    /* Shift+Tab from the panel's first control lands on the hamburger, which
+       the panel covers: the panel closes, as it did in 5.8.0. */
+    await userEvent.tab({ shift: true });
+    expect(hamburger).toHaveFocus();
+    await expectPanelClosed();
+    /* The twin: Shift+Tab within the panel leaves it open. */
+    await openPanel();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Close menu" })).toHaveFocus());
+    const panel = document.querySelector("[data-roster-mobile-panel]") as HTMLElement;
+    within(panel).getByRole("link", { name: "Leagues" }).focus();
+    await userEvent.tab({ shift: true });
+    expect([panel.contains(document.activeElement), hamburger.getAttribute("aria-expanded")]).toEqual([true, "true"]);
+  });
+
   // Control: the built-in slots already wire close() themselves.
   it("closes the panel when a built-in nav item is clicked", async () => {
     render(<Navbar {...defaultProps} />);
@@ -547,8 +583,9 @@ describe("Navbar mobile panel dismissal on navigation", () => {
     await expectPanelClosed();
   });
 
-  // Desktop: HeadlessUI's Menu closes itself on MenuItem click. Pinned so the
-  // dropdown half of the "menus should close on navigate" report stays fixed.
+  // Desktop: the user menu (Roster's Menu) closes itself when an item is
+  // chosen. Pinned so the dropdown half of the "menus should close on
+  // navigate" report stays fixed.
   it("closes the desktop user dropdown when a userMenuItem is clicked", async () => {
     render(
       <Navbar
@@ -564,6 +601,7 @@ describe("Navbar mobile panel dismissal on navigation", () => {
     fireEvent.click(item);
 
     await waitFor(() => {
+      expect(screen.getByRole("button", { name: /user menu/i })).toHaveAttribute("aria-expanded", "false");
       expect(screen.queryByText("Family area")).not.toBeInTheDocument();
     });
   });
@@ -623,14 +661,17 @@ describe("Navbar mobile panel dismissal on navigation", () => {
     });
 
     it.each([
-      ["desktop menu", /user menu/i],
-      ["mobile panel", /open main menu/i],
-    ])("renders no Switch control in the %s", async (_where, opener) => {
+      ["desktop menu", /user menu/i, "menuitemcheckbox"],
+      ["mobile panel", /open main menu/i, "switch"],
+    ])("renders no Switch control in the %s: the row is the one control", async (_where, opener, role) => {
       render(<Navbar {...defaultProps} user={mockUser} onThemeToggle={vi.fn()} />);
       fireEvent.click(screen.getByRole("button", { name: opener }));
       const track = await screen.findByTestId("navbar-theme-track");
       expect(screen.queryAllByRole("switch", { name: "Toggle setting" })).toHaveLength(0);
-      expect(track.closest("button")).toBeNull();
+      /* The track's control is the row, and nothing interactive sits inside it. */
+      const control = track.closest('button, [role="switch"], [role="menuitemcheckbox"]');
+      expect(control?.getAttribute("role")).toBe(role);
+      expect(control!.querySelector("button, input, a, [tabindex]")).toBeNull();
     });
   });
 });
