@@ -924,6 +924,10 @@ look like oversights until you know why:
   page does not reach it. All three components copy the nearest `.dark` onto
   the panel to fix that. Custom properties are not carried the same way — set
   `--roster-popover-*` at `:root`.
+- **`Menu` shares the panel, not the anchoring.** Its panel takes the same
+  surface, tokens and dark carry, but `Menu` places itself (see
+  [Menu](#menu)), writing its own inline `max-height`. It reads the same
+  `--anchor-max-height`, so the hatch above works on `MenuItems` too.
 - **`variant="slate"` opens on the dark palette**, in light mode too. That
   variant paints a dark trigger, and its panel was rendering white: a dark
   control opening a white sheet, which is the mismatch `--roster-popover-*`
@@ -1499,6 +1503,84 @@ shown beside it.
 
 Every string in all five is a prop with an English default.
 
+### Menu
+
+A button that opens a panel of actions: the menu button pattern. Compose it:
+
+```tsx
+import { Menu, MenuButton, MenuItems, MenuItem, MenuSeparator } from "@blakesteve/roster";
+
+<Menu>
+  <MenuButton variant="ghost" size="icon" aria-label="More for Banded agate">⋯</MenuButton>
+  <MenuItems align="end">
+    <MenuItem icon={<EditIcon />} shortcut="⌘E" onSelect={edit}>Edit</MenuItem>
+    <MenuItem href="/rocks/agate/share">Share</MenuItem>
+    <MenuSeparator />
+    <MenuItem destructive onSelect={confirmDelete}>Delete</MenuItem>
+  </MenuItems>
+</Menu>;
+```
+
+- **Items.** `MenuItem` is an action, or a link with `href` (rendered through
+  the menu's `linkComponent`; pass `next/link` from a client component, as with
+  Breadcrumbs). Each takes a leading `icon`, a `shortcut` to show (display
+  only: your app handles the keys; `keyshortcuts` tells assistive technology),
+  a `description` line, a trailing `badge`, `destructive` and `disabled`.
+  `MenuCheckboxItem` is an on/off choice, `MenuRadioGroup` with
+  `MenuRadioItem` one of several, `MenuGroup` puts items under an optional
+  label, `MenuSeparator` draws a rule, and `MenuSubmenu` opens a menu beside
+  its item. Submenus nest.
+- **Keyboard.** Enter, Space or Down open it on the first item and Up on the
+  last; a click opens it on the panel. The arrows move, Home and End jump, and
+  typing jumps to the next item starting with what's typed, a space included
+  ("save a"). Escape closes it and returns focus to the button; Tab closes it
+  and moves on from the button, to what the browser's own Tab would reach. A
+  submenu opens with the arrow away from its parent, Enter, Space, a click or
+  the pointer resting on it, and closes with the arrow back or Escape. A click
+  only ever opens it.
+- **Choosing.** A click or Enter chooses and closes, with focus back on the
+  button, so a choice that opens a Dialog hands focus to it and gets it back.
+  Space on a checkbox or radio item chooses and keeps the menu open, so
+  several can be set in one visit. `closeOnSelect={false}` keeps it open on
+  any choice. A disabled item can be reached, so it can be read, but not
+  chosen. A press outside closes it without moving the page, and focus stays
+  where the press put it.
+- **Events.** Keys inside the panel stay there: the panel is portaled, and
+  React would otherwise carry them to the components around the menu, so
+  Enter on Delete would also open the row whose overflow menu it is. A key
+  with Ctrl, Meta or Alt goes on, for the app's shortcuts. Clicks go on to the
+  page, where analytics listen, and so React carries an item's click to that
+  row too: a row with its own `onClick` checks that the click landed inside
+  it (`event.currentTarget.contains(event.target as Node)`). The button is
+  in your markup, and its keys and clicks reach the row like any other.
+- **Placement.** Below the button, lined up with its start (`align="end"` for
+  the other edge); flipped above when there's more room there, shifted to stay
+  on screen, and capped at the room there is. A taller menu scrolls with
+  Roster's scrollbar and a shadow at whichever edge has more. Under
+  `dir="rtl"` it lines up with the right edge and submenus open to the left.
+  It takes its button's direction, not the page's.
+- **Inside other layers.** The panel opens in a portal, so nothing it sits in
+  clips it, a card with `overflow: hidden` included. A `Dialog`, a `Sheet` or
+  Navbar's mobile panel counts it as inside: choosing from it leaves them
+  open.
+- **Styling.** `className` on `MenuItems` and on each item merges last, so a
+  fill such as `bg-gray-100` takes; the scroll shadows are drawn over it. Its
+  ring and separators follow `--roster-border-width`. Items show the pointer
+  cursor, a disabled one `not-allowed`. In forced colors the focused item gets
+  an outline, since its fill is dropped.
+- **Targets.** Every item is at least 44px tall, and `MenuButton` at least 44
+  by 44 whatever its size. `MenuButton plain` renders a bare `<button>` for a
+  trigger drawn its own way; keep its target at least 44 by 44 with a hit
+  area, as Navbar's avatar does.
+
+Built on Roster's own popup panel and on Floating UI for placement, which
+Roster already ships through its other popups, rather than on Headless UI's
+`Menu`: that has no submenus, and no checkbox or radio items. Navbar's user
+menu is built on it since 5.9.0. It looks as it did, in every state, except
+that its rows are 44px tall rather than 36, and that with neither an inbox nor
+a theme row it no longer draws an empty band and rule at the top. It keeps its
+own white fill, whatever `--roster-popover-bg` says.
+
 ### Pagination
 
 Moves through pages of a list, built for a long list browsed on a phone.
@@ -1778,6 +1860,7 @@ function App() {
 | `LiquidTabs`      | Tab strip with a sliding pill; arrow keys, roving focus, 44px `lg` size     |
 | `MatchupCard`     | Head-to-head comparison card                                                |
 | `MediaPreview`    | Thumbnail that falls back to "Preview unavailable, open original" when it can't render |
+| `Menu`            | A button's menu of actions: icons, shortcuts, checkbox and radio items, links, groups, submenus; the full keyboard pattern, 44px targets (see [Menu](#menu)) |
 | `FileUpload`      | Picks files and uploads each through the app's `upload`, with per-file progress, retry and rules |
 | `Pagination`      | Page numbers with gaps, or a compact page picker on narrow screens; buttons or real links, 44px targets |
 | `SkeletonCard`, `SkeletonTableRow`, `SkeletonAvatar`, `SkeletonStat` | Skeleton presets in the real component's box |
@@ -1799,7 +1882,7 @@ function App() {
 | `ModerationQueue` | Items waiting for a decision: busy per action, confirm, reason and edit steps, focus after an item leaves, a live region. Never fetches (see [ModerationQueue](#moderationqueue)) |
 | `QueueEditDialog` | A ModerationQueue edit step in a Dialog: pass it as an edit's `surface`. A separate export, so a queue that never uses it doesn't ship it |
 | `QueueEditSheet` | A ModerationQueue edit step in a Sheet, for a long form: pass it as an edit's `surface`. A separate export, like `QueueEditDialog` |
-| `Navbar`    | Responsive navigation bar with mobile slide-out. A wide logo keeps its own proportions through `logoHeight` and `logoWidth`; its built-in words are in `labels` |
+| `Navbar`    | Responsive navigation bar with mobile slide-out; its user menu is a `Menu`. A wide logo keeps its own proportions through `logoHeight` and `logoWidth`; its built-in words are in `labels` |
 | `Sheet`     | Bottom sheet: drag, Escape or backdrop to dismiss; only its content scrolls; returns focus, even from a deep link; the title may be a node |
 | `Table`     | Static data table                                                                                                                                                  |
 
@@ -1953,7 +2036,8 @@ reason and the build goes green on the state it inherited while still failing on
 anything new. It also fails when a listed class starts emitting, so a fix cannot
 leave a stale entry behind. Run it with `--verbose` to print the list.
 
-Story tests that need the user's own input, a wheel or a mouse drag, get it
+Story tests that need the user's own input, a wheel, a mouse drag or a pointer
+resting on something, get it
 from `.storybook/real-input.ts`: Vitest browser commands that drive
 Playwright's mouse, whose events are trusted. A synthetic wheel or pointer
 event never scrolls anything, so "a vertical wheel scrolls the page, not the

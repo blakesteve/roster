@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, within } from "storybook/test";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Navbar, type NavbarProps } from "./Navbar";
 import { Badge } from "../../atoms/Badge/Badge";
 
@@ -64,7 +64,11 @@ By default, the Navbar renders with \`variant="default"\` and \`position="sticky
 * Use \`fixed\` only when you want the Navbar to float *over* elements like large hero images.
 
 **3. Theming & Dark Mode**
-The component supports multiple visual variants to suit different contexts. Additionally, if you pass a function to the \`onThemeToggle\` prop, the Navbar will automatically inject a Dark/Light mode toggle button into both the desktop dropdown and the mobile slide-out menu.
+The component supports multiple visual variants to suit different contexts. Additionally, if you pass a function to the \`onThemeToggle\` prop, the Navbar adds a Dark Mode row to both the user menu (a checkbox item, which keeps the menu open when chosen) and the mobile slide-out menu (a switch).
+
+The user menu is Roster's \`Menu\`: the arrows, Home, End and a typed letter move through it, Escape closes it and returns focus to the avatar, and every row is 44px tall. Otherwise it looks as it did before it was a \`Menu\`, its own white fill included, whatever \`--roster-popover-bg\` says.
+
+The mobile slide-out takes focus when it opens, and closes when focus or a tap goes anywhere else. A \`Menu\` in \`actions\` opens inside it: its panel counts as part of the slide-out, which stays open under it.
 
 **4. Custom Brand Element (brandElement prop)**
 Pass a React node to \`brandElement\` to replace the default brand name \`<span>\` with custom markup. The logo image is always rendered; this only controls the text element. Use this when you need mixed weights, colors, or other rich styling that a plain string cannot express.
@@ -214,7 +218,7 @@ export const DefaultTheme: Story = {
     docs: {
       description: {
         story:
-          "The **Default** variant is the true baseline. It uses pure white in light mode and deep `gray-950` in dark mode to blend perfectly into the application background. **Click the user avatar in this interactive story** to test the fully functional theme toggle switch.",
+          "The **Default** variant is the true baseline. It uses pure white in light mode and deep `gray-950` in dark mode to blend perfectly into the application background. **Click the user avatar in this interactive story** to try the Dark Mode row.",
       },
     },
   },
@@ -234,6 +238,9 @@ export const ThemeToggleRow: Story = {
     await userEvent.click(canvas.getByRole("button", { name: /user menu/i }));
     const row = await page.findByRole("menuitemcheckbox", { name: "Dark Mode" });
     await expect(row).toHaveAttribute("aria-checked", "false");
+    /* Measured once the menu has finished opening, at full size. */
+    const menu = row.closest<HTMLElement>("[role='menu']")!;
+    await waitFor(() => expect([menu.getAnimations().length, getComputedStyle(menu).scale]).toEqual([0, "none"]));
     // Nothing inside the row is a control of its own.
     await expect(within(row).queryByRole("switch")).toBeNull();
     await expect(row.querySelector("button, input, a, [tabindex]:not([tabindex='-1'])")).toBeNull();
@@ -247,8 +254,8 @@ export const ThemeToggleRow: Story = {
       await expect(row.contains(document.elementFromPoint(cx + dx, cy + dy))).toBe(true);
     }
     /* The track is drawn with the Switch's styles, and those include a 44px
-       hit area that would overhang this 36px row. It must not reach the item
-       next to it: the edge of "Log Out" belongs to "Log Out". */
+       hit area. It must not reach the item next to it: the edge of "Log Out"
+       belongs to "Log Out". */
     const rowBox = row.getBoundingClientRect();
     await expect(row.contains(document.elementFromPoint(cx, rowBox.bottom + 2))).toBe(false);
     await expect(row.contains(document.elementFromPoint(cx, rowBox.top - 2))).toBe(false);

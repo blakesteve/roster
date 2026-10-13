@@ -97,6 +97,20 @@ export const realClick: BrowserCommand<[selector: string, at?: { fx?: number; fy
   await context.page.mouse.click(x, y);
 };
 
+/**
+ * Moves the real mouse onto `selector` in `steps` moves, and leaves it there:
+ * hover, as a person rests the pointer on something, without pressing.
+ */
+export const realHover: BrowserCommand<[selector: string, at?: { fx?: number; fy?: number; steps?: number }]> = async (
+  context,
+  selector,
+  at = {},
+) => {
+  const { x, y } = await centerOf(context, selector, at);
+  await context.page.mouse.move(x, y, { steps: at.steps ?? 4 });
+  await assertOver(context, selector);
+};
+
 /** A file for the commands below: its bytes as base64, or `size` zero bytes. */
 export type RealFile = { name: string; mimeType: string; base64?: string; size?: number };
 const buffers = (files: RealFile[]) =>
@@ -143,7 +157,7 @@ export const realEmulateMedia: BrowserCommand<[features: { forcedColors?: "activ
   await context.page.emulateMedia(features);
 };
 
-export const realInputCommands = { realWheel, realDrag, realClick, realSetFiles, realDropFiles, realEmulateMedia };
+export const realInputCommands = { realWheel, realDrag, realClick, realHover, realSetFiles, realDropFiles, realEmulateMedia };
 
 declare module "vitest/browser" {
   interface BrowserCommands {
@@ -154,6 +168,7 @@ declare module "vitest/browser" {
       options?: { steps?: number; holdMs?: number; fx?: number; fy?: number },
     ) => Promise<void>;
     realClick: (selector: string, at?: { fx?: number; fy?: number }) => Promise<void>;
+    realHover: (selector: string, at?: { fx?: number; fy?: number; steps?: number }) => Promise<void>;
     realSetFiles: (selector: string, files: RealFile[]) => Promise<void>;
     realDropFiles: (selector: string, files: RealFile[]) => Promise<void>;
     realEmulateMedia: (features: { forcedColors?: "active" | "none" | null }) => Promise<void>;

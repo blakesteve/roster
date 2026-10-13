@@ -1,6 +1,7 @@
 /**
  * Reads Chromium's accessibility tree for an element in the story under test:
- * its role, its name, its description, and its invalid, disabled and busy states, as a screen
+ * its role, its name, its description, and its invalid, disabled, busy, checked, expanded and
+ * has-popup states, as a screen
  * reader is handed them. An attribute in the DOM is what the page asked for; this is what the
  * browser made of it, which is what a requirement about "announced as invalid"
  * is actually about.
@@ -28,6 +29,12 @@ export type AXState = {
   ignored: boolean;
   disabled: boolean;
   busy: boolean;
+  /** "true", "false" or "mixed" on a checkable role; null where the role has no checked state. */
+  checked: string | null;
+  /** Whether a control says what it opens is open; null where it says nothing. */
+  expanded: boolean | null;
+  /** What a control opens ("menu", "dialog"…); null where it opens nothing. */
+  hasPopup: string | null;
 };
 
 function documents(node: DOMNode, out: DOMNode[] = []): DOMNode[] {
@@ -86,6 +93,9 @@ async function read(session: Session, selectors: string[]): Promise<AXState[]> {
       /* Chromium reports `busy` as 1 rather than true. */
       disabled: !!prop("disabled"),
       busy: !!prop("busy"),
+      checked: prop("checked") === undefined ? null : String(prop("checked")),
+      expanded: prop("expanded") === undefined ? null : !!prop("expanded"),
+      hasPopup: prop("hasPopup") === undefined ? null : String(prop("hasPopup")),
     });
   }
   return results;

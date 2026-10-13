@@ -24,6 +24,7 @@ const GUARDED = [
   "components/molecules/SkeletonPresets",
   "components/molecules/ProgressField",
   "components/molecules/StepProgress",
+  "components/molecules/Menu",
 ];
 
 /* A class with any variants in front of it: `rst:dark:hover:`. */
@@ -90,6 +91,8 @@ describe("style guard", () => {
       "components/molecules/SkeletonPresets/SkeletonPresets.tsx",
       "components/molecules/ProgressField/ProgressField.tsx",
       "components/molecules/StepProgress/StepProgress.tsx",
+      "components/molecules/Menu/Menu.tsx",
+      "components/molecules/Menu/menu-typeahead.ts",
     ]);
   });
 

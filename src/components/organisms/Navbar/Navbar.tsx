@@ -1,9 +1,5 @@
 import React, { Fragment, useEffect, useRef } from "react";
 import {
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
   Popover,
   PopoverButton,
   PopoverPanel,
@@ -25,6 +21,7 @@ import { Link } from "../../atoms/Link/Link";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Avatar } from "../../atoms/Avatar/Avatar";
 import { switchThumbVariants, switchTrackVariants } from "../../atoms/Switch/switch-variants";
+import { Menu, MenuButton, MenuCheckboxItem, MenuGroup, MenuItem, MenuItems, type MenuLinkProps } from "../../molecules/Menu/Menu";
 import { navbarVariants } from "./navbar-variants";
 
 /**
@@ -49,16 +46,37 @@ function ThemeTrack({ on, size }: { on: boolean; size: "xs" | "sm" }) {
   );
 }
 
-/* Headless UI's `MenuItem` writes `role="menuitem"` over whatever role its
-   element is given, and has no checkbox item. An on/off row in a menu is a
-   `menuitemcheckbox` (a `switch` is not a valid child of `role="menu"`), so
-   the role is set on the element once it mounts. It stays: React writes an
-   attribute only when its prop changes, and `MenuItem` passes the same
-   "menuitem" every render. Headless UI finds its items by id and their text,
-   never by role, so arrows, Home, End and typeahead still reach the row. */
-const asMenuItemCheckbox = (el: HTMLElement | null) => {
-  el?.setAttribute("role", "menuitemcheckbox");
-};
+/* The user menu's rows, drawn as they were before the menu was Roster's own:
+   the panel's gray text, a pale fill under focus and the pointer, and each
+   icon at its own width rather than in the menu's 16px slot. */
+const USER_MENU_ROW =
+  "rst:gap-2 rst:px-4 rst:[&>[data-menu-lead]]:w-auto rst:text-gray-700 rst:dark:text-gray-200 rst:focus:bg-gray-50 rst:focus:text-gray-700 rst:dark:focus:bg-gray-700 rst:dark:focus:text-gray-200";
+/* Link rows were Links: semibold, slightly rounded, and darker under the
+   pointer. Pointing at a row focuses it, so the darker text has to win over
+   the focused one. */
+const USER_MENU_LINK = /* @__PURE__ */ cn(
+  USER_MENU_ROW,
+  "rst:font-semibold rst:rounded-sm rst:hover:text-gray-900 rst:dark:hover:text-gray-100 rst:hover:focus:text-gray-900 rst:dark:hover:focus:text-gray-100",
+);
+/* The user menu's link rows go through the app's router element, as the bar's
+   own links do. Made once per element, so the menu sees a stable component. */
+const ROUTER_MENU_LINKS = new WeakMap<object, React.ComponentType<MenuLinkProps>>();
+function routerMenuLink(As: React.ElementType | undefined): React.ComponentType<MenuLinkProps> | undefined {
+  if (!As || typeof As === "string") return undefined;
+  let link = ROUTER_MENU_LINKS.get(As);
+  if (!link) {
+    link = (props: MenuLinkProps) => <As {...props} />;
+    ROUTER_MENU_LINKS.set(As, link);
+  }
+  return link;
+}
+
+/* Inbox and Log Out were ghost Buttons: a ghost Button's medium gray, its clear
+   1px border, and its own fill under the pointer, over the focused one. */
+const USER_MENU_ACTION = /* @__PURE__ */ cn(
+  USER_MENU_ROW,
+  "rst:border rst:border-transparent rst:font-medium rst:text-gray-600 rst:dark:text-gray-400 rst:focus:text-gray-600 rst:dark:focus:text-gray-400 rst:hover:bg-gray-500/10 rst:dark:hover:bg-gray-400/15 rst:hover:focus:bg-gray-500/10 rst:dark:hover:focus:bg-gray-400/15",
+);
 
 /**
  * Content for a consumer-supplied slot. Pass a plain node, or a function that
@@ -194,7 +212,7 @@ export interface NavbarProps
   /**
    * Replaces the default brand name `<span>` with arbitrary markup. Use this
    * when you need mixed weights, colors, or other rich styling that a plain
-   * string cannot express (e.g. bold "GAME" + thin "VERDICT").
+   * string can't express (e.g. a bold word beside a thin one).
    * The logo image is always rendered; this only affects the text element.
    * The logo is decorative (empty alt) because this or the brand name names
    * the link, so give it text a screen reader can read, visible or not.
@@ -241,22 +259,62 @@ function useDarkClass(enabled: boolean) {
   );
 }
 
+/* Inside this Navbar's mobile panel: the card itself, or a Menu opened from it,
+   which draws its own panel elsewhere in the document. */
+function inMobilePanel(panel: HTMLElement | null, node: Node | null): boolean {
+  if (!node || !panel) return false;
+  if (panel.contains(node)) return true;
+  const menu = (node as Element).closest?.("[data-menu-panel]")?.getAttribute("data-menu-tree");
+  return !!menu && !!panel.querySelector(`[data-menu-tree="${CSS.escape(menu)}"]`);
+}
+
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 // Mounts when the mobile panel is open. Listens for pointerdown on the document
 // (capture phase so it fires before any element's own handlers) and closes the
 // panel when the tap lands outside both the panel card and the hamburger toggle.
-function MobileOutsideClickListener({ close }: { close: () => void }) {
+type MobilePanelProps = {
+  close: () => void;
+  panel: React.RefObject<HTMLDivElement | null>;
+  hamburger: React.RefObject<HTMLDivElement | null>;
+};
+
+function MobileOutsideClickListener({ close, panel, hamburger }: MobilePanelProps) {
   useEffect(() => {
     const handlePointerDown = (e: PointerEvent) => {
-      const panel = document.querySelector("[data-roster-mobile-panel]");
-      const hamburger = document.querySelector("[data-roster-hamburger]");
       const target = e.target as Node;
-      if (!panel?.contains(target) && !hamburger?.contains(target)) {
+      if (!inMobilePanel(panel.current, target) && !hamburger.current?.contains(target)) {
         close();
       }
     };
     document.addEventListener("pointerdown", handlePointerDown, { capture: true });
     return () => document.removeEventListener("pointerdown", handlePointerDown, { capture: true });
-  }, [close]);
+  }, [close, panel, hamburger]);
+  return null;
+}
+
+// Mounts when the mobile panel is open: moves focus into it, and closes it when
+// focus goes anywhere else, the hamburger included: the panel covers it, so
+// focus there (Shift+Tab from the panel's first control) is focus out of
+// sight. Headless UI's `focus` on the panel did both, but it took a Menu opened
+// from inside the panel, whose own panel is drawn elsewhere in the document,
+// for focus leaving, and closed under it.
+function MobilePanelFocus({ close, panel }: Pick<MobilePanelProps, "close" | "panel">) {
+  useEffect(() => {
+    const handleFocusIn = (e: FocusEvent) => {
+      if (!inMobilePanel(panel.current, e.target as Node)) close();
+    };
+    /* A frame on: Headless UI settles focus on its button after this effect. */
+    const frame = requestAnimationFrame(() => {
+      panel.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+      document.addEventListener("focusin", handleFocusIn);
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("focusin", handleFocusIn);
+    };
+  }, [close, panel]);
   return null;
 }
 
@@ -313,6 +371,7 @@ const Navbar = ({
   ...props
 }: NavbarProps) => {
   const l = withLabels(LABELS, labels);
+  const menuLink = routerMenuLink(routerElement);
   const hasNotifications = (user?.notificationCount || 0) > 0;
 
   // A bare number reads as px, matching how width/height attributes behave.
@@ -385,6 +444,9 @@ const Navbar = ({
             ? "rst:text-gray-300 rst:dark:text-gray-300 rst:hover:bg-white/10 rst:dark:hover:bg-white/10 rst:hover:text-white rst:dark:hover:text-white"
             : "rst:text-gray-500 rst:dark:text-gray-500 rst:hover:bg-gray-100 rst:dark:hover:bg-gray-100 rst:hover:text-gray-700 rst:dark:hover:text-gray-700",
         };
+
+  const mobilePanel = useRef<HTMLDivElement>(null);
+  const hamburger = useRef<HTMLDivElement>(null);
 
   return (
     <Popover
@@ -460,167 +522,105 @@ const Navbar = ({
 
               {/* User Menu / Custom Actions */}
               {resolvedActions ?? (user ? (
-                <Menu as="div" className="rst:relative rst:ml-2">
-                  <MenuButton className="rst:relative rst:flex rst:rounded-full rst:text-sm rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background">
-                    <span className="rst:sr-only">{l.openUserMenu}</span>
+                <div className="rst:relative rst:ml-2">
+                  <Menu linkComponent={menuLink}>
+                    {/* The avatar is 32px; the hit area around it is 44. */}
+                    <MenuButton
+                      plain
+                      className="rst:relative rst:flex rst:rounded-full rst:text-sm rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background rst:before:absolute rst:before:-inset-1.5 rst:before:content-['']"
+                    >
+                      <span className="rst:sr-only">{l.openUserMenu}</span>
 
-                    {/* Hidden, photo and initials alike: the button is named by
-                        its label, which an alt or initials would add to. */}
-                    <Avatar
-                      aria-hidden="true"
-                      alt=""
-                      initials={user.initials}
-                      src={user.avatarSrc}
-                      size="sm"
-                      shape="circle"
-                      colorScheme={(user.avatarColor as React.ComponentProps<typeof Avatar>["colorScheme"]) ?? "primary"}
-                    />
+                      {/* Hidden, photo and initials alike: the button is named by
+                          its label, which an alt or initials would add to. */}
+                      <Avatar
+                        aria-hidden="true"
+                        alt=""
+                        initials={user.initials}
+                        src={user.avatarSrc}
+                        size="sm"
+                        shape="circle"
+                        colorScheme={(user.avatarColor as React.ComponentProps<typeof Avatar>["colorScheme"]) ?? "primary"}
+                      />
 
-                    {hasNotifications && (
-                      <div className="rst:absolute rst:-top-1 rst:-right-2">
-                        <Badge
-                          fill={notificationFill}
-                          size="xs"
-                          statusBadge
-                          variant={notificationVariant}
-                        >
-                          {user.notificationCount}
-                        </Badge>
-                      </div>
-                    )}
-                  </MenuButton>
+                      {hasNotifications && (
+                        <div className="rst:absolute rst:-top-1 rst:-right-2">
+                          <Badge
+                            fill={notificationFill}
+                            size="xs"
+                            statusBadge
+                            variant={notificationVariant}
+                          >
+                            {user.notificationCount}
+                          </Badge>
+                        </div>
+                      )}
+                    </MenuButton>
 
-                  <Transition
-                    as={Fragment}
-                    enter="rst:transition rst:ease-out rst:duration-100"
-                    enterFrom="rst:transform rst:opacity-0 rst:scale-95"
-                    enterTo="rst:transform rst:opacity-100 rst:scale-100"
-                    leave="rst:transition rst:ease-in rst:duration-75"
-                    leaveFrom="rst:transform rst:opacity-100 rst:scale-100"
-                    leaveTo="rst:transform rst:opacity-0 rst:scale-95"
-                  >
-                    <MenuItems className="rst:absolute rst:right-0 rst:z-50 rst:mt-2 rst:w-48 rst:origin-top-right rst:rounded-md rst:bg-white rst:dark:bg-gray-800 rst:py-1 rst:elevation-anchored rst:ring rst:ring-black/5 rst:dark:ring-white/10 rst:focus:outline-hidden rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700">
-                      <div className="rst:py-1">
-                        {hasNotifications && onInboxClick && (
-                          <MenuItem>
-                            {({ focus }) => (
-                              <Button
-                                variant="ghost"
-                                colorScheme="neutral"
-                                size="sm"
-                                onClick={onInboxClick}
-                                className={cn(
-                                  "rst:w-full rst:justify-start rst:rounded-none rst:px-4",
-                                  focus && "rst:bg-gray-50 rst:dark:bg-gray-700",
-                                )}
-                                startIcon={
-                                  <FontAwesomeIcon
-                                    icon={faInbox}
-                                    className="rst:text-primary-500 rst:w-4"
-                                  />
-                                }
-                              >
-                                {l.inbox(user.notificationCount ?? 0)}
-                              </Button>
-                            )}
-                          </MenuItem>
-                        )}
+                    <MenuItems
+                      align="end"
+                      offset={8}
+                      className="rst:w-48 rst:min-w-0 rst:bg-white rst:dark:bg-gray-800 rst:ring-black/5 rst:dark:ring-white/10 rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700"
+                    >
+                      {((hasNotifications && onInboxClick) || onThemeToggle) && (
+                        <MenuGroup className="rst:py-1">
+                          {hasNotifications && onInboxClick && (
+                            <MenuItem
+                              onSelect={onInboxClick}
+                              className={USER_MENU_ACTION}
+                              icon={<FontAwesomeIcon icon={faInbox} className="rst:text-primary-500 rst:w-4" />}
+                            >
+                              {l.inbox(user.notificationCount ?? 0)}
+                            </MenuItem>
+                          )}
 
-                        {/* THEME TOGGLE (DESKTOP) */}
-                        {onThemeToggle && (
-                          <MenuItem>
-                            {({ focus }) => (
-                              /* The row is the control. Headless UI keeps
-                                 focus on the menu and clicks the active item
-                                 on Enter or Space, so the row needs no key
-                                 handler of its own. */
-                              <div
-                                ref={asMenuItemCheckbox}
-                                aria-checked={isDarkMode}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  onThemeToggle();
-                                }}
-                                className={cn(
-                                  "rst:flex rst:w-full rst:items-center rst:justify-between rst:px-4 rst:py-2 rst:text-sm rst:text-gray-700 rst:dark:text-gray-200 rst:cursor-pointer rst:transition-colors",
-                                  focus && "rst:bg-gray-50 rst:dark:bg-gray-700",
-                                )}
-                              >
-                                <div className="rst:flex rst:items-center rst:gap-2">
-                                  <FontAwesomeIcon
-                                    icon={faMoon}
-                                    className={cn(
-                                      "rst:w-4 rst:transition-colors",
-                                      isDarkMode
-                                        ? "rst:text-amber-500"
-                                        : "rst:text-gray-400",
-                                    )}
-                                  />
-                                  <span className="rst:font-medium">{l.darkMode}</span>
-                                </div>
-                                <ThemeTrack on={isDarkMode} size="xs" />
-                              </div>
-                            )}
-                          </MenuItem>
-                        )}
-                      </div>
+                          {/* THEME TOGGLE (DESKTOP): an on/off row, so a
+                              `menuitemcheckbox`. It stays open when chosen,
+                              as it always has. */}
+                          {onThemeToggle && (
+                            <MenuCheckboxItem
+                              checked={isDarkMode}
+                              onCheckedChange={() => onThemeToggle()}
+                              closeOnSelect={false}
+                              className={USER_MENU_ROW}
+                              icon={
+                                <FontAwesomeIcon
+                                  icon={faMoon}
+                                  className={cn("rst:w-4 rst:transition-colors", isDarkMode ? "rst:text-amber-500" : "rst:text-gray-400")}
+                                />
+                              }
+                              indicator={<ThemeTrack on={isDarkMode} size="xs" />}
+                            >
+                              <span className="rst:font-medium">{l.darkMode}</span>
+                            </MenuCheckboxItem>
+                          )}
+                        </MenuGroup>
+                      )}
 
                       {userMenuItems.length > 0 && (
-                        <div className="rst:py-1">
+                        <MenuGroup className="rst:py-1">
                           {userMenuItems.map((item) => (
-                            <MenuItem key={item.path}>
-                              {({ focus }) => (
-                                <Link
-                                  as={routerElement}
-                                  href={item.path}
-                                  to={item.path}
-                                  variant="neutral"
-                                  underline="none"
-                                  className={cn(
-                                    "rst:flex rst:w-full rst:items-center rst:justify-between rst:gap-2 rst:px-4 rst:py-2 rst:text-sm rst:text-gray-700 rst:dark:text-gray-200 rst:transition-colors",
-                                    focus && "rst:bg-gray-50 rst:dark:bg-gray-700",
-                                  )}
-                                >
-                                  {item.label}
-                                  {item.badge && (
-                                    <span className="rst:inline-flex">{item.badge}</span>
-                                  )}
-                                </Link>
-                              )}
+                            <MenuItem key={item.path} href={item.path} badge={item.badge} className={USER_MENU_LINK}>
+                              {item.label}
                             </MenuItem>
                           ))}
-                        </div>
+                        </MenuGroup>
                       )}
 
                       {onLogout && (
-                        <div className="rst:py-1">
-                          <MenuItem>
-                            {({ focus }) => (
-                              <Button
-                                variant="ghost"
-                                colorScheme="neutral"
-                                size="sm"
-                                onClick={onLogout}
-                                className={cn(
-                                  "rst:w-full rst:justify-start rst:rounded-none rst:px-4",
-                                  focus && "rst:bg-gray-50 rst:dark:bg-gray-700",
-                                )}
-                                startIcon={
-                                  <FontAwesomeIcon
-                                    icon={faRightFromBracket}
-                                    className="rst:text-gray-400 rst:dark:text-gray-500 rst:w-4"
-                                  />
-                                }
-                              >
-                                {l.logOut}
-                              </Button>
-                            )}
+                        <MenuGroup className="rst:py-1">
+                          <MenuItem
+                            onSelect={onLogout}
+                            className={USER_MENU_ACTION}
+                            icon={<FontAwesomeIcon icon={faRightFromBracket} className="rst:text-gray-400 rst:dark:text-gray-500 rst:w-4" />}
+                          >
+                            {l.logOut}
                           </MenuItem>
-                        </div>
+                        </MenuGroup>
                       )}
                     </MenuItems>
-                  </Transition>
-                </Menu>
+                  </Menu>
+                </div>
               ) : (
                 <Button size="sm" variant="solid" colorScheme="primary" onClick={onLogin}>
                   {l.logIn}
@@ -629,7 +629,7 @@ const Navbar = ({
             </div>
 
             {/* Mobile Hamburger */}
-            <div data-roster-hamburger className="rst:flex rst:md:hidden">
+            <div ref={hamburger} data-roster-hamburger className="rst:flex rst:md:hidden">
               <PopoverButton
                 className={cn(
                   "rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background",
@@ -660,7 +660,10 @@ const Navbar = ({
           </div>
 
           {/* Document-level listener: closes panel when tapping outside it */}
-          {open && <MobileOutsideClickListener close={close} />}
+          {open && <MobileOutsideClickListener close={close} panel={mobilePanel} hamburger={hamburger} />}
+
+          {/* Focus into the panel on opening, and closes it when focus leaves */}
+          {open && <MobilePanelFocus close={close} panel={mobilePanel} />}
 
           {/* Closes the panel when a client-side navigation changes the route */}
           {open && <CloseOnNavigation activePath={activePath} close={close} />}
@@ -676,10 +679,9 @@ const Navbar = ({
             leaveTo="rst:opacity-0 rst:scale-95"
           >
             <PopoverPanel
-              focus
               className="rst:absolute rst:top-0 rst:inset-x-0 rst:z-50 rst:origin-top-right rst:transform rst:p-2 rst:transition rst:md:hidden"
             >
-              <div data-roster-mobile-panel className="rst:rounded-lg rst:elevation-anchored rst:ring rst:ring-black/5 rst:dark:ring-white/10 rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700 rst:bg-white rst:dark:bg-gray-800">
+              <div ref={mobilePanel} data-roster-mobile-panel className="rst:rounded-lg rst:elevation-anchored rst:ring rst:ring-black/5 rst:dark:ring-white/10 rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700 rst:bg-white rst:dark:bg-gray-800">
                 <div className="rst:px-5 rst:pt-5 rst:pb-6">
                   <div className="rst:flex rst:items-center rst:justify-between">
                     <div className="rst:flex rst:items-center rst:gap-3">
