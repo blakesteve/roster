@@ -84,7 +84,7 @@ export const buttonVariants = /* @__PURE__ */ cva(
       // Translucent rather than a solid tint step. A ghost button sits directly
       // on the host's own background, and a solid `bg-*-50` silently disappears
       // wherever that background happens to equal the step it names — which is
-      // exactly what happened to blakeb.dev, whose paper is the same value it
+      // exactly what happened to one app, whose paper is the same value it
       // maps `--roster-gray-100` to. An alpha wash darkens or lightens whatever
       // is actually behind it, so it reads on any surface.
       { variant: "ghost", colorScheme: "primary", className: "rst:text-primary-600 rst:hover:bg-primary-500/10 rst:dark:text-primary-400 rst:dark:hover:bg-primary-400/15" },

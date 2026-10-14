@@ -77,4 +77,13 @@ describe("cn", () => {
     expect(cn("rst:elevation-control", "rst:elevation-raised")).toBe("rst:elevation-raised");
   });
 
+  it("lets a consumer replace a skeleton block's corners", () => {
+    /* `rounded-skeleton` is a custom utility reading `--roster-skeleton-radius`.
+       Outside the rounded group, a caller's `rounded-xl` would sit beside it
+       and stylesheet order would pick the winner. */
+    expect(cn("rst:rounded-skeleton", "rst:rounded-xl")).toBe("rst:rounded-xl");
+    expect(cn("rst:rounded-xl", "rst:rounded-skeleton")).toBe("rst:rounded-skeleton");
+    expect(cn("rst:rounded-skeleton", "rst:rounded-none")).toBe("rst:rounded-none");
+  });
+
 });

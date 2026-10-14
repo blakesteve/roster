@@ -7,7 +7,7 @@ import { cva } from "class-variance-authority";
  * short list of three options wants to sit on the form the way a Select's
  * label and trigger do, with no chrome of its own.
  *
- * `panel` is the long-list case — the grouped, scrollable list mega-squad
+ * `panel` is the long-list case — the grouped, scrollable list one app
  * hand-rolled for its sports picker. It deliberately does NOT read
  * `--roster-popover-*`: that family is documented as "a panel that floats over
  * the page", and this one is in the flow.

@@ -3,10 +3,11 @@ import { describe, it, expect } from "vitest";
 import { buildMeta } from "../scripts/write-meta.mjs";
 
 /**
- * `dist/meta.json` is how the test count reaches blakeb-dev's case study, which
- * renders it under the words "live · roster @ x.y.z". A wrong field here does
- * not fail anything — it publishes a confident, incorrect number to a public
- * page, which is precisely the failure the file was written to end.
+ * `dist/meta.json` is how the test count reaches a portfolio site's case
+ * study, which renders it under the words "live · roster @ x.y.z". A wrong
+ * field here does not fail anything — it publishes a confident, incorrect
+ * number to a public page, which is precisely the failure the file was written
+ * to end.
  *
  * The vitest JSON report is the fixture, trimmed to the fields that matter.
  * `numTotalTestSuites` and `testResults` disagree in exactly the way that

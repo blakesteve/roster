@@ -40,17 +40,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # The browsers in the key: a cache saved with Chromium alone must not
+      # count as a hit once the real-input project also runs WebKit.
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-playwright-
+          key: ${{ runner.os }}-playwright-chromium-webkit-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-playwright-chromium-webkit-
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium webkit
+
+      # The cache holds the browsers, not the system libraries they load. The
+      # runner image already has Chromium's; WebKit's are installed every run.
+      - name: Install WebKit's system libraries
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps webkit
 
       - name: Run Storybook tests
         run: npx vitest run --project storybook
@@ -61,6 +69,7 @@ jobs:
       # Stories that drive Playwright's real mouse and resize the viewport
       # (.storybook/real-input.ts). Their own project, and their own step,
       # because they need the page's one mouse and one viewport to themselves.
+      # They run in Chromium and in WebKit, where pointer and scroll differ.
       - name: Run Storybook tests with real input
         run: npx vitest run --project storybook-real-input
 

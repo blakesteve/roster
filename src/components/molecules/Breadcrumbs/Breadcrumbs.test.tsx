@@ -87,7 +87,7 @@ describe("Breadcrumbs Molecule", () => {
 
 describe("Breadcrumbs flexibility", () => {
   // The blocker for every router-based consumer: rendering plain anchors turns
-  // each hop into a full page load. blakeb.dev kept a hand-rolled breadcrumb
+  // each hop into a full page load. One app kept a hand-rolled breadcrumb
   // rather than lose client-side navigation.
   it("renders crumbs through a supplied link component", async () => {
     const navigate = vi.fn();
@@ -111,7 +111,7 @@ describe("Breadcrumbs flexibility", () => {
         linkComponent={RouterLink}
         items={[
           { label: "Work", href: "/work" },
-          { label: "Game Verdict", href: "/work/game-verdict" },
+          { label: "Lanternfish", href: "/work/lanternfish" },
         ]}
       />,
     );

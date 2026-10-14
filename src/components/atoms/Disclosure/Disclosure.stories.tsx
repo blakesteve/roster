@@ -63,9 +63,9 @@ type Story = StoryObj<typeof meta>;
 export const White: Story = {
   args: {
     variant: "white",
-    title: "What is MegaSquad?",
+    title: "What is Tidewater?",
     children:
-      "MegaSquad is the ultimate sports pick-em application for you and your friends.",
+      "Tidewater is a shared logbook for you and your friends, out on the water.",
   },
 };
 

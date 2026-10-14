@@ -269,7 +269,7 @@ changes nothing.
 | ----- | ------- | -------- |
 | `--roster-radius-sm` | `0.25rem` | `Button` `xs`, `Checkbox` `sm` and `md`, `InlineCode`, `Link`, `MultiSelect`'s chip dismiss, the dismiss and reveal buttons in `Alert`, `Toast` and `PasswordInput` |
 | `--roster-radius-md` | `0.375rem` | `Button`, `Input`, `Textarea`, `Select`, `MultiSelect`, `Badge`, `Avatar` and its popover, `Checkbox` `lg`, `CheckboxGroup`'s panel, `Disclosure`, `Dialog`'s and `Sheet`'s close buttons, `Navbar`'s links and menu, popup panels, `Table` |
-| `--roster-radius-lg` | `0.5rem` | `Alert`, `Toast`, `Tooltip`, `CallToAction`, `EmptyState`, `ErrorState`, `LiquidTabs`, `MatchupCard`, `Navbar`'s mobile panel |
+| `--roster-radius-lg` | `0.5rem` | `Alert`, `Toast`, `Tooltip`, `CallToAction`, `EmptyState`, `ErrorState`, `LiquidTabs`, `MatchupCard`, `Navbar`'s mobile panel, `Skeleton` blocks (unless `--roster-skeleton-radius` is set) |
 | `--roster-radius-xl` | `0.75rem` | `Card`, `LiquidTabs`' `pill` strip |
 | `--roster-radius-2xl` | `1rem` | `Dialog`, the top of `Sheet` |
 | `--roster-radius-3xl` | `1.5rem` | nothing yet; wired for the first component that uses it |
@@ -607,10 +607,14 @@ its `label` (default "loading") says so.
 The loading system has its own: `--roster-skeleton` and
 `--roster-skeleton-highlight` are the skeleton's fill and the light that
 crosses it, and the empty part of every progress bar (gray-200 and gray-100,
-gray-700 and gray-600 in dark). Three durations, unset by default, change the
-pace: `--roster-skeleton-duration` (1.8s), `--roster-progress-travel-duration`
-(1.4s, the indeterminate pill) and `--roster-dots-duration` (1.2s). Under
-reduced motion all three stop on a resting frame.
+gray-700 and gray-600 in dark). Four durations, unset by default, change the
+pace: `--roster-skeleton-duration` (1.8s, the shimmer),
+`--roster-skeleton-pulse-duration` (2s, the pulse),
+`--roster-progress-travel-duration` (1.4s, the indeterminate pill) and
+`--roster-dots-duration` (1.2s). `--roster-skeleton-pulse-opacity` (0.5) is
+how far a pulse fades. Under reduced motion all of them stop on a resting
+frame. `--roster-skeleton-radius` rounds skeleton blocks without touching the
+shared radius scale (see Skeleton below).
 
 ### Scrollbars
 
@@ -1039,7 +1043,7 @@ rather than vanishing from a field that still reports it.
 
 #### CheckboxGroup
 
-Three things it adds over the version mega-squad's squad form hand-rolled:
+Three things it adds over the version one app's form hand-rolled:
 
 - **Each option is a Headless UI `Field`**, so its label is wired to its own
   checkbox and clicking the text toggles it. The pointer cursor sits on the
@@ -1109,8 +1113,8 @@ silently drops any selected value whose option has not loaded yet.
 
 `CheckboxGroup` exists instead of a multi-select `Select`, and the reason is
 that neither multi-selection UI in the portfolio was ever a dropdown.
-mega-squad's squad form picks sports from a grouped, scrollable checklist with
-category headings; bb-memorial's share form picks tags from a flat row of
+One app's form picks sports from a grouped, scrollable checklist with
+category headings; another's share form picks tags from a flat row of
 toggles. Collapsing either into a menu would have hidden the options behind a
 click to save vertical space neither screen was short of, so the component
 follows the shape that already worked. A multi-select dropdown is still the
@@ -1205,7 +1209,7 @@ rather than a rewrite.
 
 ```tsx
 <RadioGroup
-  label="Who can see this squad"
+  label="Who can see this group"
   helperText="You can change this at any time."
   value={visibility}
   onChange={setVisibility}
@@ -1459,7 +1463,21 @@ import { SkeletonRegion, SkeletonCard } from "@blakesteve/roster";
 - The fill is `--roster-skeleton` (gray-200, gray-700 in dark), with
   `--roster-skeleton-highlight` crossing it. Neutral rather than the brand
   shimmer Countdown uses, and its own pair, so retinting one never recolors the
-  other. Under reduced motion it holds still.
+  other.
+- `animation` picks how it moves: `"shimmer"` (the default, a band of light
+  crossing the fill), `"pulse"` (the fill fading and returning, nothing
+  moving: quieter on a dense page) or `"none"`. Under reduced motion both
+  movements stop on the flat fill, and in forced colors every shape keeps its
+  outline (a pulse stops there, so the outline never fades). Pass it to
+  `SkeletonRegion` and every skeleton inside takes it, presets included; a
+  preset or a skeleton that names its own keeps it. A pulse runs
+  `--roster-skeleton-pulse-duration` (2s) and fades to
+  `--roster-skeleton-pulse-opacity` (0.5).
+- A block's corners are `--roster-skeleton-radius`, the `lg` step unless
+  set. Set it on `:root` or on a wrapper (`14px`, say) and skeleton blocks
+  follow, and nothing else does: the shared scale and every other component
+  stay as they are. A block's `radius` prop still wins, a line keeps its
+  small step, and a circle stays round.
 
 **Progress and ProgressField.** `ProgressField` is the form to reach for: the
 label and value on one baseline above the bar, an optional detail line below.
@@ -1833,7 +1851,7 @@ function App() {
 | `CollapsibleSection` | Clamps any content (prose, chips, image grids) to a fixed height with a fade and expand/collapse toggle      |
 | `Select`             | Dropdown selector, on the same size scale as `Button` and `Input`                                            |
 | `SegmentBar`         | Proportional horizontal bar divided into colored segments with optional legend (a split, not progress)       |
-| `Skeleton`           | Line, block or circle placeholder at the content's exact size; `SkeletonRegion` sets `aria-busy`              |
+| `Skeleton`           | Line, block or circle placeholder at the content's exact size, shimmering, pulsing or still; `SkeletonRegion` sets `aria-busy` |
 | `Progress`           | Continuous or segmented progress bar: determinate, indeterminate or busy; per-segment state                   |
 | `LoadingDots`        | Three dots for a model generating before its first token; replaced by the text                                |
 | `Stat`               | A figure with its label and, optionally, its source; a valid `<dl>` group, or `semantics="standalone"`       |
@@ -2037,14 +2055,15 @@ anything new. It also fails when a listed class starts emitting, so a fix cannot
 leave a stale entry behind. Run it with `--verbose` to print the list.
 
 Story tests that need the user's own input, a wheel, a mouse drag or a pointer
-resting on something, get it
-from `.storybook/real-input.ts`: Vitest browser commands that drive
-Playwright's mouse, whose events are trusted. A synthetic wheel or pointer
-event never scrolls anything, so "a vertical wheel scrolls the page, not the
-row" can't be tested without them. The commands fail loudly when the pointer
-isn't over their target, rather than letting a wheel land on the page and a
-test pass for the wrong reason. Storybook's own UI has no such input, so those
-steps are skipped there.
+resting on something, get it from `.storybook/real-input.ts`: Vitest browser
+commands that drive Playwright's mouse, whose events are trusted. They run in
+Chromium and in WebKit, where pointer and scroll events differ: WebKit sends a
+pointermove when content scrolls under a resting pointer, and Chromium doesn't.
+A synthetic wheel or pointer event never scrolls anything, so "a vertical wheel
+scrolls the page, not the row" can't be tested without them. The commands fail
+loudly when the pointer isn't over their target, rather than letting a wheel
+land on the page and a test pass for the wrong reason. Storybook's own UI has
+no such input, so those steps are skipped there.
 
 `src/lib/utils.test.ts` pins `cn`. `tailwind-merge` has to be configured with the
 prefix or it stops recognising Roster's classes as utilities and silently
@@ -2073,9 +2092,9 @@ Output in `dist/`:
 
 ### What `meta.json` is for
 
-Consumers read this package to describe it. blakeb.dev's case study takes the
-version from `package.json` and counts components by parsing the exports out of
-`dist/*.d.ts`, so both stay correct on their own.
+Consumers read this package to describe it. A portfolio site's case study takes
+the version from `package.json` and counts components by parsing the exports
+out of `dist/*.d.ts`, so both stay correct on their own.
 
 The test count has no such source. `files` is `["dist"]`, so the suite never
 leaves this repo, and the number on that page was a hand-typed literal that

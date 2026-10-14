@@ -120,7 +120,7 @@ export const WhiteWithEmail: Story = {
   args: {
     type: "email",
     label: "Email Address",
-    placeholder: "user@megasquad.com",
+    placeholder: "user@example.com",
     startIcon: <FontAwesomeIcon icon={faEnvelope} className="rst:h-4 rst:w-4" />,
     helperText: "We'll never share your email.",
     variant: "white",
@@ -139,9 +139,9 @@ export const SoftSearch: Story = {
 };
 
 /**
- * The `slate` variant provides a bold, dark background. Originally designed for MegaSquad's heavy dashboard dialogs.
+ * The `slate` variant provides a bold, dark background. Originally designed for heavy dashboard dialogs.
  */
-export const MegaSquadSlate: Story = {
+export const SlateField: Story = {
   args: {
     variant: "slate",
     label: "Filter Roster",
@@ -286,7 +286,7 @@ export const PairedWithButton: Story = {
     docs: {
       description: {
         story:
-          "The case that motivated the size prop. `Input` used to be a fixed 42px while `Button` was 40px or 44px, so a field beside a submit button lined up at no size at all — retrospect gave up and kept a raw `<input>` pinned to `h-11`. Note `className` on the field: it lands on the outer wrapper, which is what makes `flex-1` work here.",
+          "The case that motivated the size prop. `Input` used to be a fixed 42px while `Button` was 40px or 44px, so a field beside a submit button lined up at no size at all — one app gave up and kept a raw `<input>` pinned to `h-11`. Note `className` on the field: it lands on the outer wrapper, which is what makes `flex-1` work here.",
       },
     },
   },

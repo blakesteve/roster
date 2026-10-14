@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { cn } from "../../../lib/utils";
 
 /**
@@ -30,10 +30,28 @@ const RADIUS = {
   full: "rst:rounded-full",
 } as const;
 
-/* The fill, and the shimmer over it, which stops under reduced motion. Forced
-   colors drop the fill, so there the shape keeps an outline, which takes no
-   room and moves nothing. */
-const FILL = "rst:animate-skeleton rst:forced-colors:outline-solid rst:forced-colors:outline-1";
+/* A block's corners when `radius` isn't passed: the skeleton's own token, so
+   an app can round its placeholders without moving the shared radius scale,
+   which every other component reads. */
+const BLOCK_RADIUS = "rst:rounded-skeleton";
+
+/** How a skeleton moves while it waits. */
+export type SkeletonAnimation = "shimmer" | "pulse" | "none";
+
+/* The fill, and how it moves: a highlight sweeping across it, the fill
+   fading, or neither. Both movements stop under reduced motion, on the flat
+   fill. Forced colors drop the fill, so there the shape keeps an outline,
+   which takes no room and moves nothing; the pulse stops there too, or the
+   outline standing in for the fill would fade with it. */
+const FILL: Record<SkeletonAnimation, string> = {
+  shimmer: "rst:animate-skeleton rst:forced-colors:outline-solid rst:forced-colors:outline-1",
+  pulse: "rst:animate-skeleton-pulse rst:forced-colors:outline-solid rst:forced-colors:outline-1 rst:forced-colors:animate-none",
+  none: "rst:skeleton-fill rst:forced-colors:outline-solid rst:forced-colors:outline-1",
+};
+
+/* What a SkeletonRegion asks of the skeletons inside it, unless one asks
+   otherwise. */
+const SkeletonAnimationContext = createContext<SkeletonAnimation | undefined>(undefined);
 
 export interface SkeletonProps {
   /**
@@ -53,8 +71,20 @@ export interface SkeletonProps {
   width?: CSSProperties["width"];
   /** A block's height. */
   height?: CSSProperties["height"];
-  /** A block's corners, from the radius scale. */
+  /**
+   * A block's corners, from the radius scale. Without it a block reads
+   * `--roster-skeleton-radius`, which defaults to `lg`. A line's corners are
+   * `sm` unless this says otherwise; a circle is always round.
+   */
   radius?: keyof typeof RADIUS;
+  /**
+   * `"shimmer"` (the default): a highlight sweeps across the fill. `"pulse"`:
+   * the fill fades and returns, at `--roster-skeleton-pulse-duration` and down
+   * to `--roster-skeleton-pulse-opacity`. `"none"`: the fill holds still.
+   * Under reduced motion both movements stop. Inside a `SkeletonRegion`, it
+   * defaults to the region's.
+   */
+  animation?: SkeletonAnimation;
   className?: string;
 }
 
@@ -65,7 +95,9 @@ export interface SkeletonProps {
  * isn't there yet. The region it stands in for says it's busy; use
  * `SkeletonRegion`, which does that, or set `aria-busy` on it yourself.
  */
-function Skeleton({ shape = "line", size, lines = 1, width, height, radius, className }: SkeletonProps) {
+function Skeleton({ shape = "line", size, lines = 1, width, height, radius, animation, className }: SkeletonProps) {
+  const inherited = useContext(SkeletonAnimationContext);
+  const fill = FILL[animation ?? inherited ?? "shimmer"];
   if (shape === "circle") {
     const circle = (size && size in CIRCLE_SIZE ? size : "md") as keyof typeof CIRCLE_SIZE;
     return (
@@ -74,7 +106,7 @@ function Skeleton({ shape = "line", size, lines = 1, width, height, radius, clas
         /* Avatar's 1px border, transparent: an Avatar is its size with its
            border inside it only where a reset makes boxes border-box, and
            this matches it either way. */
-        className={cn("rst:block rst:shrink-0 rst:rounded-full rst:border rst:border-transparent", CIRCLE_SIZE[circle], FILL, className)}
+        className={cn("rst:block rst:shrink-0 rst:rounded-full rst:border rst:border-transparent", CIRCLE_SIZE[circle], fill, className)}
         data-skeleton="circle"
       />
     );
@@ -83,7 +115,7 @@ function Skeleton({ shape = "line", size, lines = 1, width, height, radius, clas
     return (
       <span
         aria-hidden="true"
-        className={cn("rst:block rst:w-full", RADIUS[radius ?? "lg"], FILL, className)}
+        className={cn("rst:block rst:w-full", radius ? RADIUS[radius] : BLOCK_RADIUS, fill, className)}
         style={{ height: height ?? "8rem", width }}
         data-skeleton="block"
       />
@@ -104,7 +136,7 @@ function Skeleton({ shape = "line", size, lines = 1, width, height, radius, clas
       >
         {"\u00a0"}
         <span
-          className={cn("rst:absolute rst:inset-x-0 rst:top-1/2 rst:h-[0.7em] rst:-translate-y-1/2", RADIUS[radius ?? "sm"], FILL)}
+          className={cn("rst:absolute rst:inset-x-0 rst:top-1/2 rst:h-[0.7em] rst:-translate-y-1/2", RADIUS[radius ?? "sm"], fill)}
         />
       </span>
     );
@@ -128,6 +160,8 @@ export interface SkeletonRegionProps {
    * together, a grid of cards say, or wrap them in one region instead.
    */
   announce?: boolean;
+  /** How the skeletons inside move, unless one says otherwise: see `Skeleton`. */
+  animation?: SkeletonAnimation;
   children?: ReactNode;
   className?: string;
 }
@@ -138,7 +172,9 @@ export interface SkeletonRegionProps {
  * When `loading` turns false the content replaces the skeleton in the same
  * box, so a skeleton drawn at the content's size means nothing moves.
  */
-function SkeletonRegion({ loading, skeleton, label = "Loading", announce = true, children, className }: SkeletonRegionProps) {
+function SkeletonRegion({ loading, skeleton, label = "Loading", announce = true, animation, children, className }: SkeletonRegionProps) {
+  /* A region inside another's skeleton keeps the outer one's, unless it says. */
+  const inherited = useContext(SkeletonAnimationContext);
   /* The status stays in the page, empty, and its words go in a moment after
      loading starts: a status region that arrives already holding its text
      usually isn't read out. */
@@ -156,7 +192,13 @@ function SkeletonRegion({ loading, skeleton, label = "Loading", announce = true,
         {said}
       </span>
       <div aria-busy={loading || undefined} className={className} data-skeleton-region={loading ? "loading" : "ready"}>
-        {loading ? <div aria-hidden="true">{skeleton}</div> : children}
+        {loading ? (
+          <SkeletonAnimationContext.Provider value={animation ?? inherited}>
+            <div aria-hidden="true">{skeleton}</div>
+          </SkeletonAnimationContext.Provider>
+        ) : (
+          children
+        )}
       </div>
     </>
   );

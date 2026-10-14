@@ -15,10 +15,10 @@ describe("Footer Component", () => {
   });
 
   it("accepts and renders a custom company name", () => {
-    render(<Footer companyName="MegaSquad" />);
+    render(<Footer companyName="Tidewater" />);
 
     const expectedText = new RegExp(
-      `© ${currentYear} MegaSquad, All rights reserved.`,
+      `© ${currentYear} Tidewater, All rights reserved.`,
     );
     expect(screen.getByText(expectedText)).toBeInTheDocument();
   });

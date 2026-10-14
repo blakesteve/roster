@@ -14,8 +14,8 @@ import { Checkbox } from "./components/atoms/Checkbox/Checkbox";
  *
  * `src/contrast.test.ts` is the guard; this is the eye test. It measures what
  * the browser actually painted rather than reading the tokens, so it stays true
- * under a consuming app's palette overrides — point it at game-verdict's theme
- * and it reports game-verdict's ratios.
+ * under a consuming app's palette overrides — point it at one app's theme
+ * and it reports that app's ratios.
  */
 
 function parse(rgb: string): [number, number, number] | null {

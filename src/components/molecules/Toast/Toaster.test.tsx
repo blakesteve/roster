@@ -25,7 +25,7 @@ describe("Toaster", () => {
 
   it("gives info and warning real tones instead of falling back to neutral", async () => {
     /* This is the bug that shipped in a consumer. react-hot-toast has no
-       `info`, so mega-squad's wrapper called `toast.error` and every
+       `info`, so one app's wrapper called `toast.error` and every
        informational message in that app rendered as an error. `toast.info`
        marks the tone and `Toaster` reads it back, so it is a real tone rather
        than a red toast wearing a different word. */

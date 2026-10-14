@@ -57,7 +57,7 @@ const meta = {
         component: [
           "A labeled, validated set of checkboxes that reports one `string[]`.",
           "",
-          "This exists because the multi-selection UI in the portfolio is not a dropdown. mega-squad's squad form picks sports from a grouped, scrollable checklist — every option visible, headings you can scan — and hand-rolled the whole thing: raw `<label>` wrappers, a hardcoded panel, category headings that were styling and nothing else. Collapsing that into a menu would have been a downgrade, so the component follows the shape that already worked.",
+          "This exists because the multi-selection UI in the portfolio is not a dropdown. One app's settings form picks sports from a grouped, scrollable checklist — every option visible, headings you can scan — and hand-rolled the whole thing: raw `<label>` wrappers, a hardcoded panel, category headings that were styling and nothing else. Collapsing that into a menu would have been a downgrade, so the component follows the shape that already worked.",
           "",
           "What it adds over the hand-rolled version is the part that is easy to skip: each option is a Headless UI `Field`, so the label is wired to its own checkbox and clicking it toggles; each category is a nested fieldset, so its heading is the group's accessible name rather than decoration a screen reader walks past; and `errorMessage` reaches the fieldset as `aria-describedby`, merged with any the caller passes rather than replacing it.",
         ].join("\n"),
@@ -124,7 +124,7 @@ export const Playground: Story = {
 };
 
 /**
- * The shape mega-squad's squad form actually needs.
+ * The shape one app's settings form actually needs.
  */
 export const Grouped: Story = {
   args: { options: NOTIFICATIONS, value: [], onChange: () => {} },
@@ -132,7 +132,7 @@ export const Grouped: Story = {
     <Stateful
       options={SPORTS}
       label="Select supported sports"
-      helperText="Select all the sports your squad might play. You can always add more later."
+      helperText="Select all the sports your group might play. You can always add more later."
       variant="panel"
       columns={2}
       maxHeight={240}

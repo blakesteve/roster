@@ -70,7 +70,7 @@ const basicItems = [
     id: "overview",
     title: "Project Overview",
     content:
-      "MegaSquad is a next-gen fantasy sports application built with React and Tailwind.",
+      "Tidewater is a next-gen fantasy sports application built with React and Tailwind.",
   },
   {
     id: "tech-stack",
@@ -81,7 +81,7 @@ const basicItems = [
   {
     id: "contact",
     title: "Contact Support",
-    content: "Reach out to the dev team via Slack channel #megasquad-dev.",
+    content: "Reach out to the dev team via Slack channel #tidewater-dev.",
   },
 ];
 
@@ -174,7 +174,7 @@ export const MultiExpand: Story = {
   },
 };
 
-export const MegaSquadSlate: Story = {
+export const SlatePanels: Story = {
   args: {
     items: [
       {
@@ -196,7 +196,7 @@ export const MegaSquadSlate: Story = {
     docs: {
       description: {
         story:
-          "The `slate` variant uses the darker background requested for the MegaSquad dashboard panels, automatically flipping the text to light mode.",
+          "The `slate` variant uses a darker background suited to dashboard panels, automatically flipping the text to light mode.",
       },
     },
   },

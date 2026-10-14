@@ -90,7 +90,7 @@ export const WithoutIcon: Story = {
 
 /**
  * `current` and `surface` exist so an app can stop hand-rolling a labeled
- * accent panel beside this one. Game Verdict had built exactly that: a gradient
+ * accent panel beside this one. One app had built exactly that: a gradient
  * callout with a title row, tinted to whichever answer had won. Alert could not
  * take a color from outside its own ramps, so there was nothing to reuse.
  *

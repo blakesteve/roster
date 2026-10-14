@@ -76,8 +76,8 @@ Pass a React node to \`brandElement\` to replace the default brand name \`<span>
 <Navbar
   brandElement={
     <span className="text-sm tracking-widest text-indigo-400">
-      <span className="font-bold">GAME</span>
-      <span className="font-extralight"> VERDICT</span>
+      <span className="font-bold">HARBOR</span>
+      <span className="font-extralight"> LANE</span>
     </span>
   }
 />
@@ -209,7 +209,7 @@ const mockUser = {
 export const DefaultTheme: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "default",
     user: mockUser,
@@ -277,7 +277,7 @@ export const ThemeToggleRow: Story = {
 export const SlateTheme: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "slate",
     user: mockUser,
@@ -295,7 +295,7 @@ export const SlateTheme: Story = {
 export const ActiveLinkState: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     activePath: "/leagues",
     variant: "default",
@@ -314,7 +314,7 @@ export const ActiveLinkState: Story = {
 export const PrimaryTheme: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "primary",
     user: mockUser,
@@ -332,7 +332,7 @@ export const PrimaryTheme: Story = {
 export const FallbackInitials: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "default",
     user: {
@@ -354,7 +354,7 @@ export const FallbackInitials: Story = {
 export const WhiteTheme: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "white",
     user: mockUser,
@@ -372,7 +372,7 @@ export const WhiteTheme: Story = {
 export const Transparent: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "transparent",
     position: "fixed",
@@ -403,7 +403,7 @@ export const Transparent: Story = {
 export const WithNotifications: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "default",
     notificationVariant: "amber",
@@ -426,7 +426,7 @@ export const WithNotifications: Story = {
 export const MobileView: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     activePath: "/leagues",
     variant: "default",
@@ -469,7 +469,7 @@ export const MobileView: Story = {
 export const GuestState: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "default",
     activePath: "/schedule",
@@ -489,7 +489,7 @@ export const GuestState: Story = {
 export const CustomActions: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "default",
     activePath: "/schedule",
@@ -524,15 +524,15 @@ export const CustomActions: Story = {
 export const CustomBrandElement: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "transparent",
     position: "fixed",
     user: mockUser,
     brandElement: (
       <span style={{ fontSize: "0.75rem", letterSpacing: "0.15em", color: "#818cf8" }}>
-        <span style={{ fontWeight: 700 }}>GAME</span>
-        <span style={{ fontWeight: 200 }}> VERDICT</span>
+        <span style={{ fontWeight: 700 }}>HARBOR</span>
+        <span style={{ fontWeight: 200 }}> LANE</span>
       </span>
     ),
   },
@@ -559,7 +559,7 @@ export const CustomBrandElement: Story = {
 export const CustomAvatarColor: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "default",
     activePath: "/schedule",
@@ -578,7 +578,7 @@ export const CustomAvatarColor: Story = {
 export const NavItemBadge: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: [
       { label: "Schedule", path: "/schedule" },
       {
@@ -608,7 +608,7 @@ export const NavItemBadge: Story = {
 export const NavActionsSlot: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "transparent",
     position: "fixed",
@@ -648,7 +648,7 @@ export const NavActionsSlot: Story = {
 export const SlotClosesMobilePanel: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     activePath: "/leagues",
     variant: "default",
@@ -688,7 +688,7 @@ export const SlotClosesMobilePanel: Story = {
 export const WithUserMenuItems: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "default",
     activePath: "/schedule",
@@ -708,7 +708,7 @@ export const WithUserMenuItems: Story = {
 export const CustomLogoSize: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "default",
     activePath: "/schedule",
@@ -789,7 +789,7 @@ export const WideLogo: Story = {
 export const ThemeModeAuto: Story = {
   args: {
     logoSrc: mockLogo,
-    brandName: "MegaSquad",
+    brandName: "Tidewater",
     items: defaultItems,
     variant: "default",
     activePath: "/schedule",
@@ -828,6 +828,9 @@ export const MobileThemeSwitch: Story = {
     await userEvent.click(canvas.getByRole("button", { name: /open main menu/i }));
     const page = within(document.body);
     const row = await page.findByRole("switch", { name: "Dark Mode" });
+    /* Once the panel has taken focus, a frame after it opens: a key pressed
+       sooner could land on its close button instead. */
+    await waitFor(() => expect(page.getByRole("button", { name: "Close menu" })).toHaveFocus());
     await expect(row).toHaveAttribute("aria-checked", "false");
     await expect(row).toHaveAttribute("tabindex", "0");
     await expect(row.querySelector("button, input, a, [tabindex]")).toBeNull();

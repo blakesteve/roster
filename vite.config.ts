@@ -220,8 +220,14 @@ export default defineConfig({
             headless: true,
             provider: playwright({}),
             commands: realInputCommands,
+            /* WebKit too, here only: a real pointer and real scrolling are
+               where the engines part. WebKit sends a pointermove when content
+               scrolls under a resting pointer, and Chromium doesn't, so a
+               check of the guard against it can only fail in WebKit. */
             instances: [{
               browser: 'chromium'
+            }, {
+              browser: 'webkit'
             }]
           },
           setupFiles: ['.storybook/vitest.setup.ts']

@@ -76,15 +76,15 @@ export const SeparatingSections: Story = {
     <div className="rst:flex rst:max-w-lg rst:flex-col rst:gap-4">
       <LabeledDivider label="2026" trailing="3 projects" />
       <ul className="rst:m-0 rst:flex rst:list-none rst:flex-col rst:gap-2 rst:p-0 rst:text-sm rst:text-gray-900 rst:dark:text-gray-100">
-        <li>Game Verdict — controller versus keyboard, settled</li>
+        <li>Lanternfish — controller versus keyboard, settled</li>
         <li>Roster — the library this component ships in</li>
-        <li>blakeb.dev — the portfolio it was extracted from</li>
+        <li>kestrel.example — the portfolio it was extracted from</li>
       </ul>
 
       <LabeledDivider label="2025" trailing="2 projects" />
       <ul className="rst:m-0 rst:flex rst:list-none rst:flex-col rst:gap-2 rst:p-0 rst:text-sm rst:text-gray-900 rst:dark:text-gray-100">
-        <li>MegaSquad — bracket pools that survive a bad Thursday</li>
-        <li>InnerSquad — the quieter sibling</li>
+        <li>Northpaw — bracket pools that survive a bad Thursday</li>
+        <li>Quarry & Quill — the quieter sibling</li>
       </ul>
     </div>
   ),

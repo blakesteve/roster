@@ -71,7 +71,7 @@ type Story = StoryObj<typeof Footer>;
 // --- 1. Default Theme ---
 export const DefaultTheme: Story = {
   args: {
-    companyName: "MegaSquad",
+    companyName: "Tidewater",
     variant: "default",
   },
   parameters: {
@@ -87,7 +87,7 @@ export const DefaultTheme: Story = {
 // --- 2. Primary Theme ---
 export const PrimaryTheme: Story = {
   args: {
-    companyName: "MegaSquad",
+    companyName: "Tidewater",
     variant: "primary",
   },
   parameters: {
@@ -103,7 +103,7 @@ export const PrimaryTheme: Story = {
 // --- 3. With Navigation Links ---
 export const WithLinks: Story = {
   args: {
-    companyName: "MegaSquad",
+    companyName: "Tidewater",
     variant: "default",
     links: [
       { label: "Contact", href: "/contact" },
@@ -124,7 +124,7 @@ export const WithLinks: Story = {
 // --- 4. Transparent Theme ---
 export const TransparentTheme: Story = {
   args: {
-    companyName: "MegaSquad",
+    companyName: "Tidewater",
     variant: "transparent",
   },
   parameters: {

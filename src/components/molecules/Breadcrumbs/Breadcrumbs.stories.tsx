@@ -61,7 +61,7 @@ type Story = StoryObj<typeof Breadcrumbs>;
 
 const sampleItems = [
   { label: "Leagues", href: "/leagues" },
-  { label: "MegaSquad Premier", href: "/leagues/123" },
+  { label: "Tidewater Premier", href: "/leagues/123" },
   { label: "Settings", href: "/leagues/123/settings" },
 ];
 
@@ -164,7 +164,7 @@ export const WithRouterLink: Story = {
         showHomeIcon
         items={[
           { label: "Work", href: "/work" },
-          { label: "Game Verdict" },
+          { label: "Lanternfish" },
         ]}
       />
     );
@@ -181,7 +181,7 @@ export const WithRouterLink: Story = {
           "<Breadcrumbs linkComponent={NextLink} items={items} />",
           "```",
           "",
-          "Without it the component falls back to a plain `<a>`, which is correct for a static page and wrong inside a router: every hop becomes a full page load. blakeb.dev hand-rolled its breadcrumb rather than pay that, which is why this prop exists.",
+          "Without it the component falls back to a plain `<a>`, which is correct for a static page and wrong inside a router: every hop becomes a full page load. One app hand-rolled its breadcrumb rather than pay that, which is why this prop exists.",
           "",
           "**In an app with React Server Components, pass it from a client component.** `linkComponent` is a function, and functions do not cross the RSC boundary — doing this from a server component fails the render with *Functions cannot be passed directly to Client Components*. A four-line wrapper is enough, and the pages using it stay server-rendered:",
           "",
@@ -206,7 +206,7 @@ export const CurrentPageAccent: Story = {
     <div className="rst:flex rst:flex-col rst:gap-4">
       <Breadcrumbs
         currentClassName="!text-primary-600 dark:!text-primary-400"
-        items={[{ label: "Work", href: "/work" }, { label: "Game Verdict" }]}
+        items={[{ label: "Work", href: "/work" }, { label: "Lanternfish" }]}
       />
       <Breadcrumbs
         currentClassName="!text-success-600 dark:!text-success-400"
@@ -218,7 +218,7 @@ export const CurrentPageAccent: Story = {
     docs: {
       description: {
         story:
-          "`currentClassName` tints the last crumb only. Useful when each page carries its own accent and the trail should pick it up, as blakeb.dev's case studies do.",
+          "`currentClassName` tints the last crumb only. Useful when each page carries its own accent and the trail should pick it up, as a portfolio site's case studies do.",
       },
     },
   },
@@ -230,7 +230,7 @@ export const UnlinkedCrumbs: Story = {
       items={[
         { label: "Archive", href: "/archive" },
         { label: "2026" },
-        { label: "Game Verdict" },
+        { label: "Lanternfish" },
       ]}
     />
   ),
@@ -257,7 +257,7 @@ export const NodeLabels: Story = {
           ),
           href: "/live",
         },
-        { label: "Game Verdict" },
+        { label: "Lanternfish" },
       ]}
     />
   ),

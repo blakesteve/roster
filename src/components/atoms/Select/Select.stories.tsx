@@ -168,7 +168,7 @@ export const SoftVariant: Story = {
   render: (args) => <SelectWithState {...args} />,
 };
 
-export const MegaSquadSlate: Story = {
+export const SlateSelect: Story = {
   args: {
     options: [
       { value: "qb", label: "Quarterback (QB)" },
@@ -293,7 +293,7 @@ export const PairedWithInputAndButton: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    /* game-verdict's GameEditForm puts exactly this row on screen: an Input
+    /* One app's edit form puts exactly this row on screen: an Input
        between two Selects in a `sm:grid-cols-3` grid. Before this change the
        Select was 44px there against the Input's 40px, and the mismatch only
        appeared from the `sm` breakpoint up — so it was invisible in any test

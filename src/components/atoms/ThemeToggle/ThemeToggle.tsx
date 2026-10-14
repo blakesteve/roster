@@ -72,7 +72,7 @@ export interface ThemeToggleProps
    * opposite, because a button's name should say what pressing it does.
    *
    * Both take nodes, so a product with its own vocabulary for the two states
-   * ("Press sheet" / "Blueline", "Day" / "Night") can say so.
+   * ("Paper" / "Chalkboard", "Day" / "Night") can say so.
    */
   lightLabel?: React.ReactNode;
   /** Visible text when the page is dark, if `showLabel` is set. */

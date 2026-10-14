@@ -543,14 +543,22 @@ export const APressFurtherDownLeavesThePageWhereItIs: Story = {
     };
     const settle = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     try {
+      /* Whether a press on a button focuses it, in this browser: Chromium's
+         does, WebKit's, like Safari, doesn't. Pressed with no menu open. */
+      const far = canvasElement.querySelector<HTMLElement>('[data-check="far-button"]')!;
+      window.scrollTo(0, 1300);
+      await waitFor(() => expect(Math.round(window.scrollY)).toBe(1300));
+      (document.activeElement as HTMLElement | null)?.blur();
+      await real.commands.realClick('[data-check="far-button"]');
+      const pressFocuses = document.activeElement === far;
       /* A press on a button down there: the menu closes, the page stays put,
-         and focus is on what was pressed. */
+         and focus is on what was pressed, or, in a browser where a press
+         focuses no button, back on the menu's button. */
       await openThenScroll();
       await real.commands.realClick('[data-check="far-button"]');
       await closed(trigger);
       await settle();
-      const far = canvasElement.querySelector('[data-check="far-button"]');
-      await expect([Math.round(window.scrollY), document.activeElement === far]).toEqual([1300, true]);
+      await expect([Math.round(window.scrollY), document.activeElement === (pressFocuses ? far : trigger)]).toEqual([1300, true]);
       /* A press on plain words, which takes focus nowhere: focus goes back to
          the button, still without moving the page. */
       await openThenScroll();
@@ -767,6 +775,56 @@ export const ATallMenuScrolls: Story = {
     } finally {
       await real.page.viewport(1280, 720);
     }
+  },
+};
+
+export const APointerAtRestDoesNotSteer: Story = {
+  tags: ["real-input"],
+  render: () => (
+    <Menu>
+      <MenuButton variant="outline" colorScheme="neutral">
+        Places
+      </MenuButton>
+      <MenuItems>
+        {Array.from({ length: 30 }, (_, i) => (
+          <MenuItem key={i}>{`Place ${i + 1}`}</MenuItem>
+        ))}
+      </MenuItems>
+    </Menu>
+  ),
+  play: async ({ canvasElement }) => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    const trigger = button(canvasElement, "Places");
+    trigger.focus();
+    await userEvent.keyboard("{Enter}");
+    const panel = await opened(trigger);
+    await settled(panel);
+    /* The pointer comes to rest on the third item: a real move, so focus
+       follows it. */
+    within(panel).getByRole("menuitem", { name: "Place 3" }).setAttribute("data-check", "place-3");
+    await real.commands.realHover('[data-check="place-3"]');
+    await waitFor(() => expect(focused()).toBe("Place 3"));
+    /* End scrolls the panel under the resting pointer. WebKit then sends a
+       pointermove at the same spot, over whichever item has scrolled under
+       it; Chromium sends none. The pointer hasn't moved, so focus stays on
+       the last item. The moves heard are kept in the message. */
+    const moves: number[][] = [];
+    const onMove = (event: PointerEvent) => moves.push([event.clientX, event.clientY]);
+    window.addEventListener("pointermove", onMove, true);
+    try {
+      await userEvent.keyboard("{End}");
+      await new Promise((r) => setTimeout(r, 500));
+      await expect(focused(), `pointermoves after the scroll: ${JSON.stringify(moves)}`).toBe("Place 30");
+    } finally {
+      window.removeEventListener("pointermove", onMove, true);
+    }
+    /* The twin: a real move onto an item takes focus there. */
+    within(panel).getByRole("menuitem", { name: "Place 28" }).setAttribute("data-check", "place-28");
+    await real.commands.realHover('[data-check="place-28"]');
+    await waitFor(() => expect(focused()).toBe("Place 28"));
+    await userEvent.keyboard("{Escape}");
+    await closed(trigger);
   },
 };
 
@@ -1107,11 +1165,14 @@ export const ForcedColorsOutlineFocusOnly: Story = {
       await userEvent.keyboard("{Enter}");
       const panel = await opened(trigger);
       await waitFor(() => expect(focused()).toBe("Edit"));
+      /* An outline whose style is none draws nothing, whatever its width
+         reads: WebKit reports the default 3px there, Chromium 0px. */
       const outline = (name: string) => {
         const style = getComputedStyle(within(panel).getByRole("menuitem", { name }));
-        return [style.outlineStyle, style.outlineWidth];
+        return [style.outlineStyle, style.outlineStyle === "none" ? "0px" : style.outlineWidth];
       };
-      /* Fills are dropped in forced colors: focus is an outline, on the focused
+      /* Fills are dropped in forced colors (in Chromium; WebKit's emulation
+         turns on only the media query): focus is an outline, on the focused
          item only. The twin is the item beside it, with none. */
       await expect([outline("Edit"), outline("Duplicate")]).toEqual([
         ["solid", "2px"],

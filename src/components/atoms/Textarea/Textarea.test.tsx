@@ -109,7 +109,7 @@ describe("Textarea spacing and escape hatch", () => {
 
   it("sends className to the wrapper and textareaClassName to the control", () => {
     /* `<Textarea className="rst:h-40" />` sized the wrapper and left the
-       control alone, with no way to reach it. Three game-verdict sites are
+       control alone, with no way to reach it. Three call sites in one app are
        working around this with inline `style` and comments explaining it.
        Both directions asserted so neither can quietly start going to the
        other place. */

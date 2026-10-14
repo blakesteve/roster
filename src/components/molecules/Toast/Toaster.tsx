@@ -37,7 +37,7 @@ export interface ToasterProps
  * already depend on it at the same version and already write
  * `toast.success(...)`. Wrapping means their call sites do not move; what
  * changes is that the toast stops being styled with hardcoded hex in each app
- * — game-verdict pinned `#1a1f2e` and `#10b981`, mega-squad `#413f3c` and
+ * — one app pinned `#1a1f2e` and `#10b981`, the other `#413f3c` and
  * `#f3eee3`, neither of which is in either app's palette any more.
  *
  * The `children` render prop is used rather than `toastOptions`, so the body

@@ -55,7 +55,7 @@ export const inputVariants = /* @__PURE__ */ cva(
       },
       /* Deliberately the same three heights as Button: h-9 / h-10 / h-11.
          Input was a fixed 42px, which agreed with Button at no size at all, so
-         a field beside a submit button never lined up. retrospect gave up and
+         a field beside a submit button never lined up. One app gave up and
          kept a raw <input> pinned to h-11. */
       size: {
         sm: "rst:h-9 rst:px-3",

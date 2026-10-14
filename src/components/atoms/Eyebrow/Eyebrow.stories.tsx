@@ -12,7 +12,7 @@ const meta = {
         component: [
           "The small tracked-out uppercase label that sits above a heading, beside a rule, or at the head of a column.",
           "",
-          "Extracted from blakeb.dev, where it lived as a hand-rolled `.u` class and had been used 26 times before anyone noticed it was a component.",
+          "Extracted from a portfolio site, where it lived as a hand-rolled `.u` class and had been used 26 times before anyone noticed it was a component.",
           "",
           "**Why monospace.** At this size, a tracked-out uppercase label in a proportional face just reads as small prose. Monospace makes it read as chrome, which is the entire job — an eyebrow is a wayfinding mark, not a sentence.",
           "",
@@ -101,7 +101,7 @@ export const AboveAHeading: Story = {
     <div className="rst:flex rst:max-w-md rst:flex-col rst:gap-2">
       <Eyebrow tone="primary">Case study</Eyebrow>
       <h2 className="rst:m-0 rst:text-3xl rst:font-bold rst:tracking-tight rst:text-gray-900 rst:dark:text-gray-100">
-        Game Verdict
+        Lanternfish
       </h2>
       <p className="rst:m-0 rst:text-sm rst:text-gray-600 rst:dark:text-gray-400">
         Settling the controller-versus-keyboard argument with 1,573 verdicts and
@@ -126,8 +126,8 @@ export const AsAColumnHead: Story = {
       <Eyebrow>Stack</Eyebrow>
       <Eyebrow>Year</Eyebrow>
       {[
-        ["Game Verdict", "Next.js", "2025"],
-        ["MegaSquad", "Vite", "2024"],
+        ["Lanternfish", "Next.js", "2025"],
+        ["Northpaw", "Vite", "2024"],
         ["Roster", "Vite lib", "2024"],
       ].map((row) => (
         <div key={row[0]} className="rst:contents">
@@ -184,7 +184,7 @@ export const AsALink: Story = {
   render: () => (
     <div className="rst:flex rst:flex-col rst:items-start rst:gap-4">
       <Eyebrow as="a" href="#" className="rst:no-underline rst:hover:!text-primary-600">
-        gameverdict.app
+        lanternfish.example
       </Eyebrow>
       <Eyebrow
         as="a"
