@@ -104,8 +104,21 @@ function itemsOf(panel: HTMLElement | null): HTMLElement[] {
   return [...panel.querySelectorAll<HTMLElement>(ITEM)].filter((el) => el.closest("[data-menu-panel]") === panel);
 }
 
-function focusItem(el: HTMLElement | undefined) {
+/**
+ * Focus an item from the keyboard: the arrows, Home and End, typeahead, an
+ * opening key, or backing out of a submenu. The pointer focuses items itself
+ * and never comes through here.
+ *
+ * The item is marked `data-key-focus` until it loses focus, and that mark, not
+ * `:focus-visible`, is what draws its ring. Focus moved by script only counts
+ * as the keyboard's to a browser that has seen keys since the last click:
+ * WebKit hadn't, for a menu opened with the mouse and then walked with the
+ * arrows, so its rows showed the tint alone.
+ */
+function focusItem(el: HTMLElement | null | undefined) {
   if (!el) return;
+  el.setAttribute("data-key-focus", "");
+  el.addEventListener("blur", () => el.removeAttribute("data-key-focus"), { once: true });
   el.focus({ preventScroll: true });
   el.scrollIntoView?.({ block: "nearest" });
 }
@@ -708,6 +721,13 @@ const ITEM_CLASS = /* @__PURE__ */ cn(
   /* Focus follows the pointer, so the highlight is focus. In forced colors a
      fill is dropped, so focus draws an outline there instead. */
   "rst:focus:bg-primary-100 rst:focus:text-primary-900 rst:dark:focus:bg-primary-900/30 rst:dark:focus:text-primary-100 rst:forced-colors:focus:outline-solid rst:forced-colors:focus:outline-2 rst:forced-colors:focus:-outline-offset-2",
+  /* The tint alone isn't a focus indicator: it measures under 1.2:1 against
+     the panel in both themes, on the default surface and a consumer's. So
+     keyboard focus adds an inset ring in the focus token, which a consumer
+     tunes against their own surfaces, and holds 3:1 on any of them. The
+     pointer's focus is the tint alone: the ring follows the mark `focusItem`
+     leaves, which only the keyboard's paths set. */
+  "rst:data-key-focus:ring-2 rst:data-key-focus:ring-inset rst:data-key-focus:ring-ring",
   "rst:aria-disabled:opacity-50 rst:aria-disabled:cursor-not-allowed",
 );
 
@@ -1067,7 +1087,7 @@ function MenuSubmenu({ label, children, icon, disabled, textValue, className, pa
 
   const backToItem = () => {
     parent.setOpenSubmenu(null);
-    itemRef.current?.focus({ preventScroll: true });
+    focusItem(itemRef.current);
   };
   const { typedRef, typingAhead } = useTypeahead();
   const onKeyDown = usePanelKeys({ panelRef, typedRef, onEscape: backToItem, onBack: backToItem });

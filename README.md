@@ -543,6 +543,18 @@ The band matters more than it looks. Without it the ring sits directly on the
 fill, and a `primary-500` ring on a `primary-600` button is 1.37:1 — which is
 why the ring and its offset are a pair rather than two independent knobs.
 
+**A row in a popup marks focus with the ring too.** The focused row in `Menu`,
+`Select`, `Combobox` and `MultiSelect` keeps its soft primary tint and adds a
+2px inset ring in `--roster-ring`. The tint alone was the indicator until
+5.11.0, and it measured 1.17:1 against the panel in light and 1.03:1 in dark
+on Roster's own defaults: a keyboard user couldn't see where they were. The
+ring follows the token you already set against your own surfaces, so it holds
+wherever the panel is: 6.37:1 and 5.61:1 on the defaults. If you set
+`--roster-popover-bg` to a surface `--roster-ring` doesn't contrast with, set
+the ring with it. In `Menu` the ring shows for keyboard focus only, because the
+pointer moves focus there too. Headless UI's popups mark the keys' row and the
+pointer's alike, so in theirs it shows on hover as well.
+
 ### Motion
 
 Two hand-rolled utilities, both of which stop for `prefers-reduced-motion`.
@@ -930,6 +942,10 @@ look like oversights until you know why:
   page does not reach it. All three components copy the nearest `.dark` onto
   the panel to fix that. Custom properties are not carried the same way — set
   `--roster-popover-*` at `:root`.
+- **A row is a click target, and focus is a ring.** Every option row shows
+  the pointer cursor, as `Menu`'s items do (a disabled one, `not-allowed`).
+  A focused row keeps its tint and adds an inset `--roster-ring`, which is
+  what reaches 3:1 against the panel ([Focus](#focus)).
 - **`Menu` shares the panel, not the anchoring.** Its panel takes the same
   surface, tokens and dark carry, but `Menu` places itself (see
   [Menu](#menu)), writing its own inline `max-height`. It reads the same
@@ -1586,8 +1602,10 @@ import { Menu, MenuButton, MenuItems, MenuItem, MenuSeparator } from "@blakestev
 - **Styling.** `className` on `MenuItems` and on each item merges last, so a
   fill such as `bg-gray-100` takes; the scroll shadows are drawn over it. Its
   ring and separators follow `--roster-border-width`. Items show the pointer
-  cursor, a disabled one `not-allowed`. In forced colors the focused item gets
-  an outline, since its fill is dropped.
+  cursor, a disabled one `not-allowed`. Keyboard focus adds an inset ring in
+  `--roster-ring` to the item's tint, which alone doesn't reach 3:1 against
+  the panel ([Focus](#focus)). In forced colors the focused item gets an
+  outline, since its fill and ring are dropped.
 - **Targets.** Every item is at least 44px tall, and `MenuButton` at least 44
   by 44 whatever its size. `MenuButton plain` renders a bare `<button>` for a
   trigger drawn its own way; keep its target at least 44 by 44 with a hit
@@ -2115,6 +2133,32 @@ such as `AvatarStrip`'s `ringClass`, stays exactly as they wrote it.
 
 `npm run build` fails if any unprefixed class reaches `dist/roster.css`.
 
+## Authoring components: cursors
+
+**If it's clickable, it's the pointer.** Every element that does something
+when it's clicked shows `cursor: pointer`, and says so in its classes. A
+browser gives a button the arrow; Tailwind v3's preflight gave it the pointer
+and v4's doesn't, so a `<button>` with no cursor class shows the arrow. Until 5.11.0 the option rows
+in `Select`, `Combobox` and `MultiSelect` showed the arrow while `Menu`'s
+showed the pointer, and `PasswordInput`'s reveal button showed the arrow too.
+
+- A disabled control shows `not-allowed`.
+- A busy one may say so: `Button`'s `loading` shows `progress`.
+- A text field's label keeps the arrow, as a native one does: clicking it puts
+  the caret in the field rather than doing something.
+
+Three things keep another cursor, because they aren't click targets:
+
+- **`Breadcrumbs`' current crumb** is the page you're on, not a link:
+  `default`.
+- **`Tooltip`'s trigger wrapper** isn't necessarily clickable: `default`. A
+  control inside it brings its own pointer.
+- **A drag surface** says what it does: `Carousel`'s track and `Sheet`'s drag
+  handle show `grab`, then `grabbing`.
+
+`src/internal/popups.checks.stories.tsx` reads the computed cursor on a row in
+each popup, with a disabled row as its twin.
+
 ## Development
 
 Storybook is the component playground. Each component has dedicated stories covering all variants, props, and light/dark mode.
@@ -2246,7 +2290,7 @@ like a file count but counts `describe` blocks — 166 against 92 real files.
 Pull requests are welcome. Please:
 
 1. Open an issue or discussion first for significant changes
-2. Follow the existing code style (CVA variants, forwardRef, Storybook stories, unit tests)
+2. Follow the existing code style (CVA variants, forwardRef, Storybook stories, unit tests) and the authoring rules above: the `rst:` prefix and cursors
 3. Fill out the pull request template checklist before requesting review
 
 ## License
