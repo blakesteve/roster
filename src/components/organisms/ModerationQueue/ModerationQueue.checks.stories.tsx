@@ -827,12 +827,14 @@ export const At320EveryTargetIs44: Story = {
         await waitFor(() => expect(q('[role="dialog"]')).not.toBeNull());
         const buttons = [...q('[role="dialog"]')!.querySelectorAll<HTMLElement>("button")].filter((el) => el.offsetParent);
         await expect(buttons.length, `${id}: buttons`).toBeGreaterThan(1);
-        for (const el of buttons) {
+        /* Read at rest: the surface grows in from 95%, and on its first
+           frames a 44px button measures 41.8. A slow machine reads it there. */
+        const atRest = (el: HTMLElement) => {
           const box = el.getBoundingClientRect();
-          await expect(
-            [Math.round(box.width) >= 44, Math.round(box.height) >= 44, box.left >= 0, box.right <= 320],
-            `${id}: ${el.getAttribute("aria-label") ?? el.textContent}`,
-          ).toEqual([true, true, true, true]);
+          return [Math.round(box.width) >= 44, Math.round(box.height) >= 44, box.left >= 0, box.right <= 320];
+        };
+        for (const el of buttons) {
+          await waitFor(() => expect(atRest(el), `${id}: ${el.getAttribute("aria-label") ?? el.textContent}`).toEqual([true, true, true, true]));
         }
         await userEvent.keyboard("{Escape}");
         await waitFor(() => expect(q('[role="dialog"]')).toBeNull(), { timeout: 3000 });
