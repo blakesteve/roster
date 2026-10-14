@@ -773,6 +773,8 @@ Every field therefore has a second prop, **named for the element it reaches**:
 | `Combobox`     | `className` | `inputClassName`     | `optionsClassName`  |
 | `CheckboxGroup`| `className` | —                    | `optionsClassName`  |
 | `RadioGroup`   | `className` | `radioClassName`     | `optionsClassName`, `optionClassName`, `labelClassName`, `optionLabelClassName`, `descriptionClassName`, `messageClassName` |
+| `Slider`       | `className` | `trackClassName`     | `thumbClassName`, `chipClassName`, `labelClassName`, `messageClassName` |
+| `RangeSlider`  | `className` | `thumbClassName`     | `trackClassName`, `chipClassName`, `labelClassName`, `messageClassName` |
 
 `CheckboxGroup` and `RadioGroup` have no single "control" to reach, since they
 hold one per option, so `RadioGroup`'s `radioClassName` lands on every radio
@@ -1599,6 +1601,120 @@ that its rows are 44px tall rather than 36, and that with neither an inbox nor
 a theme row it no longer draws an empty band and rule at the top. It keeps its
 own white fill, whatever `--roster-popover-bg` says.
 
+### Slider
+
+A value picked along a track: tapped, dragged, stepped with the keys, or set
+from a named snap point.
+
+```tsx
+import { Slider } from "@blakesteve/roster";
+
+<Slider
+  label="How sure are you?"
+  value={sure}
+  onChange={setSure}
+  snapPoints={[{ value: 100, label: "Certain" }, { value: 75, label: "Likely" }, { value: 50, label: "Toss-up" }]}
+  formatValue={(v) => `${v}%`}
+/>;
+```
+
+- **It starts with a thumb**, in the middle of the range by default.
+  `startValue` moves where it starts, and `defaultValue` sets it outright:
+  `defaultValue={0}` starts it at the low end.
+- **Not set** is opt-in: `defaultValue={null}`, or `value={null}` when
+  controlled, leaves the track empty with no thumb until the first input. A
+  form takes it as a valid answer: under `name` it submits an empty string.
+  Controlled, `value` can go back to `null`, which is how a consumer offers a
+  clear.
+- **Snap points** are named stops, any values and labels: a selectable
+  `Chip` under the track for each, in the track's order, moves the thumb
+  there, and a bead on the rail shows where. They're shortcuts, so dragging
+  still lands anywhere between them. A chip shows as pressed (solid rather
+  than outline) while the value is exactly its value, and pressing it again
+  leaves it there. A point outside `min` to `max` is left out.
+- **The number** shows beside the label (`formatValue` writes it). A screen
+  reader hears it with the nearest snap point's name, "72%, Likely", and
+  "Not set" while there's no value, never a number. Every string is in
+  `labels`.
+- **In range.** A value outside `min` to `max` shows, and is said, at the
+  end it's past. A controlled owner that turns a change down (a clamp, say)
+  leaves the next key stepping from the value it kept.
+- **Pointer.** A tap on the track sets the value there; a press on the thumb
+  takes it without a jump, and commits only if the drag moved it. On touch
+  the track waits to see which way a finger goes: across is a drag, down the
+  page scrolls it and sets nothing (and takes no focus), and a tap sets on
+  lift. A pointermove with no press, which WebKit sends when content scrolls
+  under a resting pointer, sets nothing. A second finger is left alone.
+- **Keys.** The arrows step by `step`, PageUp and PageDown by `pageStep` (a
+  tenth of the range by default), Home and End go to the ends. **On an empty
+  slider an arrow or Page key places the thumb at `startValue`, the middle
+  by default**; it doesn't step from anywhere. A key at an end does nothing.
+  From a value between steps, a key goes to the next step that way. Keys
+  always step from the value last set, never from where the thumb is drawn
+  while it eases there, so a burst of presses counts every one. A key the
+  consumer's own `onKeyDown` handled (`preventDefault`) is left to it.
+- **Focus.** By keyboard, the ring is round the thumb; an empty slider rings
+  the track. A disabled slider takes no focus at all.
+- **Form.** Under `name` it submits its value, or an empty string while not
+  set; disabled, nothing, as a disabled input submits nothing. A form's
+  reset puts an uncontrolled slider back where it started.
+- **Targets.** The track is 44px tall and its rail stops 22px short of each
+  end, so the thumb's 44 by 44 target stays on it at every value. Each chip
+  has Chip's 44px-tall target and is at least 44 wide, and the chip row sits
+  8px under the track so its targets never take the thumb's. Under reduced
+  motion the thumb moves without easing. Under `dir="rtl"` the track runs
+  from the right.
+- **Look.** The rail is a light surface edged in `--roster-control-border`,
+  which carries a control edge's 3:1 when there's no thumb to show the
+  slider. Snap points are beads set in the rail, the edge's color on the bare
+  rail and the page's on the fill.
+
+One thumb. Two, for a range, is [RangeSlider](#rangeslider), on the same
+track, so `value` here stays a number.
+
+### RangeSlider
+
+A low and a high along one track: `Slider`'s track, with two thumbs.
+
+```tsx
+import { RangeSlider } from "@blakesteve/roster";
+
+<RangeSlider
+  label="Price"
+  min={0}
+  max={500}
+  step={5}
+  value={price}
+  onChange={setPrice}
+  formatValue={(v) => `$${v}`}
+/>;
+```
+
+- **It starts at the whole range**, `[min, max]`, unless `defaultValue`
+  says otherwise. `value` is `[low, high]`, always low first: a pair given
+  the wrong way round is shown the right way. There's no not-set state; the
+  whole range is what "any" looks like.
+- **Each thumb is a slider** to the keyboard and a screen reader: its own
+  tab stop, named for the slider and its end ("Price Minimum", "Price
+  Maximum", both in `labels`), whose `aria-valuemin` and `aria-valuemax`
+  run to the other thumb. The thumbs meet and never cross: End on the low
+  thumb takes it to the high one. The whole is a group named by the label.
+- **Pointer.** A press takes the nearer thumb: a tap on the track moves it
+  there, a drag carries it. Two thumbs on one spot part by the way the drag
+  first moves, up the range taking the high one. Touch, the resting
+  pointer, the second finger and the keys work as `Slider`'s do.
+- **Snap points** put a bead on the rail and a `Chip` under it, which does
+  what a tap on its mark does: moves the nearer thumb there (halfway, the
+  low one). A chip shows as pressed while either thumb is on it.
+- **The number** beside the label shows both, "$120 – $340"
+  (`labels.range`). Each thumb says its own value with the nearest snap
+  point's name.
+- **Form.** Under `name` both values are submitted, low then high, as a
+  multiple select's are: read them with `formData.getAll(name)`.
+- **Focus, targets, motion, RTL and look** as `Slider`'s: the ring is round
+  the focused thumb, each thumb's 44 by 44 target stays on the track at
+  every value.
+
 ### Pagination
 
 Moves through pages of a list, built for a long list browsed on a phone.
@@ -1886,6 +2002,8 @@ function App() {
 | `StepProgress`    | Named steps: a stepper with markers and connectors, or a compact segmented "Step x of y" |
 | `Pullquote`       | A line lifted out of prose, as `<figure>` + `<blockquote>` + `<figcaption>` |
 | `RadioGroup`      | Radio set reporting one `string`; descriptions, error, 44px targets         |
+| `Slider`          | A value along a track, starting in the middle or not set on request; named snap-point chips, a visible number, the full keyboard, 44px targets (see [Slider](#slider)) |
+| `RangeSlider`     | A low and a high on one track: two thumbs that meet and never cross, each its own slider to the keyboard (see [RangeSlider](#rangeslider)) |
 | `Toast`           | Transient floating notice; `Toaster` + the imperative `toast` handle        |
 
 ### Organisms

@@ -25,6 +25,8 @@ const GUARDED = [
   "components/molecules/ProgressField",
   "components/molecules/StepProgress",
   "components/molecules/Menu",
+  "components/molecules/Slider",
+  "components/molecules/RangeSlider",
 ];
 
 /* A class with any variants in front of it: `rst:dark:hover:`. */
@@ -93,6 +95,10 @@ describe("style guard", () => {
       "components/molecules/StepProgress/StepProgress.tsx",
       "components/molecules/Menu/Menu.tsx",
       "components/molecules/Menu/menu-typeahead.ts",
+      "components/molecules/Slider/Slider.tsx",
+      "components/molecules/Slider/track-parts.tsx",
+      "components/molecules/Slider/track.ts",
+      "components/molecules/RangeSlider/RangeSlider.tsx",
     ]);
   });
 

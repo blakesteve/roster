@@ -13,7 +13,7 @@ import type { BrowserCommand } from "vitest/node";
 
 type AXValue = { value?: unknown };
 type AXProperty = { name: string; value: AXValue };
-type AXNode = { role?: AXValue; name?: AXValue; description?: AXValue; properties?: AXProperty[]; ignored?: boolean };
+type AXNode = { role?: AXValue; name?: AXValue; description?: AXValue; value?: AXValue; properties?: AXProperty[]; ignored?: boolean };
 type DOMNode = {
   nodeId: number;
   nodeName: string;
@@ -35,6 +35,10 @@ export type AXState = {
   expanded: boolean | null;
   /** What a control opens ("menu", "dialog"…); null where it opens nothing. */
   hasPopup: string | null;
+  /** The accessibility tree's value: a range's number (its midpoint when none is given), a field's text; null where there's none. */
+  value: string | null;
+  /** A range's `aria-valuetext`, which a screen reader speaks instead of its number; null where there's none. */
+  valueText: string | null;
 };
 
 function documents(node: DOMNode, out: DOMNode[] = []): DOMNode[] {
@@ -96,6 +100,8 @@ async function read(session: Session, selectors: string[]): Promise<AXState[]> {
       checked: prop("checked") === undefined ? null : String(prop("checked")),
       expanded: prop("expanded") === undefined ? null : !!prop("expanded"),
       hasPopup: prop("hasPopup") === undefined ? null : String(prop("hasPopup")),
+      value: node.value?.value === undefined ? null : String(node.value.value),
+      valueText: prop("valuetext") === undefined ? null : String(prop("valuetext")),
     });
   }
   return results;
