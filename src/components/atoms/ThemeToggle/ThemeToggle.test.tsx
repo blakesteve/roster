@@ -88,14 +88,14 @@ describe("ThemeToggle labels and icons", () => {
     localStorage.clear();
   });
 
-  // These exist because blakeb.dev's two states are "Press sheet" and
-  // "Blueline"; a hardcoded "Light"/"Dark" made the component unusable there.
+  // These exist because a portfolio site's two states are "Paper" and
+  // "Chalkboard"; a hardcoded "Light"/"Dark" made the component unusable there.
   it("takes a custom visible label for each state", async () => {
-    render(<ThemeToggle showLabel lightLabel="Press sheet" darkLabel="Blueline" />);
-    expect(screen.getByRole("button")).toHaveTextContent("Press sheet");
+    render(<ThemeToggle showLabel lightLabel="Paper" darkLabel="Chalkboard" />);
+    expect(screen.getByRole("button")).toHaveTextContent("Paper");
 
     await userEvent.click(screen.getByRole("button"));
-    expect(screen.getByRole("button")).toHaveTextContent("Blueline");
+    expect(screen.getByRole("button")).toHaveTextContent("Chalkboard");
   });
 
   it("takes nodes, not just strings", () => {
@@ -107,12 +107,12 @@ describe("ThemeToggle labels and icons", () => {
     render(
       <ThemeToggle
         showLabel
-        lightLabel="Press sheet"
-        toDarkLabel="Switch to the blueline proof"
+        lightLabel="Paper"
+        toDarkLabel="Switch to the chalkboard"
       />,
     );
-    const button = screen.getByRole("button", { name: "Switch to the blueline proof" });
-    expect(button).toHaveTextContent("Press sheet");
+    const button = screen.getByRole("button", { name: "Switch to the chalkboard" });
+    expect(button).toHaveTextContent("Paper");
   });
 
   it("takes a custom icon for each state", async () => {

@@ -33,6 +33,9 @@ const merge = /* @__PURE__ */ extendTailwindMerge({
         "elevation-overlay",
         "elevation-control",
       ],
+      /* A skeleton block's corners, read from its own token. Same reason: a
+         caller's `rounded-*` has to replace it, not sit beside it. */
+      rounded: ["rounded-skeleton"],
     },
   },
 });

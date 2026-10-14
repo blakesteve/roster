@@ -112,7 +112,7 @@ export const InAToolbar: Story = {
   render: () => (
     <div className="rst:flex rst:max-w-lg rst:items-center rst:justify-between rst:rounded-lg rst:border rst:border-gray-200 rst:px-4 rst:py-2 rst:dark:border-gray-800">
       <span className="rst:font-mono rst:text-[0.625rem] rst:uppercase rst:tracking-[0.14em] rst:text-gray-500 rst:dark:text-gray-400">
-        blakeb.dev
+        kestrel.example
       </span>
       <ThemeToggle />
     </div>
@@ -142,10 +142,10 @@ export const CustomStorageKey: Story = {
 export const CustomLabels: Story = {
   args: {
     showLabel: true,
-    lightLabel: "Press sheet",
-    darkLabel: "Blueline",
-    toDarkLabel: "Switch to the blueline proof",
-    toLightLabel: "Switch back to the press sheet",
+    lightLabel: "Paper",
+    darkLabel: "Chalkboard",
+    toDarkLabel: "Switch to the chalkboard",
+    toLightLabel: "Switch back to paper",
   },
   parameters: {
     docs: {
@@ -155,7 +155,7 @@ export const CustomLabels: Story = {
           "",
           "`lightLabel` / `darkLabel` are what the button *shows*, and they name the current state. `toDarkLabel` / `toLightLabel` are what a screen reader *announces*, and they name the destination, because a button's accessible name should describe what pressing it does.",
           "",
-          "The values here are blakeb.dev's, whose two states are a press sheet and a blueline proof rather than light and dark. That site is the reason these props exist: a hardcoded \"Light\"/\"Dark\" meant adopting the component would have cost the metaphor the whole site is built on.",
+          "The values here are a portfolio site's, whose two states are paper and a chalkboard rather than light and dark. That site is the reason these props exist: a hardcoded \"Light\"/\"Dark\" meant adopting the component would have cost the metaphor the whole site is built on.",
         ].join("\n"),
       },
     },
@@ -167,8 +167,8 @@ export const CustomIcons: Story = {
     <div className="rst:flex rst:flex-wrap rst:items-center rst:gap-3">
       <ThemeToggle
         showLabel
-        lightLabel="Press sheet"
-        darkLabel="Blueline"
+        lightLabel="Paper"
+        darkLabel="Chalkboard"
         lightIcon={<span aria-hidden="true">\u25D0</span>}
         darkIcon={<span aria-hidden="true">\u25D1</span>}
       />

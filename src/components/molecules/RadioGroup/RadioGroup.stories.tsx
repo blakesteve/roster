@@ -86,7 +86,7 @@ export const Playground: Story = {
   args: { options: VISIBILITY, value: "", onChange: () => {} },
   render: (args) => (
     <Stateful
-      label="Who can see this squad"
+      label="Who can see this group"
       helperText="You can change this at any time."
       className="rst:max-w-sm"
       {...args}
@@ -121,7 +121,7 @@ export const Playground: Story = {
  */
 export const Unanswered: Story = {
   args: { options: VISIBILITY, value: "", onChange: () => {} },
-  render: () => <Stateful label="Who can see this squad" className="rst:max-w-sm" />,
+  render: () => <Stateful label="Who can see this group" className="rst:max-w-sm" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const radios = canvas.getAllByRole("radio");
@@ -152,7 +152,7 @@ export const WithDescriptions: Story = {
   render: () => (
     <Stateful
       className="rst:max-w-sm"
-      label="Who can see this squad"
+      label="Who can see this group"
       options={[
         { value: "public", label: "Public", description: "Anyone can find and join it." },
         { value: "unlisted", label: "Unlisted", description: "Only people with the link." },
@@ -183,8 +183,8 @@ export const WithErrorAndHelp: Story = {
   args: { options: VISIBILITY, value: "", onChange: () => {} },
   render: () => (
     <div className="rst:flex rst:flex-col rst:gap-8 rst:max-w-sm">
-      <Stateful label="Who can see this squad" helperText="You can change this at any time." />
-      <Stateful label="Who can see this squad" errorMessage="Choose who can see this squad." />
+      <Stateful label="Who can see this group" helperText="You can change this at any time." />
+      <Stateful label="Who can see this group" errorMessage="Choose who can see this group." />
     </div>
   ),
   play: async ({ canvasElement }) => {
@@ -194,7 +194,7 @@ export const WithErrorAndHelp: Story = {
       .filter((el) => el.getAttribute("aria-invalid") === "true");
     await expect(invalid).toHaveLength(1);
     await expect(invalid[0]).toHaveAccessibleDescription(
-      "Choose who can see this squad.",
+      "Choose who can see this group.",
     );
   },
   parameters: {
@@ -270,7 +270,7 @@ export const Horizontal: Story = {
     <div className="rst:flex rst:flex-col rst:gap-8">
       <Stateful
         orientation="horizontal"
-        label="Who can see this squad"
+        label="Who can see this group"
         helperText="You can change this at any time."
       />
       <Stateful
@@ -309,7 +309,7 @@ export const Styled: Story = {
   render: () => (
     <Stateful
       className="rst:max-w-sm"
-      label="Who can see this squad"
+      label="Who can see this group"
       optionsClassName="rst:gap-2"
       optionClassName="rst:rounded-lg rst:border rst:border-gray-200 rst:px-3 rst:dark:border-gray-800 rst:has-data-checked:border-primary-500 rst:has-data-checked:bg-primary-50 rst:dark:has-data-checked:bg-primary-950"
       options={[
@@ -372,7 +372,7 @@ export const OnADarkSurface: Story = {
   render: () => (
     <Stateful
       initial="unlisted"
-      label="Who can see this squad"
+      label="Who can see this group"
       helperText="You can change this at any time."
       options={[
         { value: "public", label: "Public", description: "Anyone can find and join it." },

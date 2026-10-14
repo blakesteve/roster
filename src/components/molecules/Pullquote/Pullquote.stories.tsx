@@ -153,7 +153,7 @@ export const InProse: Story = {
   render: () => (
     <div className="rst:max-w-prose rst:space-y-4 rst:text-[0.9375rem] rst:leading-relaxed rst:text-gray-700 rst:dark:text-gray-300">
       <p className="rst:m-0">
-        Game Verdict asks one question — controller or keyboard — and the answer
+        Lanternfish asks one question — controller or keyboard — and the answer
         is only interesting if enough people answer it. Which made the login
         screen the most expensive component on the site.
       </p>

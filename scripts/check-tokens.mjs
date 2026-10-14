@@ -29,6 +29,11 @@ const ROLES = ["ui", "mono", "display"];
    implementation rather than API and belong in the internal prefix. */
 const MOTION = ["enter-duration", "enter-easing"];
 
+/* Component hooks: never defined by Roster, read with a fallback that is the
+   component's own default. The skeleton's shimmer and pulse timing, how far
+   the pulse fades, and its blocks' corners. */
+const COMPONENT_HOOKS = ["skeleton-duration", "skeleton-pulse-duration", "skeleton-pulse-opacity", "skeleton-radius"];
+
 /* The elevation scale. A level that emits nothing means some surface stopped
    using it, which is how a scale quietly becomes three unused tokens. */
 const ELEVATION = ["elevation-raised", "elevation-anchored", "elevation-overlay"];
@@ -124,6 +129,15 @@ for (const hook of MOTION) {
   }
 }
 
+for (const hook of COMPONENT_HOOKS) {
+  if (!css.includes(`var(--roster-${hook},`)) {
+    problems.push(
+      `\`--roster-${hook}\` is not read with a fallback, so setting it changes ` +
+        `nothing, or a consumer who sets nothing gets an invalid declaration.`,
+    );
+  }
+}
+
 for (const token of ELEVATION) {
   if (!css.includes(`--roster-${token}:`)) {
     problems.push(`\`--roster-${token}\` is never defined at \`:root\`.`);
@@ -201,5 +215,5 @@ if (problems.length > 0) {
 }
 
 console.log(
-  `✓ ${ROLES.length} font roles, ${MOTION.length} motion knobs, ${ELEVATION.length} surface elevation levels, ${COMPONENT.length} component tokens and ${Object.keys(SHAPE).length + 1} shape tokens, the control level among them (read by ${Object.values(SHAPE).flat().length} utilities, and the backdrop by ${backdropReads} rules) are themeable via --roster-*`,
+  `✓ ${ROLES.length} font roles, ${MOTION.length} motion knobs, ${ELEVATION.length} surface elevation levels, ${COMPONENT.length} component tokens, ${COMPONENT_HOOKS.length} component hooks and ${Object.keys(SHAPE).length + 1} shape tokens, the control level among them (read by ${Object.values(SHAPE).flat().length} utilities, and the backdrop by ${backdropReads} rules) are themeable via --roster-*`,
 );

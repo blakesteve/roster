@@ -24,7 +24,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-function Demo() {
+function Demo({ animation }: { animation?: "shimmer" | "pulse" | "none" }) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (!loading) return;
@@ -33,7 +33,7 @@ function Demo() {
   }, [loading]);
   return (
     <div style={{ display: "grid", gap: 12, maxWidth: 380 }}>
-      <SkeletonRegion loading={loading} label="Loading the trail log" skeleton={<SkeletonCard lines={2} />}>
+      <SkeletonRegion loading={loading} label="Loading the trail log" animation={animation} skeleton={<SkeletonCard lines={2} />}>
         <Card>
           <h3 style={{ margin: 0, fontSize: 16, lineHeight: "24px", fontWeight: 600 }}>Ridge loop, 8.4 miles</h3>
           <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: "20px" }}>
@@ -54,5 +54,17 @@ export const LoadingThenLoaded: Story = {
   render: () => <Demo />,
   parameters: {
     docs: { description: { story: "A card's worth of content arrives after a moment, into the box its skeleton held. Press Load again to watch it twice." } },
+  },
+};
+
+export const APulsingRegion: Story = {
+  render: () => <Demo animation="pulse" />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`animation` on the region reaches every skeleton inside it, presets included, so a whole region pulses without each child asking. A skeleton that names its own animation keeps it.",
+      },
+    },
   },
 };

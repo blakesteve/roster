@@ -2,7 +2,7 @@
  * Writes `dist/meta.json` so consumers can report facts about this library that
  * are not derivable from what it ships.
  *
- * blakeb-dev's case study reads the installed package for everything it can:
+ * A portfolio site's case study reads the installed package for everything it can:
  * the version from `package.json`, the component count by parsing the exports
  * out of `dist/*.d.ts`. The test count has no such source — `files` is `["dist"]`,
  * so the suite never leaves this repo, and the number was a hand-typed literal

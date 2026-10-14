@@ -60,7 +60,7 @@ export interface CheckboxGroupProps
    * Caps the options' height and scrolls past it. A number is pixels.
    *
    * Applied inline rather than as a class because the useful values here are
-   * arbitrary — `240` is mega-squad's, yours will differ — and an arbitrary
+   * arbitrary — `240` is one app's, yours will differ — and an arbitrary
    * Tailwind value built from a prop is a class that does not exist at build
    * time, which is exactly what `check-classes-emit` fails the build over.
    */

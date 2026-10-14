@@ -152,7 +152,7 @@ export const Danger: Story = {
   },
 };
 
-export const WhiteMegaSquad: Story = {
+export const WhiteOnDark: Story = {
   args: {
     variant: "white",
     href: "#",

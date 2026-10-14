@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import { SkeletonRegion } from "../../atoms/Skeleton/Skeleton";
 import { describe, expect, it } from "vitest";
 import "@testing-library/jest-dom";
 import { Table, TableBody } from "../../organisms/Table/Table";
@@ -7,6 +8,41 @@ import { SkeletonAvatar, SkeletonCard, SkeletonStat, SkeletonTableRow } from "./
 /* Structure only: each preset is the real container with skeleton lines in
    it. The sizes are measured against real content in Chromium. */
 describe("Skeleton presets", () => {
+  it("passes its animation to every skeleton in it, or takes its region's", () => {
+    const moving = (root: ParentNode) =>
+      [...root.querySelectorAll("[class*='rst:animate-skeleton'], [class*='rst:skeleton-fill']")].map((el) =>
+        el.classList.contains("rst:animate-skeleton-pulse") ? "pulse" : el.classList.contains("rst:skeleton-fill") ? "none" : "shimmer",
+      );
+    const { container } = render(
+      <>
+        <div data-k="own">
+          <SkeletonCard media={40} lines={1} animation="none" />
+          <SkeletonAvatar withName animation="none" />
+          <dl>
+            <SkeletonStat source animation="none" />
+          </dl>
+          <Table>
+            <TableBody>
+              <SkeletonTableRow columns={2} animation="none" />
+            </TableBody>
+          </Table>
+        </div>
+        <div data-k="region">
+          <SkeletonRegion loading animation="pulse" skeleton={<SkeletonCard lines={1} />} />
+        </div>
+        {/* The twin: a preset on its own shimmers. */}
+        <div data-k="plain">
+          <SkeletonAvatar withName />
+        </div>
+      </>,
+    );
+    expect([moving(container.querySelector('[data-k="own"]')!), moving(container.querySelector('[data-k="region"]')!), moving(container.querySelector('[data-k="plain"]')!)]).toEqual([
+      Array(10).fill("none"),
+      ["pulse", "pulse"],
+      ["shimmer", "shimmer"],
+    ]);
+  });
+
   it("draws a card as a real Card: media, title, body lines", () => {
     const { container } = render(<SkeletonCard media={160} lines={2} />);
     const card = container.querySelector('[data-skeleton="card"]')!;

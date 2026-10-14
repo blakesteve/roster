@@ -60,7 +60,7 @@ describe("Alert Component", () => {
 
   /**
    * `current` and `surface` exist so a consuming app can stop hand-rolling a
-   * labeled accent callout beside this one. Game Verdict had built exactly
+   * labeled accent callout beside this one. One app had built exactly
    * that — a gradient panel with a title row, tinted to whichever answer won —
    * because Alert could only take colors from Roster's own ramps.
    */

@@ -79,6 +79,73 @@ describe("Skeleton", () => {
   });
 });
 
+/* Each fill's movement, by the utility it carries. Every fill keeps its
+   forced-colors outline, whichever. */
+const MOVES = {
+  shimmer: "rst:animate-skeleton",
+  pulse: "rst:animate-skeleton-pulse",
+  none: "rst:skeleton-fill",
+} as const;
+const movesOf = (root: ParentNode) =>
+  [...root.querySelectorAll<HTMLElement>("[class*='rst:animate-skeleton'], [class*='rst:skeleton-fill']")].map((el) => {
+    const move = (Object.keys(MOVES) as (keyof typeof MOVES)[]).find((k) => el.classList.contains(MOVES[k]));
+    return [move, el.classList.contains("rst:forced-colors:outline-solid")];
+  });
+
+describe("Skeleton animation", () => {
+  it("shimmers by default, and pulses or holds still when asked, in every shape", () => {
+    const { container } = render(
+      <>
+        <Skeleton />
+        <Skeleton shape="block" animation="pulse" />
+        <Skeleton shape="circle" animation="none" />
+      </>,
+    );
+    expect(movesOf(container)).toEqual([
+      ["shimmer", true],
+      ["pulse", true],
+      ["none", true],
+    ]);
+  });
+
+  it("takes a region's animation, unless it asks for its own", () => {
+    const { container } = render(
+      <>
+        <div data-region="pulse">
+          <SkeletonRegion
+            loading
+            animation="pulse"
+            skeleton={
+              <>
+                <Skeleton lines={2} />
+                <Skeleton shape="block" animation="none" />
+              </>
+            }
+          />
+        </div>
+        {/* The twin: a region that says nothing leaves them shimmering. */}
+        <div data-region="plain">
+          <SkeletonRegion loading skeleton={<Skeleton shape="block" />} />
+        </div>
+        {/* A region inside a pulsing one's skeleton, saying nothing itself,
+            keeps the outer one's. */}
+        <div data-region="nested">
+          <SkeletonRegion loading animation="pulse" skeleton={<SkeletonRegion loading skeleton={<Skeleton shape="block" />} />} />
+        </div>
+      </>,
+    );
+    expect(movesOf(container.querySelector('[data-region="nested"]')!)).toEqual([["pulse", true]]);
+    expect([movesOf(container.querySelector('[data-region="pulse"]')!), movesOf(container.querySelector('[data-region="plain"]')!)]).toEqual([
+      [
+        ["pulse", true],
+        ["pulse", true],
+        ["none", true],
+      ],
+      [["shimmer", true]],
+    ]);
+  });
+});
+
 describe("SkeletonRegion", () => {
   it("is busy while loading, says so a moment later, and hides the skeleton", async () => {
     const { container, rerender } = render(

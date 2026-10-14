@@ -160,7 +160,7 @@
      Roster's chrome sets no font of its own, so it inherits whatever the host
      app put on `body`. In an app whose reading face is a serif, that means
      serif buttons, serif badges, serif inputs and serif table cells — controls
-     rendered in a face chosen for long-form prose. Found twice on blakeb.dev,
+     rendered in a face chosen for long-form prose. Found twice on one site,
      which reads in Source Serif; the first workaround forced monospace onto
      every Button in the consuming app, which only traded one wrong face for
      another.
@@ -729,9 +729,40 @@
   animation: rst-shimmer var(--roster-skeleton-duration, 1.8s) linear infinite;
 }
 
+/* The pulse: the flat fill fading and returning, no highlight. The other
+   common loading treatment, and the quieter one on a dense page. How long a
+   breath takes and how far it fades are hooks, for an app with its own
+   rhythm. Opacity only: nothing moves, so nothing can be mistaken for
+   content arriving. */
+@keyframes rst-skeleton-pulse {
+  50% {
+    opacity: var(--roster-skeleton-pulse-opacity, 0.5);
+  }
+}
+
+@utility animate-skeleton-pulse {
+  background-color: var(--roster-skeleton);
+  animation: rst-skeleton-pulse var(--roster-skeleton-pulse-duration, 2s) ease-in-out infinite;
+}
+
+/* The fill alone, for a skeleton that holds still. */
+@utility skeleton-fill {
+  background-color: var(--roster-skeleton);
+}
+
+/* A skeleton block's corners: its own hook, falling back to the `lg` step of
+   the shared scale, so an app can round its placeholders (14px, say) without
+   moving every other component that reads the scale. Lines and circles don't
+   read it: a line's bar keeps the small step, and a circle stays round. */
+@utility rounded-skeleton {
+  border-radius: var(--roster-skeleton-radius, --theme(--radius-lg));
+}
+
+/* Both stop under reduced motion, on the flat fill at full strength. */
 @layer roster {
   @media (prefers-reduced-motion: reduce) {
-    .rst\:animate-skeleton {
+    .rst\:animate-skeleton,
+    .rst\:animate-skeleton-pulse {
       animation: none;
     }
   }
@@ -823,7 +854,7 @@
    Button's colors resolve through `--roster-*`, so remapping a palette carries
    into it. Input's did not: every variant hardcoded its border and background,
    so a consumer wanting a field border in their own accent had no variant to
-   pick and no token to point at. retrospect wanted a gold hairline at 28% alpha
+   pick and no token to point at. One app wanted a gold hairline at 28% alpha
    over deep indigo and had to keep a raw <input>.
 
    Read by Input, PasswordInput, Select and MultiSelect, in their `outline` variant only.

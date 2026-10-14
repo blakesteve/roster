@@ -224,7 +224,7 @@ describe("Input Component", () => {
   describe("theming the outline variant", () => {
     it("reads its border and background from tokens rather than hardcoding them", () => {
       /* Button's colors resolve through --roster-*, so remapping a palette
-         carries. These did not, which is why retrospect could not give a field
+         carries. These did not, which is why one app could not give a field
          its gold hairline without abandoning the component. */
       render(<Input variant="outline" />);
       const input = screen.getByRole("textbox");

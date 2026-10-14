@@ -125,13 +125,13 @@ export const RichTitleWithBadge: Story = {
 
 /**
  * The standard 'brand' look. Used for positive events,
- * onboarding, or announcing new season start dates.
+ * onboarding, or announcing new league start dates.
  */
 export const PicksOpen: Story = {
   args: {
     title: "Week 1 Picks are LIVE!",
     description:
-      "The 2026 Season is finally here. Submit your spread picks before kickoff on Thursday night to be eligible for the Weekly Jackpot.",
+      "Opening week is finally here. Submit your spread picks before kickoff on Thursday night to be eligible for the Weekly Jackpot.",
     variant: "primary",
     icon: <FontAwesomeIcon icon={faTrophy} className="rst:h-5 rst:w-5" />,
     action: (
@@ -148,7 +148,7 @@ export const PicksOpen: Story = {
  */
 export const RichDescriptionEmbedded: Story = {
   args: {
-    title: "NFL Season is coming soon!",
+    title: "League signups open soon!",
     variant: "primary",
     icon: <FontAwesomeIcon icon={faTrophy} className="rst:h-5 rst:w-5" />,
     description: (
@@ -286,8 +286,8 @@ export const WithPersistenceLogic: Story = {
 
     return (
       <CallToAction
-        title="New Feature: Survivor Pools"
-        description="We've added Survivor Pools to MegaSquad! Survive the longest without a loss to win the pot."
+        title="New Feature: Shared Logs"
+        description="We've added Shared Logs to Tidewater! Keep one log together and see who went out today."
         variant="neutral"
         icon={<FontAwesomeIcon icon={faInfoCircle} className="rst:h-5 rst:w-5" />}
         onDismiss={handleDismiss}

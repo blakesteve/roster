@@ -228,7 +228,7 @@ export const FieldsOnAnInvertedPanel: Story = {
 export const PrimaryBrand: Story = {
   render: (args) => <DialogWrapper {...args} />,
   args: {
-    title: "Welcome to MegaSquad!",
+    title: "Welcome to Tidewater!",
     description: "You're almost ready to make your first pick.",
     size: "md",
     variant: "primary",

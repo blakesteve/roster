@@ -118,7 +118,7 @@ export const DefaultTheme: Story = {
     position: "top",
     badge: (
       <Badge variant="orange" statusBadge>
-        MegaSquad Public League
+        Tidewater Public League
       </Badge>
     ),
     actions: (

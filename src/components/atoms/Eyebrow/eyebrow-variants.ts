@@ -2,8 +2,8 @@ import { cva } from "class-variance-authority";
 
 /**
  * The small uppercase label that sits above a heading, beside a rule, or as a
- * column head. Extracted from blakeb.dev, where it was hand-rolled as a CSS
- * class and used 26 times before anyone noticed it was a component.
+ * column head. Extracted from a portfolio site, where it was hand-rolled as a
+ * CSS class and used 26 times before anyone noticed it was a component.
  *
  * Monospace on purpose: at this size, tracked-out uppercase reads as chrome
  * rather than prose, which is the whole job.

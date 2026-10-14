@@ -49,7 +49,7 @@ describe("EmptyState Molecule", () => {
    * EmptyState and ErrorState were the only two components in the library with
    * no dark handling at all — every surface, title and description was painted
    * light-only. On a dark page the default `dashed` variant rendered as a white
-   * panel, which is how it was found: the admin queue in BB's Grove.
+   * panel, which is how it was found: an app's admin queue.
    *
    * Asserted on the class list rather than a rendered colour because jsdom does
    * not resolve the cascade, so this is the only layer that can catch it before

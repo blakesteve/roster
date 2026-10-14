@@ -67,7 +67,7 @@ export const NoLeagues: Story = {
   args: {
     title: "No Active Leagues",
     description:
-      "You haven't joined any MegaSquad leagues yet. Create your own or find one to join.",
+      "You haven't joined any Tidewater leagues yet. Create your own or find one to join.",
     variant: "dashed",
     icon: <FontAwesomeIcon icon={faTrophy} />,
     action: (

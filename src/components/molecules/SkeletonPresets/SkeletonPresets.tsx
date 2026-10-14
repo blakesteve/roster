@@ -4,7 +4,7 @@ import { Card, type CardProps } from "../../atoms/Card/Card";
 import { Eyebrow } from "../../atoms/Eyebrow/Eyebrow";
 import { statSourceClass, statValueVariants } from "../../atoms/Stat/stat-variants";
 import { TableCell, TableRow } from "../../organisms/Table/Table";
-import { Skeleton } from "../../atoms/Skeleton/Skeleton";
+import { Skeleton, type SkeletonAnimation } from "../../atoms/Skeleton/Skeleton";
 
 /*
  * The presets for what people wait on. Each is built from the real
@@ -19,6 +19,8 @@ export interface SkeletonCardProps extends Pick<CardProps, "variant" | "padding"
   media?: CSSProperties["height"];
   /** Body lines under the title. */
   lines?: number;
+  /** How its skeletons move: see `Skeleton`. Inside a `SkeletonRegion`, the region's. */
+  animation?: SkeletonAnimation;
   className?: string;
 }
 
@@ -26,12 +28,12 @@ export interface SkeletonCardProps extends Pick<CardProps, "variant" | "padding"
  * A Card loading. Stands in for a Card holding an optional media block (with
  * 16px below it), a `text-base` title, and `text-sm` body lines 8px under it.
  */
-function SkeletonCard({ media, lines = 3, variant, padding, className }: SkeletonCardProps) {
+function SkeletonCard({ media, lines = 3, variant, padding, animation, className }: SkeletonCardProps) {
   return (
     <Card variant={variant} padding={padding} className={className} aria-hidden="true" data-skeleton="card">
-      {media !== undefined && <Skeleton shape="block" height={media} className="rst:mb-4" />}
-      <Skeleton size="lg" width="45%" />
-      {lines > 0 && <Skeleton size="md" lines={lines} className="rst:mt-2" />}
+      {media !== undefined && <Skeleton shape="block" height={media} animation={animation} className="rst:mb-4" />}
+      <Skeleton size="lg" width="45%" animation={animation} />
+      {lines > 0 && <Skeleton size="md" lines={lines} animation={animation} className="rst:mt-2" />}
     </Card>
   );
 }
@@ -39,6 +41,8 @@ function SkeletonCard({ media, lines = 3, variant, padding, className }: Skeleto
 export interface SkeletonTableRowProps {
   /** How many cells. */
   columns: number;
+  /** How its skeletons move: see `Skeleton`. Inside a `SkeletonRegion`, the region's. */
+  animation?: SkeletonAnimation;
   className?: string;
 }
 
@@ -47,13 +51,13 @@ export interface SkeletonTableRowProps {
  * size, each holding one line in the cell's text size. Stands in for a row of
  * one-line cells.
  */
-function SkeletonTableRow({ columns, className }: SkeletonTableRowProps) {
+function SkeletonTableRow({ columns, animation, className }: SkeletonTableRowProps) {
   const widths = ["70%", "50%", "60%", "40%"];
   return (
     <TableRow aria-hidden="true" className={className} data-skeleton="table-row">
       {Array.from({ length: Math.max(1, columns) }, (_, i) => (
         <TableCell key={i}>
-          <Skeleton size="inherit" width={widths[i % widths.length]} />
+          <Skeleton size="inherit" width={widths[i % widths.length]} animation={animation} />
         </TableCell>
       ))}
     </TableRow>
@@ -65,16 +69,18 @@ export interface SkeletonAvatarProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   /** A name line beside it, in `text-sm`. */
   withName?: boolean;
+  /** How its skeletons move: see `Skeleton`. Inside a `SkeletonRegion`, the region's. */
+  animation?: SkeletonAnimation;
   className?: string;
 }
 
 /** An Avatar loading, and optionally the name beside it. */
-function SkeletonAvatar({ size = "md", withName = false, className }: SkeletonAvatarProps) {
-  if (!withName) return <Skeleton shape="circle" size={size} className={className} />;
+function SkeletonAvatar({ size = "md", withName = false, animation, className }: SkeletonAvatarProps) {
+  if (!withName) return <Skeleton shape="circle" size={size} animation={animation} className={className} />;
   return (
     <span aria-hidden="true" className={cn("rst:flex rst:items-center rst:gap-3", className)} data-skeleton="avatar">
-      <Skeleton shape="circle" size={size} />
-      <Skeleton size="md" width="8rem" />
+      <Skeleton shape="circle" size={size} animation={animation} />
+      <Skeleton size="md" width="8rem" animation={animation} />
     </span>
   );
 }
@@ -90,6 +96,8 @@ export interface SkeletonStatProps {
   semantics?: "definition" | "standalone";
   /** A source line under the figure, as a Stat with `source` has. */
   source?: boolean;
+  /** How its skeletons move: see `Skeleton`. Inside a `SkeletonRegion`, the region's. */
+  animation?: SkeletonAnimation;
   className?: string;
 }
 
@@ -99,17 +107,17 @@ export interface SkeletonStatProps {
  * the label is the real Eyebrow, a flex item where Stat's is, so it makes the
  * same line.
  */
-function SkeletonStat({ size = "md", semantics = "definition", source = false, className }: SkeletonStatProps) {
+function SkeletonStat({ size = "md", semantics = "definition", source = false, animation, className }: SkeletonStatProps) {
   const valueClass = statValueVariants({ size, colorScheme: "neutral" });
-  const value = <Skeleton size="inherit" width="2.5em" />;
+  const value = <Skeleton size="inherit" width="2.5em" animation={animation} />;
   const label = (
     <Eyebrow size="xs">
-      <Skeleton size="inherit" width="9em" />
+      <Skeleton size="inherit" width="9em" animation={animation} />
     </Eyebrow>
   );
   const sourceLine = (
     <span className={statSourceClass}>
-      <Skeleton size="inherit" width="12em" />
+      <Skeleton size="inherit" width="12em" animation={animation} />
     </span>
   );
   if (semantics === "standalone") {
@@ -128,7 +136,7 @@ function SkeletonStat({ size = "md", semantics = "definition", source = false, c
         <dd className={cn("rst:m-0", valueClass, "rst:col-start-1 rst:row-span-3 rst:row-start-1 rst:grid rst:grid-rows-subgrid")}>
           <span className="rst:row-start-1">{value}</span>
           <span className={cn(statSourceClass, "rst:row-start-3")}>
-            <Skeleton size="inherit" width="12em" />
+            <Skeleton size="inherit" width="12em" animation={animation} />
           </span>
         </dd>
       ) : (

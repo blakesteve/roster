@@ -245,6 +245,10 @@ export const TheUserMenuLooksAsItDid: Story = {
 };
 
 
+/* Engines print the same oklab color to different precision (Chromium
+   0.500224, WebKit 0.500227): compared to three places. */
+const tidy = (color: string) => color.replace(/\d*\.\d+/g, (n) => String(Math.round(Number(n) * 1000) / 1000));
+
 export const TheUserMenuPointsAsItDid: Story = {
   tags: ["real-input"],
   render: () => <UserMenuFixture />,
@@ -259,16 +263,16 @@ export const TheUserMenuPointsAsItDid: Story = {
       const r = rows[i];
       /* Read once the colors have finished easing in. */
       await waitFor(() => expect(r.getAnimations({ subtree: true }).length).toBe(0));
-      return [getComputedStyle(r).backgroundColor, labelOf(r, panel).style.color];
+      return [tidy(getComputedStyle(r).backgroundColor), labelOf(r, panel).style.color];
     };
     /* Under the pointer, Inbox takes a ghost Button's own fill and Settings a
        Link's darker words, each over the focused row's pale fill. The twin:
        Dark Mode, a plain row then too, takes the pale fill and keeps its words. */
     await expect([await under(0), await under(1), await under(2), await under(3)]).toEqual([
-      ["oklab(0.500224 0.000659585 0.00672197 / 0.1)", "rgb(87, 83, 78)"],
+      ["oklab(0.5 0.001 0.007 / 0.1)", "rgb(87, 83, 78)"],
       ["rgb(250, 250, 249)", "rgb(68, 64, 60)"],
       ["rgb(250, 250, 249)", "rgb(28, 25, 23)"],
-      ["oklab(0.500224 0.000659585 0.00672197 / 0.1)", "rgb(87, 83, 78)"],
+      ["oklab(0.5 0.001 0.007 / 0.1)", "rgb(87, 83, 78)"],
     ]);
     trigger.click();
   },

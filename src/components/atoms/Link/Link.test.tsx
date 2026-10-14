@@ -97,10 +97,10 @@ describe("Link Atom", () => {
 
     rerender(
       <Link href="#" variant="white">
-        MegaSquad Dark
+        Tidewater Dark
       </Link>,
     );
-    link = screen.getByRole("link", { name: "MegaSquad Dark" });
+    link = screen.getByRole("link", { name: "Tidewater Dark" });
 
     expect(link).toHaveClass("rst:text-gray-200", "rst:dark:text-gray-300");
   });

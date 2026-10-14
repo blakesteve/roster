@@ -14,7 +14,7 @@ global.ResizeObserver = ResizeObserverMock;
 
 // mock data
 const defaultProps: NavbarProps = {
-  brandName: "MegaSquad",
+  brandName: "Tidewater",
   logoSrc: "/logo.png",
   items: [
     { label: "Home", path: "/" },
@@ -39,7 +39,7 @@ describe("Navbar Component", () => {
   it("renders the brand name and logo", () => {
     render(<Navbar {...defaultProps} />);
 
-    expect(screen.getByText("MegaSquad")).toBeInTheDocument();
+    expect(screen.getByText("Tidewater")).toBeInTheDocument();
 
     /* The logo is decorative: the name beside it names the link, so it
        isn't read a second time. */
@@ -245,7 +245,7 @@ describe("Navbar Component", () => {
     expect(screen.getByTestId("custom-brand")).toBeInTheDocument();
     expect(screen.getByTestId("custom-brand")).toHaveTextContent("CUSTOM BRAND");
     // The plain brandName string should not appear as visible text
-    expect(screen.queryByText("MegaSquad")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tidewater")).not.toBeInTheDocument();
   });
 
   it("renders userMenuItems in the desktop dropdown when user is present", () => {
@@ -499,6 +499,10 @@ describe("Navbar mobile panel dismissal on navigation", () => {
     within(panel).getByRole("link", { name: "Leagues" }).focus();
     await userEvent.tab({ shift: true });
     expect([panel.contains(document.activeElement), hamburger.getAttribute("aria-expanded")]).toEqual([true, "true"]);
+    /* WebKit doesn't focus a button on click: it focuses the Popover's own
+       panel element around the card. That's still inside, and leaves it open. */
+    (panel.parentElement as HTMLElement).focus();
+    expect([document.activeElement === panel.parentElement, hamburger.getAttribute("aria-expanded")]).toEqual([true, "true"]);
   });
 
   // Control: the built-in slots already wire close() themselves.

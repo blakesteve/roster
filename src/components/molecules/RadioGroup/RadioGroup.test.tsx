@@ -259,9 +259,9 @@ describe("RadioGroup", () => {
 
   describe("labelling and validation", () => {
     it("names the group from `label`", () => {
-      render(<Stateful label="Who can see this squad" />);
+      render(<Stateful label="Who can see this group" />);
       expect(
-        screen.getByRole("radiogroup", { name: "Who can see this squad" }),
+        screen.getByRole("radiogroup", { name: "Who can see this group" }),
       ).toBeInTheDocument();
     });
 

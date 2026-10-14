@@ -303,6 +303,12 @@ function MobileOutsideClickListener({ close, panel, hamburger }: MobilePanelProp
 function MobilePanelFocus({ close, panel }: Pick<MobilePanelProps, "close" | "panel">) {
   useEffect(() => {
     const handleFocusIn = (e: FocusEvent) => {
+      /* A click on something in the card that doesn't take focus itself, its
+         words or its padding, focuses the nearest focusable ancestor: Headless
+         UI's own panel element around this card. WebKit treats a click on a
+         button the same way, since it never focuses one on a click. That's
+         still inside. */
+      if (e.target === panel.current?.parentElement) return;
       if (!inMobilePanel(panel.current, e.target as Node)) close();
     };
     /* A frame on: Headless UI settles focus on its button after this effect. */

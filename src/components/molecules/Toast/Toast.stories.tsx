@@ -166,7 +166,7 @@ export const Live: Story = {
   ),
   play: async ({ canvasElement }) => {
     /* `info` is the one worth asserting. react-hot-toast ships no `info`, so
-       an app that wants one improvises — mega-squad improvised by calling
+       an app that wants one improvises — one consumer improvised by calling
        `toast.error`, and every informational message in that app rendered as
        an error until this existed. */
     const canvas = within(canvasElement);
