@@ -18,6 +18,8 @@ import { MediaPreview } from "./components/molecules/MediaPreview/MediaPreview";
 import { ModerationQueue, type ModerationQueueLabels } from "./components/organisms/ModerationQueue/ModerationQueue";
 import { QueueEditDialog } from "./components/organisms/ModerationQueue/QueueEditDialog";
 import type { QueueRunResult } from "./components/organisms/ModerationQueue/queue-actions";
+import { Slider } from "./components/molecules/Slider/Slider";
+import { RangeSlider } from "./components/molecules/RangeSlider/RangeSlider";
 
 /**
  * Every word a component shows or says of its own can be replaced. Here every
@@ -293,6 +295,29 @@ describe("pseudo-locale: no built-in English is left once every label is replace
         />
       ),
       ["in", "new", "tab"],
+    ],
+    [
+      "Slider, not set",
+      (labeled) => (
+        <Slider
+          label={pseudo("How sure")}
+          defaultValue={null}
+          snapPoints={[{ value: 70, label: pseudo("Fair") }]}
+          labels={labeled ? { notSet: pseudo("Not set") } : undefined}
+        />
+      ),
+      ["Not", "set"],
+    ],
+    [
+      "RangeSlider",
+      (labeled) => (
+        <RangeSlider
+          label={pseudo("Price")}
+          snapPoints={[{ value: 70, label: pseudo("Fair") }]}
+          labels={labeled ? { low: pseudo("Minimum"), high: pseudo("Maximum") } : undefined}
+        />
+      ),
+      ["Minimum", "Maximum"],
     ],
   ];
 

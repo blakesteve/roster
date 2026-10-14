@@ -83,6 +83,8 @@ export * from './components/molecules/ErrorState/ErrorState';
 export * from './components/molecules/ErrorState/error-state-variants';
 export * from './components/molecules/MatchupCard/MatchupCard';
 export * from './components/molecules/Menu/Menu';
+export * from './components/molecules/Slider/Slider';
+export * from './components/molecules/RangeSlider/RangeSlider';
 
 // --- ORGANISMS ---
 export * from './components/organisms/ActionBar/ActionBar';

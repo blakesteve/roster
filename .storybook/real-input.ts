@@ -157,7 +157,48 @@ export const realEmulateMedia: BrowserCommand<[features: { forcedColors?: "activ
   await context.page.emulateMedia(features);
 };
 
-export const realInputCommands = { realWheel, realDrag, realClick, realHover, realSetFiles, realDropFiles, realEmulateMedia };
+/**
+ * Presses keys on the real keyboard, one after another with no pause between,
+ * to the focused element: trusted events, as fast as the browser takes them.
+ */
+export const realPress: BrowserCommand<[keys: string[]]> = async (context, keys) => {
+  for (const key of keys) await context.page.keyboard.press(key);
+};
+
+/**
+ * A real finger: touches `selector` at a fraction of its box, moves `dx` and
+ * `dy` page pixels in `steps`, and lifts. Chromium only, through its DevTools
+ * protocol, which feeds the touch to the same input pipeline a touchscreen
+ * does, so the browser decides on scrolling and captures the pointer as it
+ * would for a person. Returns false, touching nothing, where the browser has
+ * no such protocol (WebKit), so a check can say what it skipped.
+ */
+export const realTouchSwipe: BrowserCommand<
+  [selector: string, dx: number, dy: number, options?: { fx?: number; fy?: number; steps?: number }]
+> = async (context, selector, dx, dy, options = {}) => {
+  let session;
+  try {
+    session = await context.page.context().newCDPSession(context.page);
+  } catch {
+    return false;
+  }
+  const start = await centerOf(context, selector, options);
+  const steps = options.steps ?? 15;
+  const at = (i: number) => [{ x: start.x + (dx * i) / steps, y: start.y + (dy * i) / steps, id: 1 }];
+  try {
+    await session.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: at(0) });
+    for (let i = 1; i <= steps; i++) {
+      await session.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: at(i) });
+      await context.page.waitForTimeout(16);
+    }
+    await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  } finally {
+    await session.detach();
+  }
+  return true;
+};
+
+export const realInputCommands = { realWheel, realDrag, realClick, realHover, realSetFiles, realDropFiles, realEmulateMedia, realPress, realTouchSwipe };
 
 declare module "vitest/browser" {
   interface BrowserCommands {
@@ -172,5 +213,7 @@ declare module "vitest/browser" {
     realSetFiles: (selector: string, files: RealFile[]) => Promise<void>;
     realDropFiles: (selector: string, files: RealFile[]) => Promise<void>;
     realEmulateMedia: (features: { forcedColors?: "active" | "none" | null }) => Promise<void>;
+    realPress: (keys: string[]) => Promise<void>;
+    realTouchSwipe: (selector: string, dx: number, dy: number, options?: { fx?: number; fy?: number; steps?: number }) => Promise<boolean>;
   }
 }

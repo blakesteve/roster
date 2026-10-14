@@ -23,6 +23,10 @@ export interface RealInput {
     realDropFiles: (selector: string, files: RealFile[]) => Promise<void>;
     /** Emulates media features for the page, such as forced colors; `null` clears one. */
     realEmulateMedia: (features: { forcedColors?: "active" | "none" | null }) => Promise<void>;
+    /** Presses keys on the real keyboard, one after another, to the focused element. */
+    realPress: (keys: string[]) => Promise<void>;
+    /** A real finger's swipe, through Chromium's DevTools protocol; false where there's none (WebKit). */
+    realTouchSwipe: (selector: string, dx: number, dy: number, options?: { fx?: number; fy?: number; steps?: number }) => Promise<boolean>;
     /** The accessibility tree's role, name, description and states for each element (.storybook/ax-tree.ts). */
     axStates: (selectors: string[]) => Promise<
       {
@@ -36,6 +40,8 @@ export interface RealInput {
         checked: string | null;
         expanded: boolean | null;
         hasPopup: string | null;
+        value: string | null;
+        valueText: string | null;
       }[]
     >;
   };
