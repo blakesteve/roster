@@ -6,6 +6,7 @@ import { Textarea } from "./components/atoms/Textarea/Textarea";
 import { Card } from "./components/atoms/Card/Card";
 import { Dialog } from "./components/organisms/Dialog/Dialog";
 import { Navbar } from "./components/organisms/Navbar/Navbar";
+import { backgroundOf, contrast, paint } from "./test/painted";
 
 /**
  * Two readability rules, checked rendered in Chromium.
@@ -167,40 +168,6 @@ const MINIMUM = 4.5;
 
 /* What 5.2.1 painted: gray-400 in light, gray-500 in dark. */
 const OLD = { light: "#a8a29e", dark: "#65635f" };
-
-/** Paints `layers` bottom to top on one pixel and reads it back, so any CSS
-    color Chromium can compute, with any alpha, composites as the page does. */
-function paint(layers: string[]): number[] {
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = 1;
-  const ctx = canvas.getContext("2d")!;
-  for (const color of layers) {
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, 1, 1);
-  }
-  return Array.from(ctx.getImageData(0, 0, 1, 1).data.slice(0, 3));
-}
-
-/** Background colors from `el` up to the first opaque one, bottom first. */
-function backgroundOf(el: Element): string[] {
-  const layers: string[] = [];
-  for (let node: Element | null = el; node; node = node.parentElement) {
-    const color = getComputedStyle(node).backgroundColor;
-    layers.unshift(color);
-    if (paint(["rgb(0, 0, 0)", color]).join() === paint(["rgb(255, 255, 255)", color]).join()) break;
-  }
-  return layers;
-}
-
-function luminance([r, g, b]: number[]) {
-  const lin = (c: number) => ((c /= 255) <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
-  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-}
-
-function contrast(a: number[], b: number[]) {
-  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-  return (hi + 0.05) / (lo + 0.05);
-}
 
 /** The placeholder's contrast against its own field, as painted. */
 function placeholderContrast(field: Element, color = getComputedStyle(field, "::placeholder").color) {

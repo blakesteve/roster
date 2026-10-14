@@ -91,8 +91,18 @@ export const selectOptionVariants = /* @__PURE__ */ cva(
      `text-sm` lives here rather than on the popup, and carries no `sm:`. The
      popup used to set `text-base sm:text-sm`, which made a menu row 44px on
      mobile and 40px from `sm` up: the exact breakpoint-dependent geometry this
-     change removed from the trigger, still alive one element away. */
-  "rst:text-sm rst:group rst:relative rst:cursor-default rst:select-none rst:py-2.5 rst:pl-4 rst:pr-9 rst:transition-colors rst:text-inherit rst:data-focus:bg-primary-100 rst:data-focus:text-primary-900 rst:dark:data-focus:bg-primary-900/30 rst:dark:data-focus:text-primary-100 rst:data-selected:bg-gray-50 rst:dark:data-selected:bg-gray-700/50 rst:data-disabled:opacity-50 rst:data-disabled:cursor-not-allowed",
+     change removed from the trigger, still alive one element away.
+
+     `cursor-pointer`: a row is a click target, as Menu's are.
+
+     Focus is the tint and an inset ring in the focus token. The tint alone
+     measures under 1.2:1 against the panel in both themes, on the default
+     surface and a consumer's; the ring follows the token a consumer tunes
+     against their own surfaces, and holds 3:1 on any of them. Headless UI's
+     `data-focus` comes from the keys and the pointer alike, so the ring shows
+     on hover too. In forced colors, which drop both, focus is an outline. */
+  "rst:data-focus:ring-2 rst:data-focus:ring-inset rst:data-focus:ring-ring rst:forced-colors:data-focus:outline-solid rst:forced-colors:data-focus:outline-2 rst:forced-colors:data-focus:-outline-offset-2 " +
+  "rst:text-sm rst:group rst:relative rst:cursor-pointer rst:select-none rst:py-2.5 rst:pl-4 rst:pr-9 rst:transition-colors rst:text-inherit rst:data-focus:bg-primary-100 rst:data-focus:text-primary-900 rst:dark:data-focus:bg-primary-900/30 rst:dark:data-focus:text-primary-100 rst:data-selected:bg-gray-50 rst:dark:data-selected:bg-gray-700/50 rst:data-disabled:opacity-50 rst:data-disabled:cursor-not-allowed",
   {
     variants: {
       size: {

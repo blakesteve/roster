@@ -151,7 +151,9 @@ export const SlateField: Story = {
 };
 
 /**
- * Showcases how to pass interactive elements into the `endIcon` prop.
+ * Showcases how to pass interactive elements into the `endIcon` prop: a real
+ * button, named, with a pointer cursor and a focus ring like any other control.
+ * For a password, `PasswordInput` does all of this already.
  */
 export const PasswordAction: Story = {
   args: {
@@ -159,7 +161,11 @@ export const PasswordAction: Story = {
     label: "Password",
     defaultValue: "Secret123",
     endIcon: (
-      <button className="rst:opacity-70 rst:hover:opacity-100 rst:transition-opacity rst:focus:outline-none">
+      <button
+        type="button"
+        aria-label="Show password"
+        className="rst:cursor-pointer rst:rounded-sm rst:opacity-70 rst:hover:opacity-100 rst:transition-opacity rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring"
+      >
         <FontAwesomeIcon icon={faEye} className="rst:h-4 rst:w-4" />
       </button>
     ),

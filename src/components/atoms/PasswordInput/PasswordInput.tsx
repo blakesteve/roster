@@ -87,7 +87,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
                 "rst:-m-1 rst:flex rst:items-center rst:rounded-sm rst:p-1 rst:transition-opacity",
                 "rst:opacity-70 rst:hover:opacity-100",
                 "rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring",
-                disabled && "rst:cursor-not-allowed rst:opacity-40 rst:hover:opacity-40",
+                disabled ? "rst:cursor-not-allowed rst:opacity-40 rst:hover:opacity-40" : "rst:cursor-pointer",
               )}
             >
               <FontAwesomeIcon
