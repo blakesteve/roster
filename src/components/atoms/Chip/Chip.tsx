@@ -71,16 +71,17 @@ const CONTROL =
  * clicks off the visible box of the chip beside it, which is the one thing a
  * larger target must never do. Above and below there is only the row gap.
  *
- * So the target is the chip's own width and 44px tall, centered: 8px of
- * overhang each side at `md` (28px), 12px at `sm` (20px). Centered with a
- * translate rather than inset, because an absolutely positioned pseudo-element
- * resolves `inset` against the padding box and the `outline` variant's border
- * would take a pixel off each side.
+ * So the target is the chip's own width and 44px tall, centered: 7px of
+ * overhang each side at `md` (30px with its border), 11px at `sm` (22px).
+ * Centered with a translate rather than inset, because an absolutely
+ * positioned pseudo-element resolves `inset` against the padding box and the
+ * border every variant carries would take a pixel off each side.
  *
  * What the layout owes it, shown in the stories, and the same clearance
  * applies to any other control above or below a row of chips:
  * - a wrapping row needs a row gap of twice the overhang for every chip to keep
- *   its full 44px (16px at `md`, 24px at `sm`). Any gap of at least the
+ *   its full 44px (14px at `md`, 22px at `sm`; `gap-y-4` and `gap-y-6` clear
+ *   them). Any gap of at least the
  *   overhang keeps each chip's visible box its own; below that, a lower chip's
  *   target covers the bottom of the chip above it.
  * - a horizontally scrolling row needs block padding of the overhang, because

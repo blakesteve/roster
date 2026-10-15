@@ -356,8 +356,8 @@ const chipAt = (x: number, y: number) =>
 
 /**
  * Probes 1px inside and 1px outside the 44px target, above and below the
- * chip's own box. Derived from the chip's rendered height, since the
- * `outline` variant's border makes a `md` chip 30px rather than 28.
+ * chip's own box. Derived from the chip's rendered height, which follows
+ * `--roster-border-width`: a `md` chip is 30px at the default 1px.
  */
 async function expectTarget(chip: HTMLElement) {
   const r = chip.getBoundingClientRect();
@@ -370,8 +370,8 @@ async function expectTarget(chip: HTMLElement) {
 }
 
 /**
- * A selectable chip's hit area is 44px tall: about 8px above and below a `md`
- * chip, about 12px at `sm`. It never reaches sideways, where it would cover
+ * A selectable chip's hit area is 44px tall: about 7px above and below a `md`
+ * chip, about 11px at `sm`. It never reaches sideways, where it would cover
  * the chip beside it.
  *
  * **A wrapping row needs a row gap of twice that overhang** for every chip to
@@ -410,7 +410,7 @@ export const TargetInAWrappingRow: Story = {
  * **A horizontally scrolling row needs block padding of the overhang.**
  * `overflow-x: auto` clips vertical overflow too, and clipping applies to
  * hit testing, so without it the target stops at the chip's edge. `py-2`
- * gives a `md` row its 8px.
+ * gives a `md` row its 7px, and a pixel more.
  */
 export const TargetInAScrollingRow: Story = {
   args: { children: "placeholder" },

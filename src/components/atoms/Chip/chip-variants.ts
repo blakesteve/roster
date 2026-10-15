@@ -21,7 +21,13 @@ import { cva } from "class-variance-authority";
  * viewer should notice is that this one responds.
  */
 export const chipVariants = /* @__PURE__ */ cva(
-  "rst:font-ui rst:inline-flex rst:items-center rst:rounded-full rst:font-medium rst:whitespace-nowrap rst:align-middle rst:transition-colors",
+  /* A border on every variant, transparent where the variant draws none, so
+     every variant is one size. Only `outline` had one, so a chip that swaps
+     `outline` for `solid` when selected, as a filter row and a slider's snap
+     chips do, lost the border's width on both sides at the press and the row
+     jumped. A transparent border costs nothing to see: the fill paints under
+     it. Its width is `--roster-border-width`, like every edge. */
+  "rst:font-ui rst:inline-flex rst:items-center rst:rounded-full rst:border rst:border-transparent rst:font-medium rst:whitespace-nowrap rst:align-middle rst:transition-colors",
   {
     variants: {
       colorScheme: {
@@ -34,7 +40,7 @@ export const chipVariants = /* @__PURE__ */ cva(
       },
       variant: {
         soft: "",
-        outline: "rst:bg-transparent rst:border",
+        outline: "rst:bg-transparent",
         solid: "",
       },
       size: {

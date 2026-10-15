@@ -744,11 +744,10 @@ opens are also legitimately different surfaces in plenty of palettes.
 **Set these at `:root`, not on a container.** The menu and the tooltip bubble
 are portaled to `<body>`, so they are not descendants of whatever you rendered
 the component inside: properties set on a wrapper reach the trigger and stop
-there. Any ancestor of `<body>` works — `:root` is simply the one that always
-is, which is also why the `.dark` block below reaches a menu whose `.dark`
-scope `Select` copies across the portal. The result is a themed trigger opening an unthemed panel, which is the
-exact problem this family exists to fix. Set them in both scopes too, for the
-same reason the control family needs both.
+there, and the result is a themed trigger opening an unthemed panel, which is
+the exact problem this family exists to fix. Any ancestor of `<body>` works:
+`:root`, `html.dark`, or inline on `<html>` all reach every panel. Set them in
+both scopes too, for the same reason the control family needs both.
 
 Where each component takes them, and why not everywhere:
 
@@ -939,9 +938,12 @@ look like oversights until you know why:
   variable that inline rule reads:
   `optionsClassName="rst:[--anchor-max-height:20rem]"`.
 - **The panel is portaled to `<body>`**, so a `.dark` scoped to part of your
-  page does not reach it. All three components copy the nearest `.dark` onto
-  the panel to fix that. Custom properties are not carried the same way — set
-  `--roster-popover-*` at `:root`.
+  page does not reach it. The panel carries `.dark` itself in that case, and
+  only then: when `.dark` is on `<html>` or `<body>` the panel is already
+  inside it, and carrying the class would re-declare Roster's palette on the
+  panel over your own. Every portaled surface does the same (`Menu`, `Sheet`
+  and the toasts too). Custom properties are not carried: set
+  `--roster-popover-*` on an ancestor of `<body>`.
 - **A row is a click target, and focus is a ring.** Every option row shows
   the pointer cursor, as `Menu`'s items do (a disabled one, `not-allowed`).
   A focused row keeps its tint and adds an inset `--roster-ring`, which is
