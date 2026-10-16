@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { cn } from "../../../lib/utils";
 import { Chip } from "../../atoms/Chip/Chip";
 import { CAP, INSET, along, type SliderSnapPoint } from "./track";
@@ -5,7 +6,7 @@ import { CAP, INSET, along, type SliderSnapPoint } from "./track";
 /* The parts of the track Slider and RangeSlider share. Internal. */
 
 /** The label and the visible number above the track. The number is hidden from screen readers, which hear it as the value. */
-export function SliderHeader(props: { labelId: string; label?: string; readout: string; empty: boolean; disabled: boolean; labelClassName?: string }) {
+export function SliderHeader(props: { labelId: string; label?: ReactNode; readout: string; empty: boolean; disabled: boolean; labelClassName?: string }) {
   return (
     <div className="rst:flex rst:items-baseline rst:justify-between rst:gap-3">
       {props.label ? (

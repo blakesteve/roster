@@ -555,6 +555,27 @@ the ring with it. In `Menu` the ring shows for keyboard focus only, because the
 pointer moves focus there too. Headless UI's popups mark the keys' row and the
 pointer's alike, so in theirs it shows on hover as well.
 
+**Keyboard focus shows in Safari too.** Every ring is drawn on Roster's
+`focus-visible` variant, which matches the engine's own `:focus-visible` or an
+element marked `data-key-focus`. WebKit doesn't match `:focus-visible` on an
+element a script focuses in answer to a key once the page has been clicked.
+Escape handing focus back to a menu's or a select's trigger, or to a dialog's
+opener, and a radio group's or tabs' arrows all drew no ring in Safari after
+a click. A small internal tracker marks those elements: keyboard mode starts on a navigation key (Tab, Option+Tab, the
+arrows, Escape, Enter, Space, Home, End, PageUp, PageDown) and ends on pointer
+input, and it marks only what Chromium's own `:focus-visible` already matches,
+so Chromium's rings are unchanged. It runs while a component that moves focus
+is mounted (Menu, the select family, Dialog, Sheet, RadioGroup, LiquidTabs,
+Slider and the rest), on one set of document listeners.
+
+Your own components' rings come from your Tailwind, not Roster's, so they
+don't follow the mark on their own. To have them do the same, redefine the
+variant in your stylesheet as Roster does:
+
+```css
+@custom-variant focus-visible (&:is(:focus-visible, [data-key-focus]));
+```
+
 ### Motion
 
 Two hand-rolled utilities, both of which stop for `prefers-reduced-motion`.
@@ -1652,6 +1673,10 @@ import { Slider } from "@blakesteve/roster";
   still lands anywhere between them. A chip shows as pressed (solid rather
   than outline) while the value is exactly its value, and pressing it again
   leaves it there. A point outside `min` to `max` is left out.
+- **The label** is a string or a node, so it can carry markup; the slider is
+  named by reference to it, so what's read is its text. A consumer's own
+  `aria-labelledby` names it instead, as when the visible label is shared and
+  each slider needs its own name.
 - **The number** shows beside the label (`formatValue` writes it). A screen
   reader hears it with the nearest snap point's name, "72%, Likely", and
   "Not set" while there's no value, never a number. Every string is in
@@ -1726,6 +1751,8 @@ import { RangeSlider } from "@blakesteve/roster";
 - **Snap points** put a bead on the rail and a `Chip` under it, which does
   what a tap on its mark does: moves the nearer thumb there (halfway, the
   low one). A chip shows as pressed while either thumb is on it.
+- **The label** takes a node too, and names the group and each thumb by
+  reference; a consumer's `aria-labelledby` names them instead.
 - **The number** beside the label shows both, "$120 – $340"
   (`labels.range`). Each thumb says its own value with the nearest snap
   point's name.

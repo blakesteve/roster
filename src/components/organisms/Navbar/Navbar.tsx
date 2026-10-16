@@ -23,6 +23,7 @@ import { Avatar } from "../../atoms/Avatar/Avatar";
 import { switchThumbVariants, switchTrackVariants } from "../../atoms/Switch/switch-variants";
 import { Menu, MenuButton, MenuCheckboxItem, MenuGroup, MenuItem, MenuItems, type MenuLinkProps } from "../../molecules/Menu/Menu";
 import { navbarVariants } from "./navbar-variants";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 /**
  * The theme rows' switch, drawn and nothing else.
@@ -376,6 +377,7 @@ const Navbar = ({
   notificationFill = "solid",
   ...props
 }: NavbarProps) => {
+  useKeyFocus();
   const l = withLabels(LABELS, labels);
   const menuLink = routerMenuLink(routerElement);
   const hasNotifications = (user?.notificationCount || 0) > 0;

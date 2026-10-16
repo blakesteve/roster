@@ -5,6 +5,7 @@ import { cn } from "../../../lib/utils";
 import { POPUP_PANEL, carriesDark } from "../../../internal/popup";
 import { Button, type ButtonProps } from "../../atoms/Button/Button";
 import { nextByTypeahead } from "./menu-typeahead";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 /* ── Contracts ─────────────────────────────────────────────────────────────── */
 
@@ -460,6 +461,7 @@ export interface MenuProps {
  * arrow away from the parent and closes with the arrow back.
  */
 function Menu({ children, open: openProp, onOpenChange, linkComponent = DefaultLink }: MenuProps) {
+  useKeyFocus();
   const [ownOpen, setOwnOpen] = React.useState(false);
   const open = openProp ?? ownOpen;
   const id = React.useId();

@@ -43,6 +43,16 @@
 @source inline("rst:font-display");
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Every focus ring in Roster is drawn on this variant, and it matches the
+   engine's own `:focus-visible` OR an element the keyboard-mode tracker has
+   marked (`src/internal/key-focus.ts`). WebKit doesn't match `:focus-visible`
+   on an element a script focuses in answer to a key once the page has been
+   clicked, so Escape back to a trigger, a focus trap's Tab and a radio
+   group's arrows drew no ring in Safari; the mark draws it. `:is()` takes
+   its most specific argument, and both are (0,1,0), so no ring's weight
+   moves. `group-`, `peer-`, `has-` and the rest compose with it. */
+@custom-variant focus-visible (&:is(:focus-visible, [data-key-focus]));
+
 @theme inline {
   /* --- Primary (Deep Blue) --- */
   --color-primary-50: var(--roster-primary-50, #f2f8fc);

@@ -559,3 +559,43 @@ export const ItSaysWhatItIs: Story = {
     slider("Started").removeAttribute("data-ax-probe");
   },
 };
+
+/* Visually hidden, still in the accessibility tree: how a consumer names a
+   control with text it doesn't show. */
+const VISUALLY_HIDDEN = { position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" } as const;
+
+export const ANodeLabelNamesIt: Story = {
+  tags: ["ax-tree"],
+  render: () => (
+    <Frame>
+      <Slider
+        label={
+          <>
+            How <strong>sure</strong> are you?
+          </>
+        }
+      />
+      <span id="named-elsewhere" style={VISUALLY_HIDDEN}>
+        Confidence in the home team
+      </span>
+      <Slider
+        aria-labelledby="named-elsewhere"
+        label={
+          <>
+            How <strong>sure</strong>
+          </>
+        }
+      />
+    </Frame>
+  ),
+  play: async () => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    const sliders = within(document.body).getAllByRole("slider");
+    sliders.forEach((el, i) => el.setAttribute("data-ax-probe", `node-${i}`));
+    const names = (await real.commands.axStates(['[data-ax-probe="node-0"]', '[data-ax-probe="node-1"]'])).map((a) => a.name);
+    /* A label with markup in it is read as its text. The twin: a consumer's
+       own name wins over the label shown. */
+    await expect(names).toEqual(["How sure are you?", "Confidence in the home team"]);
+  },
+};
