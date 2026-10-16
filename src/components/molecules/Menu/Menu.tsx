@@ -2,7 +2,7 @@ import * as React from "react";
 import { Portal } from "@headlessui/react";
 import { autoUpdate, flip, offset as offsetBy, shift, size, useFloating, type OffsetOptions, type Placement } from "@floating-ui/react-dom";
 import { cn } from "../../../lib/utils";
-import { POPUP_PANEL } from "../../../internal/popup";
+import { POPUP_PANEL, carriesDark } from "../../../internal/popup";
 import { Button, type ButtonProps } from "../../atoms/Button/Button";
 import { nextByTypeahead } from "./menu-typeahead";
 
@@ -660,7 +660,7 @@ function MenuItems({ children, align = "start", offset = 4, className, ...aria }
   };
 
   if (!mounted) return null;
-  const inDark = !!tree.triggerEl?.closest(".dark");
+  const inDark = carriesDark(tree.triggerEl);
   /* Headless UI's portal, not a bare one: inside a Dialog, a Sheet or a
      Popover, it's where they look for their own nested layers, so the panel
      isn't made inert behind a dialog or taken for a click outside one. */
@@ -1107,7 +1107,7 @@ function MenuSubmenu({ label, children, icon, disabled, textValue, className, pa
     parent.setOpenSubmenu(triggerId, focusFirst);
   };
 
-  const inDark = !!tree.triggerEl?.closest(".dark");
+  const inDark = carriesDark(tree.triggerEl);
   return (
     <>
       <button

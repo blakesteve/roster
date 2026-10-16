@@ -31,13 +31,31 @@ import * as React from "react";
  * `@custom-variant dark (&:where(.dark, .dark *))` matches, so this reproduces
  * the cascade rather than second-guessing it. Applying the class to the panel
  * covers the panel itself through the `&:where(.dark, …)` half, and its
- * options through `.dark *`. Idempotent when `.dark` is already on the root.
+ * options through `.dark *`.
+ *
+ * **Only when the portal leaves the scope.** When `.dark` is on `<html>` or
+ * `<body>`, the panel is already inside it and needs nothing. The class isn't
+ * harmless there either: it carries Roster's own `.dark` token block, which
+ * declares the default palette on the panel itself, over whatever the page set
+ * above it. A consumer's `--roster-*` set inline on `<html>`, or under
+ * `html.dark`, stopped at every panel, which drew Roster's grays under the
+ * consumer's trigger.
  *
  * Read once, on mount. A theme TOGGLE does not need this at all: it flips
  * `.dark` on `<html>`, and the portal is already a descendant of `<html>`. The
  * only case this covers is a scoped `.dark`, which is part of a page's
  * structure rather than something that changes at runtime.
  */
+/**
+ * Whether a panel portaled out from beside `el` must carry `.dark` itself:
+ * `el` is in a `.dark` scope, and the scope doesn't contain `<body>`, where
+ * the portal lands. See `useDarkScope` for why carrying it otherwise is wrong.
+ */
+export function carriesDark(el: Element | null | undefined): boolean {
+  const scope = el?.closest(".dark");
+  return !!scope && !scope.contains(document.body);
+}
+
 export function useDarkScope<T extends HTMLElement>(): {
   ref: React.RefObject<T | null>;
   inDarkScope: boolean;
@@ -46,7 +64,7 @@ export function useDarkScope<T extends HTMLElement>(): {
   const [inDarkScope, setInDarkScope] = React.useState(false);
 
   React.useLayoutEffect(() => {
-    setInDarkScope(!!ref.current?.closest(".dark"));
+    setInDarkScope(carriesDark(ref.current));
   }, []);
 
   return { ref, inDarkScope };
