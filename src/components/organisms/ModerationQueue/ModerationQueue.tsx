@@ -29,6 +29,7 @@ import {
   type QueueRunResult,
   type QueueTone,
 } from "./queue-actions";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 /** Every word ModerationQueue shows or says of its own. Pass any of them in `labels` to replace it. */
 export interface ModerationQueueLabels {
@@ -263,6 +264,7 @@ function ModerationQueue<T>({
   labels,
   className,
 }: ModerationQueueProps<T>) {
+  useKeyFocus();
   const l = withLabels(LABELS, labels);
   const actions = typeof actionsProp === "function" ? actionsProp(KIT as QueueActionKit<T>) : actionsProp;
   const id = useId();

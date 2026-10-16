@@ -23,6 +23,7 @@ import {
   POPUP_WIDTH_OF_BUTTON,
   useDarkScope,
 } from "../../../internal/popup";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 export type SelectOption = {
   value: string | number;
@@ -85,6 +86,7 @@ const Select = ({
   label,
   ...props
 }: SelectProps) => {
+  useKeyFocus();
   const selectedOption = options.find((opt) => opt.value === value);
   const hasError = !!errorMessage || error;
   /* By the rule every Roster field follows. The consumer's `aria-invalid` and

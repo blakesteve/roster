@@ -13,6 +13,7 @@ import { withLabels } from "../../../lib/labels";
 import { Button } from "../../atoms/Button/Button";
 import { Progress } from "../../atoms/Progress/Progress";
 import { acceptList, formatBytes, matchesType, sameFile } from "./file-rules";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 /** Where a file is: waiting its turn, on its way, being handled by the app's server, or finished one way or another. */
 export type FileUploadStatus = "queued" | "uploading" | "processing" | "done" | "failed" | "rejected";
@@ -224,6 +225,7 @@ function FileUpload<R = unknown>({
   strings: overrides,
   className,
 }: FileUploadProps<R>) {
+  useKeyFocus();
   const t = withLabels(STRINGS, overrides);
   const id = useId();
   const labelId = `${id}-label`;

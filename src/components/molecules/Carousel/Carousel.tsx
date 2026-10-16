@@ -15,6 +15,7 @@ import {
   CAROUSEL_DRAG_THRESHOLD,
 } from "./carousel-math";
 import { FLUID_CLASSES, FLUID_ITEM_WIDTH, perViewVars } from "./carousel-layout";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 /** Items per view at each width, from Roster's breakpoints up. */
 export interface CarouselPerView {
@@ -262,6 +263,7 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
   },
   ref,
 ) {
+  useKeyFocus();
   const l = withLabels(LABELS, labels);
   const listRef = React.useRef<HTMLUListElement>(null);
   const listId = `${React.useId()}-list`;
@@ -572,14 +574,15 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
   /* ── Keyboard focus ───────────────────────────────────────────────────────
      Focus from the keyboard snaps its item into place at once. A mouse click
      focuses too, and must not move the row under the pointer, so only a
-     visible focus counts. */
+     visible focus counts: the engine's own, or the keyboard-mode mark,
+     which is set before this runs. */
   const onFocus = (event: React.FocusEvent<HTMLUListElement>) => {
     const list = event.currentTarget;
     const target = event.target as HTMLElement;
     if (target === list || drag.current?.dragging) return;
     let visible = false;
     try {
-      visible = target.matches(":focus-visible");
+      visible = target.matches(":focus-visible, [data-key-focus]");
     } catch {
       visible = false;
     }

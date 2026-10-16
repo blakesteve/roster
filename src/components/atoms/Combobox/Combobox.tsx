@@ -26,6 +26,7 @@ import {
   POPUP_WIDTH_OF_INPUT,
   useDarkScope,
 } from "../../../internal/popup";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 export interface ComboboxProps
   extends
@@ -102,6 +103,7 @@ const Combobox = ({
   filter = defaultFilter,
   ...props
 }: ComboboxProps) => {
+  useKeyFocus();
   const [query, setQuery] = React.useState("");
   const { ref: fieldRef, inDarkScope } = useDarkScope<HTMLDivElement>();
   const hasError = !!errorMessage || error;

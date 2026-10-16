@@ -284,3 +284,41 @@ export const ItSaysWhatItIs: Story = {
     ]);
   },
 };
+
+const VISUALLY_HIDDEN = { position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" } as const;
+
+export const ANodeLabelNamesItsThumbs: Story = {
+  tags: ["ax-tree"],
+  render: () => (
+    <Frame>
+      <RangeSlider
+        label={
+          <>
+            Price <em>range</em>
+          </>
+        }
+      />
+      <span id="budget-elsewhere" style={VISUALLY_HIDDEN}>
+        Budget for the trip
+      </span>
+      <RangeSlider
+        aria-labelledby="budget-elsewhere"
+        label={
+          <>
+            Price <em>range</em>
+          </>
+        }
+      />
+    </Frame>
+  ),
+  play: async () => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    const thumbs = within(document.body).getAllByRole("slider");
+    thumbs.forEach((el, i) => el.setAttribute("data-ax-probe", `thumb-${i}`));
+    const names = (await real.commands.axStates(thumbs.map((_, i) => `[data-ax-probe="thumb-${i}"]`))).map((a) => a.name);
+    /* Each thumb is the label's text and its end. The twin: a consumer's own
+       name wins over the label shown, on both thumbs. */
+    await expect(names).toEqual(["Price range Minimum", "Price range Maximum", "Budget for the trip Minimum", "Budget for the trip Maximum"]);
+  },
+};

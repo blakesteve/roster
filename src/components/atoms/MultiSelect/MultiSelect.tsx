@@ -25,6 +25,7 @@ import {
   POPUP_WIDTH_OF_BUTTON,
   useDarkScope,
 } from "../../../internal/popup";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 export type MultiSelectValue = string | number;
 
@@ -126,6 +127,7 @@ const MultiSelect = ({
   countLabel = (count: number) => `${count} selected`,
   ...props
 }: MultiSelectProps) => {
+  useKeyFocus();
   const hasError = !!errorMessage || error;
   /* By the rule every Roster field follows. The consumer's `aria-invalid` and
      Headless UI's `invalid` are taken off `props`, which land on the wrapper,
