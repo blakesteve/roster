@@ -1,4 +1,4 @@
-import { useId, useReducer, useRef, useState, type HTMLAttributes, type KeyboardEvent } from "react";
+import { useId, useReducer, useRef, useState, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import { cn } from "../../../lib/utils";
 import { withLabels } from "../../../lib/labels";
 import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
@@ -16,6 +16,7 @@ import {
   type SliderSnapPoint,
 } from "../Slider/track";
 import { Fill, Marks, Message, Rail, SliderHeader, SnapChips } from "../Slider/track-parts";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 /** A range's two values, low then high. */
 export type RangeValue = [number, number];
@@ -62,8 +63,13 @@ export interface RangeSliderProps extends Omit<HTMLAttributes<HTMLDivElement>, "
    * thumb there. A point outside `min` to `max` is left out.
    */
   snapPoints?: SliderSnapPoint[];
-  /** The slider's name, shown above the track. */
-  label?: string;
+  /**
+   * The slider's name, shown above the track. A node as well as a string, so
+   * it can carry markup; it names the group and each thumb by reference, so
+   * what's read is its text. A consumer's own `aria-labelledby` names it
+   * instead.
+   */
+  label?: ReactNode;
   /** Supporting text under the slider. */
   helperText?: string;
   /** The message for an invalid value. Implies the error state. */
@@ -127,6 +133,7 @@ function RangeSlider({
   "aria-describedby": ariaDescribedBy,
   ...props
 }: RangeSliderProps) {
+  useKeyFocus();
   const l = withLabels(LABELS, overrides);
   const id = useId();
   const labelId = `${id}-label`;

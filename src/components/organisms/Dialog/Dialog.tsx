@@ -12,6 +12,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 import { withLabels } from "../../../lib/labels";
 import { lockPage } from "../../../internal/page-inert";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 const dialogVariants = /* @__PURE__ */ cva(
   "rst:relative rst:w-full rst:transform rst:overflow-hidden rst:rounded-2xl rst:p-6 rst:text-left rst:align-middle rst:elevation-overlay rst:transition-all rst:border",
@@ -164,6 +165,7 @@ const Dialog = ({
   onAfterClose,
   labels,
 }: DialogProps) => {
+  useKeyFocus();
   const l = withLabels(LABELS, labels);
   /* `open` goes to Headless UI's Dialog itself. It used to come from an outer
      `<Transition show={isOpen}>`, and wrapped that way Headless UI 2.2.9 marks

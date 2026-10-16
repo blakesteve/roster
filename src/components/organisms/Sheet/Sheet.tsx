@@ -19,6 +19,7 @@ import {
   type SheetDragSample,
 } from "./sheet-drag";
 import { titleSignature } from "./sheet-title";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 /** Every word Sheet says of its own. Pass any of them in `labels` to replace it. */
 export interface SheetLabels {
@@ -225,6 +226,7 @@ const Sheet = ({
   className,
   children,
 }: SheetProps) => {
+  useKeyFocus();
   const l = withLabels(LABELS, labels);
   const { ref: scopeRef, inDarkScope } = useDarkScope<HTMLSpanElement>();
   const reducedMotion = useReducedMotion();

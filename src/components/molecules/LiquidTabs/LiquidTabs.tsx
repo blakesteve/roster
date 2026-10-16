@@ -10,6 +10,7 @@ import {
   type LiquidVariant,
 } from "./liquid-pill";
 import { liquidTabId } from "./liquid-tab-id";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 export interface TabItem {
   id: string;
@@ -92,6 +93,7 @@ export function LiquidTabs({
   "aria-labelledby": ariaLabelledBy,
   className,
 }: LiquidTabsProps) {
+  useKeyFocus();
   const containerRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLDivElement>(null);
   const generatedId = useId();

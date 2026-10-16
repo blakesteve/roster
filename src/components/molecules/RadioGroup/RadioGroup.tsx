@@ -15,6 +15,7 @@ import {
   radioOptionVariants,
   radioVariants,
 } from "./radio-group-variants";
+import { useKeyFocus } from "../../../internal/key-focus";
 
 export type RadioGroupOption = {
   value: string;
@@ -174,6 +175,7 @@ const RadioGroup = ({
   "aria-invalid": ariaInvalid,
   ...props
 }: RadioGroupProps) => {
+  useKeyFocus();
   const hasError = !!errorMessage;
   /* By the rule every Roster field follows. A radio can't carry
      `aria-invalid`, so the group says it: it is what a screen reader reports

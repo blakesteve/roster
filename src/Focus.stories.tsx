@@ -17,7 +17,9 @@ import { Input } from "./components/atoms/Input/Input";
  *
  * This story is a keyboard test, not a visual one — `:focus-visible` only
  * matches when focus arrives from the keyboard, which is the point. Click into
- * a panel and press Tab.
+ * a panel and press Tab. (Roster's `focus-visible` variant also matches an
+ * element its keyboard-mode tracker marks, for the script-moved focus WebKit
+ * doesn't count; see the README's Focus section.)
  */
 
 const SCHEMES = ["primary", "error", "success", "teal", "amber", "neutral"] as const;
