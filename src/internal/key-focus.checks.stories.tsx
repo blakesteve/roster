@@ -12,6 +12,7 @@ import { RangeSlider } from "../components/molecules/RangeSlider/RangeSlider";
 import { Dialog } from "../components/organisms/Dialog/Dialog";
 import { Sheet } from "../components/organisms/Sheet/Sheet";
 import { realInputOrSkip } from "../test/real-input";
+import { heldOff, settled } from "../test/settle";
 
 /**
  * Keyboard focus shows after a click, checked with the real mouse and keys in
@@ -156,19 +157,28 @@ function path(
       const real = realInputOrSkip();
       if (!real) return;
       const el = await run(real);
-      await wait();
-      const state = {
-        focused: document.activeElement === el,
-        ringed: ringed(el),
-        native: el.matches(":focus-visible"),
-        markedOnly: markedOnly().length,
-        painted: holder(el) ? painted(holder(el)!) : null,
-        on: `${el.tagName.toLowerCase()} ${el.getAttribute("role") ?? ""} ${(el.getAttribute("aria-label") ?? el.textContent ?? "").trim().slice(0, 20)}`,
+      const ring = holder(el);
+      /* Read where focus and its ring end up: focus can land a frame after
+         the key (a popup hands it back as it closes), and the ring eases in. */
+      const read = async () => {
+        if (ring) await settled(ring);
+        return {
+          focused: document.activeElement === el,
+          ringed: ringed(el),
+          native: el.matches(":focus-visible"),
+          markedOnly: markedOnly().length,
+          painted: ring ? painted(ring) : null,
+          on: `${el.tagName.toLowerCase()} ${el.getAttribute("role") ?? ""} ${(el.getAttribute("aria-label") ?? el.textContent ?? "").trim().slice(0, 20)}`,
+        };
       };
-      console.info(`KEY FOCUS ${chromium() ? "chromium" : "webkit"} | ${label} | ${JSON.stringify(state)}`);
+      let state = await read();
       /* Focused, matched by the variant, and the ring painted where the
          component draws it. */
-      await expect([state.focused, state.ringed, state.painted]).toEqual([true, true, holder(el) ? true : null]);
+      await waitFor(async () => {
+        state = await read();
+        expect([state.focused, state.ringed, state.painted]).toEqual([true, true, ring ? true : null]);
+      });
+      console.info(`KEY FOCUS ${chromium() ? "chromium" : "webkit"} | ${label} | ${JSON.stringify(state)}`);
       if (chromium()) await expect([state.native, state.markedOnly]).toEqual([true, 0]);
     },
   };
@@ -274,9 +284,13 @@ export const TabWrapsInsideADialog: Story = {
       seen.push((document.activeElement?.textContent || document.activeElement?.getAttribute("aria-label") || "").trim());
     }
     const el = document.activeElement!;
-    const state = { seen, ringed: ringed(el), painted: painted(el), markedOnly: markedOnly().length };
+    let state = { seen, ringed: false, painted: false, markedOnly: 0 };
+    await waitFor(async () => {
+      await settled(el);
+      state = { seen, ringed: ringed(el), painted: painted(el), markedOnly: markedOnly().length };
+      expect([state.ringed, state.painted]).toEqual([true, true]);
+    });
     console.info(`KEY FOCUS ${chromium() ? "chromium" : "webkit"} | dialog trap wrap | ${JSON.stringify(state)}`);
-    await expect([state.ringed, state.painted]).toEqual([true, true]);
     if (chromium()) await expect(state.markedOnly).toBe(0);
   },
 };
@@ -351,7 +365,12 @@ export const AClickAloneNeverRings: Story = {
     const real = realInputOrSkip();
     if (!real) return;
     const seen: [string, boolean, boolean, boolean][] = [];
-    const read = (label: string, el: Element, ring: Element = el) => seen.push([label, document.activeElement === el, ringed(el), painted(ring)]);
+    /* Each read expects no ring, so it waits past any ring that could still
+       be on its way, not just for what's running now (see `heldOff`). */
+    const read = async (label: string, el: Element, ring: Element = el) => {
+      await heldOff(ring);
+      seen.push([label, document.activeElement === el, ringed(el), painted(ring)]);
+    };
 
     /* A menu opened and closed by clicking its button, focus back on it. */
     const menu = q("menu", "button");
@@ -359,7 +378,7 @@ export const AClickAloneNeverRings: Story = {
     await wait();
     await real.commands.realClick(tag(menu, "menu"));
     await wait();
-    read("menu button", menu);
+    await read("menu button", menu);
 
     /* A select's option picked with the mouse: focus goes back to the trigger by script. */
     const select = q("select", "button");
@@ -367,7 +386,7 @@ export const AClickAloneNeverRings: Story = {
     const option = await within(document.body).findByRole("option", { name: "Bravo" });
     await real.commands.realClick(tag(option, "option"));
     await wait();
-    read("select trigger", select);
+    await read("select trigger", select);
 
     /* A dialog opened and closed with the mouse: focus goes back to its opener by script. */
     const opener = button("dialog", "Open dialog");
@@ -375,17 +394,17 @@ export const AClickAloneNeverRings: Story = {
     await wait(500);
     await real.commands.realClick(tag(within(document.body).getByRole("button", { name: /close/i }), "close"));
     await wait(500);
-    read("dialog opener", opener);
+    await read("dialog opener", opener);
 
     /* A radio and a slider pressed. */
     const radio = document.querySelectorAll<HTMLElement>('[data-p="radio"] [role="radio"]')[2];
     await real.commands.realClick(tag(radio, "radio"));
     await wait();
-    read("radio", radio);
+    await read("radio", radio);
     const slider = q("slider", '[role="slider"]');
     await real.commands.realClick(tag(slider, "slider"), { fx: 0.3 });
     await wait();
-    read("slider", slider, slider.querySelector("[data-slider-thumb]")!);
+    await read("slider", slider, slider.querySelector("[data-slider-thumb]")!);
 
     console.info(`KEY FOCUS ${chromium() ? "chromium" : "webkit"} | click alone | ${JSON.stringify(seen)}`);
     /* Focus where the click left it, and no ring anywhere. Focus is checked
@@ -424,8 +443,60 @@ export const ATapAfterKeysDoesntRing: Story = {
     const tapped = await real.commands.realTouchSwipe(tag(radios[2], "radio-c"), 0, 0, { steps: 1 });
     if (!tapped) return; /* WebKit: Playwright has no real touch there. */
     await wait();
+    await heldOff(radios[2]);
     /* The keys' radio rang; the twin, the tapped one, doesn't, and no mark is left. */
     await expect([keyed, document.activeElement === radios[2], ringed(radios[2]), document.querySelectorAll("[data-key-focus]").length]).toEqual([true, true, false, 0]);
+  },
+};
+
+function LateRing({ name, after, ease }: { name: string; after: number; ease: string }) {
+  const [late, setLate] = useState(false);
+  return (
+    <Button data-key-focus={late ? "" : undefined} style={{ transition: ease }} onClick={() => window.setTimeout(() => setLate(true), after)}>
+      {name}
+    </Button>
+  );
+}
+
+function LateRings() {
+  return (
+    <div data-p="late" style={{ display: "flex", gap: 16, padding: 16 }}>
+      {/* No transition of its own: only the hold's 150ms floor can wait for
+          its ring, since a hold sized to the element alone would read at once. */}
+      <LateRing name="Rings at 100ms" after={100} ease="none" />
+      {/* A 400ms ease of its own and a ring at 250ms: past the floor, so only
+          a hold that reads the element's own transition waits long enough. */}
+      <LateRing name="Rings at 250ms" after={250} ease="box-shadow 400ms" />
+    </div>
+  );
+}
+
+/**
+ * The twin of every no-ring read: a click that rings 100ms later must be
+ * caught. The click is the element's own `click()`, so the read that follows
+ * runs before the 100ms timer can fire: the read `settled` alone would allow
+ * sees no ring there and would pass. `heldOff` waits it out and sees the ring.
+ * If it ever stops seeing it, every no-ring read in these checks is vacuous.
+ */
+export const ALateRingIsCaught: Story = {
+  tags: ["real-input"],
+  render: () => <LateRings />,
+  play: async () => {
+    const results: [string, boolean[], boolean[]][] = [];
+    for (const name of ["Rings at 100ms", "Rings at 250ms"]) {
+      const late = button("late", name);
+      late.click();
+      await settled(late);
+      const early = [ringed(late), painted(late)];
+      await heldOff(late);
+      results.push([name, early, [ringed(late), painted(late)]]);
+    }
+    console.info(`KEY FOCUS ${chromium() ? "chromium" : "webkit"} | late rings | ${JSON.stringify(results)}`);
+    /* Missed by a read as soon as nothing runs; caught by the hold. */
+    await expect(results).toEqual([
+      ["Rings at 100ms", [false, false], [true, true]],
+      ["Rings at 250ms", [false, false], [true, true]],
+    ]);
   },
 };
 
@@ -447,6 +518,8 @@ export const ChromiumRingsAreUnchanged: Story = {
     const step = async (label: string) => {
       await wait();
       const active = document.activeElement!;
+      /* A step pinned to no ring waits past any ring still on its way. */
+      if (WALK.find(([l]) => l === label)?.[1] === false) await heldOff(active);
       steps.push([label, ringed(active)]);
       if (markedOnly().length) extra.push(label);
     };
