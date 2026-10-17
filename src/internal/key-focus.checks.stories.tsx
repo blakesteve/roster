@@ -12,6 +12,7 @@ import { RangeSlider } from "../components/molecules/RangeSlider/RangeSlider";
 import { Dialog } from "../components/organisms/Dialog/Dialog";
 import { Sheet } from "../components/organisms/Sheet/Sheet";
 import { realInputOrSkip } from "../test/real-input";
+import { heldOff, settled } from "../test/settle";
 
 /**
  * Keyboard focus shows after a click, checked with the real mouse and keys in
@@ -135,20 +136,6 @@ const painted = (el: Element) => {
   const outline = style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0 && style.outlineColor !== "rgba(0, 0, 0, 0)";
   return spreads.some((n) => n >= 2) || outline;
 };
-/**
- * Waits for an element's transitions to run out, so a read is of where it
- * ends rather than a frame on the way. A field's ring eases from its 1px edge
- * to 2px over 150ms after focus lands, and a read mid-ease measured under the
- * threshold on a slower machine. Bounded, so a looping animation can't hang
- * the check.
- */
-async function settled(el: Element) {
-  for (let i = 0; i < 10; i++) {
-    const running = el.getAnimations().filter((a) => a.playState === "running");
-    if (!running.length) return;
-    await Promise.race([Promise.all(running.map((a) => a.finished.catch(() => undefined))), wait(1000)]);
-  }
-}
 /** Marked elements Chromium's own `:focus-visible` doesn't match: none, ever. */
 const markedOnly = () => [...document.querySelectorAll("[data-key-focus]")].filter((el) => !el.matches(":focus-visible"));
 
@@ -378,10 +365,10 @@ export const AClickAloneNeverRings: Story = {
     const real = realInputOrSkip();
     if (!real) return;
     const seen: [string, boolean, boolean, boolean][] = [];
-    /* Read once its transitions run out, so a ring easing in after a beat
-       can't slip past a read taken before it started. */
+    /* Each read expects no ring, so it waits past any ring that could still
+       be on its way, not just for what's running now (see `heldOff`). */
     const read = async (label: string, el: Element, ring: Element = el) => {
-      await settled(ring);
+      await heldOff(ring);
       seen.push([label, document.activeElement === el, ringed(el), painted(ring)]);
     };
 
@@ -456,8 +443,60 @@ export const ATapAfterKeysDoesntRing: Story = {
     const tapped = await real.commands.realTouchSwipe(tag(radios[2], "radio-c"), 0, 0, { steps: 1 });
     if (!tapped) return; /* WebKit: Playwright has no real touch there. */
     await wait();
+    await heldOff(radios[2]);
     /* The keys' radio rang; the twin, the tapped one, doesn't, and no mark is left. */
     await expect([keyed, document.activeElement === radios[2], ringed(radios[2]), document.querySelectorAll("[data-key-focus]").length]).toEqual([true, true, false, 0]);
+  },
+};
+
+function LateRing({ name, after, ease }: { name: string; after: number; ease: string }) {
+  const [late, setLate] = useState(false);
+  return (
+    <Button data-key-focus={late ? "" : undefined} style={{ transition: ease }} onClick={() => window.setTimeout(() => setLate(true), after)}>
+      {name}
+    </Button>
+  );
+}
+
+function LateRings() {
+  return (
+    <div data-p="late" style={{ display: "flex", gap: 16, padding: 16 }}>
+      {/* No transition of its own: only the hold's 150ms floor can wait for
+          its ring, since a hold sized to the element alone would read at once. */}
+      <LateRing name="Rings at 100ms" after={100} ease="none" />
+      {/* A 400ms ease of its own and a ring at 250ms: past the floor, so only
+          a hold that reads the element's own transition waits long enough. */}
+      <LateRing name="Rings at 250ms" after={250} ease="box-shadow 400ms" />
+    </div>
+  );
+}
+
+/**
+ * The twin of every no-ring read: a click that rings 100ms later must be
+ * caught. The click is the element's own `click()`, so the read that follows
+ * runs before the 100ms timer can fire: the read `settled` alone would allow
+ * sees no ring there and would pass. `heldOff` waits it out and sees the ring.
+ * If it ever stops seeing it, every no-ring read in these checks is vacuous.
+ */
+export const ALateRingIsCaught: Story = {
+  tags: ["real-input"],
+  render: () => <LateRings />,
+  play: async () => {
+    const results: [string, boolean[], boolean[]][] = [];
+    for (const name of ["Rings at 100ms", "Rings at 250ms"]) {
+      const late = button("late", name);
+      late.click();
+      await settled(late);
+      const early = [ringed(late), painted(late)];
+      await heldOff(late);
+      results.push([name, early, [ringed(late), painted(late)]]);
+    }
+    console.info(`KEY FOCUS ${chromium() ? "chromium" : "webkit"} | late rings | ${JSON.stringify(results)}`);
+    /* Missed by a read as soon as nothing runs; caught by the hold. */
+    await expect(results).toEqual([
+      ["Rings at 100ms", [false, false], [true, true]],
+      ["Rings at 250ms", [false, false], [true, true]],
+    ]);
   },
 };
 
@@ -479,6 +518,8 @@ export const ChromiumRingsAreUnchanged: Story = {
     const step = async (label: string) => {
       await wait();
       const active = document.activeElement!;
+      /* A step pinned to no ring waits past any ring still on its way. */
+      if (WALK.find(([l]) => l === label)?.[1] === false) await heldOff(active);
       steps.push([label, ringed(active)]);
       if (markedOnly().length) extra.push(label);
     };
