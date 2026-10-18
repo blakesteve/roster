@@ -6,6 +6,7 @@ import { MultiSelect } from "../components/atoms/MultiSelect/MultiSelect";
 import { Menu, MenuButton, MenuItem, MenuItems } from "../components/molecules/Menu/Menu";
 import { backgroundOf, contrast, paint } from "../test/painted";
 import { realInputOrSkip } from "../test/real-input";
+import { heldOff } from "../test/settle";
 
 /**
  * The popups' rows, checked rendered: Select, Combobox and MultiSelect (one
@@ -176,6 +177,8 @@ export const MenuRingsOnlyForTheKeyboard: Story = {
     bravo.setAttribute("data-check", "bravo");
     await real.commands.realHover('[data-check="bravo"]');
     await waitFor(() => expect(document.activeElement).toBe(bravo));
+    /* A no-ring read waits past any ring still on its way (see `heldOff`). */
+    await heldOff(bravo);
     const byPointer = ringColor(bravo);
     /* The twin: a key moves focus, and the ring comes on. */
     await real.commands.realPress(["ArrowUp"]);
@@ -184,7 +187,10 @@ export const MenuRingsOnlyForTheKeyboard: Story = {
     /* Back to the pointer: the ring leaves the row the keys had, and doesn't
        come to the one under the pointer. */
     await real.commands.realHover('[data-check="bravo"]', { fx: 0.4 });
-    await waitFor(() => expect([document.activeElement === bravo, ringColor(alpha), ringColor(bravo)]).toEqual([true, null, null]));
+    await waitFor(() => expect(document.activeElement).toBe(bravo));
+    await heldOff(alpha);
+    await heldOff(bravo);
+    await expect([ringColor(alpha), ringColor(bravo)]).toEqual([null, null]);
     await real.commands.realPress(["Escape"]);
   },
 };
