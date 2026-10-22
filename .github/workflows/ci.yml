@@ -22,6 +22,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # A warning fails it: ESLint exits 0 on warnings unless told otherwise,
+      # and `lint` tells it (--max-warnings=0).
+      - name: Lint
+        run: npm run lint
+
       - name: Run unit tests
         run: npx vitest run --project unit
 
