@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { Meta, StoryObj, Decorator } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { LiquidTabs, type TabItem, type LiquidTabsProps } from "./LiquidTabs";
-import { liquidTabId } from "./liquid-tab-id";
-import { Badge } from "../../atoms/Badge/Badge";
+import { LiquidTabPanel } from "./LiquidTabPanel";
+import { Input } from "../../atoms/Input/Input";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTableCells,
@@ -33,7 +33,10 @@ const meta = {
           "The WAI tabs pattern. Only the selected tab is in the tab order (the first tab, if `activeTab` matches none). Left and Right move between tabs and wrap; Home and End go to the ends. `activation=\"automatic\"` (the default) selects as focus moves; `\"manual\"` moves focus only, and Enter or Space selects, for tabs that swap something expensive. Every tab is `type=\"button\"`, so a strip inside a form never submits it. Focus shows as an outline inside the tab, in the tab's own ink.",
           "",
           "### Naming and panels",
-          "Name the strip with `aria-label` or `aria-labelledby`. Each tab's `id` is `liquidTabId(id, tab.id)`, so a panel can point back with `aria-labelledby`; give a tab `panelId` and it sets `aria-controls`.",
+          "Name the strip with `aria-label` or `aria-labelledby`. Each tab's `id` is `liquidTabId(id, tab.id)`. Give a tab `panelId` and it sets `aria-controls`; pair it with `LiquidTabPanel`, which takes the strip's `id` and the tab and gets the panel's role, `id` and name right by construction, as one panel that swaps its content or a panel per tab.",
+          "",
+          "### Counts",
+          "A tab takes `count`: a number in a small mark beside the label, drawn from the tab's own ink, and read as part of its name (\"Open, 12 items\"). Zero shows. The words are `labels.count` and `labels.countMark`, with English defaults.",
           "",
           "### Two-phase motion",
           "1. **Stretch** (130 ms ease-out): the pill spans old and new tab, squashed to `scaleY(0.55)`.",
@@ -377,12 +380,12 @@ export const WithBadgeLabels: Story = {
       {
         id: "reviews",
         label: (
-          <span className="rst:flex rst:items-center rst:gap-2">
+          <span className="rst:flex rst:items-center rst:gap-1.5">
             <FontAwesomeIcon icon={faStar} className="rst:h-3 rst:w-3" />
             Reviews
-            <Badge variant="primary" fill="soft" size="xs">4</Badge>
           </span>
         ),
+        count: 4,
       },
     ];
     return (
@@ -394,8 +397,103 @@ export const WithBadgeLabels: Story = {
     docs: {
       description: {
         story:
-          "Labels accept any `ReactNode` — here tabs include icons and a `Badge` count. " +
+          "Labels accept any `ReactNode`: here, tabs with icons. The count beside Reviews is the tab's `count`, not part of the label, so it's read as part of the tab's name; see Counts. " +
           "Static `ReactNode` labels (not render functions) render identically in active and inactive states.",
+      },
+    },
+  },
+};
+
+const COUNTED: TabItem[] = [
+  { id: "open", label: "Open", count: 12 },
+  { id: "review", label: "In review", count: 1 },
+  { id: "done", label: "Done", count: 0 },
+  { id: "archive", label: "Archive", count: 12345 },
+];
+
+export const Counts: Story = {
+  args: { variant: "pill" } as LiquidTabsProps,
+  render: () => {
+    const [pill, setPill] = useState("open");
+    const [filled, setFilled] = useState("open");
+    return (
+      <div style={{ display: "grid", gap: 16 }}>
+        <LiquidTabs aria-label="Lists, pill" tabs={COUNTED} activeTab={pill} onChange={setPill} variant="pill" />
+        <LiquidTabs aria-label="Lists, filled, large" tabs={COUNTED} activeTab={filled} onChange={setFilled} variant="filled" size="lg" />
+      </div>
+    );
+  },
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A tab's `count` sits in a small mark beside its label, drawn from the tab's own ink: the number in that color, the fill a light tint of it, so it follows the tab at rest, selected, hovered and focused, on both variants and both themes. It's read as part of the tab's name, \"Open, 12 items\"; the mark itself is hidden from assistive technology.\n\n" +
+          "**Zero shows**, as \"0\" and \"0 items\": a count that vanished at zero would change the tab's width and move its neighbors. Pass `undefined` to hide one. A negative or fractional count isn't shown at all. Large counts are written whole (\"12,345\"); `labels.countMark` can write them shorter, and the name always says the whole number. Name your own noun with `labels.count`: `(n) => (n === 1 ? \"1 game\" : n + \" games\")`.",
+      },
+    },
+  },
+};
+
+const LIST_TABS: TabItem[] = [
+  { id: "open", label: "Open", count: 3, panelId: "lists-panel" },
+  { id: "done", label: "Done", count: 2, panelId: "lists-panel" },
+];
+const LIST_ITEMS: Record<string, string[]> = { open: ["Fix the gate", "Paint the shed", "Sweep the porch"], done: ["Mow the lawn", "Wash the car"] };
+
+export const WithAPanel: Story = {
+  args: { variant: "pill" } as LiquidTabsProps,
+  render: () => {
+    const [tab, setTab] = useState("open");
+    return (
+      <div style={{ display: "grid", gap: 12, width: 320 }}>
+        <LiquidTabs id="lists" aria-label="Chores" tabs={LIST_TABS} activeTab={tab} onChange={setTab} />
+        <LiquidTabPanel tabsId="lists" id="lists-panel" tab={tab} style={{ padding: 12, borderRadius: 8, border: "1px solid var(--roster-lt-border)" }}>
+          <ul style={{ margin: 0, paddingInlineStart: 20 }}>
+            {LIST_ITEMS[tab].map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </LiquidTabPanel>
+      </div>
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "**One panel that swaps its content.** Every tab carries the same `panelId`; the panel takes the strip's `id` as `tabsId`, that `panelId` as its `id`, and the selected tab as `tab`. It's `role=\"tabpanel\"`, named for the selected tab (\"Open, 3 items\"), and in the tab order while nothing inside it can be tabbed to, so a keyboard user can reach the list.\n\n" +
+          "```tsx\n<LiquidTabs id=\"lists\" tabs={tabs} activeTab={tab} onChange={setTab} />\n<LiquidTabPanel tabsId=\"lists\" id=\"lists-panel\" tab={tab}>…</LiquidTabPanel>\n```",
+      },
+    },
+  },
+};
+
+export const APanelPerTab: Story = {
+  args: { variant: "pill" } as LiquidTabsProps,
+  render: () => {
+    const [tab, setTab] = useState("profile");
+    const tabs: TabItem[] = [
+      { id: "profile", label: "Profile", panelId: "settings-profile" },
+      { id: "alerts", label: "Alerts", panelId: "settings-alerts" },
+    ];
+    return (
+      <div style={{ display: "grid", gap: 12, width: 320 }}>
+        <LiquidTabs id="settings" aria-label="Settings" tabs={tabs} activeTab={tab} onChange={setTab} />
+        <LiquidTabPanel tabsId="settings" id="settings-profile" tab="profile" activeTab={tab} keepMounted>
+          <Input label="Display name" placeholder="Type, switch tabs, come back" />
+        </LiquidTabPanel>
+        <LiquidTabPanel tabsId="settings" id="settings-alerts" tab="alerts" activeTab={tab}>
+          <p style={{ margin: 0 }}>No alerts set up.</p>
+        </LiquidTabPanel>
+      </div>
+    );
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "**A panel per tab.** Each tab has its own `panelId`, each panel its own `tab`, and every panel gets `activeTab`: only the selected one shows. A hidden panel renders no content by default; `keepMounted` keeps it mounted while hidden, so what's in it survives a switch. Type a name above, switch to Alerts and back: it's kept. The panel element itself always stays, hidden, so each tab's `aria-controls` points at something.",
       },
     },
   },
@@ -484,9 +582,9 @@ export const Keyboard: Story = {
     return (
       <div className="rst:flex rst:flex-col rst:gap-4 rst:items-center">
         <LiquidTabs id="view" tabs={VIEW_TABS.map((t) => ({ ...t, panelId: "view-panel" }))} activeTab={active} onChange={setActive} aria-label="View" />
-        <div role="tabpanel" id="view-panel" aria-labelledby={liquidTabId("view", active)} className="rst:text-sm">
+        <LiquidTabPanel tabsId="view" id="view-panel" tab={active} className="rst:text-sm">
           Showing the {active} view.
-        </div>
+        </LiquidTabPanel>
       </div>
     );
   },

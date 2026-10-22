@@ -10,6 +10,9 @@ import {
   type LiquidVariant,
 } from "./liquid-pill";
 import type { TabItem } from "./LiquidTabs";
+import { LiquidCount } from "./LiquidCount";
+import { LIQUID_COUNT_LABELS, countName, shownCount, type LiquidTabsLabels } from "./liquid-count";
+import { withLabels } from "../../../lib/labels";
 import { cn } from "../../../lib/utils";
 
 export interface LiquidNavItem extends Omit<TabItem, "panelId"> {
@@ -31,6 +34,12 @@ export interface LiquidNavLinkProps {
   className: string;
   children: ReactNode;
   "aria-current"?: "page";
+  /**
+   * The link's whole name when it has a count and a string label: "Inbox, 3
+   * items". Forward it to the `<a>`; a component that doesn't still gets a
+   * name with the count in it, from text hidden beside the label.
+   */
+  "aria-label"?: string;
   onClick: (event: MouseEvent<HTMLAnchorElement>) => void;
   "data-tab-id": string;
 }
@@ -62,6 +71,8 @@ export interface LiquidNavProps {
   "aria-label"?: string;
   "aria-labelledby"?: string;
   className?: string;
+  /** Every word a count says, with English defaults: see `TabItem.count`. */
+  labels?: Partial<LiquidTabsLabels>;
 }
 
 /* Named props rather than a spread, so `to` does not land on the anchor as an
@@ -72,10 +83,11 @@ function DefaultLink({
   children,
   onClick,
   "aria-current": ariaCurrent,
+  "aria-label": ariaLabel,
   "data-tab-id": tabId,
 }: LiquidNavLinkProps) {
   return (
-    <a href={href} className={className} onClick={onClick} aria-current={ariaCurrent} data-tab-id={tabId}>
+    <a href={href} className={className} onClick={onClick} aria-current={ariaCurrent} aria-label={ariaLabel} data-tab-id={tabId}>
       {children}
     </a>
   );
@@ -89,6 +101,8 @@ function DefaultLink({
  * things to assistive technology. Tabs switch panels on the same page and take
  * one tab stop with arrow keys between them; links go somewhere, and each is
  * its own tab stop, as in any nav.
+ *
+ * An item can carry a `count`, as a tab does: see `TabItem.count`.
  */
 export function LiquidNav({
   items,
@@ -101,7 +115,9 @@ export function LiquidNav({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
   className,
+  labels,
 }: LiquidNavProps) {
+  const l = withLabels(LIQUID_COUNT_LABELS, labels);
   const containerRef = useRef<HTMLElement>(null);
   const pillRef = useRef<HTMLDivElement>(null);
   const Link = linkComponent ?? DefaultLink;
@@ -127,12 +143,14 @@ export function LiquidNav({
 
       {items.map((item) => {
         const isActive = item.id === activeTab;
+        const label = typeof item.label === "function" ? item.label(isActive) : item.label;
         return (
           <Link
             key={item.id}
             href={item.href}
             to={item.href}
             aria-current={isActive ? "page" : undefined}
+            aria-label={countName(label, item.count, l)}
             data-tab-id={item.id}
             onClick={(event) => {
               if (
@@ -154,7 +172,9 @@ export function LiquidNav({
               "rst:inline-flex rst:items-center rst:justify-center rst:no-underline",
             )}
           >
-            {typeof item.label === "function" ? item.label(isActive) : item.label}
+            {/* With no count, the label itself, as a link component has always
+                been handed it. */}
+            {shownCount(item.count) ? <LiquidCount label={label} count={item.count} labels={l} /> : label}
           </Link>
         );
       })}

@@ -561,7 +561,7 @@ element marked `data-key-focus`. WebKit doesn't match `:focus-visible` on an
 element a script focuses in answer to a key once the page has been clicked.
 Escape handing focus back to a menu's or a select's trigger, or to a dialog's
 opener, and a radio group's or tabs' arrows all drew no ring in Safari after
-a click. A small internal tracker marks those elements: keyboard mode starts on a navigation key (Tab, Option+Tab, the
+a click. A small tracker marks those elements: keyboard mode starts on a navigation key (Tab, Option+Tab, the
 arrows, Escape, Enter, Space, Home, End, PageUp, PageDown) and ends on pointer
 input, and it marks only what Chromium's own `:focus-visible` already matches,
 so Chromium's rings are unchanged. It runs while a component that moves focus
@@ -574,6 +574,23 @@ variant in your stylesheet as Roster does:
 
 ```css
 @custom-variant focus-visible (&:is(:focus-visible, [data-key-focus]));
+```
+
+The variant is enough for your rings on a page where one of Roster's
+components has the tracker running. A control of your own that moves focus by
+script in answer to a key, arrows around a hand-drawn wheel or a grid that
+roves its own focus, shouldn't count on one: call `useKeyFocus()` in it, and
+the tracker runs while it's mounted. The listeners are shared, so it costs
+nothing beside Roster's own components. `KEY_FOCUS` is the attribute's name,
+for a selector or a test.
+
+```tsx
+import { useKeyFocus } from "@blakesteve/roster";
+
+function Wheel() {
+  useKeyFocus();
+  // arrows move focus between the stops with stop.focus(); rings on focus-visible:
+}
 ```
 
 ### Motion
@@ -1352,6 +1369,10 @@ What it promises:
   item's decision.
 - **Steps take focus and give it back.** Escape or Cancel returns focus to the
   button that opened the step.
+- **A blocked step says why, plainly.** A step that can't be submitted yet (a
+  reason not picked, an edit with nothing changed) says why in plain text,
+  and its submit is described by it. A submit tried anyway decides nothing
+  and turns the reason into an error.
 - **An item that disappears** (another reviewer, a reload) with its step open
   closes the step without deciding, and is announced once as decided
   elsewhere. Without a step, it moves focus only if focus was inside it.
@@ -1360,10 +1381,11 @@ What it promises:
 - **Phones.** Every button is 44px tall at every width, and nothing scrolls
   sideways at 320px. Nothing animates as an item leaves.
 
-Counts for a tab badge need no API: the app holds the items, so it's
-`items.length`. `MediaPreview` is the thumbnail to use in an item: when the
-image can't render (an expired link, a format the browser can't draw), it
-falls back to a link to the original in the same footprint.
+Counts for a tab need no API: the app holds the items, so it's
+`items.length`, passed as a `LiquidTabs` tab's `count`. `MediaPreview` is the
+thumbnail to use in an item: when the image can't render (an expired link, a
+format the browser can't draw), it falls back to a link to the original in the
+same footprint.
 
 ### FileUpload
 
@@ -1878,6 +1900,71 @@ contained. Under reduced motion every scroll the component makes is instant.
 `showPosition` shows "2 of 5", which is also each item's name and is announced
 politely when it changes.
 
+### LiquidTabs
+
+A tab strip with a sliding pill, on the WAI tabs pattern: one tab stop, arrows
+that wrap, Home and End, and `activation="manual"` for tabs that are costly to
+switch. `LiquidNav` is the same strip as a `nav` of links.
+
+**Counts.** A tab or a nav link takes `count`, shown in a small mark after its
+label:
+
+```tsx
+<LiquidTabs tabs={[{ id: "queue", label: "Queue", count: queue.length }, …]} … />
+```
+
+The count is part of the name, "Queue, 12 items" rather than "Queue12" or
+"Queue (12)", and its words come from `labels`, English by default with a
+plural. Name your own noun, and use `Intl.PluralRules` for a language with
+more than two forms:
+
+```tsx
+labels={{ count: (n) => (n === 1 ? "1 game" : `${n.toLocaleString()} games`) }}
+```
+
+- **Zero shows,** as "0" and "Queue, 0 items": an empty queue is worth
+  saying. To show no count, pass `undefined`.
+- **A count that isn't a whole number from zero** (negative, a fraction,
+  `NaN`) shows nothing, as if there were none, rather than being rounded or
+  clamped into a number nobody passed.
+- **Large counts are written whole,** "12,345", in the mark and the name. To
+  shorten the mark, pass `labels.countMark` (`(n) => "12K"`); the name stays
+  whole, since a screen reader has no width to save.
+- **The mark is drawn from the tab's own text color:** its number in that
+  color on a 12% tint of it. So it follows the tab through every state, both
+  variants and both themes, and through any palette set on the
+  `--roster-lt-*` tokens, and its number clears 4.5:1 in every state on
+  Roster's own (4.88:1 at the least). `Badge` and `Pill` each draw from a fixed
+  palette, which on the selected tab would be a second chip sitting on the
+  pill.
+- **The pill follows,** re-measuring when a count widens its tab or one
+  before it.
+
+**The panel.** `LiquidTabPanel` is the `role="tabpanel"` a tab controls, paired
+with it by construction: its `id` is the tab's `panelId`, and its
+`aria-labelledby` points at the tab through `liquidTabId`, so the panel takes
+the tab's name, count included. Give the `LiquidTabs` an `id` to pair it with.
+One panel that swaps its content, or a panel per tab:
+
+```tsx
+// One panel: every tab carries the same panelId, and `tab` is the selected one.
+<LiquidTabs id="lists" tabs={tabs.map((t) => ({ ...t, panelId: "lists-panel" }))} activeTab={list} onChange={setList} />
+<LiquidTabPanel tabsId="lists" id="lists-panel" tab={list}>…</LiquidTabPanel>
+
+// A panel per tab: each its own panelId, and every panel gets activeTab.
+<LiquidTabPanel tabsId="views" id="views-board" tab="board" activeTab={view}>…</LiquidTabPanel>
+<LiquidTabPanel tabsId="views" id="views-list" tab="list" activeTab={view} keepMounted>…</LiquidTabPanel>
+```
+
+Per tab, a panel that isn't selected stays in the page, hidden, so every tab's
+`aria-controls` points at something, and renders no content. `keepMounted`
+keeps its content mounted, so a half-filled form or a scroll position survives
+a switch away and back. A panel with nothing inside it to Tab to is itself in
+the tab order (`tabIndex={0}`), as the WAI pattern asks, so a keyboard user
+can reach what they just selected; it leaves the tab order once its content
+holds a link, a button or a field, rechecked as the content changes. Pass
+`tabIndex` to decide it yourself.
+
 ### Components that render links
 
 `Breadcrumbs` renders a plain `<a>` by default, which is right for a static
@@ -1899,8 +1986,10 @@ once, and the pages that use the wrapper stay server-rendered.
 `LiquidNav` takes a `linkComponent` too, with a wider contract: each link
 receives `href` and `to` with the same value, so React Router's `Link` works as
 well as `next/link`, plus `className`, `children`, `aria-current`, `onClick` and
-`data-tab-id`, which it must forward to the DOM. The props type is exported as
-`LiquidNavLinkProps`. The same client-component rule applies.
+`data-tab-id`, which it must forward to the DOM, and `aria-label` when the
+link has a count (forward it too; a component that doesn't still gets a name
+with the count in it). The props type is exported as `LiquidNavLinkProps`. The
+same client-component rule applies.
 
 `Eyebrow` takes the other approach: `as` accepts any element and the props
 follow it, so `<Eyebrow as="a" href="/work">` works, as does `as={NextLink}`.
@@ -1926,7 +2015,8 @@ Dialog or Sheet), alongside `Pagination`, the loading system and DataTable's
 instead, and 5.8.0 adds the ones that were missing: MultiSelect's
 `countLabel`, DataTable's `emptyMessage` and MediaPreview's `newTabLabel`, next
 to the existing `dismissLabel`, `placeholder`, `removeLabel`, `prevLabel` and
-the like. Words that take a number or a name are functions, so a language
+the like. `LiquidTabs` and `LiquidNav` take `labels` for the words a count
+says. Words that take a number or a name are functions, so a language
 whose word changes with the count can say so. An entry passed as `undefined`
 (a catalog missing a key) keeps its English rather than leaving a control
 unnamed.
@@ -2038,7 +2128,8 @@ function App() {
 | `EmptyState`      | Zero-data placeholder with icon and action slot; `headingLevel` sets its title's `h1` to `h6` |
 | `ErrorState`      | Error display with retry action                                             |
 | `LiquidNav`       | `LiquidTabs`' strip as a `nav` of links; takes a router's link component    |
-| `LiquidTabs`      | Tab strip with a sliding pill; arrow keys, roving focus, 44px `lg` size     |
+| `LiquidTabs`      | Tab strip with a sliding pill; arrow keys, roving focus, counts, 44px `lg` size (see [LiquidTabs](#liquidtabs)) |
+| `LiquidTabPanel`  | The panel a `LiquidTabs` tab controls, named for its tab by construction; one swapping panel or one per tab |
 | `MatchupCard`     | Head-to-head comparison card                                                |
 | `MediaPreview`    | Thumbnail that falls back to "Preview unavailable, open original" when it can't render |
 | `Menu`            | A button's menu of actions: icons, shortcuts, checkbox and radio items, links, groups, submenus; the full keyboard pattern, 44px targets (see [Menu](#menu)) |
@@ -2125,6 +2216,7 @@ the one that can not be affected by a future change to the barrel.
 | Hook             | Description                                                                     |
 | ---------------- | ------------------------------------------------------------------------------- |
 | `useCountdown`   | Countdown timer logic without the UI; `days` counts the whole remaining total   |
+| `useKeyFocus`    | Keeps keyboard focus ringed in Safari for your own control that moves focus by script (see [Focus](#focus)). Ships `KEY_FOCUS` |
 | `useKeySequence` | Fires a callback when a sequence of keys is typed in order. Ships `KONAMI_CODE` |
 
 ## Authoring components: the `rst:` prefix

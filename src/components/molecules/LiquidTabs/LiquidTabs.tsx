@@ -10,7 +10,12 @@ import {
   type LiquidVariant,
 } from "./liquid-pill";
 import { liquidTabId } from "./liquid-tab-id";
+import { LiquidCount } from "./LiquidCount";
+import { LIQUID_COUNT_LABELS, countName, shownCount, type LiquidTabsLabels } from "./liquid-count";
+import { withLabels } from "../../../lib/labels";
 import { useKeyFocus } from "../../../internal/key-focus";
+
+export type { LiquidTabsLabels };
 
 export interface TabItem {
   id: string;
@@ -21,6 +26,18 @@ export interface TabItem {
    * every tab the same id when one panel swaps its content.
    */
   panelId?: string;
+  /**
+   * A number in a small mark beside the label, read as part of the tab's
+   * name: "Open, 12 items" (`labels.count` says it).
+   *
+   * **Zero shows**, as "0" and "0 items": a count that vanished at zero would
+   * change the tab's width and move every tab after it, and an empty list is
+   * worth saying. To hide it, pass `undefined` for zero. `undefined` means no
+   * count and no mark. A negative or fractional count isn't shown at all,
+   * never rounded or clamped. Large counts aren't abbreviated: 12,345 shows
+   * as "12,345" unless `labels.countMark` writes it shorter.
+   */
+  count?: number;
 }
 
 export interface LiquidTabsProps {
@@ -62,6 +79,8 @@ export interface LiquidTabsProps {
   "aria-labelledby"?: string;
   /** Extra classes applied to the outer container. */
   className?: string;
+  /** Every word a count says, with English defaults: see `TabItem.count`. */
+  labels?: Partial<LiquidTabsLabels>;
 }
 
 /**
@@ -78,6 +97,9 @@ export interface LiquidTabsProps {
  * The pill follows `activeTab`, never the click, so a change the consumer
  * vetoes, or one that waits on navigation, never leaves it on the wrong tab.
  *
+ * A tab can carry a `count`, and a panel pairs with its tab by construction
+ * through `LiquidTabPanel`.
+ *
  * For navigation between routes, use `LiquidNav`, which renders links.
  */
 export function LiquidTabs({
@@ -92,8 +114,10 @@ export function LiquidTabs({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
   className,
+  labels,
 }: LiquidTabsProps) {
   useKeyFocus();
+  const l = withLabels(LIQUID_COUNT_LABELS, labels);
   const containerRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLDivElement>(null);
   const generatedId = useId();
@@ -173,6 +197,7 @@ export function LiquidTabs({
 
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;
+        const label = typeof tab.label === "function" ? tab.label(isActive) : tab.label;
         return (
           <button
             key={tab.id}
@@ -183,6 +208,7 @@ export function LiquidTabs({
             id={liquidTabId(listId, tab.id)}
             aria-selected={isActive}
             aria-controls={tab.panelId}
+            aria-label={countName(label, tab.count, l)}
             tabIndex={tab.id === tabStop ? 0 : -1}
             data-tab-id={tab.id}
             data-testid={`liquid-tab-${tab.id}`}
@@ -190,7 +216,7 @@ export function LiquidTabs({
             onFocus={() => setFocused(tab.id)}
             className={liquidItemClassName({ variant, fullWidth, size, isActive })}
           >
-            {typeof tab.label === "function" ? tab.label(isActive) : tab.label}
+            {shownCount(tab.count) ? <LiquidCount label={label} count={tab.count} labels={l} /> : label}
           </button>
         );
       })}
