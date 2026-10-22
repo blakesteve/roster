@@ -9,7 +9,8 @@ on:
 jobs:
   test:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    # Pinned with the Storybook job; see the reason there.
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +33,11 @@ jobs:
 
   storybook:
     name: Storybook Tests
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: that became Ubuntu 26.04 on 22 Oct 2026, and
+    # Playwright 1.58 can't install its browsers there ("does not support
+    # chromium on ubuntu26.04-x64"). Unpin once Playwright supports it.
+    # https://app.clickup.com/t/86e3v3jtd
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
@@ -86,7 +91,8 @@ jobs:
 
   build:
     name: Build
-    runs-on: ubuntu-latest
+    # Pinned with the Storybook job; see the reason there.
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
