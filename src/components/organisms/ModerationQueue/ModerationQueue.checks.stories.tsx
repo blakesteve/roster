@@ -329,6 +329,90 @@ export const ReasonIsRequiredThenHandedToRun: Story = {
   },
 };
 
+/** The color a class paints, read from a throwaway element. */
+const colorOf = (className: string) => {
+  const probe = document.createElement("span");
+  probe.className = className;
+  document.body.append(probe);
+  const color = getComputedStyle(probe).color;
+  probe.remove();
+  return color;
+};
+
+/**
+ * A step that opens blocked says why in plain text, not as an error: nothing
+ * has gone wrong yet. A submit tried while blocked turns it red. The submit is
+ * described by it in both states.
+ */
+export const ABlockedReasonIsPlainUntilASubmitIsTried: Story = {
+  render: () => <Harness />,
+  play: async () => {
+    reset();
+    await userEvent.click(button("a", "reject")!);
+    const reason = () => q("[data-queue-validation]")!;
+    const plain = colorOf("rst:text-gray-500");
+    const error = colorOf("rst:text-error-600");
+    const before = [reason().textContent, getComputedStyle(reason()).color, reason().hasAttribute("data-tried"), submitButton()!.getAttribute("aria-describedby") === reason().id];
+    /* The twin: a submit tried while blocked decides nothing and turns it red. */
+    await userEvent.click(submitButton()!);
+    await expect(harness.calls).toEqual([]);
+    const after = [reason().textContent, getComputedStyle(reason()).color, reason().hasAttribute("data-tried"), submitButton()!.getAttribute("aria-describedby") === reason().id];
+    await expect([before, after]).toEqual([
+      ["Pick a reason.", plain, false, true],
+      ["Pick a reason.", error, true, true],
+    ]);
+    await expect(plain === error).toBe(false);
+    /* By the keyboard too: canceled and reopened, the step is plain again,
+       and Enter on its blocked submit turns it red. */
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(q("[data-queue-validation]")).toBeNull());
+    await userEvent.click(button("a", "reject")!);
+    const reopened = getComputedStyle(reason()).color;
+    submitButton()!.focus();
+    await userEvent.keyboard("{Enter}");
+    await expect([reopened, getComputedStyle(reason()).color, harness.calls.length]).toEqual([plain, error, 0]);
+  },
+};
+
+/**
+ * The keyboard's way, with real keys in Chromium and WebKit: Enter, then
+ * Space, on a blocked submit each turn a freshly opened step's reason red and
+ * decide nothing. Simulated keys can't stand in here: whether a key on an
+ * `aria-disabled` button still arrives as its click is the browser's call.
+ */
+export const ABlockedSubmitTriedByKeyTurnsItsReasonRed: Story = {
+  tags: ["real-input"],
+  render: () => <Harness />,
+  play: async () => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    reset();
+    const plain = colorOf("rst:text-gray-500");
+    const error = colorOf("rst:text-error-600");
+    const reason = () => q("[data-queue-validation]")!;
+    const reads: [string, string, string][] = [];
+    for (const key of ["Enter", "Space"]) {
+      await real.commands.realClick('[data-queue-item="a"] [data-queue-action="reject"]');
+      await waitFor(() => expect(q("[data-queue-validation]")).not.toBeNull());
+      const before = getComputedStyle(reason()).color;
+      submitButton()!.focus();
+      await real.commands.realPress([key]);
+      await waitFor(() => expect(reason().hasAttribute("data-tried")).toBe(true), { timeout: 1000 }).catch(() => {});
+      reads.push([key, before, getComputedStyle(reason()).color]);
+      await real.commands.realPress(["Escape"]);
+      await waitFor(() => expect(q("[data-queue-validation]")).toBeNull());
+    }
+    /* Plain when each step opens, the twin; red once its key is pressed. */
+    await expect([reads, harness.calls.length]).toEqual([
+      [
+        ["Enter", plain, error],
+        ["Space", plain, error],
+      ],
+      0,
+    ]);
+  },
+};
+
 export const EditDraftIsValidatedThenHandedToRun: Story = {
   render: () => <Harness />,
   play: async () => {

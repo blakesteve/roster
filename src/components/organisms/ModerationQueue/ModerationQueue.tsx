@@ -149,6 +149,8 @@ type Step<T> = {
   /** A surface is on screen; false while it plays its exit. */
   open: boolean;
   error?: string;
+  /** A submit was tried while the step was blocked: its reason reads as an error from then on. */
+  tried?: boolean;
 };
 
 type FocusTarget =
@@ -193,12 +195,13 @@ function without<V>(record: Record<string, V>, key: string): Record<string, V> {
 function QueueButton({
   busy = false,
   blocked = false,
+  onBlockedPress,
   onClick,
   children,
   className,
   ...props
-}: ButtonProps & { busy?: boolean; blocked?: boolean }) {
-  return (
+}: ButtonProps & { busy?: boolean; blocked?: boolean; onBlockedPress?: () => void }) {
+  const button = (
     <Button
       size="lg"
       {...props}
@@ -217,6 +220,18 @@ function QueueButton({
     >
       {children}
     </Button>
+  );
+  if (!onBlockedPress) return button;
+  /* Headless UI turns every press handler on an `aria-disabled` button into
+     a `preventDefault`, so a press on a blocked button never reaches it. A
+     wrapper hears the click first, in the capture phase. Enter and Space
+     arrive as that same click (Headless UI cancels no key here, since the
+     button has no key handler), which real keys confirm in Chromium and
+     WebKit. `display: contents`, so it draws no box. */
+  return (
+    <span style={{ display: "contents" }} onClickCapture={() => blocked && !busy && onBlockedPress()}>
+      {button}
+    </span>
   );
 }
 
@@ -545,7 +560,11 @@ function ModerationQueue<T>({
 
   const submit = (key: string) => {
     const s = stepsRef.current[key];
-    if (!s || pendingRef.current[key] || blockedReason(s, itemsRef.current.get(key) ?? s.item, l)) return;
+    if (!s || pendingRef.current[key]) return;
+    if (blockedReason(s, itemsRef.current.get(key) ?? s.item, l)) {
+      if (!s.tried) setStep(key, { ...s, tried: true });
+      return;
+    }
     if (s.action.edit) void decide(key, s.item, s.action, { draft: s.draft });
     else if (s.action.reason) void decide(key, s.item, s.action, { reason: cleanReason(s.reason) });
     else void decide(key, s.item, s.action, {});
@@ -579,6 +598,7 @@ function ModerationQueue<T>({
         busy={busy}
         loadingLabel={l.busy}
         blocked={!!blocked}
+        onBlockedPress={() => submit(s.key)}
         aria-describedby={blocked ? messageId : undefined}
         onClick={() => submit(s.key)}
         data-queue-submit=""
@@ -610,8 +630,21 @@ function ModerationQueue<T>({
             onChange={(draft: unknown) => setStep(s.key, { ...stepsRef.current[s.key], draft })}
           />
         )}
+        {/* Why the submit is blocked, said in plain text until someone
+            tries it anyway, then as an error. A step that opens blocked (an
+            edit with nothing changed yet, a reason not picked) hasn't gone
+            wrong, and red before anyone acts reads as if it had. The submit
+            is described by it either way. */}
         {blocked && (
-          <p id={messageId} className="rst:text-sm rst:text-error-600 rst:dark:text-error-400" data-queue-validation="">
+          <p
+            id={messageId}
+            className={cn(
+              "rst:text-sm",
+              s.tried ? "rst:text-error-600 rst:dark:text-error-400" : "rst:text-gray-500 rst:dark:text-gray-400",
+            )}
+            data-queue-validation=""
+            data-tried={s.tried ? "" : undefined}
+          >
             {blocked}
           </p>
         )}
