@@ -127,3 +127,37 @@ export function pageTarget(g: CarouselGeometry, direction: 1 | -1): number {
   }
   return snapPosition(g, index);
 }
+
+/**
+ * How far Page Up and Page Down move in selection mode: as many options as
+ * are wholly in view, at least one.
+ */
+export function pageStep(g: CarouselGeometry): number {
+  return Math.max(1, fullyVisible(g).length);
+}
+
+/**
+ * The `scrollLeft` that brings item `i` wholly into view, measured from
+ * `from` (where the row is, or where a glide is taking it), or `null` when it
+ * already is. Inside the scroll padding, so a revealed item clears the gutter.
+ *
+ * The row moves as little as it can and always lands on a snap point, which
+ * the browser would snap it to anyway: an item off the leading side snaps to
+ * its own place; one off the trailing side lands on the first snap point that
+ * shows it whole. With `center`, an item out of view is centered.
+ */
+export function revealTarget(g: CarouselGeometry, i: number, from: number = g.scrollLeft): number | null {
+  const item = g.items[i];
+  if (!item) return null;
+  const view = (left: number) => [left + g.paddingStart - CAROUSEL_TOLERANCE, left + g.clientWidth - g.paddingEnd + CAROUSEL_TOLERANCE];
+  const [lo, hi] = view(from);
+  if (item.start >= lo && item.end <= hi) return null;
+  if (g.align === "center" || item.start < lo) return snapPosition(g, i);
+  for (let j = 0; j <= i; j++) {
+    const at = snapPosition(g, j);
+    if (at < from) continue;
+    const [, end] = view(at);
+    if (item.end <= end) return at;
+  }
+  return snapPosition(g, i);
+}

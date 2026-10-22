@@ -9,13 +9,17 @@ import {
   currentIndex,
   nearestIndex,
   overflows,
+  pageStep,
   pageTarget,
+  revealTarget,
   snapPosition,
   type CarouselGeometry,
   CAROUSEL_DRAG_THRESHOLD,
 } from "./carousel-math";
 import { FLUID_CLASSES, FLUID_ITEM_WIDTH, perViewVars } from "./carousel-layout";
+import { survivingNeighbor, typeaheadIndex, TYPEAHEAD_RESET_MS } from "./carousel-selection";
 import { useKeyFocus } from "../../../internal/key-focus";
+import { isDevelopment } from "../../../internal/dev";
 
 /** Items per view at each width, from Roster's breakpoints up. */
 export interface CarouselPerView {
@@ -33,6 +37,13 @@ export interface CarouselHandle {
   scrollPrev: () => void;
   /** What the next arrow does: on one page. */
   scrollNext: () => void;
+  /**
+   * Moves focus into the row. In selection mode, onto the option a Tab would
+   * land on: the selected one, or where the keys last left off. Otherwise onto
+   * the first item that can take focus, or the list when it's the tab stop.
+   * Scrolls it into view.
+   */
+  focus: () => void;
 }
 
 export interface CarouselArrowsRender {
@@ -57,7 +68,17 @@ export interface CarouselProps
   "aria-label"?: string;
   /** The id of the heading that names the row. */
   "aria-labelledby"?: string;
-  /** One child per item. Each is wrapped in the list item the row snaps to. */
+  /**
+   * In selection mode, describes the listbox: say how it works, as "Enter
+   * selects. Enter again opens it." Otherwise it describes the outer wrapper,
+   * as it always has.
+   */
+  "aria-describedby"?: string;
+  /**
+   * One child per item. Each is wrapped in the list item the row snaps to. In
+   * selection mode each child is an option, and its React `key` is its
+   * identity: give every child one.
+   */
   children: React.ReactNode;
   /**
    * Fixed mode: every item is this wide (a number is px). The row overflows
@@ -136,6 +157,45 @@ export interface CarouselProps
   onIndexChange?: (index: number) => void;
   /** Whether the row can move each way, whenever that changes. */
   onScrollStateChange?: (state: { canScrollPrev: boolean; canScrollNext: boolean }) => void;
+  /**
+   * Selection mode: the row becomes a listbox of options, one of which is
+   * selected. One tab stop, the arrow keys, Home, End and the Page keys move
+   * between options, type-ahead jumps to one, and Enter or Space selects.
+   * Selection doesn't follow focus: arrowing only moves focus. See the README
+   * for when to use it. Off by default, and off changes nothing.
+   *
+   * **Nothing interactive inside an option.** An option is one choice; a link
+   * or a button inside it would be a second tab stop the keys can't reach.
+   * Put actions outside the row (or use `onActivate`). A development build
+   * warns when an option holds something that takes focus.
+   */
+  selectable?: boolean;
+  /**
+   * Selection mode, controlled: the selected option's `key`, as React stores
+   * it (a string), or `null` for none.
+   */
+  selectedKey?: string | null;
+  /** Selection mode, uncontrolled: the option selected at first. */
+  defaultSelectedKey?: string | null;
+  /**
+   * Selection mode: an option was selected (Enter, Space, a click or a tap on
+   * one that isn't), with its key; or the selection was cleared (Escape, with
+   * `clearable`), with `null`.
+   */
+  onSelectionChange?: (key: string | null) => void;
+  /**
+   * Selection mode: Enter, or a click or a tap, on the option that's already
+   * selected. The second step after choosing, such as opening it.
+   */
+  onActivate?: (key: string) => void;
+  /** Selection mode: Escape clears the selection. */
+  clearable?: boolean;
+  /**
+   * Selection mode: each option's accessible name, which is also the text
+   * type-ahead matches. Without it an option is named by its content, and
+   * type-ahead reads its text.
+   */
+  getOptionLabel?: (key: string, index: number) => string;
   /** Classes for each list item. */
   itemClassName?: string;
   /** Classes for the scrolling list. `className` is the outer wrapper. */
@@ -186,6 +246,64 @@ function Chevron({ direction }: { direction: "prev" | "next" }) {
   );
 }
 
+/* Selection mode's options. The focus ring is an outline, so a consumer's own
+   selected look, drawn with a ring or a border, sits inside it rather than
+   fighting it; 2px out and 2px off fits the list's 4px of padding. */
+const OPTION_CLASSES =
+  "rst:cursor-pointer rst:in-data-dragging:cursor-grabbing rst:outline-hidden rst:focus-visible:outline-solid rst:focus-visible:outline-2 rst:focus-visible:outline-offset-2 rst:focus-visible:outline-ring";
+
+type OptionProps = {
+  child: React.ReactNode;
+  index: number;
+  count: number;
+  selected: boolean;
+  active: boolean;
+  label: string | undefined;
+  style: React.CSSProperties | undefined;
+  className: string;
+};
+
+/* Memoized, so moving focus or the selection re-renders the two options that
+   changed rather than every one of a long row. */
+const CarouselOption = React.memo(function CarouselOption({ child, index, count, selected, active, label, style, className }: OptionProps) {
+  return (
+    <li
+      role="option"
+      aria-selected={selected}
+      aria-setsize={count}
+      aria-posinset={index + 1}
+      aria-label={label}
+      tabIndex={active ? 0 : -1}
+      data-carousel-item=""
+      data-selected={selected ? "" : undefined}
+      style={style}
+      className={className}
+    >
+      {child}
+    </li>
+  );
+});
+
+type Option = { child: React.ReactNode; key: string; keyed: boolean };
+
+/* The options and their keys, as the consumer wrote them: `Children.toArray`
+   prefixes every key, and its copies would defeat the memo above. */
+function optionsOf(children: React.ReactNode): Option[] {
+  const out: Option[] = [];
+  React.Children.forEach(children, (child) => {
+    if (child === null || child === undefined || typeof child === "boolean") return;
+    const keyed = React.isValidElement(child) && child.key !== null;
+    out.push({ child, key: keyed ? String((child as React.ReactElement).key) : `#${out.length}`, keyed });
+  });
+  return out;
+}
+
+/* Where focus is in selection mode, and what it was derived from. */
+type Roving = { active: string | null; keys: readonly string[]; sig: string; selected: string | null; init: boolean };
+const ROVING_START: Roving = { active: null, keys: [], sig: "", selected: null, init: false };
+
+const indexIn = (list: Element, item: Element) => Array.prototype.indexOf.call(list.children, item) as number;
+
 const INITIAL_STATE = {
   overflowing: null,
   canScrollPrev: false,
@@ -202,8 +320,8 @@ type ScrollState = {
 };
 
 /**
- * A sideways row of items: a row of cards, a selection strip, a gallery of one
- * per view.
+ * A sideways row of items: a row of cards, a selection strip (`selectable`), a
+ * gallery of one per view.
  *
  * Native first. The row is a real scroll container with CSS scroll snap, so
  * touch, trackpad, Shift with the wheel and focus all scroll it without
@@ -227,11 +345,18 @@ type ScrollState = {
  *
  * Renders a `ul` named by `aria-label` or `aria-labelledby`, one `li` per
  * child. There is no carousel role and no slide role: nothing rotates.
+ *
+ * For a strip of choices, one of which is picked, use `selectable`: the row
+ * becomes a horizontal listbox with one tab stop, roving focus over its
+ * options, and a selection that changes only on Enter, Space or a tap. A row
+ * of buttons with `aria-pressed` is as many tab stops as there are buttons,
+ * and a screen reader hears a list of unrelated buttons.
  */
 const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carousel(
   {
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledBy,
+    "aria-describedby": ariaDescribedBy,
     children,
     itemWidth,
     perView,
@@ -255,6 +380,13 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
     labels,
     onIndexChange,
     onScrollStateChange,
+    selectable = false,
+    selectedKey,
+    defaultSelectedKey = null,
+    onSelectionChange,
+    onActivate,
+    clearable = false,
+    getOptionLabel,
     itemClassName,
     listClassName,
     className,
@@ -268,7 +400,32 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
   const listRef = React.useRef<HTMLUListElement>(null);
   const listId = `${React.useId()}-list`;
   const items = React.Children.toArray(children);
-  const count = items.length;
+  const options = selectable ? optionsOf(children) : null;
+  const count = options ? options.length : items.length;
+
+  /* ── Selection mode: what's selected, and where focus roves ─────────────── */
+
+  const controlled = selectedKey !== undefined;
+  const [ownSelected, setOwnSelected] = React.useState<string | null>(defaultSelectedKey);
+  const selected = controlled ? selectedKey : ownSelected;
+  const [focusWithin, setFocusWithin] = React.useState(false);
+  const optionKeys = options ? options.map((o) => o.key) : [];
+  const sig = optionKeys.join("\u0000");
+  /* The active option is the one Tab lands on. It's derived again whenever
+     the options or the selection change, during render: the option it was on
+     is kept if it's still there, and otherwise it moves to the nearest
+     neighbor that is. A selection made outside the row moves it too, unless
+     focus is in the row, where the keys are in charge. */
+  const [roving, setRoving] = React.useState<Roving>(ROVING_START);
+  let active = roving.active;
+  if (selectable && (!roving.init || roving.sig !== sig || roving.selected !== selected)) {
+    const present = new Set(optionKeys);
+    if (roving.init && roving.selected !== selected && !focusWithin && selected !== null && present.has(selected)) active = selected;
+    if (active === null || !present.has(active)) {
+      active = survivingNeighbor(roving.keys, present, active) ?? (selected !== null && present.has(selected) ? selected : (optionKeys[0] ?? null));
+    }
+    setRoving({ active, keys: optionKeys, sig, selected, init: true });
+  }
 
   const [state, setState] = React.useState<ScrollState>(INITIAL_STATE);
   /* The last state measured, so a change is found and reported outside the
@@ -465,8 +622,22 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
       },
       scrollPrev: () => page(-1),
       scrollNext: () => page(1),
+      focus: () => {
+        const list = listRef.current;
+        if (!list) return;
+        const target = selectable
+          ? list.querySelector<HTMLElement>(':scope > [tabindex="0"]')
+          : (list.querySelector<HTMLElement>(FOCUSABLE) ?? (list.tabIndex === 0 ? list : null));
+        if (!target) return;
+        target.focus({ preventScroll: true });
+        const item = target.closest("[data-carousel-item]");
+        const g = geometry();
+        const at = item && item.parentElement === list ? indexIn(list, item) : -1;
+        const to = g && at >= 0 ? revealTarget(g, at, carrying.current?.target ?? g.scrollLeft) : null;
+        if (to !== null) settleTo(to, "smooth");
+      },
     }),
-    [geometry, page, settleTo],
+    [geometry, page, settleTo, selectable],
   );
 
   React.useEffect(() => releaseCarry, [releaseCarry]);
@@ -577,6 +748,10 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
      visible focus counts: the engine's own, or the keyboard-mode mark,
      which is set before this runs. */
   const onFocus = (event: React.FocusEvent<HTMLUListElement>) => {
+    if (selectable) {
+      onOptionFocus(event);
+      return;
+    }
     const list = event.currentTarget;
     const target = event.target as HTMLElement;
     if (target === list || drag.current?.dragging) return;
@@ -594,6 +769,143 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
     const index = Array.prototype.indexOf.call(list.children, item);
     settleTo(snapPosition(g, index), "instant");
   };
+
+  /* ── Selection mode: keys, clicks and focus, one handler each on the row ── */
+
+  const select = (key: string | null) => {
+    if (!controlled) setOwnSelected(key);
+    onSelectionChange?.(key);
+  };
+
+  /* Brings option `i` into view: smoothly, or at once under reduced motion.
+     Mid-glide it measures from where the glide is going, so held-down keys
+     don't stack up glides from stale positions. */
+  const reveal = (i: number) => {
+    const g = geometry();
+    if (!g) return;
+    const to = revealTarget(g, i, carrying.current?.target ?? g.scrollLeft);
+    if (to !== null) settleTo(to, "smooth");
+  };
+
+  /* Focus landing on an option makes it the active one. Only keyboard focus
+     scrolls: a click mustn't move the row under the pointer. */
+  const onOptionFocus = (event: React.FocusEvent<HTMLUListElement>) => {
+    const list = event.currentTarget;
+    const target = event.target as HTMLElement;
+    if (target.parentElement !== list) return;
+    const i = indexIn(list, target);
+    const key = optionKeys[i];
+    if (key === undefined) return;
+    setRoving((r) => (r.active === key ? r : { ...r, active: key }));
+    setFocusWithin(true);
+    if (drag.current?.dragging) return;
+    let visible = false;
+    try {
+      visible = target.matches(":focus-visible, [data-key-focus]");
+    } catch {
+      visible = false;
+    }
+    if (visible) reveal(i);
+  };
+
+  /* Leaving the row hands the tab stop back to the selected option, so Tab
+     returns to the choice, as the listbox pattern asks. */
+  const onOptionBlur = (event: React.FocusEvent<HTMLUListElement>) => {
+    const to = event.relatedTarget as Node | null;
+    if (to && event.currentTarget.contains(to)) return;
+    setFocusWithin(false);
+    if (selected !== null && optionKeys.includes(selected)) setRoving((r) => (r.active === selected ? r : { ...r, active: selected }));
+  };
+
+  const onOptionClick = (event: React.MouseEvent<HTMLUListElement>) => {
+    const list = event.currentTarget;
+    const option = (event.target as Element).closest("[data-carousel-item]");
+    if (!option || option.parentElement !== list) return;
+    const key = optionKeys[indexIn(list, option)];
+    if (key === undefined) return;
+    setRoving((r) => (r.active === key ? r : { ...r, active: key }));
+    if (key === selected) onActivate?.(key);
+    else select(key);
+  };
+
+  /* What's been typed since the last pause, for type-ahead. */
+  const typed = React.useRef({ text: "", at: -Infinity });
+
+  const onOptionKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
+    const list = event.currentTarget;
+    const target = event.target as HTMLElement;
+    if (target.parentElement !== list || event.nativeEvent.isComposing) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    const last = optionKeys.length - 1;
+    const i = indexIn(list, target);
+    const key = optionKeys[i];
+    if (key === undefined) return;
+    const go = (to: number) => {
+      event.preventDefault();
+      const next = Math.min(last, Math.max(0, to));
+      if (next !== i) (list.children[next] as HTMLElement).focus({ preventScroll: true });
+    };
+    const typing = event.timeStamp - typed.current.at < TYPEAHEAD_RESET_MS && typed.current.text !== "";
+    /* Any key but a printable one ends type-ahead, so a Space after an arrow
+       or Enter selects rather than searching for "g ". */
+    if (event.key.length !== 1) typed.current = { text: "", at: -Infinity };
+    switch (event.key) {
+      case "ArrowRight":
+        return go(i + 1);
+      case "ArrowLeft":
+        return go(i - 1);
+      case "Home":
+        return go(0);
+      case "End":
+        return go(last);
+      case "PageDown":
+      case "PageUp": {
+        const g = geometry();
+        const step = g ? pageStep(g) : 1;
+        return go(event.key === "PageDown" ? i + step : i - step);
+      }
+      case "Enter":
+        event.preventDefault();
+        if (key === selected) onActivate?.(key);
+        else select(key);
+        return;
+      case " ":
+        if (typing) break;
+        event.preventDefault();
+        if (key !== selected) select(key);
+        return;
+      case "Escape":
+        if (!clearable || selected === null) return;
+        event.preventDefault();
+        event.stopPropagation();
+        select(null);
+        return;
+    }
+    if (event.key.length !== 1) return;
+    /* Type-ahead: the next option whose name starts with what's been typed. */
+    const text = (typing ? typed.current.text : "") + event.key.toLowerCase();
+    typed.current = { text, at: event.timeStamp };
+    event.preventDefault();
+    const labelAt = (n: number) =>
+      getOptionLabel ? getOptionLabel(optionKeys[n], n) : (list.children[n]?.textContent ?? "");
+    const found = typeaheadIndex(optionKeys.length, i, text, labelAt);
+    if (found >= 0 && found !== i) (list.children[found] as HTMLElement).focus({ preventScroll: true });
+  };
+
+  /* Development builds: say what selection mode needs and isn't getting. */
+  const warned = React.useRef({ keys: false, interactive: false });
+  React.useEffect(() => {
+    if (!selectable || !isDevelopment()) return;
+    const list = listRef.current;
+    if (!warned.current.keys && options?.some((o) => !o.keyed)) {
+      warned.current.keys = true;
+      console.warn("Roster Carousel: selection mode needs a key on every child; it's the option's identity.");
+    }
+    if (!warned.current.interactive && list?.querySelector(`[data-carousel-item] :is(${FOCUSABLE})`)) {
+      warned.current.interactive = true;
+      console.warn("Roster Carousel: an option holds something that takes focus. In selection mode the keys can't reach it; put it outside the row, or use onActivate.");
+    }
+  });
 
   /* ── Rendering ────────────────────────────────────────────────────────── */
 
@@ -702,20 +1014,32 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
     ...(fadeMask ? { maskImage: fadeMask, WebkitMaskImage: fadeMask } : {}),
   } as React.CSSProperties;
 
-  const itemStyle: React.CSSProperties | undefined =
-    itemWidth !== undefined ? { width: length(itemWidth) } : fluid ? { width: FLUID_ITEM_WIDTH } : undefined;
+  /* One object across renders, so it doesn't count as a change to an option. */
+  const itemStyle: React.CSSProperties | undefined = React.useMemo(
+    () => (itemWidth !== undefined ? { width: length(itemWidth) } : fluid ? { width: FLUID_ITEM_WIDTH } : undefined),
+    [itemWidth, fluid],
+  );
+  const itemClasses = cn(
+    "rst:shrink-0",
+    snap === "start" ? "rst:snap-start" : "rst:snap-center",
+    oneAtATime && "rst:snap-always",
+    selectable && OPTION_CLASSES,
+    itemClassName,
+  );
 
   return (
-    <div className={cn("rst:min-w-0", className)} style={style} {...rest}>
+    <div className={cn("rst:min-w-0", className)} style={style} {...rest} aria-describedby={selectable ? undefined : ariaDescribedBy}>
       {controls}
       <div className="rst:relative">
         <ul
           ref={listRef}
           id={listId}
-          role="list"
+          role={selectable ? "listbox" : "list"}
           aria-label={ariaLabel}
           aria-labelledby={ariaLabel ? undefined : ariaLabelledBy}
-          tabIndex={listIsTabStop && state.overflowing ? 0 : undefined}
+          aria-orientation={selectable ? "horizontal" : undefined}
+          aria-describedby={selectable ? ariaDescribedBy : undefined}
+          tabIndex={!selectable && listIsTabStop && state.overflowing ? 0 : undefined}
           data-overflowing={state.overflowing ? "" : undefined}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -723,6 +1047,9 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
           onPointerCancel={endDrag}
           onLostPointerCapture={endDrag}
           onClickCapture={onClickCapture}
+          onClick={selectable ? onOptionClick : undefined}
+          onKeyDown={selectable ? onOptionKeyDown : undefined}
+          onBlur={selectable ? onOptionBlur : undefined}
           onDragStart={onDragStart}
           onFocus={onFocus}
           style={listStyle}
@@ -739,22 +1066,31 @@ const Carousel = React.forwardRef<CarouselHandle, CarouselProps>(function Carous
             listClassName,
           )}
         >
-          {items.map((child, i) => (
-            <li
-              key={React.isValidElement(child) && child.key != null ? child.key : i}
-              data-carousel-item=""
-              aria-label={showPosition ? l.position(i + 1, count) : undefined}
-              style={itemStyle}
-              className={cn(
-                "rst:shrink-0",
-                snap === "start" ? "rst:snap-start" : "rst:snap-center",
-                oneAtATime && "rst:snap-always",
-                itemClassName,
-              )}
-            >
-              {child}
-            </li>
-          ))}
+          {options
+            ? options.map((option, i) => (
+                <CarouselOption
+                  key={option.key}
+                  child={option.child}
+                  index={i}
+                  count={count}
+                  selected={option.key === selected}
+                  active={option.key === active}
+                  label={getOptionLabel?.(option.key, i)}
+                  style={itemStyle}
+                  className={itemClasses}
+                />
+              ))
+            : items.map((child, i) => (
+                <li
+                  key={React.isValidElement(child) && child.key != null ? child.key : i}
+                  data-carousel-item=""
+                  aria-label={showPosition ? l.position(i + 1, count) : undefined}
+                  style={itemStyle}
+                  className={itemClasses}
+                >
+                  {child}
+                </li>
+              ))}
         </ul>
         {!renderArrows && arrowPlacement === "overlay" && showArrows && (
           <>

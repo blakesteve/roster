@@ -42,6 +42,7 @@ export interface RealInput {
         hasPopup: string | null;
         value: string | null;
         valueText: string | null;
+        selected: boolean | null;
       }[]
     >;
   };

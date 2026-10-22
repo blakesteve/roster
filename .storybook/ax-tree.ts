@@ -39,6 +39,8 @@ export type AXState = {
   value: string | null;
   /** A range's `aria-valuetext`, which a screen reader speaks instead of its number; null where there's none. */
   valueText: string | null;
+  /** Whether an option or a tab is selected; null where the role has no selected state. */
+  selected: boolean | null;
 };
 
 function documents(node: DOMNode, out: DOMNode[] = []): DOMNode[] {
@@ -102,6 +104,7 @@ async function read(session: Session, selectors: string[]): Promise<AXState[]> {
       hasPopup: prop("hasPopup") === undefined ? null : String(prop("hasPopup")),
       value: node.value?.value === undefined ? null : String(node.value.value),
       valueText: prop("valuetext") === undefined ? null : String(prop("valuetext")),
+      selected: prop("selected") === undefined ? null : !!prop("selected"),
     });
   }
   return results;
