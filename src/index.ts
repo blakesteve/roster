@@ -68,6 +68,7 @@ export * from './components/molecules/Breadcrumbs/breadcrumb-variants';
 export * from './components/molecules/LiquidTabs/LiquidTabs';
 export * from './components/molecules/LiquidTabs/LiquidNav';
 export * from './components/molecules/LiquidTabs/liquid-tab-id';
+export * from './components/molecules/LiquidTabs/LiquidTabPanel';
 export * from './components/molecules/Carousel/Carousel';
 export * from './components/molecules/CallToAction/CallToAction';
 export * from './components/molecules/CallToAction/call-to-action-variants';
@@ -109,6 +110,10 @@ export * from './components/organisms/Table/table-variants';
 // --- HOOKS ---
 export * from './hooks/useCountdown';
 export * from './hooks/useKeySequence';
+/* The keyboard-mode tracker Roster's own rings use, for a consumer's
+   hand-drawn control that moves focus by script. It lives with the
+   components that call it. */
+export { useKeyFocus, KEY_FOCUS } from './internal/key-focus';
 
 // --- UTILITIES ---
 export * from './lib/utils';

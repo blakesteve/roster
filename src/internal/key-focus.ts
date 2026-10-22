@@ -59,6 +59,13 @@ const NAVIGATION = new Set([
   "PageDown",
 ]);
 
+/**
+ * The attribute the tracker marks keyboard focus with: `data-key-focus`. For
+ * a selector or a test of your own, or a control that marks focus itself (a
+ * typeahead that moves focus marks the item it lands on). A ring should match
+ * it through the `focus-visible` variant rather than on its own: see
+ * `useKeyFocus`.
+ */
 export const KEY_FOCUS = "data-key-focus";
 
 let users = 0;
@@ -122,8 +129,26 @@ function uninstall() {
 
 /**
  * Keeps the keyboard-mode listeners installed while the calling component is
- * mounted. Every component that moves focus by script, or opens something
- * that does, calls it.
+ * mounted. Every Roster component that moves focus by script, or opens
+ * something that does, calls it.
+ *
+ * **Call it in your own control when** the control moves focus by script in
+ * answer to a key (arrows around a hand-drawn wheel, a grid that roves its own
+ * focus) and draws its ring with `focus-visible:`. Once the page has been
+ * clicked, WebKit doesn't count that focus as the keyboard's, and the ring
+ * doesn't show in Safari. With the hook mounted, the element the keys land on
+ * carries `data-key-focus` until it loses focus, and the ring follows it once
+ * your `focus-visible` variant matches the mark too, the one line Roster's own
+ * stylesheet has:
+ *
+ * ```css
+ * @custom-variant focus-visible (&:is(:focus-visible, [data-key-focus]));
+ * ```
+ *
+ * Focus the keyboard moves on its own, Tab to a button or a field, rings in
+ * every engine and needs neither. Calling it beside Roster's components costs
+ * nothing more: the listeners are shared, added for the first caller and
+ * removed after the last.
  */
 export function useKeyFocus() {
   React.useEffect(() => {

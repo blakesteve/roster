@@ -12,6 +12,8 @@ import { AvatarStrip } from "./components/atoms/AvatarStrip/AvatarStrip";
 import { ErrorState } from "./components/molecules/ErrorState/ErrorState";
 import { Countdown } from "./components/organisms/Countdown/Countdown";
 import { Carousel } from "./components/molecules/Carousel/Carousel";
+import { LiquidTabs } from "./components/molecules/LiquidTabs/LiquidTabs";
+import { LiquidNav } from "./components/molecules/LiquidTabs/LiquidNav";
 import { MultiSelect } from "./components/atoms/MultiSelect/MultiSelect";
 import { DataTable } from "./components/organisms/DataTable/DataTable";
 import { MediaPreview } from "./components/molecules/MediaPreview/MediaPreview";
@@ -240,6 +242,34 @@ describe("pseudo-locale: no built-in English is left once every label is replace
         </Carousel>
       ),
       ["of"],
+    ],
+    [
+      "LiquidTabs, with counts",
+      (labeled) => (
+        <LiquidTabs
+          aria-label={pseudo("Lists")}
+          tabs={[
+            { id: "open", label: pseudo("Open"), count: 12 },
+            { id: "one", label: <span>{pseudo("One")}</span>, count: 1 },
+          ]}
+          activeTab="open"
+          onChange={() => {}}
+          labels={labeled ? { count: (n) => `${n} ${pseudo("things")}` } : undefined}
+        />
+      ),
+      ["items", "item"],
+    ],
+    [
+      "LiquidNav, with a count",
+      (labeled) => (
+        <LiquidNav
+          aria-label={pseudo("Sections")}
+          items={[{ id: "inbox", label: pseudo("Inbox"), href: "/inbox", count: 3 }]}
+          activeTab="inbox"
+          labels={labeled ? { count: (n) => `${n} ${pseudo("things")}` } : undefined}
+        />
+      ),
+      ["items"],
     ],
     [
       "MultiSelect",
