@@ -114,6 +114,8 @@ A vertical wheel over the row scrolls the page, like any sideways row on the web
 \`\`\`
 
 Each child is one item. Size them with \`itemWidth\` (fixed) or \`perView\` (fluid, by breakpoint). Put the arrows on their own line (the default), over the ends (\`arrowPlacement="overlay"\`), or anywhere you like with \`renderArrows\`.
+
+**A strip of choices** takes \`selectable\`: the row becomes a listbox, one tab stop, with the arrow keys, Home, End, the Page keys and type-ahead moving between options, and Enter, Space or a tap selecting. Selection doesn't follow focus, and Enter or a tap on the selected option calls \`onActivate\`. Each child's \`key\` is its identity, and nothing inside an option may take focus. See *Selection*.
 `,
       },
     },
@@ -209,7 +211,9 @@ export const InAHeadingLine: Story = {
 /**
  * Overlay arrows sit over the ends and take no space; the fade shows only on
  * a side with more to see. Here the items are buttons that choose what's
- * shown above. `scrollToIndex` brings the row back to the start.
+ * shown above, each its own tab stop. `scrollToIndex` brings the row back to
+ * the start. For a strip of choices, *Selection* below is one tab stop with
+ * the arrow keys.
  */
 export const SelectionStrip: Story = {
   args: { children: null },
@@ -289,6 +293,96 @@ export const SelectionStrip: Story = {
               </span>
             </button>
           ))}
+        </Carousel>
+      </Stage>
+    );
+  },
+};
+
+/**
+ * Selection mode: the row is a listbox of records. Tab lands on the selected
+ * one, the arrow keys, Home, End and the Page keys move between them, and
+ * typing a title jumps to it. Arrowing only moves focus: nothing above
+ * changes until Enter, Space or a tap selects. Enter again, or a tap on the
+ * selected record, plays it. Escape clears.
+ *
+ * The selected look is the consumer's, drawn here by each option from
+ * `selectedKey`; Roster draws the focus ring. `getOptionLabel` names each
+ * option "title, artist", which type-ahead matches by title.
+ */
+export const Selection: Story = {
+  args: { children: null },
+  parameters: { controls: { disable: true } },
+  render: function Render() {
+    const [chosen, setChosen] = useState<string | null>("Glasshouse");
+    const [playing, setPlaying] = useState<string | null>(null);
+    const album = albums.find((a) => a.title === chosen);
+    return (
+      <Stage>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "96px 1fr",
+            gap: 20,
+            alignItems: "center",
+            padding: 20,
+            marginBottom: 12,
+            borderRadius: 24,
+            background: album ? `linear-gradient(120deg, hsl(${album.from} 80% 60% / 0.18), hsl(${album.to} 80% 50% / 0.1))` : "rgb(0 0 0 / 0.04)",
+          }}
+        >
+          <div style={{ ...ART, padding: 0, background: album ? gradient(album.from, album.to) : "rgb(0 0 0 / 0.08)" }} />
+          <div>
+            <div style={{ ...SUBTITLE, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 11 }}>{album ? "Selected" : "Nothing selected"}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em" }}>{album?.title ?? "Pick a record"}</div>
+            <div style={SUBTITLE}>{album ? `${album.artist} · ${album.tag}` : "Tab to the row, then use the arrow keys."}</div>
+            <p aria-live="polite" style={{ margin: "8px 0 0", fontSize: 13, fontWeight: 600, minHeight: 18 }}>
+              {playing ? `Playing ${playing}` : ""}
+            </p>
+          </div>
+        </div>
+        <p id="selection-how" style={{ ...SUBTITLE, margin: "0 0 8px" }}>
+          Arrow keys move. Enter selects; Enter again plays it. Escape clears.
+        </p>
+        <Carousel
+          aria-label="Choose a record"
+          aria-describedby="selection-how"
+          selectable
+          selectedKey={chosen}
+          onSelectionChange={setChosen}
+          onActivate={setPlaying}
+          clearable
+          getOptionLabel={(key) => `${key}, ${albums.find((a) => a.title === key)?.artist ?? ""}`}
+          itemWidth={150}
+          gap={12}
+          gutter={0}
+          arrowPlacement="overlay"
+          arrows="always"
+          fade
+        >
+          {albums.map((a) => {
+            const on = a.title === chosen;
+            return (
+              <div
+                key={a.title}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: 8,
+                  borderRadius: 14,
+                  background: on ? `hsl(${a.from} 80% 60% / 0.16)` : "transparent",
+                  border: `1.5px solid ${on ? `hsl(${a.from} 70% 45%)` : "rgb(0 0 0 / 0.12)"}`,
+                }}
+              >
+                <span style={{ width: 36, height: 36, flex: "none", borderRadius: 10, background: gradient(a.from, a.to) }} />
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{a.title}</span>
+                  <span style={{ display: "block", fontSize: 12, opacity: 0.6, whiteSpace: "nowrap" }}>{a.artist}</span>
+                </span>
+              </div>
+            );
+          })}
         </Carousel>
       </Stage>
     );

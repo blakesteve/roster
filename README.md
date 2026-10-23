@@ -1861,8 +1861,8 @@ Things to know:
 
 ### Carousel
 
-A sideways row: a row of cards, a selection strip, or a gallery of one per
-view. It is a real scroll container with CSS scroll snap, so touch, trackpad,
+A sideways row: a row of cards, a selection strip (`selectable`, below), or a
+gallery of one per view. It is a real scroll container with CSS scroll snap, so touch, trackpad,
 Shift with the wheel and keyboard focus all scroll it without script, and every
 item is in the server render. No clones, no virtualization, no loop, and
 nothing moves on its own.
@@ -1895,10 +1895,93 @@ Script adds what a mouse is missing:
 
 A vertical wheel over the row scrolls the page, and sideways overscroll is
 contained. Under reduced motion every scroll the component makes is instant.
-`ref` gives `scrollToIndex(i)`, `scrollPrev()` and `scrollNext()`;
+`ref` gives `scrollToIndex(i)`, `scrollPrev()`, `scrollNext()` and `focus()`;
 `onIndexChange` reports the first item wholly in view. For a gallery,
 `showPosition` shows "2 of 5", which is also each item's name and is announced
 politely when it changes.
+
+#### Selection mode
+
+For a strip of choices, one of which is picked, pass `selectable`. The row
+becomes a horizontal listbox: one tab stop, the keys moving focus between
+options, and one option selected. A row of buttons with `aria-pressed` is a tab
+stop per button (300 options, 300 Tab presses), and a screen reader hears a
+list of unrelated buttons. Without `selectable` nothing changes.
+
+```tsx
+<Carousel
+  aria-label="Choose a record"
+  aria-describedby="how"
+  selectable
+  selectedKey={chosen}
+  onSelectionChange={setChosen}
+  onActivate={play}
+  clearable
+  itemWidth={150}
+>
+  {records.map((r) => <RecordCell key={r.id} record={r} selected={r.id === chosen} />)}
+</Carousel>
+```
+
+- **Tab** lands on the selected option, or the first when nothing is. Leaving
+  the row hands the tab stop back to the selected option.
+- **Left and Right** move by one, without wrapping; **Home and End** go to the
+  ends; **Page Up and Page Down** move by as many options as are wholly in
+  view.
+- **Type-ahead:** typing jumps to the next option whose name starts with what
+  was typed. A pause of 700ms starts over, and the same letter again steps on
+  to the next option starting with it.
+- **Enter or Space selects. Selection doesn't follow focus:** arrowing only
+  moves focus, so whatever a selection sets off (a pan, a fetch, an
+  announcement) happens once, on purpose.
+- **Enter, a click or a tap on the selected option** calls `onActivate`, the
+  step after choosing: open it, read it, play it. A click or tap on any other
+  option selects it.
+- **Escape** clears the selection when `clearable` is set, and calls
+  `onSelectionChange(null)`.
+
+Moving focus with the keys scrolls the option into view, smoothly, or at once
+under reduced motion; a click doesn't move the row. A selection doesn't scroll
+the row at all, so a `scrollToIndex` of your own (centering the choice, say)
+isn't undone. The keyboard-mode tracker is mounted, so the ring shows in Safari
+after a click too (see [Focus](#focus)).
+
+**Identity is the child's `key`.** `selectedKey`, `defaultSelectedKey` and both
+callbacks deal in it, as React stores it: a string. Keys, not positions,
+because a consumer that filters the row changes every position after the first
+option it hides. A development build warns about a child without a key.
+Controlled (`selectedKey` with `onSelectionChange`) or uncontrolled
+(`defaultSelectedKey`); where focus is stays internal, and `focus()` on the
+`ref` moves focus onto the tab stop, from a find field's Down Arrow, say.
+
+**Names.** An option is named by its content, or by `getOptionLabel(key,
+index)`, which is also the text type-ahead matches. Name the listbox with
+`aria-label` or `aria-labelledby`, and put a sentence saying how it works in
+`aria-describedby`.
+
+**Nothing interactive inside an option.** An option is one choice, reached with
+the arrow keys; a link or a button inside it is a tab stop the keys skip, and
+a screen reader can't reach it as anything but text. Put actions outside the
+row, or behind `onActivate`. A development build warns when an option holds
+something that takes focus.
+
+**Filtering.** Render fewer children and `aria-setsize` and `aria-posinset`
+describe what's shown. The tab stop stays on its option if that's still shown;
+otherwise it moves to the nearest option still shown, in the order before the
+change, after it if there is one, else before it. A selection made elsewhere
+moves the tab stop to the selected option while focus is outside the row, and
+leaves it where the keys put it while focus is inside.
+
+**The selected look is yours.** Roster draws the focus ring, an outline 2px out,
+so a selected look drawn with a ring or a border sits inside it. Draw the
+selection in the child, from `selectedKey`, or on the option with
+`itemClassName` and the `aria-selected:` variant.
+
+**Scale.** Every option is in the DOM, for the keys and for screen readers;
+draw expensive content lazily inside it. Options are memoized and the keys,
+clicks and focus are one listener each on the row. Measured at 1,000 options
+in Chromium: mounting takes about 30ms longer than the default mode, a key
+moves focus within a millisecond, and the frame after it lands in about 7ms.
 
 ### LiquidTabs
 
@@ -2123,7 +2206,7 @@ function App() {
 | `Breadcrumbs`     | Navigation trail; pass `linkComponent` to keep navigation client-side       |
 | `CheckboxGroup`   | Checkbox set reporting one `string[]`; groups, columns, scroll, error       |
 | `CallToAction`    | Prominent hero-style CTA block                                              |
-| `Carousel`        | Sideways row of items on native scroll snap; mouse drag, paging arrows, no autoplay |
+| `Carousel`        | Sideways row of items on native scroll snap; mouse drag, paging arrows, no autoplay; a selection mode for a strip of choices (see [Selection mode](#selection-mode)) |
 | `DescriptionList` | Label and value pairs as a real `<dl>`: inline, stacked, or split           |
 | `EmptyState`      | Zero-data placeholder with icon and action slot; `headingLevel` sets its title's `h1` to `h6` |
 | `ErrorState`      | Error display with retry action                                             |

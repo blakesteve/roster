@@ -7,7 +7,9 @@ import {
   maxScroll,
   nearestIndex,
   overflows,
+  pageStep,
   pageTarget,
+  revealTarget,
   snapPosition,
   type CarouselGeometry,
 } from "./carousel-math";
@@ -99,5 +101,33 @@ describe("carousel arithmetic", () => {
     const empty = cards(0, { items: [], scrollWidth: 720 });
     expect(pageTarget(empty, 1)).toBe(0);
     expect(snapPosition(empty, 0)).toBe(0);
+  });
+});
+
+describe("pageStep", () => {
+  it("is the count of items wholly in view, and at least one", () => {
+    /* At 0, items 0 (16-256) and 1 (268-508) are whole; item 2 (520-760) runs past 720. */
+    expect([pageStep(cards(0)), pageStep(cards(0, { clientWidth: 100 }))]).toEqual([2, 1]);
+  });
+});
+
+describe("revealTarget", () => {
+  it("leaves an item that's already whole inside the gutters where it is", () => {
+    expect(revealTarget(cards(0), 1)).toBeNull();
+  });
+  it("brings an item off the trailing side in on the first snap point that shows it whole", () => {
+    /* Item 2 ends at 760; the view at 252 (item 1's place) ends at 252 + 720 - 16 = 956. */
+    expect([revealTarget(cards(0), 2), revealTarget(cards(0), 12)]).toEqual([252, 2576]);
+  });
+  it("snaps an item off the leading side to its own place", () => {
+    expect([revealTarget(cards(504), 0), revealTarget(cards(504), 1)]).toEqual([0, 252]);
+  });
+  it("centers an item out of view when the row snaps to the center", () => {
+    /* Item 5: 1276-1516, middle 1396, less the view's middle 16 + 688 / 2 = 360. */
+    expect(revealTarget(cards(0, { align: "center" }), 5)).toBe(1036);
+  });
+  it("measures from where a glide is going, when told", () => {
+    /* The twin of the trailing case: from 252 item 2 is already whole. */
+    expect([revealTarget(cards(0), 2, 252), revealTarget(cards(0), 99)]).toEqual([null, null]);
   });
 });
