@@ -101,7 +101,7 @@ const OLD_BUILD: Record<"chromium" | "webkit", Pinned> = {
     walked: { links: "a52a5acf037a3ba5", plain: "5259aa9c1c4f6ce0", pressed: "22ea51f7e9fb22a4" },
     walk: [
       "hovered: body | 0,0,0",
-      "clicked: button Item 3 | 0,0,0",
+      "clicked: where the platform puts it | 0,0,0",
       "button Next Links | 0,0,0",
       "a Item 1 | 0,0,0",
       "a Item 2 | 162,0,0",
@@ -138,7 +138,7 @@ const OLD_BUILD: Record<"chromium" | "webkit", Pinned> = {
     walked: { links: "8e2a82d7130a592f", plain: "788368f2da6f49c2", pressed: "9682c08537cc0c1e" },
     walk: [
       "hovered: body | 0,0,0",
-      "clicked: body | 0,0,0",
+      "clicked: where the platform puts it | 0,0,0",
       "button Next Links | 0,0,0",
       "a Item 1 | 0,0,0",
       "a Item 2 | 162,0,0",
@@ -187,7 +187,13 @@ export const TheDefaultModeIsUnchanged: Story = {
     await real.commands.realClick('[data-pin="pressed"] li:nth-child(3) button');
     await wait(400);
     now.clicked = await read();
-    now.walk.push(`clicked: ${where()}`);
+    /* Whether a click focuses a button is the platform's rule, not the
+       row's: WebKit on macOS leaves focus where it was, and on Linux (CI)
+       focuses the button, as Chromium does. Either is pinned as one; focus
+       anywhere else, such as the row moving it, still fails. */
+    const clicked = document.querySelector('[data-pin="pressed"] li:nth-child(3) button');
+    const native = document.activeElement === clicked || document.activeElement === document.body;
+    now.walk.push(`clicked: ${native ? `where the platform puts it | ${where().split(" | ")[1]}` : where()}`);
     (document.querySelector('[data-pin="before"]') as HTMLElement).focus();
     /* Safari's keyboard users reach links and buttons with Option+Tab. */
     const tab = chromium() ? "Tab" : "Alt+Tab";
