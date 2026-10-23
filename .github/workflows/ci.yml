@@ -11,6 +11,9 @@ jobs:
     name: Unit Tests
     # Pinned with the Storybook job; see the reason there.
     runs-on: ubuntu-24.04
+    # A ceiling, so a stall fails here rather than at GitHub's six hours.
+    # Healthy: about a minute and a half.
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +41,27 @@ jobs:
     # chromium on ubuntu26.04-x64"). Unpin once Playwright supports it.
     # https://app.clickup.com/t/86e3v3jtd
     runs-on: ubuntu-24.04
+    # Inside Playwright's own image for the locked version, which already
+    # holds Chromium, WebKit and every system library they load, so nothing
+    # is installed from Ubuntu's mirrors. On 23 Oct the WebKit libraries step
+    # took 52 minutes on a slow Azure apt mirror (90.9 MB at 29.4 kB/s) and
+    # passed; the same install took 24s that afternoon. A short apt timeout
+    # wouldn't have helped: the mirror was slow, not silent. The tag must
+    # match package-lock.json's playwright version (src/ci-workflow.test.ts).
+    container:
+      image: mcr.microsoft.com/playwright:v1.58.2-noble
+      # Chromium in Docker needs the host's shared memory, or large pages crash.
+      options: --ipc=host
+    # The runner ran in UTC; the image is built in Los Angeles time.
+    env:
+      TZ: UTC
+    # Ceilings, so a stall fails with GitHub's "has timed out" message inside a
+    # stated bound rather than at six hours. Healthy steps, 16 to 23 Oct:
+    # dependencies 6 to 20s, the four test steps 40 to 63s, 14 to 25s, 76 to
+    # 132s and 15 to 29s. Each step gets about three to five times its worst
+    # healthy time; the job, about two and a half times its whole healthy run
+    # with the image pull.
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -48,32 +72,15 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
+        timeout-minutes: 3
         run: npm ci
 
-      # The browsers in the key: a cache saved with Chromium alone must not
-      # count as a hit once the real-input project also runs WebKit.
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-chromium-webkit-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-playwright-chromium-webkit-
-
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium webkit
-
-      # The cache holds the browsers, not the system libraries they load. The
-      # runner image already has Chromium's; WebKit's are installed every run.
-      - name: Install WebKit's system libraries
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps webkit
-
       - name: Run Storybook tests
+        timeout-minutes: 4
         run: npx vitest run --project storybook
 
       - name: Run Storybook tests under reduced motion
+        timeout-minutes: 2
         run: npx vitest run --project storybook-reduced-motion
 
       # Stories that drive Playwright's real mouse and resize the viewport
@@ -81,18 +88,22 @@ jobs:
       # because they need the page's one mouse and one viewport to themselves.
       # They run in Chromium and in WebKit, where pointer and scroll differ.
       - name: Run Storybook tests with real input
+        timeout-minutes: 6
         run: npx vitest run --project storybook-real-input
 
       # Checks that read Chromium's accessibility tree (.storybook/ax-tree.ts).
       # Last, and alone: beside other story files the page didn't answer the
       # DevTools protocol in time.
       - name: Run accessibility-tree checks
+        timeout-minutes: 2
         run: npx vitest run --project storybook-ax-tree
 
   build:
     name: Build
     # Pinned with the Storybook job; see the reason there.
     runs-on: ubuntu-24.04
+    # A ceiling, as on the other jobs. Healthy: about half a minute.
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4

@@ -407,9 +407,10 @@ export const AClickAloneNeverRings: Story = {
     await read("slider", slider, slider.querySelector("[data-slider-thumb]")!);
 
     console.info(`KEY FOCUS ${chromium() ? "chromium" : "webkit"} | click alone | ${JSON.stringify(seen)}`);
-    /* Focus where the click left it, and no ring anywhere. Focus is checked
-       where a click focuses in both engines; WebKit doesn't focus a clicked
-       button, so for those only the ring is read. */
+    /* No ring anywhere, wherever the click left focus. Focus itself isn't
+       pinned: whether a click focuses a button depends on the platform
+       (WebKit on macOS doesn't, WebKit on Linux and Chromium do), and these
+       checks are about the ring. */
     await expect(seen.map(([label, , ring, paint]) => [label, ring, paint])).toEqual([
       ["menu button", false, false],
       ["select trigger", false, false],

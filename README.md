@@ -2390,6 +2390,13 @@ npm run check:prefix
 npm run check:classes-emit
 ```
 
+In CI the Storybook projects run inside Playwright's own image for the locked
+version (`mcr.microsoft.com/playwright:v<version>-noble` in `ci.yml`), so no
+browser or system library is installed from Ubuntu's mirrors. Bumping
+`playwright` means bumping that tag too: `src/ci-workflow.test.ts` fails until
+they match. Every job and test step has a time limit, so a stall fails with
+GitHub's "has timed out" message instead of running for hours.
+
 Three guards are worth knowing about, because the bugs they catch cannot be
 reproduced from inside this repo.
 

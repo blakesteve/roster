@@ -544,13 +544,17 @@ export const APressFurtherDownLeavesThePageWhereItIs: Story = {
     const settle = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     try {
       /* Whether a press on a button focuses it, in this browser: Chromium's
-         does, WebKit's, like Safari, doesn't. Pressed with no menu open. */
+         does on every platform; WebKit's doesn't on macOS, like Safari, and
+         does on Linux, where CI runs. Pressed with no menu open. */
       const far = canvasElement.querySelector<HTMLElement>('[data-check="far-button"]')!;
       window.scrollTo(0, 1300);
       await waitFor(() => expect(Math.round(window.scrollY)).toBe(1300));
       (document.activeElement as HTMLElement | null)?.blur();
       await real.commands.realClick('[data-check="far-button"]');
       const pressFocuses = document.activeElement === far;
+      /* Chromium has one answer; pinned, so the branch below can't hide a
+         Chromium that stopped focusing a pressed button. */
+      if (/Chrome/.test(navigator.userAgent)) await expect(pressFocuses).toBe(true);
       /* A press on a button down there: the menu closes, the page stays put,
          and focus is on what was pressed, or, in a browser where a press
          focuses no button, back on the menu's button. */
