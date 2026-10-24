@@ -65,6 +65,11 @@ export * from './components/molecules/RadioGroup/RadioGroup';
 export * from './components/molecules/RadioGroup/radio-group-variants';
 export * from './components/molecules/Breadcrumbs/Breadcrumbs';
 export * from './components/molecules/Breadcrumbs/breadcrumb-variants';
+export * from './components/molecules/Tabs/Tabs';
+export * from './components/molecules/Tabs/TabPanel';
+export * from './components/molecules/Tabs/tab-id';
+/* LiquidTabs, LiquidTabPanel and liquidTabId are the old names for Tabs'
+   liquid variant, TabPanel and tabId: deprecated, and kept working. */
 export * from './components/molecules/LiquidTabs/LiquidTabs';
 export * from './components/molecules/LiquidTabs/LiquidNav';
 export * from './components/molecules/LiquidTabs/liquid-tab-id';

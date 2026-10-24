@@ -477,6 +477,33 @@
   --roster-lt-text-hover: var(--roster-gray-100, #f5f5f4);
 }
 
+/* ── Tabs component tokens ───────────────────────────────────────────────────
+   The plain variant: a rule along the strip, the selected tab's underline,
+   and the tabs' ink. The underline is the ring's color, primary-500 in light
+   and primary-400 in dark, so it clears 3:1 against the page either way
+   (6.37:1 and 7.31:1 on Roster's own surfaces). The rest ink clears 4.5:1:
+   gray-500 on white, gray-400 on gray-950. The hover underline is a hint,
+   lighter than the selected one, so the two never read alike. The liquid
+   variant keeps its own `--roster-lt-*` tokens, below.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --roster-tabs-border: var(--roster-gray-200, #e7e5e4);
+  --roster-tabs-text: var(--roster-gray-500, #65635f);
+  --roster-tabs-text-hover: var(--roster-gray-900, #1c1917);
+  --roster-tabs-text-active: var(--roster-gray-900, #1c1917);
+  --roster-tabs-indicator: var(--roster-primary-500, #0f6498);
+  --roster-tabs-indicator-hover: var(--roster-gray-300, #d6d3d1);
+}
+
+.dark {
+  --roster-tabs-border: var(--roster-gray-800, #292524);
+  --roster-tabs-text: var(--roster-gray-400, #a8a29e);
+  --roster-tabs-text-hover: var(--roster-gray-100, #f5f5f4);
+  --roster-tabs-text-active: var(--roster-gray-100, #f5f5f4);
+  --roster-tabs-indicator: var(--roster-primary-400, #5ea3de);
+  --roster-tabs-indicator-hover: var(--roster-gray-600, #57534e);
+}
+
 /* ── Entrance animation ──────────────────────────────────────────────────────
    Tooltip asked for `animate-in`, `fade-in-0`, `zoom-in-95` and four
    `slide-in-from-*` classes, all of which come from `tailwindcss-animate` — a
