@@ -1,10 +1,10 @@
 /**
- * Counts on a tab or a nav link: what `LiquidTabs` and `LiquidNav` share
- * about them. Internal; the type is exported from `LiquidTabs`.
+ * Counts on a tab or a nav link: what `Tabs`, `LiquidTabs` and `LiquidNav`
+ * share about them. Internal; the type is exported from `Tabs`.
  */
 
 /** Every word a count says. Pass any of them in `labels` to replace it. */
-export interface LiquidTabsLabels {
+export interface TabsLabels {
   /**
    * What a count says after the label, as part of the tab's accessible name:
    * "12 items", so the tab reads "Open, 12 items". Name your own noun, with
@@ -21,7 +21,10 @@ export interface LiquidTabsLabels {
   countMark: (count: number) => string;
 }
 
-export const LIQUID_COUNT_LABELS: LiquidTabsLabels = {
+/** @deprecated Renamed `TabsLabels`; the words are the same. */
+export type LiquidTabsLabels = TabsLabels;
+
+export const LIQUID_COUNT_LABELS: TabsLabels = {
   count: (count) => `${count.toLocaleString("en-US")} ${count === 1 ? "item" : "items"}`,
   countMark: (count) => count.toLocaleString("en-US"),
 };
@@ -42,5 +45,5 @@ export const shownCount = (count: number | undefined): count is number =>
  * visually hidden part, so the hidden ", 12 items" reads "Open , 12 items".
  * A label that's a node keeps that content name, which is spoken the same.
  */
-export const countName = (label: unknown, count: number | undefined, labels: LiquidTabsLabels): string | undefined =>
+export const countName = (label: unknown, count: number | undefined, labels: TabsLabels): string | undefined =>
   typeof label === "string" && shownCount(count) ? `${label}, ${labels.count(count)}` : undefined;

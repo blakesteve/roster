@@ -42,6 +42,12 @@ const ELEVATION = ["elevation-raised", "elevation-anchored", "elevation-overlay"
    invariant as the elevation levels: still defined, still read. A component
    that stops reading one leaves a knob in the docs that turns nothing. */
 const COMPONENT = [
+  "tabs-border",
+  "tabs-text",
+  "tabs-text-hover",
+  "tabs-text-active",
+  "tabs-indicator",
+  "tabs-indicator-hover",
   "lt-text-active",
   "sheet-enter-duration",
   "sheet-leave-duration",

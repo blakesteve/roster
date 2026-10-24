@@ -13,6 +13,7 @@ import { ErrorState } from "./components/molecules/ErrorState/ErrorState";
 import { Countdown } from "./components/organisms/Countdown/Countdown";
 import { Carousel } from "./components/molecules/Carousel/Carousel";
 import { LiquidTabs } from "./components/molecules/LiquidTabs/LiquidTabs";
+import { Tabs } from "./components/molecules/Tabs/Tabs";
 import { LiquidNav } from "./components/molecules/LiquidTabs/LiquidNav";
 import { MultiSelect } from "./components/atoms/MultiSelect/MultiSelect";
 import { DataTable } from "./components/organisms/DataTable/DataTable";
@@ -247,6 +248,22 @@ describe("pseudo-locale: no built-in English is left once every label is replace
       "LiquidTabs, with counts",
       (labeled) => (
         <LiquidTabs
+          aria-label={pseudo("Lists")}
+          tabs={[
+            { id: "open", label: pseudo("Open"), count: 12 },
+            { id: "one", label: <span>{pseudo("One")}</span>, count: 1 },
+          ]}
+          activeTab="open"
+          onChange={() => {}}
+          labels={labeled ? { count: (n) => `${n} ${pseudo("things")}` } : undefined}
+        />
+      ),
+      ["items", "item"],
+    ],
+    [
+      "Tabs, plain, with counts",
+      (labeled) => (
+        <Tabs
           aria-label={pseudo("Lists")}
           tabs={[
             { id: "open", label: pseudo("Open"), count: 12 },

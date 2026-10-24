@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { shownCount, type LiquidTabsLabels } from "./liquid-count";
+import { shownCount, type TabsLabels } from "./liquid-count";
 
 /**
  * A tab's or a link's label, with its count beside it when it has one.
@@ -23,7 +23,7 @@ import { shownCount, type LiquidTabsLabels } from "./liquid-count";
  * for a link component that doesn't forward one. Render it only for a count that shows (`shownCount`): with
  * none, the item takes its label as it always has, wrapper and all.
  */
-export function LiquidCount({ label, count, labels }: { label: ReactNode; count: number | undefined; labels: LiquidTabsLabels }) {
+export function LiquidCount({ label, count, labels }: { label: ReactNode; count: number | undefined; labels: TabsLabels }) {
   if (!shownCount(count)) return <>{label}</>;
   return (
     <span className="rst:inline-flex rst:items-center rst:justify-center rst:gap-1.5">

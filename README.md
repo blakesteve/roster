@@ -268,9 +268,9 @@ changes nothing.
 | token | default | reshapes |
 | ----- | ------- | -------- |
 | `--roster-radius-sm` | `0.25rem` | `Button` `xs`, `Checkbox` `sm` and `md`, `InlineCode`, `Link`, `MultiSelect`'s chip dismiss, the dismiss and reveal buttons in `Alert`, `Toast` and `PasswordInput` |
-| `--roster-radius-md` | `0.375rem` | `Button`, `Input`, `Textarea`, `Select`, `MultiSelect`, `Badge`, `Avatar` and its popover, `Checkbox` `lg`, `CheckboxGroup`'s panel, `Disclosure`, `Dialog`'s and `Sheet`'s close buttons, `Navbar`'s links and menu, popup panels, `Table` |
-| `--roster-radius-lg` | `0.5rem` | `Alert`, `Toast`, `Tooltip`, `CallToAction`, `EmptyState`, `ErrorState`, `LiquidTabs`, `MatchupCard`, `Navbar`'s mobile panel, `Skeleton` blocks (unless `--roster-skeleton-radius` is set) |
-| `--roster-radius-xl` | `0.75rem` | `Card`, `LiquidTabs`' `pill` strip |
+| `--roster-radius-md` | `0.375rem` | `Button`, `Input`, `Textarea`, `Select`, `MultiSelect`, `Badge`, `Avatar` and its popover, `Checkbox` `lg`, `CheckboxGroup`'s panel, `Disclosure`, `Dialog`'s and `Sheet`'s close buttons, `Navbar`'s links and menu, popup panels, `Table`, a plain `Tabs`' focus ring |
+| `--roster-radius-lg` | `0.5rem` | `Alert`, `Toast`, `Tooltip`, `CallToAction`, `EmptyState`, `ErrorState`, `Tabs`' liquid variant, `MatchupCard`, `Navbar`'s mobile panel, `Skeleton` blocks (unless `--roster-skeleton-radius` is set) |
+| `--roster-radius-xl` | `0.75rem` | `Card`, the liquid `Tabs`' `pill` strip |
 | `--roster-radius-2xl` | `1rem` | `Dialog`, the top of `Sheet` |
 | `--roster-radius-3xl` | `1.5rem` | nothing yet; wired for the first component that uses it |
 | `--roster-border-width` | `1px` | every 1px edge: borders, `divide-y`, the ring `Select`'s trigger and the anchored panels draw their edge with, and the rules in `Accordion` and `LabeledDivider` |
@@ -477,11 +477,12 @@ Replace the rule with the token:
 :root { --roster-primary-600-ink: #10142e; }
 ```
 
-`LiquidTabs` followed later: its active label reads `--roster-lt-text-active`,
-which defaults to `--roster-primary-500-ink`, the ink of the pill's default
-fill. A rule naming `rst:text-white` on a tab stops matching; a rule on
-`[role="tab"][aria-selected="true"]` still does. If you repaint the pill with
-`--roster-lt-pill`, set `--roster-lt-text-active` to match it.
+`LiquidTabs` followed later (now `Tabs`' liquid variant): its active label
+reads `--roster-lt-text-active`, which defaults to `--roster-primary-500-ink`,
+the ink of the pill's default fill. A rule naming `rst:text-white` on a tab
+stops matching; a rule on `[role="tab"][aria-selected="true"]` still does. If
+you repaint the pill with `--roster-lt-pill`, set `--roster-lt-text-active` to
+match it.
 
 **If you pass a foreground through `className`, add the hover modifier.** Solid
 variants now carry `hover:text-*`, and `tailwind-merge` resolves conflicts per
@@ -565,7 +566,7 @@ a click. A small tracker marks those elements: keyboard mode starts on a navigat
 arrows, Escape, Enter, Space, Home, End, PageUp, PageDown) and ends on pointer
 input, and it marks only what Chromium's own `:focus-visible` already matches,
 so Chromium's rings are unchanged. It runs while a component that moves focus
-is mounted (Menu, the select family, Dialog, Sheet, RadioGroup, LiquidTabs,
+is mounted (Menu, the select family, Dialog, Sheet, RadioGroup, Tabs,
 Slider and the rest), on one set of document listeners.
 
 Your own components' rings come from your Tailwind, not Roster's, so they
@@ -1382,7 +1383,7 @@ What it promises:
   sideways at 320px. Nothing animates as an item leaves.
 
 Counts for a tab need no API: the app holds the items, so it's
-`items.length`, passed as a `LiquidTabs` tab's `count`. `MediaPreview` is the
+`items.length`, passed as a `Tabs` tab's `count`. `MediaPreview` is the
 thumbnail to use in an item: when the image can't render (an expired link, a
 format the browser can't draw), it falls back to a link to the original in the
 same footprint.
@@ -1983,17 +1984,54 @@ clicks and focus are one listener each on the row. Measured at 1,000 options
 in Chromium: mounting takes about 30ms longer than the default mode, a key
 moves focus within a millisecond, and the frame after it lands in about 7ms.
 
-### LiquidTabs
+### Tabs
 
-A tab strip with a sliding pill, on the WAI tabs pattern: one tab stop, arrows
-that wrap, Home and End, and `activation="manual"` for tabs that are costly to
-switch. `LiquidNav` is the same strip as a `nav` of links.
-
-**Counts.** A tab or a nav link takes `count`, shown in a small mark after its
-label:
+A controlled tab strip, on the WAI tabs pattern in every variant: one tab
+stop, arrows that wrap, Home and End, and `activation="manual"` for tabs that
+are costly to switch. Every tab is `type="button"`, so a strip inside a form
+never submits it.
 
 ```tsx
-<LiquidTabs tabs={[{ id: "queue", label: "Queue", count: queue.length }, …]} … />
+import { Tabs } from "@blakesteve/roster";
+
+<Tabs aria-label="Project" tabs={[{ id: "overview", label: "Overview" }, …]} activeTab={tab} onChange={setTab} />
+```
+
+**Plain, by default.** The selected tab is underlined, 2px, on a 1px rule
+that runs the strip's width. The other tabs are muted and darken under the
+pointer, with a lighter underline as a hint. The weight never changes, so
+selecting a tab never moves the row. Keyboard focus is Roster's ring. The
+underline is a border, so it stays in forced colors, and only the selected
+tab draws one there. Its colors are tokens, each set in light and dark:
+
+| token | light | dark | paints |
+| ----- | ----- | ---- | ------ |
+| `--roster-tabs-indicator` | `primary-500` | `primary-400` | the selected tab's underline |
+| `--roster-tabs-indicator-hover` | `gray-300` | `gray-600` | the underline under the pointer |
+| `--roster-tabs-border` | `gray-200` | `gray-800` | the rule along the strip |
+| `--roster-tabs-text` | `gray-500` | `gray-400` | a tab at rest |
+| `--roster-tabs-text-hover` | `gray-900` | `gray-100` | a tab under the pointer |
+| `--roster-tabs-text-active` | `gray-900` | `gray-100` | the selected tab |
+
+On Roster's own surfaces the underline clears 3:1 against the page (6.37:1 in
+light, 7.31:1 in dark), a label at rest 4.5:1 (5.99:1 and 7.83:1), and a
+count's number 4.5:1 against its mark (5.07:1 at the least). `fullWidth` gives
+every tab an equal share of the row, and `size="lg"` makes each at least 44px
+tall.
+
+**Liquid.** `variant="liquid"` draws the sliding pill instead:
+`liquidStyle="pill"` (the default), a floating pill in a padded strip, or
+`"filled"`, where the selected tab fills its cell. The pill follows
+`activeTab`, never the click, and moves in two phases, a stretch and a
+settle, or not at all under reduced motion. Its colors are the
+`--roster-lt-*` tokens. `liquidStyle` is a type error without
+`variant="liquid"`.
+
+**Counts.** A tab takes `count`, in every variant, and so does a `LiquidNav` link, shown
+in a small mark after its label:
+
+```tsx
+<Tabs tabs={[{ id: "queue", label: "Queue", count: queue.length }, …]} … />
 ```
 
 The count is part of the name, "Queue, 12 items" rather than "Queue12" or
@@ -2014,29 +2052,29 @@ labels={{ count: (n) => (n === 1 ? "1 game" : `${n.toLocaleString()} games`) }}
   shorten the mark, pass `labels.countMark` (`(n) => "12K"`); the name stays
   whole, since a screen reader has no width to save.
 - **The mark is drawn from the tab's own text color:** its number in that
-  color on a 12% tint of it. So it follows the tab through every state, both
-  variants and both themes, and through any palette set on the
-  `--roster-lt-*` tokens, and its number clears 4.5:1 in every state on
-  Roster's own (4.88:1 at the least). `Badge` and `Pill` each draw from a fixed
+  color on a 12% tint of it. So it follows the tab through every state, every
+  variant and both themes, and through any palette set on the tabs' tokens,
+  and its number clears 4.5:1 in every state on Roster's own (4.88:1 at the
+  least, on the liquid pill). `Badge` and `Pill` each draw from a fixed
   palette, which on the selected tab would be a second chip sitting on the
   pill.
-- **The pill follows,** re-measuring when a count widens its tab or one
-  before it.
+- **The liquid pill follows,** re-measuring when a count widens its tab or
+  one before it.
 
-**The panel.** `LiquidTabPanel` is the `role="tabpanel"` a tab controls, paired
-with it by construction: its `id` is the tab's `panelId`, and its
-`aria-labelledby` points at the tab through `liquidTabId`, so the panel takes
-the tab's name, count included. Give the `LiquidTabs` an `id` to pair it with.
-One panel that swaps its content, or a panel per tab:
+**The panel.** `TabPanel` is the `role="tabpanel"` a tab controls, in every
+variant, paired with it by construction: its `id` is the tab's `panelId`, and
+its `aria-labelledby` points at the tab through `tabId`, so the panel takes the
+tab's name, count included. Give the `Tabs` an `id` to pair it with. One panel
+that swaps its content, or a panel per tab:
 
 ```tsx
 // One panel: every tab carries the same panelId, and `tab` is the selected one.
-<LiquidTabs id="lists" tabs={tabs.map((t) => ({ ...t, panelId: "lists-panel" }))} activeTab={list} onChange={setList} />
-<LiquidTabPanel tabsId="lists" id="lists-panel" tab={list}>…</LiquidTabPanel>
+<Tabs id="lists" tabs={tabs.map((t) => ({ ...t, panelId: "lists-panel" }))} activeTab={list} onChange={setList} />
+<TabPanel tabsId="lists" id="lists-panel" tab={list}>…</TabPanel>
 
 // A panel per tab: each its own panelId, and every panel gets activeTab.
-<LiquidTabPanel tabsId="views" id="views-board" tab="board" activeTab={view}>…</LiquidTabPanel>
-<LiquidTabPanel tabsId="views" id="views-list" tab="list" activeTab={view} keepMounted>…</LiquidTabPanel>
+<TabPanel tabsId="views" id="views-board" tab="board" activeTab={view}>…</TabPanel>
+<TabPanel tabsId="views" id="views-list" tab="list" activeTab={view} keepMounted>…</TabPanel>
 ```
 
 Per tab, a panel that isn't selected stays in the page, hidden, so every tab's
@@ -2047,6 +2085,22 @@ the tab order (`tabIndex={0}`), as the WAI pattern asks, so a keyboard user
 can reach what they just selected; it leaves the tab order once its content
 holds a link, a button or a field, rechecked as the content changes. Pass
 `tabIndex` to decide it yourself.
+
+**From `LiquidTabs`.** `LiquidTabs` is deprecated, and keeps working,
+unchanged: it renders `Tabs` with the liquid variant, the same markup, styles
+and test ids it always has. To move, rename it and add the variant; a
+`variant="filled"` moves to `liquidStyle`:
+
+```tsx
+<LiquidTabs … />                    →  <Tabs variant="liquid" … />
+<LiquidTabs variant="filled" … />   →  <Tabs variant="liquid" liquidStyle="filled" … />
+<LiquidTabPanel … />                →  <TabPanel … />
+liquidTabId(id, tab)                →  tabId(id, tab)
+```
+
+Nothing else changes: the props, ids, keys, pill and `data-testid` hooks are
+the same. `LiquidTabsLabels` is now `TabsLabels`, and the old name still works.
+`LiquidNav`, the liquid strip as a `nav` of links, is unchanged.
 
 ### Components that render links
 
@@ -2098,8 +2152,8 @@ Dialog or Sheet), alongside `Pagination`, the loading system and DataTable's
 instead, and 5.8.0 adds the ones that were missing: MultiSelect's
 `countLabel`, DataTable's `emptyMessage` and MediaPreview's `newTabLabel`, next
 to the existing `dismissLabel`, `placeholder`, `removeLabel`, `prevLabel` and
-the like. `LiquidTabs` and `LiquidNav` take `labels` for the words a count
-says. Words that take a number or a name are functions, so a language
+the like. `Tabs`, `LiquidTabs` and `LiquidNav` take `labels` for the words a
+count says. Words that take a number or a name are functions, so a language
 whose word changes with the count can say so. An entry passed as `undefined`
 (a catalog missing a key) keeps its English rather than leaving a control
 unnamed.
@@ -2210,9 +2264,9 @@ function App() {
 | `DescriptionList` | Label and value pairs as a real `<dl>`: inline, stacked, or split           |
 | `EmptyState`      | Zero-data placeholder with icon and action slot; `headingLevel` sets its title's `h1` to `h6` |
 | `ErrorState`      | Error display with retry action                                             |
-| `LiquidNav`       | `LiquidTabs`' strip as a `nav` of links; takes a router's link component    |
-| `LiquidTabs`      | Tab strip with a sliding pill; arrow keys, roving focus, counts, 44px `lg` size (see [LiquidTabs](#liquidtabs)) |
-| `LiquidTabPanel`  | The panel a `LiquidTabs` tab controls, named for its tab by construction; one swapping panel or one per tab |
+| `LiquidNav`       | The liquid tab strip as a `nav` of links; takes a router's link component   |
+| `LiquidTabs`      | Deprecated: `Tabs` with `variant="liquid"`, which it renders (see [Tabs](#tabs)) |
+| `LiquidTabPanel`  | Deprecated: the old name of `TabPanel`                                      |
 | `MatchupCard`     | Head-to-head comparison card                                                |
 | `MediaPreview`    | Thumbnail that falls back to "Preview unavailable, open original" when it can't render |
 | `Menu`            | A button's menu of actions: icons, shortcuts, checkbox and radio items, links, groups, submenus; the full keyboard pattern, 44px targets (see [Menu](#menu)) |
@@ -2225,6 +2279,8 @@ function App() {
 | `RadioGroup`      | Radio set reporting one `string`; descriptions, error, 44px targets         |
 | `Slider`          | A value along a track, starting in the middle or not set on request; named snap-point chips, a visible number, the full keyboard, 44px targets (see [Slider](#slider)) |
 | `RangeSlider`     | A low and a high on one track: two thumbs that meet and never cross, each its own slider to the keyboard (see [RangeSlider](#rangeslider)) |
+| `Tabs`            | Tab strip, plain (an underline) or liquid (a sliding pill); arrow keys, one tab stop, counts, 44px `lg` size (see [Tabs](#tabs)) |
+| `TabPanel`        | The panel a `Tabs` tab controls, named for its tab by construction; one swapping panel or one per tab |
 | `Toast`           | Transient floating notice; `Toaster` + the imperative `toast` handle        |
 
 ### Organisms

@@ -1,44 +1,8 @@
-import { useId, useRef, useState, type FocusEvent, type KeyboardEvent, type ReactNode } from "react";
-import {
-  LIQUID_PILL_STYLE,
-  LIQUID_STRIP_STYLE,
-  liquidItemClassName,
-  liquidPillClassName,
-  liquidStripClassName,
-  useLiquidPill,
-  type LiquidSize,
-  type LiquidVariant,
-} from "./liquid-pill";
-import { liquidTabId } from "./liquid-tab-id";
-import { LiquidCount } from "./LiquidCount";
-import { LIQUID_COUNT_LABELS, countName, shownCount, type LiquidTabsLabels } from "./liquid-count";
-import { withLabels } from "../../../lib/labels";
-import { useKeyFocus } from "../../../internal/key-focus";
+import type { LiquidSize, LiquidVariant } from "./liquid-pill";
+import { Tabs, type TabItem, type TabsLabels } from "../Tabs/Tabs";
 
-export type { LiquidTabsLabels };
-
-export interface TabItem {
-  id: string;
-  /** Static label, or a render function that receives whether this tab is active. */
-  label: ReactNode | ((isActive: boolean) => ReactNode);
-  /**
-   * The `id` of the panel this tab controls, which sets `aria-controls`. Give
-   * every tab the same id when one panel swaps its content.
-   */
-  panelId?: string;
-  /**
-   * A number in a small mark beside the label, read as part of the tab's
-   * name: "Open, 12 items" (`labels.count` says it).
-   *
-   * **Zero shows**, as "0" and "0 items": a count that vanished at zero would
-   * change the tab's width and move every tab after it, and an empty list is
-   * worth saying. To hide it, pass `undefined` for zero. `undefined` means no
-   * count and no mark. A negative or fractional count isn't shown at all,
-   * never rounded or clamped. Large counts aren't abbreviated: 12,345 shows
-   * as "12,345" unless `labels.countMark` writes it shorter.
-   */
-  count?: number;
-}
+export type { TabItem };
+export type { LiquidTabsLabels } from "./liquid-count";
 
 export interface LiquidTabsProps {
   tabs: TabItem[];
@@ -80,146 +44,23 @@ export interface LiquidTabsProps {
   /** Extra classes applied to the outer container. */
   className?: string;
   /** Every word a count says, with English defaults: see `TabItem.count`. */
-  labels?: Partial<LiquidTabsLabels>;
+  labels?: Partial<TabsLabels>;
 }
 
 /**
  * A controlled tab strip with a liquid sliding indicator.
  *
- * Follows the WAI tabs pattern: only the selected tab is in the tab order,
- * Left and Right move between tabs and wrap, Home and End go to the ends. If
- * `activeTab` matches no tab, the first tab takes the tab stop and no pill
- * shows.
+ * @deprecated Use `Tabs` with `variant="liquid"`, which renders exactly this:
+ * the same markup, styles, keys and pill. `variant` becomes `liquidStyle`, and
+ * every other prop is the same:
  *
- * Until script has measured the pill, the active tab paints the pill's color
- * itself, so server-rendered HTML shows the selection too.
+ * ```tsx
+ * <LiquidTabs variant="filled" … />  // before
+ * <Tabs variant="liquid" liquidStyle="filled" … />  // after
+ * ```
  *
- * The pill follows `activeTab`, never the click, so a change the consumer
- * vetoes, or one that waits on navigation, never leaves it on the wrong tab.
- *
- * A tab can carry a `count`, and a panel pairs with its tab by construction
- * through `LiquidTabPanel`.
- *
- * For navigation between routes, use `LiquidNav`, which renders links.
+ * `LiquidTabs` keeps working, unchanged.
  */
-export function LiquidTabs({
-  tabs,
-  activeTab,
-  onChange,
-  variant = "pill",
-  fullWidth = false,
-  size = "md",
-  activation = "automatic",
-  id,
-  "aria-label": ariaLabel,
-  "aria-labelledby": ariaLabelledBy,
-  className,
-  labels,
-}: LiquidTabsProps) {
-  useKeyFocus();
-  const l = withLabels(LIQUID_COUNT_LABELS, labels);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const pillRef = useRef<HTMLDivElement>(null);
-  const generatedId = useId();
-  const listId = id ?? generatedId;
-
-  useLiquidPill(containerRef, pillRef, activeTab, tabs.map((t) => t.id).join("\u0000"));
-
-  const select = (next: string) => {
-    if (next !== activeTab) onChange(next);
-  };
-
-  /* The tab stop is the selected tab, or the first if none is, until focus
-     is inside the strip; then it is wherever focus is. Otherwise, after
-     arrowing onto a tab that is not selected (manual activation, or a change
-     the consumer refused), Tab would land on the selected tab instead of
-     leaving the strip. */
-  const [focused, setFocused] = useState<string | null>(null);
-  const hasActive = tabs.some((t) => t.id === activeTab);
-  const tabStop =
-    focused !== null && tabs.some((t) => t.id === focused)
-      ? focused
-      : hasActive
-        ? activeTab
-        : tabs[0]?.id;
-
-  const onBlur = (event: FocusEvent<HTMLDivElement>) => {
-    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(null);
-  };
-
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const container = containerRef.current;
-    if (!container) return;
-    const buttons = Array.from(
-      container.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
-    );
-    const current = buttons.indexOf(event.target as HTMLButtonElement);
-    if (current === -1) return;
-
-    const last = buttons.length - 1;
-    const rtl = getComputedStyle(container).direction === "rtl";
-    const forward = rtl ? "ArrowLeft" : "ArrowRight";
-    const back = rtl ? "ArrowRight" : "ArrowLeft";
-
-    let next: number;
-    if (event.key === forward) next = current === last ? 0 : current + 1;
-    else if (event.key === back) next = current === 0 ? last : current - 1;
-    else if (event.key === "Home") next = 0;
-    else if (event.key === "End") next = last;
-    else return;
-
-    event.preventDefault();
-    buttons[next].focus();
-    if (activation === "automatic") select(tabs[next].id);
-  };
-
-  return (
-    <div
-      ref={containerRef}
-      id={listId}
-      role="tablist"
-      aria-label={ariaLabel}
-      aria-labelledby={ariaLabelledBy}
-      data-testid="liquid-tabs"
-      style={LIQUID_STRIP_STYLE}
-      className={liquidStripClassName(variant, fullWidth, className)}
-      onKeyDown={onKeyDown}
-      onBlur={onBlur}
-    >
-      {/* Starts invisible; a layout effect places and reveals it before the first paint. */}
-      <div
-        ref={pillRef}
-        aria-hidden
-        data-testid="liquid-tabs-pill"
-        className={liquidPillClassName(variant)}
-        style={LIQUID_PILL_STYLE}
-      />
-
-      {tabs.map((tab) => {
-        const isActive = tab.id === activeTab;
-        const label = typeof tab.label === "function" ? tab.label(isActive) : tab.label;
-        return (
-          <button
-            key={tab.id}
-            /* Not optional. A button's default type is `submit`, so a tab
-               inside a form submitted the form on every click. */
-            type="button"
-            role="tab"
-            id={liquidTabId(listId, tab.id)}
-            aria-selected={isActive}
-            aria-controls={tab.panelId}
-            aria-label={countName(label, tab.count, l)}
-            tabIndex={tab.id === tabStop ? 0 : -1}
-            data-tab-id={tab.id}
-            data-testid={`liquid-tab-${tab.id}`}
-            onClick={() => select(tab.id)}
-            onFocus={() => setFocused(tab.id)}
-            className={liquidItemClassName({ variant, fullWidth, size, isActive })}
-          >
-            {shownCount(tab.count) ? <LiquidCount label={label} count={tab.count} labels={l} /> : label}
-          </button>
-        );
-      })}
-    </div>
-  );
+export function LiquidTabs({ variant = "pill", ...rest }: LiquidTabsProps) {
+  return <Tabs {...rest} variant="liquid" liquidStyle={variant} />;
 }

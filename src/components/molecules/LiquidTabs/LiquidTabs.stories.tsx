@@ -24,6 +24,8 @@ const meta = {
     docs: {
       description: {
         component: [
+          "**Deprecated:** use `Tabs` with `variant=\"liquid\"`, which renders exactly this. `LiquidTabs` keeps working, unchanged; see Molecules/Tabs for the move.",
+          "",
           "**LiquidTabs** is a controlled tab strip with a liquid sliding indicator.",
           "",
           "### Controlled, and the pill follows the value",
