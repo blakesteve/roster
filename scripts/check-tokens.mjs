@@ -31,8 +31,9 @@ const MOTION = ["enter-duration", "enter-easing"];
 
 /* Component hooks: never defined by Roster, read with a fallback that is the
    component's own default. The skeleton's shimmer and pulse timing, how far
-   the pulse fades, and its blocks' corners. */
-const COMPONENT_HOOKS = ["skeleton-duration", "skeleton-pulse-duration", "skeleton-pulse-opacity", "skeleton-radius"];
+   the pulse fades, and its blocks' corners; FileUpload's drop box height when
+   it shows a picture. */
+const COMPONENT_HOOKS = ["skeleton-duration", "skeleton-pulse-duration", "skeleton-pulse-opacity", "skeleton-radius", "file-preview-height"];
 
 /* The elevation scale. A level that emits nothing means some surface stopped
    using it, which is how a scale quietly becomes three unused tokens. */

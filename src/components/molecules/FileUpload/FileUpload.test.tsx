@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import "@testing-library/jest-dom";
 import { FileUpload, type FileUploadContext, type FileUploadItem, type FileUploadProps } from "./FileUpload";
+import { FileUploadRejection } from "./file-upload-rejection";
 
 /* jsdom draws no images and has no object URLs, so these stand in. What a
    real browser does with focus, layout, drops and the picker is in
@@ -423,5 +424,164 @@ describe("FileUpload", () => {
     expect(said).toContain("Elegir fotos");
     expect(said).toContain("Quitar a.jpg");
     expect(said).toContain("Terminando");
+  });
+});
+
+describe("FileUpload, when upload turns a file away for good", () => {
+  it("ends it rejected with the app's reason, no Try again, and starts the next file", async () => {
+    const { pick, calls, status, row, live, changes } = setup({ concurrency: 1 });
+    pick(photo("scan.jpg"), photo("next.jpg"));
+    await waitFor(() => expect(live()).toBe("2 photos added."));
+    expect(calls.map((c) => c.file.name)).toEqual(["scan.jpg"]);
+    act(() => calls[0].context.onProgress(0.4));
+    calls[0].reject(new FileUploadRejection("That isn't a photo."));
+    await settle();
+    expect(status("scan.jpg")).toBe("2 KB · Not added. That isn't a photo.");
+    expect(row("scan.jpg").dataset.status).toBe("rejected");
+    expect(within(row("scan.jpg")).queryByRole("button", { name: "Try scan.jpg again" })).toBeNull();
+    /* Its bar went, and its slot went to the file waiting. */
+    expect(row("scan.jpg").querySelector("[data-file-progress]")).toBeNull();
+    expect(calls.map((c) => c.file.name)).toEqual(["scan.jpg", "next.jpg"]);
+    /* Reported with no progress, as a file the rules turned away is. */
+    expect(changes.at(-1)!.map((i) => [i.file.name, i.status, i.progress])).toEqual([
+      ["scan.jpg", "rejected", null],
+      ["next.jpg", "uploading", null],
+    ]);
+    await waitFor(() => expect(live()).toBe("scan.jpg wasn't added. That isn't a photo."));
+    /* The twin: a plain Error still fails, with Try again. */
+    calls[1].reject(new Error("The server is busy."));
+    await settle();
+    expect(status("next.jpg")).toBe("2 KB · Didn't upload. The server is busy.");
+    expect(within(row("next.jpg")).getByRole("button", { name: "Try next.jpg again" })).toBeInTheDocument();
+  });
+
+  it("frees its place toward maxFiles, and leaves it out of the count uploaded", async () => {
+    const { pick, calls, row, live } = setup({ maxFiles: 2 });
+    pick(photo("a.jpg"), photo("b.jpg"));
+    await waitFor(() => expect(live()).toBe("2 photos added."));
+    calls[0].reject(new FileUploadRejection("Not a photo."));
+    calls[1].resolve("2");
+    await settle();
+    await waitFor(() => expect(live()).toBe("a.jpg wasn't added. Not a photo. 1 of 1 uploaded."));
+    /* The twin of the count: a file the rules let through now takes the place. */
+    pick(photo("c.jpg"));
+    expect(row("c.jpg").dataset.status).toBe("uploading");
+    expect(calls.map((c) => c.file.name)).toEqual(["a.jpg", "b.jpg", "c.jpg"]);
+  });
+
+  it("knows a rejection made by another copy of the library, by its mark", async () => {
+    const { pick, calls, status } = setup();
+    pick(photo("a.jpg"), photo("b.jpg"));
+    const foreign = Object.assign(new Error("Refused by the server."), { [Symbol.for("@blakesteve/roster/file-upload-rejection")]: true });
+    calls[0].reject(foreign);
+    /* The twin: the same name without the mark is an ordinary failure. */
+    calls[1].reject(Object.assign(new Error("Refused by the server."), { name: "FileUploadRejection" }));
+    await settle();
+    expect([status("a.jpg"), status("b.jpg")]).toEqual(["2 KB · Not added. Refused by the server.", "2 KB · Didn't upload. Refused by the server."]);
+  });
+
+  it("says something general when the rejection has no message", async () => {
+    const { pick, calls, status } = setup();
+    pick(photo("a.jpg"));
+    calls[0].reject(new FileUploadRejection(""));
+    await settle();
+    expect(status("a.jpg")).toBe("2 KB · Not added. Something went wrong.");
+  });
+});
+
+describe("FileUpload, with its picture in the drop box", () => {
+  const box = (container: HTMLElement) => container.querySelector("[data-file-drop]")!;
+  const boxPicture = (container: HTMLElement) => box(container).querySelector("img");
+
+  it("shows the picked image in the box, not on the row, and nothing once it's removed", () => {
+    const { pick, row, container } = setup({ preview: "dropzone", maxFiles: 1 });
+    expect(boxPicture(container)).toBeNull();
+    pick(photo("cover.jpg"));
+    expect(boxPicture(container)).toHaveAttribute("src", "blob:thumb-1");
+    expect(row("cover.jpg").querySelector("[data-file-thumb]")).toBeNull();
+    expect(screen.getByRole("button", { name: "Replace photo" })).toBeInTheDocument();
+    fireEvent.click(within(row("cover.jpg")).getByRole("button", { name: "Remove cover.jpg" }));
+    expect(boxPicture(container)).toBeNull();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:thumb-1");
+    expect(screen.getByRole("button", { name: "Choose photos" })).toHaveFocus();
+  });
+
+  it("replaces the picture with a file that passes the rules, and keeps it for one that doesn't", async () => {
+    const { pick, calls, container, live, changes } = setup({ preview: "dropzone", maxFiles: 1, types: ["image/jpeg"] });
+    pick(photo("first.jpg"));
+    await waitFor(() => expect(live()).toBe("1 photo added."));
+    pick(photo("second.jpg"));
+    /* The first's upload stops and its URL goes; the second takes its place. */
+    expect(calls[0].context.signal.aborted).toBe(true);
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:thumb-1");
+    expect(boxPicture(container)).toHaveAttribute("src", "blob:thumb-2");
+    expect(changes.at(-1)!.map((i) => [i.file.name, i.status])).toEqual([["second.jpg", "uploading"]]);
+    await waitFor(() => expect(live()).toBe("first.jpg removed. 1 photo added."));
+    /* The twin: a file the rules turn away leaves the picture as it was. */
+    pick(photo("drawing.gif", 2048, "image/gif"));
+    expect(boxPicture(container)).toHaveAttribute("src", "blob:thumb-2");
+    expect(changes.at(-1)!.map((i) => [i.file.name, i.status])).toEqual([
+      ["second.jpg", "uploading"],
+      ["drawing.gif", "rejected"],
+    ]);
+  });
+
+  it("turns away the same file picked again, rather than replacing it with itself", () => {
+    const { pick, calls, changes } = setup({ preview: "dropzone", maxFiles: 1 });
+    pick(photo("cover.jpg"));
+    pick(photo("cover.jpg"));
+    expect(calls[0].context.signal.aborted).toBe(false);
+    expect(changes.at(-1)!.map((i) => [i.file.name, i.status, i.reason])).toEqual([
+      ["cover.jpg", "uploading", undefined],
+      ["cover.jpg", "rejected", "It's already added."],
+    ]);
+  });
+
+  it("fades a turned-away file's picture, as the row did, and not a failed one's", async () => {
+    const { pick, calls, container, row } = setup({ preview: "dropzone", maxFiles: 1 });
+    pick(photo("a.jpg"));
+    calls[0].reject(new Error("The server is busy."));
+    await settle();
+    expect(boxPicture(container)).not.toHaveClass("rst:opacity-50");
+    fireEvent.click(within(row("a.jpg")).getByRole("button", { name: "Remove a.jpg" }));
+    pick(photo("b.jpg"));
+    calls[1].reject(new FileUploadRejection("Not a photo."));
+    await settle();
+    expect(boxPicture(container)).toHaveClass("rst:opacity-50");
+  });
+
+  it("shows a good picture after one the browser couldn't draw", () => {
+    const { pick, container } = setup({ preview: "dropzone", maxFiles: 1 });
+    pick(photo("from-a-camera.jpg"));
+    fireEvent.error(boxPicture(container)!);
+    expect(box(container).querySelector("[data-file-preview]")).toHaveAttribute("data-file-preview", "placeholder");
+    /* Its replacement is drawn afresh, not left as the mark. */
+    pick(photo("fine.jpg"));
+    expect(box(container).querySelector("[data-file-preview]")).toHaveAttribute("data-file-preview", "image");
+    expect(boxPicture(container)).toHaveAttribute("src", "blob:thumb-2");
+  });
+
+  it("revokes the picture's URL when it goes away", () => {
+    const { pick, unmount } = setup({ preview: "dropzone", maxFiles: 1 });
+    pick(photo("a.jpg"));
+    expect(URL.revokeObjectURL).not.toHaveBeenCalled();
+    unmount();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:thumb-1");
+  });
+
+  it("keeps the pictures on the rows, and says why, with room for more than one file", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { pick, row, container } = setup({ preview: "dropzone", maxFiles: 3 } as Partial<FileUploadProps<string>>);
+    pick(photo("a.jpg"));
+    expect(boxPicture(container)).toBeNull();
+    expect(row("a.jpg").querySelector("[data-file-thumb]")).not.toBeNull();
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain('preview="dropzone" shows one file');
+  });
+
+  it("takes its words from strings", () => {
+    const { pick } = setup({ preview: "dropzone", maxFiles: 1, strings: { replace: "Cambiar foto" } });
+    pick(photo("a.jpg"));
+    expect(screen.getByRole("button", { name: "Cambiar foto" })).toBeInTheDocument();
   });
 });

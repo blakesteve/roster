@@ -84,6 +84,7 @@ describe("style guard", () => {
       "components/molecules/MediaPreview/MediaPreview.tsx",
       "components/molecules/FileUpload/FileUpload.tsx",
       "components/molecules/FileUpload/file-rules.ts",
+      "components/molecules/FileUpload/file-upload-rejection.ts",
       "components/molecules/Pagination/Pagination.tsx",
       "components/molecules/Pagination/page-items.ts",
       "components/atoms/Skeleton/Skeleton.tsx",
