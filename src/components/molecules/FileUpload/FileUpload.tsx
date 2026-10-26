@@ -13,7 +13,9 @@ import { withLabels } from "../../../lib/labels";
 import { Button } from "../../atoms/Button/Button";
 import { Progress } from "../../atoms/Progress/Progress";
 import { acceptList, formatBytes, matchesType, sameFile } from "./file-rules";
+import { isFileUploadRejection } from "./file-upload-rejection";
 import { useKeyFocus } from "../../../internal/key-focus";
+import { isDevelopment } from "../../../internal/dev";
 
 /** Where a file is: waiting its turn, on its way, being handled by the app's server, or finished one way or another. */
 export type FileUploadStatus = "queued" | "uploading" | "processing" | "done" | "failed" | "rejected";
@@ -37,13 +39,15 @@ export interface FileUploadItem<R = unknown> {
   progress: number | null;
   /** What `upload` resolved with, once `done`: an id to send with the form, say. */
   result?: R;
-  /** Why it `failed`, or why it was `rejected`. */
+  /** Why it `failed`, or why it was `rejected`: by the rules, or by `upload` with a `FileUploadRejection`. */
   reason?: string;
 }
 
 /** Every word FileUpload shows or says. Pass any of them in `strings` to replace it. */
 export interface FileUploadStrings {
   choose: string;
+  /** The Choose button's words while the drop box shows a picture (`preview="dropzone"`). */
+  replace: string;
   /** Beside the button where a pointer can drag; hidden on touch screens. */
   dropHint: string;
   /** While files are dragged over. */
@@ -72,6 +76,7 @@ export interface FileUploadStrings {
 
 const STRINGS: FileUploadStrings = {
   choose: "Choose photos",
+  replace: "Replace photo",
   dropHint: "or drag them here",
   dropHere: "Drop to add them",
   queued: "Waiting",
@@ -101,7 +106,9 @@ export interface FileUploadProps<R = unknown> {
   /**
    * Sends one file, and resolves when it's done with whatever the app needs
    * later (an id, a URL). Rejects with an Error whose message says why, and
-   * that message is shown. FileUpload never sends anything itself.
+   * that message is shown, with Try again. Reject with a `FileUploadRejection`
+   * instead when the file can never be added: it ends `rejected`, with no Try
+   * again. FileUpload never sends anything itself.
    */
   upload: (file: File, context: FileUploadContext) => Promise<R>;
   /** Every change to the list, with each file's status and result. */
@@ -140,6 +147,19 @@ export interface FileUploadProps<R = unknown> {
   disabled?: boolean;
   strings?: Partial<FileUploadStrings>;
   className?: string;
+  /**
+   * Where a picture of the file shows. `"row"` (default): a thumbnail at the
+   * start of each file's row. `"dropzone"`: the picture fills the drop box,
+   * contained, and the rows keep everything else (name, status, progress,
+   * Remove, Try again).
+   *
+   * `"dropzone"` holds one file, so it takes `maxFiles={1}`; with any other
+   * `maxFiles` the pictures stay on the rows, and a development build says
+   * so. The box keeps its height whether it shows a picture or not
+   * (`--roster-file-preview-height`, 13rem by default), and a file that
+   * passes the rules takes the place of the one there, picked or dropped.
+   */
+  preview?: "row" | "dropzone";
 }
 
 type Thumb = { status: FileUploadStatus; file: File };
@@ -149,7 +169,7 @@ type Thumb = { status: FileUploadStatus; file: File };
    state: a remount (React's strict mode does one) then makes a fresh URL
    instead of reusing a revoked one. A file the browser can't draw, such as
    HEIC outside Safari, or one that isn't an image, shows a plain mark. */
-function Thumbnail({ file, status }: Thumb) {
+function usePicture(file: File) {
   const [broken, setBroken] = useState(false);
   const image = !broken && (file.type.startsWith("image/") || /\.(jpe?g|png|gif|webp|avif|heic|heif)$/i.test(file.name));
   const attach = useCallback(
@@ -161,6 +181,19 @@ function Thumbnail({ file, status }: Thumb) {
     },
     [file],
   );
+  return { image, attach, broke: () => setBroken(true) };
+}
+
+const PLACEHOLDER_ICON = (
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <circle cx="9" cy="10" r="1.6" />
+    <path d="m21 15-4.2-4.2a1.6 1.6 0 0 0-2.3 0L7 18" />
+  </svg>
+);
+
+function Thumbnail({ file, status }: Thumb) {
+  const { image, attach, broke } = usePicture(file);
 
   const frame = "rst:h-14 rst:w-14 rst:shrink-0 rst:rounded-md rst:border rst:border-[var(--roster-card-border)]";
   if (!image) {
@@ -170,11 +203,7 @@ function Thumbnail({ file, status }: Thumb) {
         className={cn(frame, "rst:flex rst:items-center rst:justify-center rst:text-gray-500 rst:dark:text-gray-400")}
         data-file-thumb="placeholder"
       >
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="5" width="18" height="14" rx="2" />
-          <circle cx="9" cy="10" r="1.6" />
-          <path d="m21 15-4.2-4.2a1.6 1.6 0 0 0-2.3 0L7 18" />
-        </svg>
+        {PLACEHOLDER_ICON}
       </span>
     );
   }
@@ -183,10 +212,38 @@ function Thumbnail({ file, status }: Thumb) {
     <img
       ref={attach}
       alt=""
-      onError={() => setBroken(true)}
+      onError={broke}
       className={cn(frame, "rst:object-cover", status === "rejected" && "rst:opacity-50")}
       data-file-thumb="image"
     />
+  );
+}
+
+/* The file's picture in the drop box, for `preview="dropzone"`: the same
+   object URL and the same rules as a row's thumbnail, filling the box inside
+   a 12px margin, so the dashed edge never sits on the photo, and contained, so
+   the whole picture shows uncropped, as it will be sent. Keyed by the file in
+   the list, so a replaced file's URL is revoked as its picture unmounts. It
+   paints under the box's button and lets pointer input through. */
+function BoxPreview({ file, status }: Thumb) {
+  const { image, attach, broke } = usePicture(file);
+  return (
+    <span
+      aria-hidden="true"
+      className="rst:pointer-events-none rst:absolute rst:inset-3 rst:flex rst:items-center rst:justify-center"
+      data-file-preview={image ? "image" : "placeholder"}
+    >
+      {image ? (
+        <img
+          ref={attach}
+          alt=""
+          onError={broke}
+          className={cn("rst:h-full rst:w-full rst:rounded-md rst:object-contain", status === "rejected" && "rst:opacity-50")}
+        />
+      ) : (
+        <span className="rst:text-gray-500 rst:dark:text-gray-400">{PLACEHOLDER_ICON}</span>
+      )}
+    </span>
   );
 }
 
@@ -224,8 +281,17 @@ function FileUpload<R = unknown>({
   disabled = false,
   strings: overrides,
   className,
+  preview = "row",
 }: FileUploadProps<R>) {
   useKeyFocus();
+  /* The drop box holds one file's picture; with room for more, the pictures
+     stay on the rows. */
+  const boxed = preview === "dropzone" && maxFiles === 1;
+  useEffect(() => {
+    if (preview === "dropzone" && maxFiles !== 1 && isDevelopment()) {
+      console.warn(`FileUpload: preview="dropzone" shows one file, so it takes maxFiles={1}. With maxFiles=${maxFiles}, the pictures stay on the rows.`);
+    }
+  }, [preview, maxFiles]);
   const t = withLabels(STRINGS, overrides);
   const id = useId();
   const labelId = `${id}-label`;
@@ -341,9 +407,21 @@ function FileUpload<R = unknown>({
       (error: unknown) => {
         if (!current()) return;
         controllers.current.delete(item.id);
-        const reason = latest.current.t.uploadError(error);
-        patch(item.id, { status: "failed", reason });
-        say(latest.current.t.failedNotice(item.file.name, reason));
+        const { t: words } = latest.current;
+        /* The app knows this file will never go up: it's turned away for
+           good, as a file the rules refuse is, with no Try again. Being
+           rejected also takes it out of the count toward maxFiles and out
+           of "2 of 3 uploaded". */
+        if (isFileUploadRejection(error)) {
+          const message = (error as { message?: unknown }).message;
+          const reason = typeof message === "string" && message ? message : words.uploadError(error);
+          patch(item.id, { status: "rejected", progress: null, reason });
+          say(words.rejectedNotice(item.file.name, reason));
+        } else {
+          const reason = words.uploadError(error);
+          patch(item.id, { status: "failed", reason });
+          say(words.failedNotice(item.file.name, reason));
+        }
         pump();
       },
     );
@@ -393,14 +471,25 @@ function FileUpload<R = unknown>({
 
   const add = (files: File[]) => {
     if (disabled || files.length === 0) return;
-    const kept = itemsRef.current.filter((i) => i.status !== "rejected");
+    /* In the drop box, a file that passes the rules takes the place of the
+       one there: its place is counted as free, and it's removed only once
+       its replacement is in. A file turned away leaves it as it was. */
+    const current = boxed ? itemsRef.current.find((i) => i.status !== "rejected") : undefined;
+    const kept = itemsRef.current.filter((i) => i.status !== "rejected" && i !== current);
     const added: FileUploadItem<R>[] = [];
     for (const file of files) {
-      const reason = reasonFor(file, [...kept, ...added.filter((i) => i.status !== "rejected")]);
+      const reason =
+        current && sameFile(current.file, file) ? t.duplicate(file) : reasonFor(file, [...kept, ...added.filter((i) => i.status !== "rejected")]);
       added.push({ id: `${id}-file-${nextId.current++}`, file, status: reason ? "rejected" : "queued", progress: null, reason });
     }
-    commit([...itemsRef.current, ...added]);
     const accepted = added.filter((i) => i.status === "queued").length;
+    const replaced = accepted ? current : undefined;
+    if (replaced) {
+      controllers.current.get(replaced.id)?.abort();
+      controllers.current.delete(replaced.id);
+    }
+    commit([...itemsRef.current.filter((i) => i !== replaced), ...added]);
+    if (replaced) say(t.removed(replaced.file.name));
     if (accepted) say(t.added(accepted));
     for (const i of added) if (i.reason) say(t.rejectedNotice(i.file.name, i.reason));
     pump();
@@ -477,6 +566,9 @@ function FileUpload<R = unknown>({
   };
 
   const describedBy = [helperText ? helpId : null, errorMessage ? errorId : null].filter(Boolean).join(" ") || undefined;
+  /* What the drop box pictures: the file that's in, else the latest one
+     turned away, faded, until it's removed. Never a removed file. */
+  const shown = boxed ? (items.find((i) => i.status !== "rejected") ?? items.at(-1)) : undefined;
 
   return (
     <div
@@ -502,6 +594,10 @@ function FileUpload<R = unknown>({
         data-dragging={dragging ? "" : undefined}
         className={cn(
           "rst:flex rst:flex-col rst:items-center rst:justify-center rst:gap-2 rst:rounded-lg rst:border-2 rst:border-dashed rst:px-4 rst:py-6 rst:text-center rst:transition-colors rst:motion-reduce:transition-none",
+          /* One height with a picture or without, so nothing below moves when
+             it arrives; the button sits at the foot of a picture. */
+          boxed && "rst:relative rst:h-[var(--roster-file-preview-height,13rem)]",
+          boxed && shown && "rst:justify-end",
           dragging
             ? "rst:border-primary-500 rst:bg-primary-500/10"
             : errorMessage
@@ -509,12 +605,19 @@ function FileUpload<R = unknown>({
               : "rst:border-gray-300 rst:dark:border-gray-600",
         )}
       >
+        {shown && <BoxPreview key={shown.id} file={shown.file} status={shown.status} />}
         <Button
           type="button"
           variant="outline"
           colorScheme="neutral"
           size="lg"
-          className={cn("rst:px-5", disabled && DIMMED)}
+          className={cn(
+            "rst:px-5",
+            disabled && DIMMED,
+            /* Over a picture: above it, on a surface of its own, so it reads
+               whatever the photo is. */
+            shown && "rst:relative rst:z-10 rst:bg-[var(--roster-card-bg)] rst:dark:hover:bg-gray-800",
+          )}
           aria-disabled={disabled || undefined}
           aria-describedby={describedBy}
           onClick={() => inputRef.current?.click()}
@@ -525,15 +628,19 @@ function FileUpload<R = unknown>({
             </svg>
           }
         >
-          {t.choose}
+          {shown ? t.replace : t.choose}
         </Button>
-        {/* For a pointer that can drag; a touch screen can't drop files here. */}
-        <p
-          className="rst:hidden rst:text-xs rst:text-gray-600 rst:pointer-fine:block rst:dark:text-gray-400"
-          data-file-drop-hint=""
-        >
-          {dragging ? t.dropHere : t.dropHint}
-        </p>
+        {/* For a pointer that can drag; a touch screen can't drop files here.
+            Not over a picture, where it wouldn't read: the border still
+            lights up for a drag. */}
+        {!shown && (
+          <p
+            className="rst:hidden rst:text-xs rst:text-gray-600 rst:pointer-fine:block rst:dark:text-gray-400"
+            data-file-drop-hint=""
+          >
+            {dragging ? t.dropHere : t.dropHint}
+          </p>
+        )}
         <input
           ref={inputRef}
           type="file"
@@ -574,7 +681,7 @@ function FileUpload<R = unknown>({
                 data-status={item.status}
                 className="rst:flex rst:items-center rst:gap-3 rst:rounded-md rst:border rst:border-[var(--roster-card-border)] rst:p-2"
               >
-                <Thumbnail file={item.file} status={item.status} />
+                {!boxed && <Thumbnail file={item.file} status={item.status} />}
                 <div className="rst:min-w-0 rst:flex-1 rst:text-left">
                   <p className="rst:truncate rst:text-sm rst:font-medium rst:text-[var(--roster-control-text)]" title={item.file.name}>
                     {item.file.name}

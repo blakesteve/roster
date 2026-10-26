@@ -81,6 +81,7 @@ export * from './components/molecules/EmptyState/EmptyState';
 export * from './components/molecules/EmptyState/empty-state-variants';
 export * from './components/molecules/MediaPreview/MediaPreview';
 export * from './components/molecules/FileUpload/FileUpload';
+export { FileUploadRejection } from './components/molecules/FileUpload/file-upload-rejection';
 export * from './components/molecules/Pagination/Pagination';
 export * from './components/molecules/SkeletonPresets/SkeletonPresets';
 export * from './components/molecules/ProgressField/ProgressField';

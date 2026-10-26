@@ -1428,6 +1428,8 @@ import { FileUpload } from "@blakesteve/roster";
 - **Resolve** with what the form needs later, an id say; it comes back as that
   file's `result` in `onChange`. **Reject** with an Error whose message says
   why; it's shown, with Try again.
+- **Reject with a `FileUploadRejection`** when the file can never be added (see
+  below): it's turned away rather than failed, with no Try again.
 
 Each file is `queued`, `uploading`, `processing`, `done`, `failed` or
 `rejected`. A few upload at once (`concurrency`, 3 by default) and the rest
@@ -1440,6 +1442,56 @@ defaulting to `accept`); then `maxSize` in bytes; then `maxFiles`. A file
 turned away stays in the list with its reason and is never sent. A file that
 arrives with no type, as some cloud-backed picks on Android do, is judged by
 its extension.
+
+**Turned away by the app.** Some files can only be judged once they're sent:
+the server can't decode one, says it isn't a photo, or refuses its type.
+Retrying those only repeats the answer, so `upload` can say the file will never
+go up by rejecting with a `FileUploadRejection`. The file then ends `rejected`,
+as a file the rules turn away does: "Not added." with its message as the
+reason, no Try again, announced as not added. It stops counting toward
+`maxFiles` and toward "2 of 3 uploaded", its bar goes, and its place goes to
+the next file waiting. A plain `Error` still means it failed, with Try again.
+
+```tsx
+import { FileUpload, FileUploadRejection } from "@blakesteve/roster";
+
+upload={async (file, { signal }) => {
+  const response = await fetch("/photos", { method: "POST", body: file, signal });
+  if (response.status === 415) throw new FileUploadRejection("That isn't a photo.");
+  if (!response.ok) throw new Error("The server is busy.");
+  return (await response.json()).id;
+}}
+```
+
+It's recognized by a mark as well as by `instanceof`, so one made by another
+copy of the library on the page still counts.
+
+**A picture in the drop box.** For one picture, an avatar or a cover,
+`preview="dropzone"` shows it big, filling the drop box, rather than as the
+row's thumbnail. It takes `maxFiles={1}`; with any other `maxFiles` the
+pictures stay on the rows, and a development build says so.
+
+```tsx
+<FileUpload label="Cover photo" maxFiles={1} preview="dropzone" upload={uploadCover} />
+```
+
+- **The row keeps everything else:** the name, the status, the progress,
+  Remove and Try again.
+- **The picture is contained,** uncropped, as it will be sent, 12px inside the
+  dashed edge, so the edge never sits on the photo. A file turned away shows
+  faded, as its thumbnail did; once removed, the box is empty again.
+- **The box keeps its height,** with a picture or without, so nothing below it
+  moves when one arrives: 13rem, or `--roster-file-preview-height`.
+- **The picture takes no input.** A click or a drop on it lands on the box, as
+  with no picture, and the button over it keeps its 44px target and its focus
+  ring, painted above the photo.
+- **Replacing it:** the button over the picture reads Replace photo
+  (`strings.replace`) and opens the picker, and the box is still a drop target.
+  A file that passes the rules, picked or dropped, takes the place of the one
+  there, and that one's upload stops. A file the rules turn away leaves it as
+  it was.
+- **Its object URL is revoked** when the file is removed or replaced, and when
+  the field unmounts.
 
 **Phones first.** `accept` defaults to `"image/*"`, with `multiple` and no
 `capture`. That combination is what opens Android's system photo picker, with
@@ -2270,7 +2322,7 @@ function App() {
 | `MatchupCard`     | Head-to-head comparison card                                                |
 | `MediaPreview`    | Thumbnail that falls back to "Preview unavailable, open original" when it can't render |
 | `Menu`            | A button's menu of actions: icons, shortcuts, checkbox and radio items, links, groups, submenus; the full keyboard pattern, 44px targets (see [Menu](#menu)) |
-| `FileUpload`      | Picks files and uploads each through the app's `upload`, with per-file progress, retry and rules |
+| `FileUpload`      | Picks files and uploads each through the app's `upload`, with per-file progress, retry and rules; one picture can fill the drop box (see [FileUpload](#fileupload)) |
 | `Pagination`      | Page numbers with gaps, or a compact page picker on narrow screens; buttons or real links, 44px targets |
 | `SkeletonCard`, `SkeletonTableRow`, `SkeletonAvatar`, `SkeletonStat` | Skeleton presets in the real component's box |
 | `ProgressField`   | Progress with a label and value on one baseline and a detail line: the form to reach for |

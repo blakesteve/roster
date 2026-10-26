@@ -2,9 +2,12 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor } from "storybook/test";
 import { FileUpload, type FileUploadContext, type FileUploadProps } from "./FileUpload";
+import { FileUploadRejection } from "./file-upload-rejection";
 import { Progress } from "../../atoms/Progress/Progress";
 import { asRealFile, pickFiles, samplePhoto, sizedFile } from "../../../test/sample-files";
 import { realInputOrSkip } from "../../../test/real-input";
+import { backgroundOf, contrast, paint } from "../../../test/painted";
+import { settled } from "../../../test/settle";
 
 /**
  * Every promise FileUpload makes, checked in Chromium. Expected values are
@@ -25,7 +28,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-type Call = { file: File; context: FileUploadContext; resolve: (r: string) => void; reject: (e: Error) => void };
+type Call = { file: File; context: FileUploadContext; resolve: (r: string) => void; reject: (e: unknown) => void };
 const harness = { calls: [] as Call[] };
 const upload = (file: File, context: FileUploadContext) =>
   new Promise<string>((resolve, reject) => harness.calls.push({ file, context, resolve, reject }));
@@ -425,3 +428,301 @@ export const NamesAndRoles: Story = {
     ]);
   },
 };
+
+/* ── Turned away by upload ─────────────────────────────────────────────── */
+
+/* Everything the live region says, in order, not just the last thing. */
+function listen() {
+  const heard: string[] = [];
+  const region = q("[data-file-live]")!;
+  const observer = new MutationObserver(() => {
+    const text = region.textContent!.trim();
+    if (text) heard.push(text);
+  });
+  observer.observe(region, { childList: true, subtree: true, characterData: true });
+  return { heard, stop: () => observer.disconnect() };
+}
+
+export const UploadCanTurnAFileAwayForGood: Story = {
+  render: () => <Harness concurrency={1} />,
+  play: async () => {
+    reset();
+    pickFiles(input(), [await samplePhoto("scan.jpg", 10), await samplePhoto("next.jpg", 90)]);
+    await waitFor(() => expect(live()).toBe("2 photos added."));
+    const { heard, stop } = listen();
+    callFor("scan.jpg").context.onProgress(0.4);
+    await waitFor(() => expect(rowOf("scan.jpg").querySelector("[data-file-progress]")).not.toBeNull());
+    callFor("scan.jpg").reject(new FileUploadRejection("That isn't a photo."));
+    await waitFor(() => expect(rowOf("scan.jpg").dataset.status).toBe("rejected"));
+    /* Its slot freed: the file waiting starts. */
+    await waitFor(() => expect(harness.calls.map((c) => c.file.name)).toEqual(["scan.jpg", "next.jpg"]));
+    await expect([
+      statusOf("scan.jpg")!.replace(/^[\d.]+ \w+ · /, ""),
+      !!rowOf("scan.jpg").querySelector("[data-file-retry]"),
+      !!rowOf("scan.jpg").querySelector("[data-file-progress]"),
+      callFor("scan.jpg").context.signal.aborted,
+      getComputedStyle(rowOf("scan.jpg").querySelector("img")!).opacity,
+    ]).toEqual(["Not added. That isn't a photo.", false, false, false, "0.5"]);
+    /* The twin: a plain Error still fails, with Try again. */
+    callFor("next.jpg").reject(new Error("The server is busy."));
+    await waitFor(() => expect(rowOf("next.jpg").dataset.status).toBe("failed"));
+    await waitFor(() => expect(heard.at(-1)).toBe("next.jpg didn't upload. The server is busy."));
+    stop();
+    /* Said once, as not added, never as a failure. */
+    await expect(heard).toEqual(["scan.jpg wasn't added. That isn't a photo.", "next.jpg didn't upload. The server is busy."]);
+    await expect(!!rowOf("next.jpg").querySelector("[data-file-retry]")).toBe(true);
+  },
+};
+
+/* ── The picture in the drop box ──────────────────────────────────────── */
+
+const box = () => q("[data-file-drop]")!;
+const boxImage = () => box().querySelector<HTMLImageElement>("img");
+
+/* Where the picture actually paints inside its contained box. */
+function painted(img: HTMLImageElement) {
+  const r = img.getBoundingClientRect();
+  const scale = Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight);
+  const [w, h] = [img.naturalWidth * scale, img.naturalHeight * scale];
+  return { left: r.left + (r.width - w) / 2, top: r.top + (r.height - h) / 2, right: r.left + (r.width + w) / 2, bottom: r.top + (r.height + h) / 2, height: h };
+}
+
+export const ThePictureFillsTheDropBox: Story = {
+  render: () => <Harness preview="dropzone" maxFiles={1} />,
+  play: async () => {
+    reset();
+    const empty = box().getBoundingClientRect().height;
+    pickFiles(input(), [await samplePhoto("cover.jpg", 200)]);
+    await waitFor(() => expect(boxImage()?.naturalWidth).toBe(160));
+    const withPicture = box().getBoundingClientRect().height;
+    const edge = box().getBoundingClientRect();
+    const border = parseFloat(getComputedStyle(box()).borderTopWidth);
+    const p = painted(boxImage()!);
+    const gap = Math.min(p.left - edge.left, p.top - edge.top, edge.right - p.right, edge.bottom - p.bottom) - border;
+    console.info(`FILEUPLOAD BOX heights ${empty} / ${withPicture}, picture ${p.height.toFixed(1)}px tall, ${gap.toFixed(1)}px clear of the dashed edge`);
+    await expect([withPicture, gap >= 11.5, rowOf("cover.jpg").querySelector("[data-file-thumb]")]).toEqual([empty, true, null]);
+    /* The twin: the picture really drew, and fills most of the box's height. */
+    await expect(p.height / (edge.height - 2 * border)).toBeGreaterThan(0.8);
+    /* The button is over it, named for what it does now, and still a 44px target. */
+    const button = choose().getBoundingClientRect();
+    await expect([choose().textContent, Math.round(button.height) >= 44, document.elementFromPoint(button.left + button.width / 2, button.top + button.height / 2)?.closest("[data-file-choose]") === choose()]).toEqual([
+      "Replace photo",
+      true,
+      true,
+    ]);
+    /* Removed: no picture, and the box keeps its height. */
+    await userEvent.click(removeOf("cover.jpg"));
+    await waitFor(() => expect(boxImage()).toBeNull());
+    await expect([box().getBoundingClientRect().height, choose().textContent, document.activeElement === choose()]).toEqual([empty, "Choose photos", true]);
+  },
+};
+
+function Unmounting() {
+  const [shown, setShown] = useState(true);
+  return (
+    <>
+      {shown && <Harness preview="dropzone" maxFiles={1} />}
+      <button type="button" data-unmount="" onClick={() => setShown(false)}>
+        Unmount
+      </button>
+    </>
+  );
+}
+
+export const EveryPictureUrlIsRevoked: Story = {
+  render: () => <Unmounting />,
+  play: async () => {
+    reset();
+    const made: string[] = [];
+    const revoked = new Set<string>();
+    const [create, revoke] = [URL.createObjectURL, URL.revokeObjectURL];
+    URL.createObjectURL = (obj: Blob | MediaSource) => {
+      const url = create(obj);
+      made.push(url);
+      return url;
+    };
+    URL.revokeObjectURL = (url: string) => {
+      revoked.add(url);
+      revoke(url);
+    };
+    try {
+      pickFiles(input(), [await samplePhoto("first.jpg", 20)]);
+      await waitFor(() => expect(boxImage()?.naturalWidth).toBe(160));
+      /* The twin: the picture on screen is the one URL still live. */
+      await expect(made.filter((u) => !revoked.has(u))).toEqual([boxImage()!.src]);
+      /* Replaced, then removed, then a third picked and the field unmounted. */
+      pickFiles(input(), [await samplePhoto("second.jpg", 140)]);
+      await waitFor(() => expect(rowOf("second.jpg")).toBeTruthy());
+      await waitFor(() => expect(boxImage()?.naturalWidth).toBe(160));
+      await userEvent.click(removeOf("second.jpg"));
+      pickFiles(input(), [await samplePhoto("third.jpg", 260)]);
+      await waitFor(() => expect(boxImage()?.naturalWidth).toBe(160));
+      q<HTMLButtonElement>("[data-unmount]")!.click();
+      await waitFor(() => expect(q("[data-file-upload]")).toBeNull());
+      console.info(`FILEUPLOAD URLS made ${made.length}, revoked ${made.filter((u) => revoked.has(u)).length}`);
+      await expect([made.length >= 3, made.filter((u) => !revoked.has(u))]).toEqual([true, []]);
+    } finally {
+      URL.createObjectURL = create;
+      URL.revokeObjectURL = revoke;
+    }
+  },
+};
+
+export const ReplacingThePictureByKeysAndByDropping: Story = {
+  tags: ["real-input"],
+  render: () => <Harness preview="dropzone" maxFiles={1} />,
+  play: async () => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    reset();
+    pickFiles(input(), [await samplePhoto("first.jpg", 20)]);
+    await waitFor(() => expect(boxImage()?.naturalWidth).toBe(160));
+    /* Tab reaches the button over the picture, it rings, and Enter opens the picker. */
+    const opened = { n: 0 };
+    const click = HTMLInputElement.prototype.click;
+    HTMLInputElement.prototype.click = function () {
+      if (this.type === "file") opened.n++;
+      else click.call(this);
+    };
+    try {
+      document.body.focus();
+      choose().blur();
+      const before = document.createElement("button");
+      before.textContent = "start";
+      q("[data-file-upload]")!.before(before);
+      before.focus();
+      await real.commands.realPress([/Chrome/.test(navigator.userAgent) ? "Tab" : "Alt+Tab"]);
+      await waitFor(() => expect(document.activeElement).toBe(choose()));
+      await new Promise((r) => setTimeout(r, 250));
+      const ringed = /0px 0px 0px [1-9]/.test(getComputedStyle(choose()).boxShadow);
+      await real.commands.realPress(["Enter"]);
+      await expect([choose().textContent, ringed, opened.n]).toEqual(["Replace photo", true, 1]);
+      before.remove();
+    } finally {
+      HTMLInputElement.prototype.click = click;
+    }
+    /* A drop replaces it: the first's upload stops, and the box shows the second. */
+    await real.commands.realDropFiles("[data-file-drop]", [await asRealFile(await samplePhoto("second.png", 300, { type: "image/png" }))]);
+    await waitFor(() => expect([...document.querySelectorAll("[data-file-item]")].map((li) => li.querySelector("p")!.textContent)).toEqual(["second.png"]));
+    await expect(callFor("first.jpg").context.signal.aborted).toBe(true);
+    await waitFor(() => expect(boxImage()?.naturalWidth).toBe(160));
+    /* The twin: a file the rules turn away leaves the picture where it was. */
+    const shown = boxImage()!.src;
+    await real.commands.realDropFiles("[data-file-drop]", [{ name: "notes.txt", mimeType: "text/plain", size: 12 }]);
+    await waitFor(() => expect(document.querySelectorAll("[data-file-item]")).toHaveLength(2));
+    await expect([boxImage()!.src === shown, rowOf("notes.txt").dataset.status]).toEqual([true, "rejected"]);
+  },
+};
+
+/* The button's size and ring, and whether it rings at all. */
+const buttonLook = () => {
+  const b = choose();
+  return `${Math.round(b.getBoundingClientRect().height)}px, ring ${getComputedStyle(b).boxShadow}`;
+};
+
+export const ThePictureTakesNoInputFromTheBox: Story = {
+  tags: ["real-input"],
+  render: () => <Harness preview="dropzone" maxFiles={1} />,
+  play: async () => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    reset();
+    const tab = /Chrome/.test(navigator.userAgent) ? "Tab" : "Alt+Tab";
+    const start = document.createElement("button");
+    start.textContent = "start";
+    q("[data-file-upload]")!.before(start);
+    const ringOnChoose = async () => {
+      start.focus();
+      await real.commands.realPress([tab]);
+      await waitFor(() => expect(document.activeElement).toBe(choose()));
+      await settled(choose());
+      return buttonLook();
+    };
+    try {
+      const without = await ringOnChoose();
+      pickFiles(input(), [await samplePhoto("first.jpg", 20)]);
+      await waitFor(() => expect(boxImage()?.naturalWidth).toBe(160));
+      /* The same 44px target and the same ring, over a picture as without one. */
+      const over = await ringOnChoose();
+      await expect([over, /^4[4-9]px, ring .*0px 0px 0px [1-9]/.test(over)]).toEqual([without, true]);
+
+      const b = choose().getBoundingClientRect();
+      const p = painted(boxImage()!);
+      const onPicture = [p.left + (p.right - p.left) / 2, p.top + 10] as const;
+      /* Painted above the picture: with the picture made hittable for a
+         moment, the button's middle still finds the button (hit testing
+         follows paint order). The twin: the picture's own top finds the
+         picture, so the probe can see it. */
+      const layer = q<HTMLElement>("[data-file-preview]")!;
+      layer.style.pointerEvents = "auto";
+      const stacked = [
+        document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2)?.closest("[data-file-choose]") === choose(),
+        !!document.elementFromPoint(...onPicture)?.closest("[data-file-preview]"),
+      ];
+      layer.style.pointerEvents = "";
+      /* As shipped, a point on the picture is the drop box's: a click or a
+         drop there goes where it would with no picture. */
+      const hit = document.elementFromPoint(...onPicture)!;
+      await expect([...stacked, hit.closest("[data-file-preview]"), hit === box()]).toEqual([true, true, null, true]);
+      const clicked: EventTarget[] = [];
+      box().addEventListener("click", (e) => clicked.push(e.target!), { capture: true, once: true });
+      await real.commands.realClick("[data-file-drop]", { fx: 0.5, fy: (onPicture[1] - box().getBoundingClientRect().top) / box().getBoundingClientRect().height });
+      await expect(clicked).toEqual([box()]);
+      box().setAttribute("data-hit", "");
+      await real.commands.realDropFiles("[data-hit]", [await asRealFile(await samplePhoto("second.jpg", 140))]);
+      await waitFor(() => expect([...document.querySelectorAll("[data-file-item]")].map((li) => li.querySelector("p")!.textContent)).toEqual(["second.jpg"]));
+    } finally {
+      start.remove();
+    }
+  },
+};
+
+function Schemes() {
+  return (
+    <div style={{ display: "grid", gap: 0, maxWidth: 520 }}>
+      {(["light", "dark"] as const).map((scheme) => (
+        <div key={scheme} className={scheme === "dark" ? "dark" : undefined} data-scheme={scheme} style={{ padding: 16, background: scheme === "dark" ? "#0c0a09" : "#ffffff" }}>
+          <FileUpload label={`Cover, ${scheme}`} preview="dropzone" maxFiles={1} upload={upload} />
+          <div style={{ height: 12 }} />
+          <FileUpload label={`Rows, ${scheme}`} upload={upload} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export const TheDashedEdgeAndThePicture: Story = {
+  render: () => <Schemes />,
+  play: async () => {
+    reset();
+    const rows: string[] = [];
+    for (const scheme of ["light", "dark"]) {
+      const [boxed, plain] = [...document.querySelectorAll<HTMLElement>(`[data-scheme="${scheme}"] [data-file-upload]`)];
+      pickFiles(boxed.querySelector("input")!, [await samplePhoto(`${scheme}.jpg`, scheme === "light" ? 50 : 220)]);
+      const img = () => boxed.querySelector<HTMLImageElement>("[data-file-drop] img");
+      await waitFor(() => expect(img()?.naturalWidth).toBe(160));
+      const zone = boxed.querySelector<HTMLElement>("[data-file-drop]")!;
+      const ground = paint(backgroundOf(zone));
+      const edge = contrast(paint([...backgroundOf(zone), getComputedStyle(zone).borderTopColor]), ground);
+      const button = boxed.querySelector<HTMLElement>("[data-file-choose]")!;
+      /* Its face eases in with the picture: read where it ends. */
+      await settled(button);
+      const face = getComputedStyle(button).backgroundColor;
+      const ink = contrast(paint([...backgroundOf(button), getComputedStyle(button).color]), paint(backgroundOf(button)));
+      const p = painted(img()!);
+      const r = zone.getBoundingClientRect();
+      const gap = Math.min(p.left - r.left, p.top - r.top, r.right - p.right, r.bottom - p.bottom) - parseFloat(getComputedStyle(zone).borderTopWidth);
+      rows.push(
+        `${scheme}: face ${face}, edge ${edge.toFixed(2)}:1 on the page, the same as the rows' (${getComputedStyle(zone).borderTopColor === getComputedStyle(plain.querySelector("[data-file-drop]")!).borderTopColor}); picture ${gap.toFixed(1)}px clear of it; button face opaque (${paint(["rgb(0, 0, 0)", face]).join() === paint(["rgb(255, 255, 255)", face]).join()}), its words ${ink.toFixed(2)}:1`,
+      );
+    }
+    console.info(`FILEUPLOAD EDGE\n${rows.join("\n")}`);
+    /* The picture never meets the edge, so the edge is judged against the
+       page beside it, as without a picture; and the button over the picture
+       carries its own surface. */
+    for (const line of rows) {
+      await expect(line).toMatch(/the same as the rows' \(true\); picture 1[1-9]\.\dpx clear of it; button face opaque \(true\), its words ([5-9]|1\d)\.\d\d:1$/);
+    }
+  },
+};
+

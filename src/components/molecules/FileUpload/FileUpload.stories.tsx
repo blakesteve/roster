@@ -4,6 +4,7 @@ import { waitFor } from "storybook/test";
 import { Button } from "../../atoms/Button/Button";
 import { Input } from "../../atoms/Input/Input";
 import { FileUpload, type FileUploadContext, type FileUploadItem } from "./FileUpload";
+import { FileUploadRejection } from "./file-upload-rejection";
 import { pickFiles, samplePhoto, sizedFile } from "../../../test/sample-files";
 
 const meta = {
@@ -29,6 +30,8 @@ const meta = {
           "  onChange={(items) => setPhotoIds(items.filter((i) => i.status === \"done\").map((i) => i.result))}",
           "/>",
           "```",
+          "",
+          "When your server can tell a file will never go up, reject with a `FileUploadRejection` and it's turned away rather than failed. For one picture, `preview=\"dropzone\"` shows it in the drop box.",
           "",
           "On phones the picker stays `accept=\"image/*\"` with no `capture`, which is what gets Android's photo picker with albums and cloud photos rather than a file browser. Narrow what's allowed with `types`, checked after picking. Dragging files onto the field works where there's a pointer, and is never the only way in. Every word it shows or says can be replaced through `strings`.",
         ].join("\n"),
@@ -166,6 +169,67 @@ export const Rules: Story = {
       description: {
         story:
           "Types, size and count are checked as files arrive, and anything turned away stays in the list with the reason until it's removed. `validate` adds a rule of your own and its reason wins: here a HEIC file from a computer is told to export as JPEG first. Phones already send their photos as JPEG through the picker.",
+      },
+    },
+  },
+};
+
+/* A pretend server that only takes JPEG: anything else is turned away for
+   good once it arrives, the way a server that decodes the file would. */
+const jpegOnlyUpload = async (file: File, context: FileUploadContext) => {
+  await wait(400, context.signal);
+  context.onProgress(0.5);
+  await wait(400, context.signal);
+  if (file.type !== "image/jpeg") throw new FileUploadRejection("The server only takes JPEG photos.");
+  return simulatedUpload({ steps: 2, stepMs: 200, serverMs: 600 })(file, context);
+};
+
+export const TurnedAwayByTheServer: Story = {
+  render: () => (
+    <div style={{ maxWidth: 520 }}>
+      <FileUpload label="Photos" upload={jpegOnlyUpload} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const input = canvasElement.querySelector<HTMLInputElement>("input[type=file]")!;
+    pickFiles(input, [await samplePhoto("beach-house.jpg", 190), await samplePhoto("screenshot.png", 280, { type: "image/png" })]);
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Some files can only be turned away once they've been sent: the server can't decode one, or says it isn't a photo. Reject with a `FileUploadRejection` and the file ends as one the rules turned away, \"Not added.\" with your reason and no Try again, instead of failing. Here the pretend server takes JPEG only, so the PNG is turned away halfway. Its place is freed, and the next file waiting starts. A plain `Error` still means it failed and can be tried again.",
+      },
+    },
+  },
+};
+
+const coverStrings = { choose: "Choose a photo", dropHint: "or drag it here", dropHere: "Drop to use it", added: () => "Photo added." };
+
+export const PictureInTheDropBox: Story = {
+  render: () => (
+    <div style={{ maxWidth: 420 }}>
+      <FileUpload
+        label="Cover photo"
+        helperText="JPEG or PNG, up to 15 MB."
+        types={["image/jpeg", "image/png"]}
+        maxSize={15 * 1024 * 1024}
+        maxFiles={1}
+        preview="dropzone"
+        strings={coverStrings}
+        upload={simulatedUpload()}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const input = canvasElement.querySelector<HTMLInputElement>("input[type=file]")!;
+    pickFiles(input, [await samplePhoto("lake-at-sunset.jpg", 20, { size: 320 })]);
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "For one picture, an avatar or a cover, `preview=\"dropzone\"` shows it big, filling the drop box, rather than as the row's thumbnail; the row keeps the name, the progress, Remove and Try again. Choose another, or drop one on the box, and it takes the place of this one, while a file the rules turn away leaves it as it was. The box keeps its height with or without a picture, so nothing below it moves. It takes `maxFiles={1}`.",
       },
     },
   },
