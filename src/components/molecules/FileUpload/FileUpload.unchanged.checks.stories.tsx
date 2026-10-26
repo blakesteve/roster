@@ -26,11 +26,16 @@ import { realInputOrSkip } from "../../../test/real-input";
  *   WebKit writes the sample photos larger than Linux WebKit does);
  * - an outline's width, color and offset when its style is `none`, so it
  *   draws nothing: they're the platform's default focus ring;
- * - where focus is before the real click: WebKit on macOS doesn't move focus
- *   on a click and Linux does, which decides whether the button focus is
- *   then sent to rings, so focus is cleared first.
+ * - whether the button focus is sent to after the real click on Remove
+ *   rings. Where focus goes is FileUpload's choice, and it stays pinned
+ *   (Choose). Whether the browser shows a ring there is its own: macOS
+ *   WebKit doesn't move focus on a click, so it treats the script's move as
+ *   keyboard focus and rings Choose, while Linux WebKit, like Chromium, has
+ *   just focused the clicked button and doesn't. So the clicked state is
+ *   read with focus cleared, after where it landed is recorded.
  * Object URLs and React's ids are masked too. A mismatch logs everything it
- * read, every focused step's styles included.
+ * read: every field, every focused step's styles, and the clicked state's
+ * styles with where focus landed.
  *
  * Checks, not documentation: hidden from the sidebar and the docs page.
  */
@@ -149,6 +154,18 @@ const chromium = () => /Chrome/.test(navigator.userAgent);
 async function quiet() {
   await waitFor(() => expect([...document.querySelectorAll<HTMLImageElement>("[data-pin] img")].every((img) => img.complete)).toBe(true));
   await wait(400);
+  await still();
+}
+
+/* Every transition on the page run to its end, so a read is of where they
+   land rather than a frame on the way: a fixed wait read the drop box mid
+   color change on a cold run. Bounded, so nothing can hang it. */
+async function still() {
+  for (let i = 0; i < 10; i++) {
+    const running = document.getAnimations().filter((a) => a.playState === "running");
+    if (!running.length) return;
+    await Promise.race([Promise.all(running.map((a) => a.finished.catch(() => undefined))), wait(1000)]);
+  }
 }
 
 type Pinned = {
@@ -242,7 +259,7 @@ const OLD_BUILD: Record<"chromium" | "webkit", Pinned> = {
       dark: "c56d65aa32210000 c094581222bdc6b1",
     },
     clicked: {
-      one: "979c3b0a41fd5442 4487fcbed335f573",
+      one: "979c3b0a41fd5442 ce1a153c44748709",
     },
     said: [
       "",
@@ -324,10 +341,21 @@ async function readEveryState(): Promise<Pinned | null> {
     return dt;
   };
   zone.dispatchEvent(new DragEvent("dragenter", { bubbles: true, cancelable: true, dataTransfer: carrying() }));
+  await waitFor(() => expect(zone.hasAttribute("data-dragging")).toBe(true));
   await wait(300);
+  await still();
+  /* And read only once two reads 100ms apart agree: on Linux WebKit a
+     settled-looking box still read differently from run to run. */
+  for (let i = 0, before = ""; i < 20; i++) {
+    const look = styles("states");
+    if (look === before) break;
+    before = look;
+    await wait(100);
+  }
   now.dragging = await read(["states"]);
   zone.dispatchEvent(new DragEvent("dragleave", { bubbles: true, cancelable: true, dataTransfer: carrying() }));
   await waitFor(() => expect(zone.hasAttribute("data-dragging")).toBe(false));
+  await still();
 
   /* The pointer on each kind of button. Hover styles can't be read in WebKit
      here (the dev stylesheet's nested hover media), so there these read as at
@@ -340,6 +368,7 @@ async function readEveryState(): Promise<Pinned | null> {
   for (const [key, selector] of targets) {
     await real.commands.realHover(selector);
     await wait(250);
+    await still();
     now.hovered[key] = (await read(["states"])).states;
   }
   await real.commands.realHover("[data-pin-before]");
@@ -358,13 +387,18 @@ async function readEveryState(): Promise<Pinned | null> {
   }
   now.walked = await read();
 
-  /* A real click on Remove: the file goes, and focus lands on Choose. From
-     the page, so where the click itself leaves focus can't decide it. */
-  (document.activeElement as HTMLElement | null)?.blur();
+  /* A real click on Remove: the file goes, and focus lands on Choose. Where
+     it lands is pinned; the field is then read with focus cleared, because
+     whether the browser rings that button depends on the platform (above). */
   await real.commands.realClick('[data-pin="one"] [data-file-remove]');
   await waitFor(() => expect(row("one").querySelector("[data-file-item]")).toBeNull());
   await wait(300);
+  await still();
   now.walk.push(`removed: ${where()}`);
+  const clickedFocus = `${where()}: ${document.activeElement ? look(document.activeElement) : "none"}`;
+  (document.activeElement as HTMLElement | null)?.blur();
+  await wait(200);
+  await still();
   now.clicked = await read(["one"]);
   now.said.push(said("one"));
 
@@ -373,6 +407,7 @@ async function readEveryState(): Promise<Pinned | null> {
   if (JSON.stringify(now) !== JSON.stringify(OLD_BUILD[engine])) {
     for (const name of ROWS) console.info(`FILEUPLOAD UNCHANGED ${engine} ${name} html: ${html(name)}\nstyles:\n${styles(name)}`);
     console.info(`FILEUPLOAD UNCHANGED ${engine} focused steps:\n${stepLooks.join("\n")}`);
+    console.info(`FILEUPLOAD UNCHANGED ${engine} clicked: focus on ${clickedFocus}\nthen, focus cleared, one html: ${html("one")}\nstyles:\n${styles("one")}`);
   }
   return now;
 }
