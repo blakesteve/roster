@@ -19,9 +19,18 @@ import { realInputOrSkip } from "../../../test/real-input";
  * padding, outline, rings, cursor, opacity, heights). Also pinned: where focus
  * is at each step, and what the live region said.
  *
- * Widths and pixel values aren't in the digests: they come from the system
- * font, which differs between macOS and Linux, where CI runs. Object URLs and
- * React's ids are masked too. A mismatch logs everything it read.
+ * Pinned the same on macOS and on Linux, where CI runs, so what differs
+ * between them for reasons not FileUpload's own is left out:
+ * - widths and pixel values, which come from the system font;
+ * - the files' sizes, which come from the browser's own JPEG encoder (macOS
+ *   WebKit writes the sample photos larger than Linux WebKit does);
+ * - an outline's width, color and offset when its style is `none`, so it
+ *   draws nothing: they're the platform's default focus ring;
+ * - where focus is before the real click: WebKit on macOS doesn't move focus
+ *   on a click and Linux does, which decides whether the button focus is
+ *   then sent to rings, so focus is cleared first.
+ * Object URLs and React's ids are masked too. A mismatch logs everything it
+ * read, every focused step's styles included.
  *
  * Checks, not documentation: hidden from the sidebar and the docs page.
  */
@@ -84,10 +93,12 @@ const input = (name: Row) => row(name).querySelector<HTMLInputElement>("input[ty
 const item = (name: Row, file: string) =>
   [...row(name).querySelectorAll<HTMLElement>("[data-file-item]")].find((li) => li.querySelector("p")?.textContent === file)!;
 
-/* Every pixel value masked (see above), object URLs, and React's ids. */
+/* Every pixel value masked (see above), the files' sizes, object URLs, and
+   React's ids. */
 const html = (name: Row) =>
   row(name)
     .innerHTML.replace(/-?\d+(\.\d+)?px/g, "#px")
+    .replace(/>\d+(\.\d+)? (B|KB|MB)</g, ">size<")
     .replace(/blob:[^"]+/g, "blob")
     .replace(/[«:_]r[0-9a-z]+[»:_]/g, "ID");
 
@@ -102,13 +113,15 @@ const PROPS = [
   "cursor", "opacity", "transform", "visibility", "height", "min-height", "object-fit",
   "transition-property", "transition-duration", "animation-name",
 ];
+/* An element's styles, as pinned: an outline with no style draws nothing,
+   so its width, color and offset, the platform's defaults, aren't read. */
+const look = (el: Element) => {
+  const s = getComputedStyle(el);
+  const drawn = s.outlineStyle !== "none";
+  return PROPS.map((p) => (!drawn && p.startsWith("outline-") && p !== "outline-style" ? "-" : s.getPropertyValue(p))).join(";");
+};
 const styles = (name: Row) =>
-  [...row(name).querySelectorAll("*")]
-    .map((el) => {
-      const s = getComputedStyle(el);
-      return `${el.tagName.toLowerCase()} ${PROPS.map((p) => s.getPropertyValue(p)).join(";")}`;
-    })
-    .join("\n");
+  [...row(name).querySelectorAll("*")].map((el) => `${el.tagName.toLowerCase()} ${look(el)}`).join("\n");
 
 async function digest(text: string) {
   const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)));
@@ -148,33 +161,34 @@ type Pinned = {
   walk: string[];
 };
 
-/* Read from 6a1b30c, 5.15.0, 25 Oct 2026. */
+/* Read from 6a1b30c, 5.15.0, 25 Oct 2026, and read again the same day with
+   the platform differences above left out. */
 const OLD_BUILD: Record<"chromium" | "webkit", Pinned> = {
   chromium: {
     rest: {
-      empty: "b29da041066f9a7a 9354bff1cd8417b6",
-      states: "e4e5400e6eb579ab 7b651d74a89f46d0",
-      one: "736965829697a8e8 389737f2146847c5",
-      disabled: "dfc8005a010cb1d3 9c8f0215dabcecd5",
-      dark: "05aba774c26ccf85 452b0962c3cacd8f",
+      empty: "b29da041066f9a7a 40e8e7b915cadf79",
+      states: "c93ef1a773a6b7a5 02cdf06c1d412090",
+      one: "1f0b6b8911bbe59f 7184cac70d63389c",
+      disabled: "15511583629ba913 f1ca2108982bd636",
+      dark: "05890b8976ad35ec a66773f2bf6441d1",
     },
     dragging: {
-      states: "4a2bb6eb6db8c404 29486ebbc1c10ff2",
+      states: "82beb707ae645bd0 fa28dc76faed0a49",
     },
     hovered: {
-      choose: "9972d95688f6427c 17fab5be9f5383fa",
-      retry: "e9e11ef6eb9e17e0 3706a387ec0fdb3d",
-      remove: "796e87d3952ef661 eca4fd008455ad0f",
+      choose: "572097aaa8fa07ee b35abd5fbeab9b5b",
+      retry: "2788ba379d887fcf a357c6e83f8c2266",
+      remove: "5ff9c6c0c9401a95 a74c9c6940f62d69",
     },
     walked: {
-      empty: "b29da041066f9a7a 9354bff1cd8417b6",
-      states: "e4e5400e6eb579ab 7b651d74a89f46d0",
-      one: "736965829697a8e8 389737f2146847c5",
-      disabled: "dfc8005a010cb1d3 9c8f0215dabcecd5",
-      dark: "12bea4d92ced0adc c7522898f3649fe1",
+      empty: "b29da041066f9a7a 40e8e7b915cadf79",
+      states: "c93ef1a773a6b7a5 02cdf06c1d412090",
+      one: "1f0b6b8911bbe59f 7184cac70d63389c",
+      disabled: "15511583629ba913 f1ca2108982bd636",
+      dark: "c56d65aa32210000 24e12449c68e6d64",
     },
     clicked: {
-      one: "979c3b0a41fd5442 81f14549f494eb10",
+      one: "979c3b0a41fd5442 2bac17fe7e326f59",
     },
     said: [
       "",
@@ -185,50 +199,50 @@ const OLD_BUILD: Record<"chromium" | "webkit", Pinned> = {
       "cover.jpg removed.",
     ],
     walk: [
-      "empty: button Choose photos (marked) | b5b8faeabf6dd4a9",
-      "states: button Choose photos (marked) | b5b8faeabf6dd4a9",
-      "states: button Remove uploading.jpg (marked) | 53c5e63f728ca370",
-      "states: button Remove done.jpg (marked) | 53c5e63f728ca370",
-      "states: button Try failed.jpg again (marked) | 53c5e63f728ca370",
-      "states: button Remove failed.jpg (marked) | 53c5e63f728ca370",
-      "states: button Remove big.jpg (marked) | 53c5e63f728ca370",
-      "one: button Choose photos (marked) | b5b8faeabf6dd4a9",
-      "one: button Remove cover.jpg (marked) | 53c5e63f728ca370",
-      "disabled: button Choose photos (marked) | 108a6a1f9827ae2d",
-      "disabled: button Try locked.jpg again (marked) | ed1dcba236892b19",
-      "disabled: button Remove locked.jpg (marked) | ed1dcba236892b19",
-      "dark: button Choose photos (marked) | 80fc67f8a0a114c5",
-      "dark: button Remove d-uploading.jpg (marked) | 8cc2472e420c007a",
-      "dark: button Remove d-done.jpg (marked) | 8cc2472e420c007a",
-      "dark: button Try d-failed.jpg again (marked) | 8cc2472e420c007a",
+      "empty: button Choose photos (marked) | 85b0510bf70b053c",
+      "states: button Choose photos (marked) | 85b0510bf70b053c",
+      "states: button Remove uploading.jpg (marked) | 64e5d64da1724323",
+      "states: button Remove done.jpg (marked) | 64e5d64da1724323",
+      "states: button Try failed.jpg again (marked) | 64e5d64da1724323",
+      "states: button Remove failed.jpg (marked) | 64e5d64da1724323",
+      "states: button Remove big.jpg (marked) | 64e5d64da1724323",
+      "one: button Choose photos (marked) | 85b0510bf70b053c",
+      "one: button Remove cover.jpg (marked) | 64e5d64da1724323",
+      "disabled: button Choose photos (marked) | 82baa38300afccf8",
+      "disabled: button Try locked.jpg again (marked) | 1e77d19b2adab4eb",
+      "disabled: button Remove locked.jpg (marked) | 1e77d19b2adab4eb",
+      "dark: button Choose photos (marked) | b9517454f9ff3585",
+      "dark: button Remove d-uploading.jpg (marked) | f5446f6a2045be24",
+      "dark: button Remove d-done.jpg (marked) | f5446f6a2045be24",
+      "dark: button Try d-failed.jpg again (marked) | f5446f6a2045be24",
       "removed: one: button Choose photos",
     ],
   },
   webkit: {
     rest: {
-      empty: "b29da041066f9a7a 935b1283e531b946",
-      states: "8f8c265d5c7e00a7 45b75ff3adfc4c41",
-      one: "52b1fe22e530a60d 99776980d1367b60",
-      disabled: "daf5c792334e36a9 13e5d5d6918f55cd",
-      dark: "17ff1824dbb0272a 373ac8fdf92cfdb7",
+      empty: "b29da041066f9a7a 574c6d7f7b7412e0",
+      states: "c93ef1a773a6b7a5 4ff4ad4c06467edd",
+      one: "1f0b6b8911bbe59f 7753f217dec0a790",
+      disabled: "15511583629ba913 77126d4fb12b4e84",
+      dark: "05890b8976ad35ec 87e08baaabbd0115",
     },
     dragging: {
-      states: "4cf24d24e2f04ff0 6f88aa6d0b770339",
+      states: "82beb707ae645bd0 fa91ebf0861763bc",
     },
     hovered: {
-      choose: "f95d6c70b9e7c310 45b75ff3adfc4c41",
-      retry: "9286a8aa5a97774f 45b75ff3adfc4c41",
-      remove: "4e87482a54a3339a 45b75ff3adfc4c41",
+      choose: "572097aaa8fa07ee 4ff4ad4c06467edd",
+      retry: "2788ba379d887fcf 4ff4ad4c06467edd",
+      remove: "5ff9c6c0c9401a95 4ff4ad4c06467edd",
     },
     walked: {
-      empty: "b29da041066f9a7a 935b1283e531b946",
-      states: "8f8c265d5c7e00a7 45b75ff3adfc4c41",
-      one: "52b1fe22e530a60d 99776980d1367b60",
-      disabled: "daf5c792334e36a9 13e5d5d6918f55cd",
-      dark: "1063d1402fcda352 5f7fe1a6ffd2d053",
+      empty: "b29da041066f9a7a 574c6d7f7b7412e0",
+      states: "c93ef1a773a6b7a5 4ff4ad4c06467edd",
+      one: "1f0b6b8911bbe59f 7753f217dec0a790",
+      disabled: "15511583629ba913 77126d4fb12b4e84",
+      dark: "c56d65aa32210000 c094581222bdc6b1",
     },
     clicked: {
-      one: "979c3b0a41fd5442 093ed1e47c8bc57e",
+      one: "979c3b0a41fd5442 4487fcbed335f573",
     },
     said: [
       "",
@@ -239,22 +253,22 @@ const OLD_BUILD: Record<"chromium" | "webkit", Pinned> = {
       "cover.jpg removed.",
     ],
     walk: [
-      "empty: button Choose photos (marked) | 4382088b1f7a6e87",
-      "states: button Choose photos (marked) | 4382088b1f7a6e87",
-      "states: button Remove uploading.jpg (marked) | 942ecc00e46c78ba",
-      "states: button Remove done.jpg (marked) | 942ecc00e46c78ba",
-      "states: button Try failed.jpg again (marked) | 942ecc00e46c78ba",
-      "states: button Remove failed.jpg (marked) | 942ecc00e46c78ba",
-      "states: button Remove big.jpg (marked) | 942ecc00e46c78ba",
-      "one: button Choose photos (marked) | 4382088b1f7a6e87",
-      "one: button Remove cover.jpg (marked) | 942ecc00e46c78ba",
-      "disabled: button Choose photos (marked) | 39181b48eb9d8228",
-      "disabled: button Try locked.jpg again (marked) | 7d3dafd7f4079dc4",
-      "disabled: button Remove locked.jpg (marked) | 7d3dafd7f4079dc4",
-      "dark: button Choose photos (marked) | c653638c963bbf0c",
-      "dark: button Remove d-uploading.jpg (marked) | b5edfa22b7415f37",
-      "dark: button Remove d-done.jpg (marked) | b5edfa22b7415f37",
-      "dark: button Try d-failed.jpg again (marked) | b5edfa22b7415f37",
+      "empty: button Choose photos (marked) | 85b0510bf70b053c",
+      "states: button Choose photos (marked) | 85b0510bf70b053c",
+      "states: button Remove uploading.jpg (marked) | 64e5d64da1724323",
+      "states: button Remove done.jpg (marked) | 64e5d64da1724323",
+      "states: button Try failed.jpg again (marked) | 64e5d64da1724323",
+      "states: button Remove failed.jpg (marked) | 64e5d64da1724323",
+      "states: button Remove big.jpg (marked) | 64e5d64da1724323",
+      "one: button Choose photos (marked) | 85b0510bf70b053c",
+      "one: button Remove cover.jpg (marked) | 64e5d64da1724323",
+      "disabled: button Choose photos (marked) | 82baa38300afccf8",
+      "disabled: button Try locked.jpg again (marked) | 1e77d19b2adab4eb",
+      "disabled: button Remove locked.jpg (marked) | 1e77d19b2adab4eb",
+      "dark: button Choose photos (marked) | b9517454f9ff3585",
+      "dark: button Remove d-uploading.jpg (marked) | f5446f6a2045be24",
+      "dark: button Remove d-done.jpg (marked) | f5446f6a2045be24",
+      "dark: button Try d-failed.jpg again (marked) | f5446f6a2045be24",
       "removed: one: button Choose photos",
     ],
   },
@@ -334,15 +348,19 @@ async function readEveryState(): Promise<Pinned | null> {
      users reach buttons with Option+Tab. */
   document.querySelector<HTMLElement>("[data-pin-before]")!.focus();
   const tab = chromium() ? "Tab" : "Alt+Tab";
+  const stepLooks: string[] = [];
   for (let i = 0; i < 16; i++) {
     await real.commands.realPress([tab]);
     await wait(200);
     const el = document.activeElement!;
-    now.walk.push(`${where()} | ${await digest(PROPS.map((p) => getComputedStyle(el).getPropertyValue(p)).join(";"))}`);
+    stepLooks.push(`${where()}: ${look(el)}`);
+    now.walk.push(`${where()} | ${await digest(look(el))}`);
   }
   now.walked = await read();
 
-  /* A real click on Remove: the file goes, and focus lands on Choose. */
+  /* A real click on Remove: the file goes, and focus lands on Choose. From
+     the page, so where the click itself leaves focus can't decide it. */
+  (document.activeElement as HTMLElement | null)?.blur();
   await real.commands.realClick('[data-pin="one"] [data-file-remove]');
   await waitFor(() => expect(row("one").querySelector("[data-file-item]")).toBeNull());
   await wait(300);
@@ -354,6 +372,7 @@ async function readEveryState(): Promise<Pinned | null> {
   console.info(`FILEUPLOAD UNCHANGED ${engine} ${JSON.stringify(now)}`);
   if (JSON.stringify(now) !== JSON.stringify(OLD_BUILD[engine])) {
     for (const name of ROWS) console.info(`FILEUPLOAD UNCHANGED ${engine} ${name} html: ${html(name)}\nstyles:\n${styles(name)}`);
+    console.info(`FILEUPLOAD UNCHANGED ${engine} focused steps:\n${stepLooks.join("\n")}`);
   }
   return now;
 }
