@@ -341,4 +341,88 @@ describe("Dialog Component", () => {
       await waitFor(() => expect(dialog.contains(document.activeElement)).toBe(true));
     });
   });
+
+  describe("the full-screen layout", () => {
+    it("draws nothing of its own but the title: no box, no header, no close button", () => {
+      render(
+        <Dialog {...defaultProps} layout="fullscreen" titleHidden description="Swipe through the album." className="my-viewer">
+          <button>Next</button>
+        </Dialog>,
+      );
+      const dialog = screen.getByRole("dialog");
+      const panel = dialog.querySelector("[id^='headlessui-dialog-panel']")!;
+      expect(dialog).toHaveAccessibleName("Test Dialog");
+      expect(screen.queryByLabelText("Close dialog")).toBeNull();
+      /* The viewport, with the app's class and none of the box's. */
+      expect(dialog).toHaveClass("rst:fixed", "rst:inset-0");
+      expect(panel).toHaveClass("rst:fixed", "rst:inset-0", "my-viewer");
+      for (const box of ["rst:rounded-2xl", "rst:p-6", "rst:border", "rst:elevation-overlay", "rst:max-w-md"]) expect(panel).not.toHaveClass(box);
+      /* The title is there for a screen reader, the rest is the app's. */
+      expect(screen.getByRole("heading", { name: "Test Dialog" })).toHaveClass("rst:sr-only");
+      expect(screen.getByText("Swipe through the album.")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument();
+    });
+
+    it("shows the title when it isn't hidden, and hides it in the default layout too", () => {
+      const { unmount } = render(<Dialog {...defaultProps} layout="fullscreen" />);
+      expect(screen.getByRole("heading", { name: "Test Dialog" })).not.toHaveClass("rst:sr-only");
+      unmount();
+      render(<Dialog {...defaultProps} titleHidden />);
+      expect(screen.getByRole("heading", { name: "Test Dialog" })).toHaveClass("rst:sr-only");
+      /* The default layout keeps its header's close button. */
+      expect(screen.getByLabelText("Close dialog")).toBeInTheDocument();
+    });
+
+    it("makes the page inert, takes focus where asked, and hands it back on close", async () => {
+      function Viewer() {
+        const [open, setOpen] = useState(false);
+        return (
+          <>
+            <button onClick={() => setOpen(true)}>Open</button>
+            <Dialog isOpen={open} onClose={() => setOpen(false)} title="Photos" titleHidden layout="fullscreen">
+              <button>Previous</button>
+              <button data-autofocus onClick={() => setOpen(false)}>
+                Close
+              </button>
+            </Dialog>
+          </>
+        );
+      }
+      const { container } = render(<Viewer />);
+      const opener = screen.getByRole("button", { name: "Open" });
+      opener.focus();
+      await userEvent.keyboard("{Enter}");
+      await waitFor(() => expect(screen.getByRole("button", { name: "Close" })).toHaveFocus());
+      const inert = () => (container as HTMLElement & { inert?: boolean }).inert;
+      await waitFor(() => expect(inert()).toBe(true));
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() => expect(opener).toHaveFocus());
+      expect(inert()).toBeFalsy();
+    });
+  });
+
+  describe("onAfterClose", () => {
+    for (const layout of ["default", "fullscreen"] as const) {
+      it(`fires once, after the dialog has closed, in the ${layout} layout`, async () => {
+        const onAfterClose = vi.fn();
+        function Closing() {
+          const [open, setOpen] = useState(true);
+          return (
+            <Dialog isOpen={open} onClose={() => setOpen(false)} onAfterClose={onAfterClose} title="Closing" layout={layout}>
+              <button>Inside</button>
+            </Dialog>
+          );
+        }
+        render(<Closing />);
+        await screen.findByRole("dialog");
+        /* The twin: not while it's open. */
+        expect(onAfterClose).not.toHaveBeenCalled();
+        await userEvent.keyboard("{Escape}");
+        await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+        await waitFor(() => expect(onAfterClose).toHaveBeenCalledTimes(1));
+        await new Promise((r) => setTimeout(r, 50));
+        expect(onAfterClose).toHaveBeenCalledTimes(1);
+      });
+    }
+  });
 });
