@@ -22,11 +22,15 @@ import { realInputOrSkip } from "../../../test/real-input";
  * between them for reasons not Dialog's own is left out:
  * - widths and pixel values, which come from the system font;
  * - an outline's width, color and offset when its style is `none`, so it
- *   draws nothing: they're the platform's default focus ring;
+ *   draws nothing, or `auto`, the browser's own focus ring: that ring is the
+ *   platform's color (Chromium's is rgb(0, 95, 204) on macOS and
+ *   rgb(16, 16, 16) on Linux). Dialog shows it on itself when nothing inside
+ *   asks for focus, and the fixture's plain buttons show it too. The style
+ *   stays pinned, so a ring that appears or goes still fails;
  * - the browser's click-focus choice: each dialog is opened with Enter on a
  *   focused opener, so where focus returns is the dialog's doing alone.
  * React's and Headless UI's generated ids are masked too. A mismatch logs
- * everything it read.
+ * everything it read, every Tab step's styles included.
  *
  * Checks, not documentation: hidden from the sidebar and the docs page.
  */
@@ -109,11 +113,12 @@ const PROPS = [
   "backdrop-filter", "transition-property", "transition-duration",
 ];
 /* An element's styles, as pinned: an outline with no style draws nothing,
-   so its width, color and offset, the platform's defaults, aren't read. */
+   and an `auto` one is the browser's own ring, so for both, the width, color
+   and offset (the platform's) aren't read. */
 const look = (el: Element) => {
   const s = getComputedStyle(el);
-  const drawn = s.outlineStyle !== "none";
-  return PROPS.map((p) => (!drawn && p.startsWith("outline-") && p !== "outline-style" ? "-" : s.getPropertyValue(p))).join(";");
+  const platform = s.outlineStyle === "none" || s.outlineStyle === "auto";
+  return PROPS.map((p) => (platform && p.startsWith("outline-") && p !== "outline-style" ? "-" : s.getPropertyValue(p))).join(";");
 };
 const styles = () =>
   [...(root()?.querySelectorAll("*") ?? [])]
@@ -162,69 +167,70 @@ async function settledOpen() {
 
 type Pinned = { open: Record<string, string>; hovered: Record<string, string>; walk: string[] };
 
-/* Read from 8e8817d, 5.16.0, 27 Oct 2026. */
+/* Read from 8e8817d, 5.16.0, 27 Oct 2026, with the browser's own focus ring
+   left out (above). */
 const OLD_BUILD: Record<Group, Record<"chromium" | "webkit", Pinned>> = {
   light: {
     chromium: {
       open: {
-        white: "b5f6ea9ea1a10b5f 602ed84c74297020",
-        slate: "3f317646f90ab967 09b9611ce9e92966",
-        primary: "e9b22ff2e1ace6d2 d08769c89c8c5b1d",
+        white: "b5f6ea9ea1a10b5f 00a28029b1388d2c",
+        slate: "3f317646f90ab967 f9a8957f8d58541d",
+        primary: "e9b22ff2e1ace6d2 d40516d716f2cbcc",
       },
       hovered: {
-        white: "b5f6ea9ea1a10b5f 94dd84c4ebae7fae",
-        slate: "3f317646f90ab967 b56c17fd7e160408",
-        primary: "e9b22ff2e1ace6d2 d31e5886889f11c5",
+        white: "b5f6ea9ea1a10b5f 73bef63e3b0887dd",
+        slate: "3f317646f90ab967 855ab85350bfdd48",
+        primary: "e9b22ff2e1ace6d2 64f9320863127b26",
       },
       walk: [
         "white opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
         "white Tab: dialog: button Close dialog (marked) | 4a3ce78b7d4b010c",
-        "white Tab: dialog: button Cancel (marked) | 8841a54c17dd60e5",
-        "white Tab: dialog: button Save (marked) | 8841a54c17dd60e5",
+        "white Tab: dialog: button Cancel (marked) | 2f07716822aa99d3",
+        "white Tab: dialog: button Save (marked) | 2f07716822aa99d3",
         "white Tab: dialog: button Close dialog (marked) | 4a3ce78b7d4b010c",
         "white closed: page: button Open white (marked)",
         "slate opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
         "slate Tab: dialog: button Close dialog (marked) | 21c104233e93c607",
-        "slate Tab: dialog: button Cancel (marked) | 2c9028f230624296",
-        "slate Tab: dialog: button Save (marked) | 2c9028f230624296",
+        "slate Tab: dialog: button Cancel (marked) | f4e6e6ff5a3c33c3",
+        "slate Tab: dialog: button Save (marked) | f4e6e6ff5a3c33c3",
         "slate Tab: dialog: button Close dialog (marked) | 21c104233e93c607",
         "slate closed: page: button Open slate (marked)",
         "primary opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
         "primary Tab: dialog: button Close dialog (marked) | 401b69cefb5993d9",
-        "primary Tab: dialog: button Cancel (marked) | abadc500ee10c802",
-        "primary Tab: dialog: button Save (marked) | abadc500ee10c802",
+        "primary Tab: dialog: button Cancel (marked) | 35505050a5c02e9d",
+        "primary Tab: dialog: button Save (marked) | 35505050a5c02e9d",
         "primary Tab: dialog: button Close dialog (marked) | 401b69cefb5993d9",
         "primary closed: page: button Open primary (marked)",
       ],
     },
     webkit: {
       open: {
-        white: "4136a7bab7c11e07 f4625acd2e2167c5",
-        slate: "d9569334454872c5 2bb8629c4657390f",
-        primary: "78de349250ad879a bb73b9709ddbd8ec",
+        white: "4136a7bab7c11e07 ecd8683392a41b25",
+        slate: "d9569334454872c5 9193b5753b3c65b5",
+        primary: "78de349250ad879a 09b257bf0cc20af9",
       },
       hovered: {
-        white: "4136a7bab7c11e07 f4625acd2e2167c5",
-        slate: "d9569334454872c5 2bb8629c4657390f",
-        primary: "78de349250ad879a bb73b9709ddbd8ec",
+        white: "4136a7bab7c11e07 ecd8683392a41b25",
+        slate: "d9569334454872c5 9193b5753b3c65b5",
+        primary: "78de349250ad879a 09b257bf0cc20af9",
       },
       walk: [
         "white opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
         "white Alt+Tab: dialog: button Close dialog (marked) | 4a3ce78b7d4b010c",
-        "white Alt+Tab: dialog: button Cancel (marked) | b4757abed0505c74",
-        "white Alt+Tab: dialog: button Save (marked) | b4757abed0505c74",
+        "white Alt+Tab: dialog: button Cancel (marked) | 2f07716822aa99d3",
+        "white Alt+Tab: dialog: button Save (marked) | 2f07716822aa99d3",
         "white Alt+Tab: dialog: button Close dialog (marked) | 4a3ce78b7d4b010c",
         "white closed: page: button Open white (marked)",
         "slate opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
         "slate Alt+Tab: dialog: button Close dialog (marked) | 21c104233e93c607",
-        "slate Alt+Tab: dialog: button Cancel (marked) | 5dbf62d2280d0a3d",
-        "slate Alt+Tab: dialog: button Save (marked) | 5dbf62d2280d0a3d",
+        "slate Alt+Tab: dialog: button Cancel (marked) | f4e6e6ff5a3c33c3",
+        "slate Alt+Tab: dialog: button Save (marked) | f4e6e6ff5a3c33c3",
         "slate Alt+Tab: dialog: button Close dialog (marked) | 21c104233e93c607",
         "slate closed: page: button Open slate (marked)",
         "primary opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
         "primary Alt+Tab: dialog: button Close dialog (marked) | 401b69cefb5993d9",
-        "primary Alt+Tab: dialog: button Cancel (marked) | 58377f2f8273f0a4",
-        "primary Alt+Tab: dialog: button Save (marked) | 58377f2f8273f0a4",
+        "primary Alt+Tab: dialog: button Cancel (marked) | 35505050a5c02e9d",
+        "primary Alt+Tab: dialog: button Save (marked) | 35505050a5c02e9d",
         "primary Alt+Tab: dialog: button Close dialog (marked) | 401b69cefb5993d9",
         "primary closed: page: button Open primary (marked)",
       ],
@@ -233,48 +239,48 @@ const OLD_BUILD: Record<Group, Record<"chromium" | "webkit", Pinned>> = {
   others: {
     chromium: {
       open: {
-        glass: "7d45a0dc68ec2dc4 9208abf71428b5b6",
-        dark: "1fa3df5d9fa9294a baf95c45ca84796f",
+        glass: "7d45a0dc68ec2dc4 2d057e6fe92361d5",
+        dark: "1fa3df5d9fa9294a 1f6ca9a236725705",
       },
       hovered: {
-        glass: "7d45a0dc68ec2dc4 32615d92f1b1eb21",
-        dark: "1fa3df5d9fa9294a 2e3a77f5ab70e727",
+        glass: "7d45a0dc68ec2dc4 0c173f3f97a970ee",
+        dark: "1fa3df5d9fa9294a 995c3f403736964d",
       },
       walk: [
         "glass opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
         "glass Tab: dialog: button Close dialog (marked) | 4a3ce78b7d4b010c",
-        "glass Tab: dialog: button Cancel (marked) | 8841a54c17dd60e5",
-        "glass Tab: dialog: button Save (marked) | 8841a54c17dd60e5",
+        "glass Tab: dialog: button Cancel (marked) | 2f07716822aa99d3",
+        "glass Tab: dialog: button Save (marked) | 2f07716822aa99d3",
         "glass Tab: dialog: button Close dialog (marked) | 4a3ce78b7d4b010c",
         "glass closed: page: button Open glass (marked)",
         "dark opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
         "dark Tab: dialog: button Close dialog (marked) | a651c8e9bcf3a41c",
-        "dark Tab: dialog: button Cancel (marked) | 2c9028f230624296",
-        "dark Tab: dialog: button Save (marked) | 2c9028f230624296",
+        "dark Tab: dialog: button Cancel (marked) | f4e6e6ff5a3c33c3",
+        "dark Tab: dialog: button Save (marked) | f4e6e6ff5a3c33c3",
         "dark Tab: dialog: button Close dialog (marked) | a651c8e9bcf3a41c",
         "dark closed: page: button Open dark (marked)",
       ],
     },
     webkit: {
       open: {
-        glass: "3d518bccef9dc16c 186c2950ceecc551",
-        dark: "53b0a8206b2fabe1 a56cce2e472e8a49",
+        glass: "3d518bccef9dc16c 6207a523a3e8d4a1",
+        dark: "53b0a8206b2fabe1 a9c5357dd62fcf8e",
       },
       hovered: {
-        glass: "3d518bccef9dc16c 186c2950ceecc551",
-        dark: "53b0a8206b2fabe1 a56cce2e472e8a49",
+        glass: "3d518bccef9dc16c 6207a523a3e8d4a1",
+        dark: "53b0a8206b2fabe1 a9c5357dd62fcf8e",
       },
       walk: [
         "glass opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
         "glass Alt+Tab: dialog: button Close dialog (marked) | 4a3ce78b7d4b010c",
-        "glass Alt+Tab: dialog: button Cancel (marked) | b4757abed0505c74",
-        "glass Alt+Tab: dialog: button Save (marked) | b4757abed0505c74",
+        "glass Alt+Tab: dialog: button Cancel (marked) | 2f07716822aa99d3",
+        "glass Alt+Tab: dialog: button Save (marked) | 2f07716822aa99d3",
         "glass Alt+Tab: dialog: button Close dialog (marked) | 4a3ce78b7d4b010c",
         "glass closed: page: button Open glass (marked)",
         "dark opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
         "dark Alt+Tab: dialog: button Close dialog (marked) | a651c8e9bcf3a41c",
-        "dark Alt+Tab: dialog: button Cancel (marked) | 5dbf62d2280d0a3d",
-        "dark Alt+Tab: dialog: button Save (marked) | 5dbf62d2280d0a3d",
+        "dark Alt+Tab: dialog: button Cancel (marked) | f4e6e6ff5a3c33c3",
+        "dark Alt+Tab: dialog: button Save (marked) | f4e6e6ff5a3c33c3",
         "dark Alt+Tab: dialog: button Close dialog (marked) | a651c8e9bcf3a41c",
         "dark closed: page: button Open dark (marked)",
       ],
@@ -316,6 +322,7 @@ async function readEveryCase(group: Group): Promise<Pinned | null> {
         await real.commands.realPress([tab]);
         await wait(150);
         now.walk.push(`${c.key} ${tab === "Tab" ? "Tab" : "Alt+Tab"}: ${where()} | ${await digest(look(document.activeElement!))}`);
+        raw.push(`${c.key} step ${i + 1} ${where()}: ${look(document.activeElement!)}`);
       }
 
       await real.commands.realPress(["Escape"]);

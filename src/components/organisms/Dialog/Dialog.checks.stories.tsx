@@ -26,6 +26,8 @@ import { realInputOrSkip } from "../../../test/real-input";
  *   closed, in both layouts.
  * - **Clicks reach your controls** and never close the dialog: the whole
  *   viewport is the panel.
+ * - **`onAfterClose` fires once, after the leave,** in both layouts: not
+ *   before the close, not as it starts, and not twice.
  *
  * Every wait is for a positive end state (the dialog gone, or open and
  * settled), never for "nothing animating", which is also true before an
@@ -294,6 +296,66 @@ export const OpenMidEntranceAndClosedInBothLayouts: Story = {
       "fullscreen: entering true true false | open false 1 false | closed",
       "default: entering true true true | open false 1 false | closed",
     ]);
+  },
+};
+
+/* ── After the close ──────────────────────────────────────────────────── */
+
+type AfterClose = { layout: string; afterPress: number; opacity: string | null };
+const afterClose = { pressedAt: 0, calls: [] as AfterClose[] };
+
+function Closing() {
+  const [which, setWhich] = useState<"fullscreen" | "default" | null>(null);
+  return (
+    <div>
+      <button type="button" data-check-full="" onClick={() => setWhich("fullscreen")}>
+        Full screen
+      </button>
+      <button type="button" data-check-default="" onClick={() => setWhich("default")}>
+        Default
+      </button>
+      {(["fullscreen", "default"] as const).map((layout) => (
+        <Dialog
+          key={layout}
+          isOpen={which === layout}
+          onClose={() => setWhich(null)}
+          onAfterClose={() => {
+            const panel = document.querySelector<HTMLElement>("#headlessui-portal-root [id^='headlessui-dialog-panel']");
+            afterClose.calls.push({ layout, afterPress: performance.now() - afterClose.pressedAt, opacity: panel ? getComputedStyle(panel).opacity : null });
+          }}
+          title={`A ${layout} dialog`}
+          layout={layout}
+        >
+          <button type="button">Inside</button>
+        </Dialog>
+      ))}
+    </div>
+  );
+}
+
+export const OnAfterCloseFiresOnceAfterTheLeave: Story = {
+  tags: ["real-input"],
+  render: () => <Closing />,
+  play: async () => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    afterClose.calls = [];
+    const rows: string[] = [];
+    for (const layout of ["fullscreen", "default"] as const) {
+      document.querySelector<HTMLElement>(layout === "fullscreen" ? "[data-check-full]" : "[data-check-default]")!.click();
+      await settledOpen();
+      const beforeClose = afterClose.calls.filter((c) => c.layout === layout).length;
+      afterClose.pressedAt = performance.now();
+      await real.commands.realPress(["Escape"]);
+      await closed();
+      /* Long enough for a second call, if there were one. */
+      await wait(400);
+      const calls = afterClose.calls.filter((c) => c.layout === layout);
+      console.info(`DIALOG AFTER CLOSE ${layout} ${JSON.stringify(calls)}`);
+      /* After the 200ms leave, with the panel faded out: not as it starts. */
+      rows.push(`${layout}: ${beforeClose} before, ${calls.length} after, ${calls.every((c) => c.afterPress >= 150) ? "after the leave" : "too early"}, ${calls.map((c) => c.opacity ?? "panel gone").join(" ")}`);
+    }
+    await expect(rows).toEqual(["fullscreen: 0 before, 1 after, after the leave, 0", "default: 0 before, 1 after, after the leave, 0"]);
   },
 };
 

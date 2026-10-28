@@ -400,5 +400,29 @@ describe("Dialog Component", () => {
       expect(inert()).toBeFalsy();
     });
   });
-});
 
+  describe("onAfterClose", () => {
+    for (const layout of ["default", "fullscreen"] as const) {
+      it(`fires once, after the dialog has closed, in the ${layout} layout`, async () => {
+        const onAfterClose = vi.fn();
+        function Closing() {
+          const [open, setOpen] = useState(true);
+          return (
+            <Dialog isOpen={open} onClose={() => setOpen(false)} onAfterClose={onAfterClose} title="Closing" layout={layout}>
+              <button>Inside</button>
+            </Dialog>
+          );
+        }
+        render(<Closing />);
+        await screen.findByRole("dialog");
+        /* The twin: not while it's open. */
+        expect(onAfterClose).not.toHaveBeenCalled();
+        await userEvent.keyboard("{Escape}");
+        await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+        await waitFor(() => expect(onAfterClose).toHaveBeenCalledTimes(1));
+        await new Promise((r) => setTimeout(r, 50));
+        expect(onAfterClose).toHaveBeenCalledTimes(1);
+      });
+    }
+  });
+});
