@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Dialog as HeadlessDialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
@@ -112,6 +112,18 @@ const Feature = () => {
       description:
         "The main content area of the dialog. Typically used for forms, confirmation messages, and action buttons.",
       control: false,
+    },
+    layout: {
+      control: "inline-radio",
+      options: ["default", "fullscreen"],
+      description:
+        "`default`: the panel with Roster's header and close button. `fullscreen`: the whole viewport, no box and no header of Roster's, for a photo viewer or a full-screen card; the controls inside are yours.",
+      table: { defaultValue: { summary: "default" } },
+    },
+    titleHidden: {
+      control: "boolean",
+      description: "Keep the title as the dialog's accessible name, said by a screen reader, without showing it.",
+      table: { defaultValue: { summary: "false" } },
     },
   },
 } satisfies Meta<typeof Dialog>;
@@ -352,6 +364,134 @@ export const GlassEffect: Story = {
 };
 
 const page = within(document.body);
+
+/* ── Full screen ───────────────────────────────────────────────────────── */
+
+const PHOTOS = [
+  { caption: "Harbor at dawn", sky: "#f6c28b", sea: "#3d6b8f", sun: "#fff1c9" },
+  { caption: "Ridge trail in October", sky: "#9ec5e8", sea: "#5b7f4a", sun: "#fdf6d8" },
+  { caption: "Lighthouse after the storm", sky: "#6f7f9c", sea: "#2b3a52", sun: "#d9e2f2" },
+  { caption: "Meadow at noon", sky: "#bfe0f7", sea: "#7aa35a", sun: "#fffbe6" },
+];
+
+/* A landscape drawn in CSS: sky, sun and land, so the story needs no image. */
+const landscape = (p: (typeof PHOTOS)[number]): CSSProperties => ({
+  width: "min(88vw, 960px)",
+  aspectRatio: "3 / 2",
+  borderRadius: 4,
+  background: `radial-gradient(circle at 72% 30%, ${p.sun} 0 7%, transparent 7.5%), linear-gradient(transparent 62%, ${p.sea} 62%), linear-gradient(${p.sky}, #ffffff)`,
+});
+
+/* The scrim, darker for photos: `--roster-backdrop` is the one property every
+   overlay's scrim reads. Set while the viewer is open, and put back after. */
+function useDarkScrim(on: boolean) {
+  useEffect(() => {
+    if (!on) return;
+    const root = document.documentElement;
+    const before = root.style.getPropertyValue("--roster-backdrop");
+    root.style.setProperty("--roster-backdrop", "rgb(12 10 9 / 0.94)");
+    return () => {
+      if (before) root.style.setProperty("--roster-backdrop", before);
+      else root.style.removeProperty("--roster-backdrop");
+    };
+  }, [on]);
+}
+
+function PhotoViewer(args: Omit<DialogProps, "isOpen" | "onClose" | "children">) {
+  const [open, setOpen] = useState(false);
+  const [index, setIndex] = useState(0);
+  useDarkScrim(open);
+  const photo = PHOTOS[index];
+  const step = (by: number) => setIndex((i) => (i + by + PHOTOS.length) % PHOTOS.length);
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Open the album</Button>
+      <Dialog {...args} isOpen={open} onClose={() => setOpen(false)}>
+        <div
+          style={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 24, color: "#f5f5f4" }}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft") step(-1);
+            if (e.key === "ArrowRight") step(1);
+          }}
+        >
+          <div style={{ alignSelf: "stretch", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span aria-live="polite" style={{ fontSize: 14, opacity: 0.8 }}>
+              {index + 1} of {PHOTOS.length}
+            </span>
+            <Button variant="solid" colorScheme="neutral" autoFocus onClick={() => setOpen(false)}>
+              Close
+            </Button>
+          </div>
+          <div role="img" aria-label={photo.caption} style={landscape(photo)} />
+          <p style={{ margin: 0, fontSize: 15 }}>{photo.caption}</p>
+          <div style={{ display: "flex", gap: 12 }}>
+            <Button variant="solid" colorScheme="neutral" onClick={() => step(-1)}>
+              Previous
+            </Button>
+            <Button variant="solid" colorScheme="neutral" onClick={() => step(1)}>
+              Next
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+    </>
+  );
+}
+
+export const PhotoViewerFullScreen: Story = {
+  name: "Photo viewer (full screen)",
+  render: (args) => <PhotoViewer {...args} />,
+  args: { title: "Photos from the trip", layout: "fullscreen", titleHidden: true, children: null },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`layout=\"fullscreen\"` with `titleHidden`: the dialog is the whole viewport, with no box, no padding and no header of Roster's. The counter, the caption, Previous, Next and Close are the app's own; Roster keeps the rest. Focus moves in on open (to Close, which carries `autoFocus`), Tab stays among the viewer's controls, Escape closes, focus goes back to the button that opened it, and the page behind is inert. The title isn't shown but names the dialog, so a screen reader announces \"Photos from the trip\". The darker scrim is `--roster-backdrop`, set while the viewer is open. The arrow keys page through the photos too.",
+      },
+    },
+  },
+};
+
+function FullScreenCard(args: Omit<DialogProps, "isOpen" | "onClose" | "children">) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Read the story</Button>
+      <Dialog {...args} isOpen={open} onClose={() => setOpen(false)}>
+        <div style={{ minHeight: "100%", display: "grid", placeItems: "center", padding: 24 }}>
+          <article
+            style={{ position: "relative", width: "min(92vw, 560px)", padding: 32, borderRadius: 16, background: "#fffaf3", color: "#1c1917", boxShadow: "0 24px 64px rgb(0 0 0 / 0.35)" }}
+          >
+            <p style={{ margin: 0, fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", opacity: 0.6 }}>Summer, 1998</p>
+            <h3 style={{ margin: "8px 0 16px", fontSize: 26 }}>The rope swing at the quarry</h3>
+            <p style={{ margin: 0, lineHeight: 1.6 }}>
+              Everyone said the rope would hold, and it did, every time but one. We came back the next summer with a new rope and a better knot, and the story got longer every year after.
+            </p>
+            <div style={{ marginTop: 24, display: "flex", justifyContent: "flex-end" }}>
+              <Button autoFocus onClick={() => setOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </article>
+        </div>
+      </Dialog>
+    </>
+  );
+}
+
+export const FullScreenCardStory: Story = {
+  name: "Full-screen card",
+  render: (args) => <FullScreenCard {...args} />,
+  args: { title: "The rope swing at the quarry", layout: "fullscreen", titleHidden: true, children: null },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A card laid out by the app, over the whole viewport: its own heading, text and Close. The dialog's hidden title matches the card's heading, so the name a screen reader hears is the one on screen. A tall card scrolls inside the dialog, and the page behind stays still.",
+      },
+    },
+  },
+};
 
 /**
  * While the dialog is open, everything behind it is `inert`: not focusable,

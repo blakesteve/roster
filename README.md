@@ -1296,6 +1296,48 @@ escape the box. Lay the options out across with `orientation` rather than
 through `optionsClassName`, for the same reason: the horizontal spacing that
 keeps two radios 44px apart rides on that prop.
 
+### Dialog
+
+A modal dialog. Focus moves in when it opens, Tab stays inside, Escape and its
+close button close it, focus goes back to what opened it, and the page behind
+is inert and hidden from assistive technology (a toast still gets through: see
+[Toasts](#toasts)). `onAfterClose` runs once it has finished closing.
+
+**Full screen.** `layout="fullscreen"` makes a bare dialog over the whole
+viewport, for a photo viewer or a full-screen card: no box, no padding, and no
+header or close button of Roster's. Everything inside is yours, a close
+included; Roster keeps the focus, the keys and the page behind. `titleHidden`
+keeps the title as the dialog's accessible name, announced when it opens,
+without showing it.
+
+```tsx
+<Dialog isOpen={open} onClose={close} title="Photos" titleHidden layout="fullscreen">
+  <div style={{ height: "100%", display: "grid", placeItems: "center" }}>
+    <img src={photo.src} alt={photo.alt} />
+    <p>{index + 1} of {photos.length}: {photo.caption}</p>
+    <Button onClick={previous}>Previous</Button>
+    <Button onClick={next}>Next</Button>
+    <Button autoFocus onClick={close}>Close</Button>
+  </div>
+</Dialog>
+```
+
+- **The dialog is the viewport.** `className` lands on the full-viewport
+  panel, and the element carrying `role="dialog"` measures the viewport too,
+  so anything looking for the dialog's box finds it. A click anywhere in it
+  doesn't close it: give it your own close.
+- **The scrim stays,** retinted by `--roster-backdrop`, and it fades in and
+  out without scaling.
+- **`size` and `status` don't apply;** `variant` still picks the scrim.
+- **A title that isn't hidden** is Roster's `h2`, first in the panel. Most
+  full-screen dialogs name themselves on screen and hide it.
+- **`titleHidden` works with the default layout too:** the header keeps its
+  close button.
+
+**Where focus starts.** On the element marked `data-autofocus`, or a Roster
+`Button` given `autoFocus` (Headless UI reads both). With neither, on the
+dialog itself. In a photo viewer that's usually Close.
+
 ### ModerationQueue
 
 A queue of things waiting for a decision: submissions to approve, reports to
@@ -2342,7 +2384,7 @@ function App() {
 | `ActionBar` | Sticky bottom action strip                                                                                                                                         |
 | `Countdown` | Live countdown timer                                                                                                                                               |
 | `DataTable` | Table with sorting and paging via TanStack Table v9. Its pager is built on `Pagination` (since 5.6.0, the arrows layout), worded through `paginationLabels`; the page size is fixed at 10, with no prop to change it yet. Imported from `@blakesteve/roster/data-table` (see [DataTable columns](#datatable-columns)) |
-| `Dialog`    | Modal dialog; `onAfterClose` runs once it has finished closing                                                                                                     |
+| `Dialog`    | Modal dialog; `onAfterClose` runs once it has finished closing; a bare full-screen layout with a hidden title (see [Dialog](#dialog))                              |
 | `Footer`    | Site footer                                                                                                                                                        |
 | `ModerationQueue` | Items waiting for a decision: busy per action, confirm, reason and edit steps, focus after an item leaves, a live region. Never fetches (see [ModerationQueue](#moderationqueue)) |
 | `QueueEditDialog` | A ModerationQueue edit step in a Dialog: pass it as an edit's `surface`. A separate export, so a queue that never uses it doesn't ship it |

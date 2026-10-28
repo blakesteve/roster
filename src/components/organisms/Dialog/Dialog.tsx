@@ -150,8 +150,60 @@ export interface DialogProps extends VariantProps<typeof dialogVariants> {
   onAfterClose?: () => void;
   /** The component's own words, replaced; any left out stay English. */
   labels?: Partial<DialogLabels>;
+  /**
+   * `"default"`: a panel, sized by `size` and styled by `variant` and
+   * `status`, with Roster's header (the title, the description and a close
+   * button).
+   *
+   * `"fullscreen"`: the dialog fills the viewport, with no box, no padding,
+   * and no header or close button of Roster's: everything inside is yours, a
+   * close control included. For a photo viewer or a full-screen card. The
+   * scrim stays (`--roster-backdrop` retints it), `className` lands on the
+   * full-viewport panel, and it fades in and out without scaling. `size` and
+   * `status` don't apply; `variant` still picks the scrim. The whole viewport
+   * is the panel, so a click anywhere in it doesn't close the dialog: give it
+   * your own close, and use Headless UI's `autoFocus` on the element to focus
+   * first.
+   *
+   * Either way, focus moves in on open, Tab stays inside, Escape closes, focus
+   * goes back to what opened it, and the page behind is inert.
+   */
+  layout?: "default" | "fullscreen";
+  /**
+   * Keep the title as the dialog's accessible name, said by a screen reader
+   * when the dialog opens, without showing it: for a dialog whose content
+   * names itself, like a photo viewer. Works with either layout.
+   */
+  titleHidden?: boolean;
 }
 
+/**
+ * A modal dialog. Focus moves in when it opens, Tab stays inside, Escape and
+ * the close button close it, focus goes back to what opened it, and the page
+ * behind is inert and hidden from assistive technology.
+ *
+ * `layout="fullscreen"` with `titleHidden` is a bare dialog over the whole
+ * viewport, for a photo viewer or a full-screen card: the content and its
+ * controls are yours, and Roster keeps the focus, the keys and the page
+ * behind.
+ *
+ * ```tsx
+ * <Dialog isOpen={open} onClose={close} title="Photos" titleHidden layout="fullscreen">
+ *   <div style={{ height: "100%", display: "grid", placeItems: "center" }}>
+ *     <img src={photo.src} alt={photo.alt} />
+ *     <p>{index + 1} of {photos.length}: {photo.caption}</p>
+ *     <Button onClick={previous}>Previous</Button>
+ *     <Button onClick={next}>Next</Button>
+ *     <Button autoFocus onClick={close}>Close</Button>
+ *   </div>
+ * </Dialog>
+ * ```
+ *
+ * **Where focus starts.** On the element marked `data-autofocus`, or a Roster
+ * `Button` given `autoFocus` (Headless UI reads both); with neither, on the
+ * dialog itself. In a photo viewer that's usually Close, or the photo's own
+ * region if it takes focus.
+ */
 const Dialog = ({
   isOpen,
   onClose,
@@ -164,8 +216,11 @@ const Dialog = ({
   className,
   onAfterClose,
   labels,
+  layout = "default",
+  titleHidden = false,
 }: DialogProps) => {
   useKeyFocus();
+  const fullscreen = layout === "fullscreen";
   const l = withLabels(LABELS, labels);
   /* `open` goes to Headless UI's Dialog itself. It used to come from an outer
      `<Transition show={isOpen}>`, and wrapped that way Headless UI 2.2.9 marks
@@ -207,10 +262,13 @@ const Dialog = ({
   return (
     <>
       {open && <span ref={anchorRef} hidden />}
+      {/* Headless UI puts `role="dialog"` on this element. Full screen, it's
+          the viewport's box, so whatever looks for the dialog's box finds it;
+          a role on a box-less wrapper reads as hidden. */}
       <HeadlessDialog
         open={open}
         as="div"
-        className="rst:font-ui rst:relative rst:z-50"
+        className={fullscreen ? "rst:font-ui rst:fixed rst:inset-0 rst:z-50" : "rst:font-ui rst:relative rst:z-50"}
         onClose={onClose}
       >
         <TransitionChild
@@ -239,51 +297,74 @@ const Dialog = ({
             )}
           />
         </TransitionChild>
-        <div className="rst:fixed rst:inset-0 rst:overflow-y-auto">
-          <div className="rst:flex rst:min-h-full rst:items-center rst:justify-center rst:p-4 rst:text-center">
-            <TransitionChild
-              as={Fragment}
-              enter="rst:ease-out rst:duration-300"
-              enterFrom="rst:opacity-0 rst:scale-95"
-              enterTo="rst:opacity-100 rst:scale-100"
-              leave="rst:ease-in rst:duration-200"
-              leaveFrom="rst:opacity-100 rst:scale-100"
-              leaveTo="rst:opacity-0 rst:scale-95"
-              afterLeave={onAfterClose}
-            >
-              <DialogPanel
-                className={cn(
-                  dialogVariants({ size, variant, status }),
-                  className,
-                )}
+        {fullscreen ? (
+          <TransitionChild
+            as={Fragment}
+            enter="rst:ease-out rst:duration-300"
+            enterFrom="rst:opacity-0"
+            enterTo="rst:opacity-100"
+            leave="rst:ease-in rst:duration-200"
+            leaveFrom="rst:opacity-100"
+            leaveTo="rst:opacity-0"
+            afterLeave={onAfterClose}
+          >
+            {/* The viewport, and nothing of Roster's but the title, which names
+                the dialog whether it shows or not. */}
+            <DialogPanel className={cn("rst:fixed rst:inset-0 rst:overflow-y-auto", className)}>
+              <DialogTitle as="h2" className={titleHidden ? "rst:sr-only" : cn(titleVariants())}>
+                {title}
+              </DialogTitle>
+              {description && <p className={cn(descriptionVariants())}>{description}</p>}
+              {children}
+            </DialogPanel>
+          </TransitionChild>
+        ) : (
+          <div className="rst:fixed rst:inset-0 rst:overflow-y-auto">
+            <div className="rst:flex rst:min-h-full rst:items-center rst:justify-center rst:p-4 rst:text-center">
+              <TransitionChild
+                as={Fragment}
+                enter="rst:ease-out rst:duration-300"
+                enterFrom="rst:opacity-0 rst:scale-95"
+                enterTo="rst:opacity-100 rst:scale-100"
+                leave="rst:ease-in rst:duration-200"
+                leaveFrom="rst:opacity-100 rst:scale-100"
+                leaveTo="rst:opacity-0 rst:scale-95"
+                afterLeave={onAfterClose}
               >
-                <div className="rst:flex rst:items-start rst:justify-between">
-                  <div>
-                    <DialogTitle as="h2" className={cn(titleVariants())}>
-                      {title}
-                    </DialogTitle>
-                    {description && (
-                      <p className={cn(descriptionVariants())}>{description}</p>
-                    )}
+                <DialogPanel
+                  className={cn(
+                    dialogVariants({ size, variant, status }),
+                    className,
+                  )}
+                >
+                  <div className="rst:flex rst:items-start rst:justify-between">
+                    <div>
+                      <DialogTitle as="h2" className={titleHidden ? "rst:sr-only" : cn(titleVariants())}>
+                        {title}
+                      </DialogTitle>
+                      {description && (
+                        <p className={cn(descriptionVariants())}>{description}</p>
+                      )}
+                    </div>
+
+                    <div className="rst:ml-4 rst:flex rst:shrink-0">
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        className={cn(closeVariants())}
+                        aria-label={l.close}
+                      >
+                        <FontAwesomeIcon icon={faXmark} className="rst:h-5 rst:w-5" />
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="rst:ml-4 rst:flex rst:shrink-0">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className={cn(closeVariants())}
-                      aria-label={l.close}
-                    >
-                      <FontAwesomeIcon icon={faXmark} className="rst:h-5 rst:w-5" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="rst:mt-6">{children}</div>
-              </DialogPanel>
-            </TransitionChild>
+                  <div className="rst:mt-6">{children}</div>
+                </DialogPanel>
+              </TransitionChild>
+            </div>
           </div>
-        </div>
+        )}
       </HeadlessDialog>
     </>
   );
