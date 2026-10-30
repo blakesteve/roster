@@ -16,6 +16,13 @@ import * as React from "react";
  * commoner the busier the machine: in real Escapes during the entrance, 2
  * stuck in 1,800 at a load of 13 to 20, none in 2,700 at 3 to 5.
  *
+ * Upstream, this is Headless UI's issue #3902
+ * (https://github.com/tailwindlabs/headlessui/issues/3902). PR #3895
+ * (https://github.com/tailwindlabs/headlessui/pull/3895), open and unreviewed
+ * on 29 Oct 2026, reads the transitions again each time a batch of them
+ * settles, which covers this. When a Headless UI release carries that fix,
+ * this watchdog can come out.
+ *
  * So each close is watched. A leave that ends goes as it always has: Headless
  * UI calls `afterLeave`, then removes the dialog. If the dialog is still
  * mounted `leaveMs` plus a margin after the close, with no transition running
