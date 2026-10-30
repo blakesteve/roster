@@ -12,6 +12,7 @@ import { withLabels } from "../../../lib/labels";
 import { useDarkScope } from "../../../internal/popup";
 import { useReducedMotion } from "../../../internal/motion";
 import { lockPage } from "../../../internal/page-inert";
+import { useLeaveWatchdog } from "../../../internal/leave-watchdog";
 import {
   exceedsSheetTapSlop,
   sheetDragOutcome,
@@ -34,7 +35,8 @@ export interface SheetProps {
   /** Called by Escape, a backdrop click, the close button and a dismissing drag. */
   onClose: () => void;
   /**
-   * Called once the leave transition has finished and the sheet is gone.
+   * Called once the leave transition has finished and the sheet is gone,
+   * once for each close, a close during the entrance included.
    *
    * Clear the sheet's content here rather than in `onClose`. Cleared in
    * `onClose`, it empties while it is still sliding out.
@@ -106,6 +108,11 @@ const BACKDROP_SLIDE =
   "rst:transition-opacity rst:duration-(--roster-sheet-enter-duration) rst:ease-out rst:data-leave:duration-(--roster-sheet-leave-duration) rst:data-closed:opacity-0";
 const BACKDROP_FADE =
   "rst:transition-opacity rst:duration-(--roster-sheet-fade-duration) rst:ease-out rst:data-closed:opacity-0";
+
+/* The leave's default length for each set: `--roster-sheet-leave-duration`
+   and `--roster-sheet-fade-duration` in src/index.css. A consumer who makes
+   it longer is still waited for: the watchdog waits while a transition runs. */
+const LEAVE_MS = { slide: 200, fade: 150 };
 
 const FIELD_SELECTOR = [
   "input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=reset]):not([type=range]):not([type=color]):not([type=file]):not([type=image])",
@@ -230,6 +237,11 @@ const Sheet = ({
   const l = withLabels(LABELS, labels);
   const { ref: scopeRef, inDarkScope } = useDarkScope<HTMLSpanElement>();
   const reducedMotion = useReducedMotion();
+
+  /* Removes a sheet Headless UI leaves mounted after a close cut into its
+     entrance, and calls `onAfterClose` once either way (the module says how). */
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+  const leave = useLeaveWatchdog(dialogRef, isOpen, reducedMotion ? LEAVE_MS.fade : LEAVE_MS.slide, onAfterClose);
 
   /* Headless UI marks only the part of the page the sheet is written in;
      `lockPage` marks the rest, the header and footer beside it, and leaves the
@@ -464,6 +476,8 @@ const Sheet = ({
           the sheet into the page. Measured in Chromium both ways. The
           `TransitionChild` below is where the leave is observed instead. */}
       <HeadlessDialog
+        key={leave.key}
+        ref={dialogRef}
         open={isOpen}
         as="div"
         onClose={onClose}
@@ -482,7 +496,7 @@ const Sheet = ({
           )}
         />
         <div className="rst:fixed rst:inset-0 rst:flex rst:items-end rst:justify-center">
-          <TransitionChild afterLeave={onAfterClose}>
+          <TransitionChild afterLeave={leave.afterLeave}>
             <DialogPanel
               ref={panelRef}
               style={panelStyle}

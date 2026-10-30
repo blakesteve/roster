@@ -1303,6 +1303,13 @@ close button close it, focus goes back to what opened it, and the page behind
 is inert and hidden from assistive technology (a toast still gets through: see
 [Toasts](#toasts)). `onAfterClose` runs once it has finished closing.
 
+**A close always leaves.** A close that cuts into the entrance could, now and
+then, leave the dialog mounted and invisible over the page, taking every
+click: Headless UI's transition stopped waiting before the leave had ended.
+Roster now removes a dialog still there after its leave and a short margin,
+and `onAfterClose` still runs once. Nothing to change in your code; `Sheet`
+gets the same.
+
 **Full screen.** `layout="fullscreen"` makes a bare dialog over the whole
 viewport, for a photo viewer or a full-screen card: no box, no padding, and no
 header or close button of Roster's. Everything inside is yours, a close

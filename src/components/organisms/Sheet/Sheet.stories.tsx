@@ -26,7 +26,7 @@ const meta = {
           "",
           "**Focus.** Trapped while open, and everything else on the page is `inert`. It lands on the close button, or on `initialFocus`. On close it returns to whatever opened the sheet, or to `returnFocus`, which is what a sheet opened from a deep link needs, since it has no opener. When `title` (or `contentKey`) changes while open, focus moves to the new title so a screen reader announces it, and nothing animates in again.",
           "",
-          "**After closing.** `onAfterClose` runs once the leave transition has finished. Clear the sheet's content there, not in `onClose`, or it slides out empty.",
+          "**After closing.** `onAfterClose` runs once the leave transition has finished, once for each close. Clear the sheet's content there, not in `onClose`, or it slides out empty. A close that cuts into the entrance can't leave the sheet behind: if it's still mounted after its leave and a short margin, Roster removes it, and `onAfterClose` runs then.",
           "",
           "**Motion.** Slides up over about 280ms and leaves in about 200ms, set by `--roster-sheet-enter-duration`, `--roster-sheet-leave-duration` and the two matching easings. Under `prefers-reduced-motion` it fades for `--roster-sheet-fade-duration` (150ms) instead, with no slide and no spring back after a canceled drag.",
           "",
