@@ -271,15 +271,18 @@ const Dialog = ({
   return (
     <>
       {open && <span ref={anchorRef} hidden />}
-      {/* Headless UI puts `role="dialog"` on this element. Full screen, it's
-          the viewport's box, so whatever looks for the dialog's box finds it;
-          a role on a box-less wrapper reads as hidden. */}
+      {/* Headless UI puts `role="dialog"` on this element, so it's the
+          viewport's box in both layouts, and whatever looks for the dialog's
+          box finds it: a role on a box-less wrapper reads as hidden (to
+          Playwright's `toBeVisible`, for one). It draws nothing of its own.
+          The scrim and the panel's container cover it, so a click outside the
+          panel lands on them and closes the dialog, as it always has. */}
       <HeadlessDialog
         key={leave.key}
         ref={dialogRef}
         open={open}
         as="div"
-        className={fullscreen ? "rst:font-ui rst:fixed rst:inset-0 rst:z-50" : "rst:font-ui rst:relative rst:z-50"}
+        className="rst:font-ui rst:fixed rst:inset-0 rst:z-50"
         onClose={onClose}
       >
         <TransitionChild

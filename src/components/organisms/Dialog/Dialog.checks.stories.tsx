@@ -7,13 +7,15 @@ import { realInputOrSkip } from "../../../test/real-input";
 import { stallLeave, transitionRunsOn } from "../../../test/leave";
 
 /**
- * The full-screen layout and the hidden title, checked rendered with real
+ * The layouts, the hidden title and the close, checked rendered with real
  * keys and a real mouse in Chromium and WebKit.
  *
- * - **The dialog's box is the viewport.** The element carrying
- *   `role="dialog"` measures the viewport, not merely exists: a role on a
- *   box-less wrapper reads as hidden. The twin is the default layout, whose
- *   role sits on a wrapper with no height.
+ * - **The dialog's box is the viewport, in both layouts.** The element
+ *   carrying `role="dialog"` measures the viewport, not merely exists: a role
+ *   on a box-less wrapper reads as hidden. The twin is that wrapper, the
+ *   default layout as 5.16.0 had it (`relative`): it measures 0 high. In the
+ *   default layout a click on the card leaves it open, and a click on the
+ *   scrim beside it closes it.
  * - **The hidden title names the dialog and stays a heading**, from the
  *   accessibility tree. The twin hides the title with `display: none`: the
  *   heading leaves the tree, so a screen reader can't reach it by heading.
@@ -147,10 +149,10 @@ export const TheDialogsBoxIsTheViewport: Story = {
       return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)];
     };
     const viewport = [0, 0, document.documentElement.clientWidth, window.innerHeight];
+    const panel = () => dialog()!.querySelector<HTMLElement>("[id^='headlessui-dialog-panel']")!;
     const panelLook = () => {
-      const panel = dialog()!.querySelector<HTMLElement>("[id^='headlessui-dialog-panel']")!;
-      const s = getComputedStyle(panel);
-      const r = panel.getBoundingClientRect();
+      const s = getComputedStyle(panel());
+      const r = panel().getBoundingClientRect();
       return [s.backgroundColor, s.borderTopWidth, s.borderTopLeftRadius, s.paddingTop, s.boxShadow, Math.round(r.width) === viewport[2] && Math.round(r.height) === viewport[3]];
     };
 
@@ -161,17 +163,24 @@ export const TheDialogsBoxIsTheViewport: Story = {
     await real.commands.realPress(["Escape"]);
     await closed();
 
-    /* The twin: the default layout's role sits on a wrapper with no height. */
+    /* The default layout: the role's box is the viewport too, with the card,
+       smaller, inside it. */
     document.querySelector<HTMLElement>("[data-check-default]")!.focus();
     await real.commands.realPress(["Enter"]);
     await settledOpen();
-    const plain = { height: box()[3], close: !!dialog()!.querySelector('[aria-label="Close dialog"]') };
-    await real.commands.realPress(["Escape"]);
+    const card = panel().getBoundingClientRect();
+    const plain = { box: box(), cardInside: card.width < viewport[2] && card.height < viewport[3], close: !!dialog()!.querySelector('[aria-label="Close dialog"]') };
+    /* A click on the card, on no control, leaves it open; one on the scrim
+       beside it closes it. */
+    await real.commands.realClick("[id^='headlessui-dialog-panel'] h2");
+    await wait(300);
+    const afterCard = !!dialog();
+    await real.commands.realClick('[role="dialog"]', { fx: 0.03, fy: 0.03 });
     await closed();
 
     console.info(`DIALOG BOX full ${JSON.stringify(full)} default ${JSON.stringify(plain)} viewport ${viewport}`);
     await expect(full).toEqual({ box: viewport, panel: ["rgba(0, 0, 0, 0)", "0px", "0px", "0px", "none", true], close: false });
-    await expect(plain).toEqual({ height: 0, close: true });
+    await expect({ ...plain, afterCard }).toEqual({ box: viewport, cardInside: true, close: true, afterCard: true });
   },
 };
 

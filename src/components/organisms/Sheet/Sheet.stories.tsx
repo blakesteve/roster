@@ -32,6 +32,8 @@ const meta = {
           "",
           "**Theming.** The surface is `Dialog`'s default: `--roster-popover-bg`, `-border` and `-text`, with `--roster-elevation-overlay`. The backdrop is `--roster-sheet-backdrop`, set in both `:root` and `.dark`. The sheet is portaled, and still follows a `.dark` scoped to part of the page; to find out, it renders an empty `<span hidden>` where you place it.",
           "",
+          "**The box.** The element carrying `role=\"dialog\"` is the viewport's box, so a test that finds the sheet by its role and checks it's visible finds it open. Before 5.17.0 it was a wrapper with no height, and read as hidden.",
+          "",
           "**Two caveats.** The scroll lock pads `<html>` for the scrollbar it hides, and a fixed element elsewhere on the page may still shift by that width. The bottom padding includes `env(safe-area-inset-bottom)`, which is 0 unless the page's viewport meta sets `viewport-fit=cover`.",
           "",
           "```tsx",

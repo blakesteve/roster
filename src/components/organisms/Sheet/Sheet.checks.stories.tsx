@@ -6,9 +6,15 @@ import { realInputOrSkip } from "../../../test/real-input";
 import { stallLeave, transitionRunsOn } from "../../../test/leave";
 
 /**
- * How a sheet leaves, checked rendered with real keys in Chromium and WebKit,
- * and under reduced motion in Chromium.
+ * The sheet's box and how it leaves, checked rendered with real keys and a
+ * real mouse in Chromium and WebKit, and under reduced motion in Chromium.
  *
+ * - **The sheet's box is the viewport.** The element carrying
+ *   `role="dialog"`, `aria-modal`, and the name and description, measures the
+ *   viewport, not merely exists: a role on a box-less wrapper reads as hidden
+ *   (Playwright's `toBeVisible` reads this box). The twin is that wrapper, as
+ *   5.16.0 had it (`relative`): it measures 0 high. A click in the sheet
+ *   leaves it open, and a click on the backdrop above it closes it.
  * - **`onAfterClose` fires once, after the close:** not before it, not twice
  *   (counted past the watchdog's deadline too), with the panel gone or
  *   leaving when it's called and no transition running on it in any frame
@@ -81,7 +87,7 @@ const panelNow = (): PanelThen => {
   return panel.matches("[data-leave], [data-closed]") ? "leaving" : "at rest";
 };
 
-function Closing() {
+function Closing({ description }: { description?: string }) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     sheet.open = setOpen;
@@ -102,12 +108,49 @@ function Closing() {
           })
         }
         title="Details"
+        description={description}
       >
         <p>Inside the sheet.</p>
       </Sheet>
     </div>
   );
 }
+
+/* ── The box ──────────────────────────────────────────────────────────── */
+
+export const TheSheetsBoxIsTheViewport: Story = {
+  tags: ["real-input"],
+  render: () => <Closing description="Opened from the list." />,
+  play: async () => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    await openFromKeys(real);
+    const d = dialog()!;
+    const r = d.getBoundingClientRect();
+    const text = (ids: string | null) => (ids ?? "").split(" ").map((id) => document.getElementById(id)?.textContent ?? "?").join(" ");
+    const seen = {
+      box: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)],
+      modal: d.getAttribute("aria-modal"),
+      name: text(d.getAttribute("aria-labelledby")),
+      description: text(d.getAttribute("aria-describedby")),
+    };
+    /* A click in the sheet, on no control, leaves it open; one on the backdrop
+       above it closes it. */
+    await real.commands.realClick('[data-testid="sheet-content"] p');
+    await wait(300);
+    const afterSheet = !!dialog();
+    await real.commands.realClick('[role="dialog"]', { fx: 0.5, fy: 0.04 });
+    await closed();
+    console.info(`SHEET BOX ${JSON.stringify(seen)}`);
+    await expect({ ...seen, afterSheet }).toEqual({
+      box: [0, 0, document.documentElement.clientWidth, window.innerHeight],
+      modal: "true",
+      name: "Details",
+      description: "Opened from the list.",
+      afterSheet: true,
+    });
+  },
+};
 
 /* ── After the close ──────────────────────────────────────────────────── */
 

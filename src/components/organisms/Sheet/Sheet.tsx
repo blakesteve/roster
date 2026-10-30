@@ -474,7 +474,13 @@ const Sheet = ({
           loses track of the page behind it and marks nothing `inert`: the
           focus trap holds, but a screen reader's virtual cursor walks out of
           the sheet into the page. Measured in Chromium both ways. The
-          `TransitionChild` below is where the leave is observed instead. */}
+          `TransitionChild` below is where the leave is observed instead.
+
+          Headless UI puts `role="dialog"` on this element, so it's the
+          viewport's box: a role on a box-less wrapper reads as hidden (to
+          Playwright's `toBeVisible`, for one). It draws nothing of its own.
+          The backdrop and the panel's container cover it, so a click above
+          the sheet lands on them and closes it, as it always has. */}
       <HeadlessDialog
         key={leave.key}
         ref={dialogRef}
@@ -483,7 +489,7 @@ const Sheet = ({
         onClose={onClose}
         initialFocus={initialFocus ?? closeRef}
         className={cn(
-          "rst:font-ui rst:relative rst:z-50 rst:focus:outline-hidden",
+          "rst:font-ui rst:fixed rst:inset-0 rst:z-50 rst:focus:outline-hidden",
           inDarkScope && "dark",
         )}
       >
