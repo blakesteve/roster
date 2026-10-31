@@ -241,7 +241,8 @@ const Sheet = ({
   /* Removes a sheet Headless UI leaves mounted after a close cut into its
      entrance, and calls `onAfterClose` once either way (the module says how). */
   const dialogRef = React.useRef<HTMLDivElement>(null);
-  const leave = useLeaveWatchdog(dialogRef, isOpen, reducedMotion ? LEAVE_MS.fade : LEAVE_MS.slide, onAfterClose);
+  const panelRef = React.useRef<HTMLDivElement>(null);
+  const leave = useLeaveWatchdog(dialogRef, panelRef, isOpen, reducedMotion ? LEAVE_MS.fade : LEAVE_MS.slide, onAfterClose);
 
   /* Headless UI marks only the part of the page the sheet is written in;
      `lockPage` marks the rest, the header and footer beside it, and leaves the
@@ -252,7 +253,6 @@ const Sheet = ({
     return lockPage(scopeRef.current);
   }, [isOpen, scopeRef]);
 
-  const panelRef = React.useRef<HTMLDivElement>(null);
   const handleRef = React.useRef<HTMLDivElement>(null);
   const titleRef = React.useRef<HTMLHeadingElement>(null);
   const closeRef = React.useRef<HTMLButtonElement>(null);

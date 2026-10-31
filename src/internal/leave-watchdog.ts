@@ -21,7 +21,9 @@ import * as React from "react";
  * (https://github.com/tailwindlabs/headlessui/pull/3895), open and unreviewed
  * on 29 Oct 2026, reads the transitions again each time a batch of them
  * settles, which covers this. When a Headless UI release carries that fix,
- * this watchdog can come out.
+ * the removal can come out. The wait in `afterLeave` (below) stays until a
+ * release also stops ending a leave before it has run, which #3895 doesn't
+ * (https://github.com/tailwindlabs/headlessui/issues/3902#issuecomment-6511980829).
  *
  * So each close is watched. A leave that ends goes as it always has: Headless
  * UI calls `afterLeave`, then removes the dialog. If the dialog is still
@@ -36,24 +38,34 @@ import * as React from "react";
  * before the open, as it always was, and a dialog open on its first render
  * behaves as it did.
  *
- * `onAfterClose` fires once for each close: from `afterLeave`, or, when that
- * never came, once the stuck dialog is gone. A watched close that ends with
- * `afterLeave` stays watched until the dialog leaves the page, because the
- * backdrop has its own transition and can be the part left behind. Reopening
- * during the leave ends the watch, and that close never reports; so does
- * unmounting.
+ * `onAfterClose` fires once for each close: after `afterLeave`, once no
+ * transition runs on the dialog's own parts or it has gone (Headless UI can
+ * call `afterLeave` with the leave still to run), or, when `afterLeave` never
+ * came, once the stuck dialog is gone. A watched close that ends with `afterLeave` stays
+ * watched until the dialog leaves the page, because the backdrop has its own
+ * transition and can be the part left behind. Reopening during the leave ends
+ * the watch, and that close never reports; so does unmounting.
  */
 
 /** How long past its leave a closed dialog may stay mounted, with nothing running, before it counts as stuck. */
 export const LEAVE_MARGIN_MS = 300;
 
-/* CSS transitions only. A consumer's animation inside the dialog, a spinner
-   say, can run forever and has nothing to do with the dialog leaving. Read by
-   shape rather than `instanceof CSSTransition`, which jsdom doesn't have. */
-function transitionRunning(root: Element): boolean {
+/* A CSS transition running on the dialog's own parts: anything under `root`
+   but what's inside the panel. A consumer's animation, a spinner say, can run
+   forever, and a transition in the panel's content, a button's hover fade
+   say, has nothing to do with the dialog leaving. Read by shape rather than
+   `instanceof CSSTransition`, which jsdom doesn't have. */
+function leaveRunning(root: Element, panel: Element | null): boolean {
   if (typeof root.getAnimations !== "function") return false;
-  return root.getAnimations({ subtree: true }).some((a) => "transitionProperty" in a && a.playState === "running");
+  return root.getAnimations({ subtree: true }).some((a) => {
+    if (!("transitionProperty" in a) || a.playState !== "running") return false;
+    const target = (a.effect as { target?: Element | null } | null)?.target;
+    return !(target && panel && target !== panel && panel.contains(target));
+  });
 }
+
+/** How often a close whose `afterLeave` has come is looked at again while a transition still runs on the dialog: about a frame. */
+const SETTLE_POLL_MS = 16;
 
 type Close = { timer: number; reported: boolean; removed: boolean };
 
@@ -72,11 +84,13 @@ export interface LeaveWatchdog {
 
 /**
  * `ref` is on Headless UI's `Dialog`, the element that holds the backdrop and
- * the panel, and `open` is what that `Dialog` is given. `leaveMs` is the
- * leave's default length, the panel's and the backdrop's, whichever is longer.
+ * the panel, `panelRef` is on its `DialogPanel`, and `open` is what that
+ * `Dialog` is given. `leaveMs` is the leave's default length, the panel's and
+ * the backdrop's, whichever is longer.
  */
 export function useLeaveWatchdog(
   ref: React.RefObject<HTMLElement | null>,
+  panelRef: React.RefObject<HTMLElement | null>,
   open: boolean,
   leaveMs: number,
   onAfterClose?: () => void,
@@ -93,9 +107,27 @@ export function useLeaveWatchdog(
   const close = React.useRef<Close | null>(null);
   const opened = React.useRef(open);
 
+  /* Headless UI can call `afterLeave` before the leave has run. Under load its
+     one read of the transitions can come before the closing classes reach the
+     page; it finds none and ends the leave there, while the panel is still
+     opaque, and its transitions then run on screen until the dialog is
+     removed. So the report waits until no transition runs on the dialog's
+     own parts, the backdrop and the panel, or it has gone. Abandoned,
+     unreported, if the close stops being watched. */
   const afterLeave = React.useCallback(() => {
-    if (close.current) report(close.current, latest.current.onAfterClose);
-  }, []);
+    const c = close.current;
+    if (!c) return;
+    const settle = () => {
+      if (close.current !== c || c.reported) return;
+      const root = ref.current;
+      if (root?.isConnected && leaveRunning(root, panelRef.current)) {
+        window.setTimeout(settle, SETTLE_POLL_MS);
+        return;
+      }
+      report(c, latest.current.onAfterClose);
+    };
+    settle();
+  }, [ref, panelRef]);
 
   React.useEffect(() => {
     if (open) {
@@ -110,7 +142,7 @@ export function useLeaveWatchdog(
       const root = ref.current;
       /* Gone: Headless UI removed it, after its `afterLeave`. */
       if (!root?.isConnected) return;
-      if (transitionRunning(root)) {
+      if (leaveRunning(root, panelRef.current)) {
         c.timer = window.setTimeout(check, LEAVE_MARGIN_MS);
         return;
       }
@@ -122,7 +154,7 @@ export function useLeaveWatchdog(
       window.clearTimeout(c.timer);
       if (close.current === c) close.current = null;
     };
-  }, [open, ref]);
+  }, [open, ref, panelRef]);
 
   /* After the remount has committed, so `onAfterClose` finds the dialog gone. */
   React.useLayoutEffect(() => {

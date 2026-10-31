@@ -1,29 +1,44 @@
 import { useEffect, useRef, useState } from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { LEAVE_MARGIN_MS, useLeaveWatchdog } from "./leave-watchdog";
 
 /* Headless UI's part, played by hand: the dialog is mounted while open, and
    after a close until `release()` (its leave ending), or forever if nothing
-   releases it. Remounted closed, as the watchdog's `key` does, it's gone. */
+   releases it. Remounted closed, as the watchdog's `key` does, it's gone. It
+   holds a field, whose value only a remount would lose. */
 const headless = { release: () => {}, afterLeave: () => {} };
 
-function FakeHeadlessDialog({ open, rootRef }: { open: boolean; rootRef: React.RefObject<HTMLDivElement | null> }) {
+function Field() {
+  const [value, setValue] = useState("");
+  return <input aria-label="Name" value={value} onChange={(e) => setValue(e.target.value)} />;
+}
+
+type Refs = { rootRef: React.RefObject<HTMLDivElement | null>; panelRef: React.RefObject<HTMLDivElement | null> };
+
+function FakeHeadlessDialog({ open, rootRef, panelRef }: { open: boolean } & Refs) {
   const [shown, setShown] = useState(open);
   if (open && !shown) setShown(true);
   useEffect(() => {
     headless.release = () => setShown(false);
   }, []);
-  return shown ? <div ref={rootRef} data-testid="dialog" /> : null;
+  return shown ? (
+    <div ref={rootRef} data-testid="dialog">
+      <div ref={panelRef} data-testid="panel">
+        <Field />
+      </div>
+    </div>
+  ) : null;
 }
 
 function Harness({ open, onAfterClose }: { open: boolean; onAfterClose: () => void }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const leave = useLeaveWatchdog(rootRef, open, LEAVE_MS, onAfterClose);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const leave = useLeaveWatchdog(rootRef, panelRef, open, LEAVE_MS, onAfterClose);
   useEffect(() => {
     headless.afterLeave = leave.afterLeave;
   }, [leave.afterLeave]);
-  return <FakeHeadlessDialog key={leave.key} open={open} rootRef={rootRef} />;
+  return <FakeHeadlessDialog key={leave.key} open={open} rootRef={rootRef} panelRef={panelRef} />;
 }
 
 const LEAVE_MS = 200;
@@ -40,8 +55,9 @@ function openThenClose(onAfterClose = vi.fn()) {
 }
 
 /* What `getAnimations` would list on the dialog: a transition has
-   `transitionProperty`, a CSS animation (a spinner) doesn't. */
-function animating(list: { transitionProperty?: string; playState: string }[]) {
+   `transitionProperty`, a CSS animation (a spinner) doesn't, and `effect`
+   says which element it runs on. */
+function animating(list: { transitionProperty?: string; playState: string; effect?: { target: Element } }[]) {
   screen.getByTestId("dialog").getAnimations = () => list as unknown as Animation[];
 }
 
@@ -104,6 +120,58 @@ describe("useLeaveWatchdog", () => {
     expect([mounted(), onAfterClose.mock.calls.length]).toEqual([false, 1]);
   });
 
+  it("reports an afterLeave that comes while a transition still runs only once it has stopped", () => {
+    const { onAfterClose } = openThenClose();
+    const leaving = { transitionProperty: "opacity", playState: "running" };
+    animating([leaving]);
+    /* Headless UI's call as the leave starts, when its one read of the
+       transitions came too soon to see any. */
+    act(() => headless.afterLeave());
+    advance(LEAVE_MS);
+    expect([mounted(), onAfterClose.mock.calls.length]).toEqual([true, 0]);
+    leaving.playState = "finished";
+    advance(50);
+    expect(onAfterClose).toHaveBeenCalledTimes(1);
+    act(() => headless.release());
+    advance(DEADLINE * 4);
+    expect([mounted(), onAfterClose.mock.calls.length]).toEqual([false, 1]);
+  });
+
+  it("reports an afterLeave that comes mid-transition once the dialog is gone, if it goes first", () => {
+    const { onAfterClose } = openThenClose();
+    animating([{ transitionProperty: "opacity", playState: "running" }]);
+    act(() => headless.afterLeave());
+    expect(onAfterClose).not.toHaveBeenCalled();
+    act(() => headless.release());
+    advance(50);
+    expect([mounted(), onAfterClose.mock.calls.length]).toEqual([false, 1]);
+  });
+
+  it("doesn't hold the report for a transition in the panel's content, a button's hover fade say", () => {
+    const { onAfterClose } = openThenClose();
+    animating([{ transitionProperty: "opacity", playState: "running", effect: { target: screen.getByLabelText("Name") } }]);
+    act(() => headless.afterLeave());
+    expect(onAfterClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("holds it for a transition on the panel itself", () => {
+    const { onAfterClose } = openThenClose();
+    animating([{ transitionProperty: "opacity", playState: "running", effect: { target: screen.getByTestId("panel") } }]);
+    act(() => headless.afterLeave());
+    expect(onAfterClose).not.toHaveBeenCalled();
+  });
+
+  it("drops an afterLeave still waiting on a transition when the dialog reopens", () => {
+    const { onAfterClose, rerender } = openThenClose();
+    const leaving = { transitionProperty: "opacity", playState: "running" };
+    animating([leaving]);
+    act(() => headless.afterLeave());
+    rerender(<Harness open onAfterClose={onAfterClose} />);
+    leaving.playState = "finished";
+    advance(DEADLINE * 4);
+    expect([mounted(), onAfterClose.mock.calls.length]).toEqual([true, 0]);
+  });
+
   it("calls afterLeave's report once however often it comes", () => {
     const { onAfterClose } = openThenClose();
     act(() => {
@@ -120,6 +188,16 @@ describe("useLeaveWatchdog", () => {
     act(() => headless.afterLeave());
     advance(DEADLINE * 4);
     expect([mounted(), onAfterClose.mock.calls.length]).toEqual([true, 0]);
+  });
+
+  it("leaves a dialog reopened during the leave as it is past the deadline: the same element, and what's typed in it", () => {
+    const { onAfterClose, rerender } = openThenClose();
+    advance(100);
+    rerender(<Harness open onAfterClose={onAfterClose} />);
+    const element = screen.getByTestId("dialog");
+    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "typed while open" } });
+    advance(DEADLINE * 2);
+    expect([screen.getByTestId("dialog") === element, screen.getByLabelText<HTMLInputElement>("Name").value]).toEqual([true, "typed while open"]);
   });
 
   it("reports nothing when it unmounts during the leave", () => {

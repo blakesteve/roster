@@ -1351,11 +1351,14 @@ is inert and hidden from assistive technology (a toast still gets through: see
 then, leave the dialog mounted and invisible over the page, taking every
 click: Headless UI's transition stopped waiting before the leave had ended.
 Roster now removes a dialog still there after its leave and a short margin,
-and `onAfterClose` still runs once. Nothing to change in your code; `Sheet`
+and `onAfterClose` still runs once. It also waits for the leave: under load,
+Headless UI could report a leave over before it had run, and `onAfterClose`
+came with the dialog still on screen. Nothing to change in your code; `Sheet`
 gets the same. Headless UI tracks the cause in
 [#3902](https://github.com/tailwindlabs/headlessui/issues/3902), and
-[#3895](https://github.com/tailwindlabs/headlessui/pull/3895) would fix it:
-Roster's removal comes out once a Headless UI release carries that fix.
+[#3895](https://github.com/tailwindlabs/headlessui/pull/3895) would fix the
+stuck dialog: Roster's removal comes out once a Headless UI release carries
+that fix.
 
 **The dialog has a box.** The element carrying `role="dialog"` is the
 viewport's box, in either layout, so a test that finds the dialog by its role

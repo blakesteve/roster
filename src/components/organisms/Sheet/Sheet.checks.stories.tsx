@@ -32,7 +32,9 @@ import { stallLeave, transitionRunsOn } from "../../../test/leave";
  *   removal reports with it gone. Not timed: on a busy machine Headless UI's
  *   own call came 1,453ms after Escape.
  * - **Reopened during the leave, it stays open**, at rest, past the
- *   watchdog's deadline, and that close never reports.
+ *   watchdog's deadline, and that close never reports. It's the same
+ *   element, not remounted: a stray watchdog timer would remount it, replaying
+ *   the entrance and losing what's in it.
  * - **Escape during the entrance closes**, at points through the 280ms
  *   entrance: gone from the page, never left mounted.
  *
@@ -263,13 +265,16 @@ export const ReopenedDuringTheLeaveItStaysOpen: Story = {
     const leaving = inTransition();
     /* The opener is under the leaving backdrop, so the app reopens it. */
     sheet.open(true);
+    const element = dialog();
     /* Past the watchdog's deadline, counted from the close. */
     await wait(900);
     await settledOpen();
-    const row = `reopened ${leaving ? "while leaving" : "after the leave"}, open ${!!dialog()}, ${panelNow()}, onAfterClose ${sheet.calls.length}`;
+    const row = `reopened ${leaving ? "while leaving" : "after the leave"}, open ${!!dialog()}, ${
+      dialog() === element ? "the same element" : "remounted"
+    }, ${panelNow()}, onAfterClose ${sheet.calls.length}`;
     await real.commands.realPress(["Escape"]);
     await closed();
-    await expect(row).toBe("reopened while leaving, open true, at rest, onAfterClose 0");
+    await expect(row).toBe("reopened while leaving, open true, the same element, at rest, onAfterClose 0");
   },
 };
 

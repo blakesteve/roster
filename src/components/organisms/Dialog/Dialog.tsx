@@ -254,7 +254,8 @@ const Dialog = ({
   /* Removes a dialog Headless UI leaves mounted after a close cut into its
      entrance, and calls `onAfterClose` once either way (the module says how). */
   const dialogRef = useRef<HTMLDivElement>(null);
-  const leave = useLeaveWatchdog(dialogRef, open, LEAVE_MS, onAfterClose);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const leave = useLeaveWatchdog(dialogRef, panelRef, open, LEAVE_MS, onAfterClose);
 
   /* Headless UI marks only the part of the page the dialog is written in;
      `lockPage` marks the rest, so a header or footer beside it is not left
@@ -324,7 +325,7 @@ const Dialog = ({
           >
             {/* The viewport, and nothing of Roster's but the title, which names
                 the dialog whether it shows or not. */}
-            <DialogPanel className={cn("rst:fixed rst:inset-0 rst:overflow-y-auto", className)}>
+            <DialogPanel ref={panelRef} className={cn("rst:fixed rst:inset-0 rst:overflow-y-auto", className)}>
               <DialogTitle as="h2" className={titleHidden ? "rst:sr-only" : cn(titleVariants())}>
                 {title}
               </DialogTitle>
@@ -346,6 +347,7 @@ const Dialog = ({
                 afterLeave={leave.afterLeave}
               >
                 <DialogPanel
+                  ref={panelRef}
                   className={cn(
                     dialogVariants({ size, variant, status }),
                     className,

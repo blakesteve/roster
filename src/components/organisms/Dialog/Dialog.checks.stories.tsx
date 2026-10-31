@@ -33,10 +33,11 @@ import { stallLeave, transitionRunsOn } from "../../../test/leave";
  *   before it, not twice (counted past the watchdog's deadline too), with the
  *   panel gone or leaving within a frame of the call, and no transition
  *   running on the panel in any frame after it. The twin is a call at the
- *   leave's start (`beforeLeave`): the leave runs after it. How long the leave
- *   took, and the panel's opacity then, are logged but not asserted: they're
- *   Headless UI's transition, which can skip the leave under load (seen on CI,
- *   Linux WebKit: 152ms after Escape, opacity 1).
+ *   leave's start (`beforeLeave`): the leave runs after it. Under load
+ *   Headless UI can call `afterLeave` before its leave has run (62ms after
+ *   Escape at opacity 1, in WebKit), and the report still waits for the
+ *   leave. How long it took, and the panel's opacity then, are logged but not
+ *   asserted.
  * - **A leave that never ends is cleaned up.** Headless UI is handed a
  *   transition that never finishes, so it never removes the dialog or calls
  *   `afterLeave`, the end state a close cut into the entrance can leave.
@@ -44,7 +45,9 @@ import { stallLeave, transitionRunsOn } from "../../../test/leave";
  *   `onAfterClose` once, and the page takes the next open. Gone sooner would
  *   mean the stall didn't hold; the twin is no watchdog, and it stays.
  * - **Reopened during the leave, it stays open**, at rest, past the
- *   watchdog's deadline, and that close never reports.
+ *   watchdog's deadline, and that close never reports. It's the same
+ *   element, not remounted: a stray watchdog timer would remount it, replaying
+ *   the entrance and losing what's in it.
  *
  * Every wait is for a positive end state (the dialog gone, or open and
  * settled), never for "nothing animating", which is also true before an
@@ -492,18 +495,21 @@ export const ReopenedDuringTheLeaveItStaysOpen: Story = {
       const leaving = inTransition();
       /* The opener is under the leaving scrim, so the app reopens it. */
       afterClose.open(layout);
+      const element = dialog();
       /* Past the watchdog's deadline, counted from the close. */
       await wait(900);
       await waitFor(() => expect(dialog() && !inTransition()).toBe(true));
       const focus = document.activeElement as HTMLElement | null;
       console.info(`DIALOG REOPENED ${layout} focus on ${focus?.closest('[role="dialog"]') ? "the dialog" : "the page"}: ${focus?.tagName} ${focus?.textContent?.trim().slice(0, 30)}`);
-      rows.push(`${layout}: reopened ${leaving ? "while leaving" : "after the leave"}, open ${!!dialog()}, opacity ${getComputedStyle(findPanel()!).opacity}, onAfterClose ${callsFor(layout).length}`);
+      rows.push(`${layout}: reopened ${leaving ? "while leaving" : "after the leave"}, open ${!!dialog()}, ${
+        dialog() === element ? "the same element" : "remounted"
+      }, opacity ${getComputedStyle(findPanel()!).opacity}, onAfterClose ${callsFor(layout).length}`);
       afterClose.open(null);
       await closed();
     }
     await expect(rows).toEqual([
-      "fullscreen: reopened while leaving, open true, opacity 1, onAfterClose 0",
-      "default: reopened while leaving, open true, opacity 1, onAfterClose 0",
+      "fullscreen: reopened while leaving, open true, the same element, opacity 1, onAfterClose 0",
+      "default: reopened while leaving, open true, the same element, opacity 1, onAfterClose 0",
     ]);
   },
 };
