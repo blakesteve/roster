@@ -4,15 +4,18 @@ import { expect, waitFor } from "storybook/test";
 import { Dialog, type DialogProps } from "./Dialog";
 import { Button } from "../../atoms/Button/Button";
 import { realInputOrSkip } from "../../../test/real-input";
+import { stallLeave, transitionRunsOn } from "../../../test/leave";
 
 /**
- * The full-screen layout and the hidden title, checked rendered with real
+ * The layouts, the hidden title and the close, checked rendered with real
  * keys and a real mouse in Chromium and WebKit.
  *
- * - **The dialog's box is the viewport.** The element carrying
- *   `role="dialog"` measures the viewport, not merely exists: a role on a
- *   box-less wrapper reads as hidden. The twin is the default layout, whose
- *   role sits on a wrapper with no height.
+ * - **The dialog's box is the viewport, in both layouts.** The element
+ *   carrying `role="dialog"` measures the viewport, not merely exists: a role
+ *   on a box-less wrapper reads as hidden. The twin is that wrapper, the
+ *   default layout as 5.16.0 had it (`relative`): it measures 0 high. In the
+ *   default layout a click on the card leaves it open, and a click on the
+ *   scrim beside it closes it.
  * - **The hidden title names the dialog and stays a heading**, from the
  *   accessibility tree. The twin hides the title with `display: none`: the
  *   heading leaves the tree, so a screen reader can't reach it by heading.
@@ -27,11 +30,24 @@ import { realInputOrSkip } from "../../../test/real-input";
  * - **Clicks reach your controls** and never close the dialog: the whole
  *   viewport is the panel.
  * - **`onAfterClose` fires once, after the close,** in both layouts: not
- *   before it, not twice, and with the panel gone or leaving within a frame
- *   of the call. How long the leave took, and the panel's opacity then, are
- *   logged but not asserted: they're Headless UI's transition, which can
- *   skip the leave under load (seen on CI, Linux WebKit: 152ms after Escape,
- *   opacity 1).
+ *   before it, not twice (counted past the watchdog's deadline too), with the
+ *   panel gone or leaving within a frame of the call, and no transition
+ *   running on the panel in any frame after it. The twin is a call at the
+ *   leave's start (`beforeLeave`): the leave runs after it. Under load
+ *   Headless UI can call `afterLeave` before its leave has run (62ms after
+ *   Escape at opacity 1, in WebKit), and the report still waits for the
+ *   leave. How long it took, and the panel's opacity then, are logged but not
+ *   asserted.
+ * - **A leave that never ends is cleaned up.** Headless UI is handed a
+ *   transition that never finishes, so it never removes the dialog or calls
+ *   `afterLeave`, the end state a close cut into the entrance can leave.
+ *   Roster removes it after the 200ms leave and its 300ms margin, calls
+ *   `onAfterClose` once, and the page takes the next open. Gone sooner would
+ *   mean the stall didn't hold; the twin is no watchdog, and it stays.
+ * - **Reopened during the leave, it stays open**, at rest, past the
+ *   watchdog's deadline, and that close never reports. It's the same
+ *   element, not remounted: a stray watchdog timer would remount it, replaying
+ *   the entrance and losing what's in it.
  *
  * Every wait is for a positive end state (the dialog gone, or open and
  * settled), never for "nothing animating", which is also true before an
@@ -136,10 +152,10 @@ export const TheDialogsBoxIsTheViewport: Story = {
       return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)];
     };
     const viewport = [0, 0, document.documentElement.clientWidth, window.innerHeight];
+    const panel = () => dialog()!.querySelector<HTMLElement>("[id^='headlessui-dialog-panel']")!;
     const panelLook = () => {
-      const panel = dialog()!.querySelector<HTMLElement>("[id^='headlessui-dialog-panel']")!;
-      const s = getComputedStyle(panel);
-      const r = panel.getBoundingClientRect();
+      const s = getComputedStyle(panel());
+      const r = panel().getBoundingClientRect();
       return [s.backgroundColor, s.borderTopWidth, s.borderTopLeftRadius, s.paddingTop, s.boxShadow, Math.round(r.width) === viewport[2] && Math.round(r.height) === viewport[3]];
     };
 
@@ -150,17 +166,24 @@ export const TheDialogsBoxIsTheViewport: Story = {
     await real.commands.realPress(["Escape"]);
     await closed();
 
-    /* The twin: the default layout's role sits on a wrapper with no height. */
+    /* The default layout: the role's box is the viewport too, with the card,
+       smaller, inside it. */
     document.querySelector<HTMLElement>("[data-check-default]")!.focus();
     await real.commands.realPress(["Enter"]);
     await settledOpen();
-    const plain = { height: box()[3], close: !!dialog()!.querySelector('[aria-label="Close dialog"]') };
-    await real.commands.realPress(["Escape"]);
+    const card = panel().getBoundingClientRect();
+    const plain = { box: box(), cardInside: card.width < viewport[2] && card.height < viewport[3], close: !!dialog()!.querySelector('[aria-label="Close dialog"]') };
+    /* A click on the card, on no control, leaves it open; one on the scrim
+       beside it closes it. */
+    await real.commands.realClick("[id^='headlessui-dialog-panel'] h2");
+    await wait(300);
+    const afterCard = !!dialog();
+    await real.commands.realClick('[role="dialog"]', { fx: 0.03, fy: 0.03 });
     await closed();
 
     console.info(`DIALOG BOX full ${JSON.stringify(full)} default ${JSON.stringify(plain)} viewport ${viewport}`);
     await expect(full).toEqual({ box: viewport, panel: ["rgba(0, 0, 0, 0)", "0px", "0px", "0px", "none", true], close: false });
-    await expect(plain).toEqual({ height: 0, close: true });
+    await expect({ ...plain, afterCard }).toEqual({ box: viewport, cardInside: true, close: true, afterCard: true });
   },
 };
 
@@ -308,16 +331,33 @@ export const OpenMidEntranceAndClosedInBothLayouts: Story = {
 /* The panel as the call finds it, and a frame later: gone, leaving (Headless
    UI's `data-leave` or `data-closed`), or still there at rest. */
 type PanelThen = "gone" | "leaving" | "at rest";
-type AfterClose = { layout: string; afterPress: number; opacity: string | null; atCall: PanelThen; nextFrame?: PanelThen };
-const afterClose = { pressedAt: 0, calls: [] as AfterClose[] };
+type AfterClose = {
+  layout: string;
+  afterPress: number;
+  opacity: string | null;
+  atCall: PanelThen;
+  nextFrame?: PanelThen;
+  /* Whether a transition ran on the panel in a frame after the call. */
+  leaveRunsAfter: Promise<boolean>;
+};
+const afterClose: { pressedAt: number; calls: AfterClose[]; open: (which: "fullscreen" | "default" | null) => void } = {
+  pressedAt: 0,
+  calls: [],
+  open: () => {},
+};
+const findPanel = () => document.querySelector<HTMLElement>("#headlessui-portal-root [id^='headlessui-dialog-panel']");
 const panelNow = (): [PanelThen, string | null] => {
-  const panel = document.querySelector<HTMLElement>("#headlessui-portal-root [id^='headlessui-dialog-panel']");
+  const panel = findPanel();
   if (!panel) return ["gone", null];
   return [panel.closest("[data-leave], [data-closed]") || panel.matches("[data-leave], [data-closed]") ? "leaving" : "at rest", getComputedStyle(panel).opacity];
 };
+const callsFor = (layout: string) => afterClose.calls.filter((c) => c.layout === layout);
 
 function Closing() {
   const [which, setWhich] = useState<"fullscreen" | "default" | null>(null);
+  useEffect(() => {
+    afterClose.open = setWhich;
+  }, []);
   return (
     <div>
       <button type="button" data-check-full="" onClick={() => setWhich("fullscreen")}>
@@ -333,7 +373,13 @@ function Closing() {
           onClose={() => setWhich(null)}
           onAfterClose={() => {
             const [atCall, opacity] = panelNow();
-            const call: AfterClose = { layout, afterPress: Math.round(performance.now() - afterClose.pressedAt), opacity, atCall };
+            const call: AfterClose = {
+              layout,
+              afterPress: Math.round(performance.now() - afterClose.pressedAt),
+              opacity,
+              atCall,
+              leaveRunsAfter: transitionRunsOn(findPanel),
+            };
             afterClose.calls.push(call);
             requestAnimationFrame(() => {
               call.nextFrame = panelNow()[0];
@@ -364,16 +410,107 @@ export const OnAfterCloseFiresOnceAfterTheClose: Story = {
       afterClose.pressedAt = performance.now();
       await real.commands.realPress(["Escape"]);
       await closed();
-      /* Long enough for a second call, if there were one. */
-      await wait(400);
-      const calls = afterClose.calls.filter((c) => c.layout === layout);
-      console.info(`DIALOG AFTER CLOSE ${layout} ${JSON.stringify(calls)}`);
-      /* The promise: once, after the close, with the panel on its way out. The
-         leave's length and the opacity are in the log above, not asserted. */
+      /* Past the watchdog's deadline, the 200ms leave and its 300ms margin, so
+         a second call from it would be counted. */
+      await wait(Math.max(200, 800 - (performance.now() - afterClose.pressedAt)));
+      const calls = callsFor(layout);
+      const leaveRunsAfter = await Promise.all(calls.map((c) => c.leaveRunsAfter));
+      console.info(`DIALOG AFTER CLOSE ${layout} ${JSON.stringify(calls)} leave running after the call ${JSON.stringify(leaveRunsAfter)}`);
+      /* The promise: once, after the close, with the panel on its way out and
+         its leave over. The leave's length and the opacity are in the log
+         above, not asserted. */
       const outOfTheWay = calls.every((c) => c.atCall !== "at rest" || c.nextFrame !== "at rest");
-      rows.push(`${layout}: ${beforeClose} before, ${calls.length} after, panel ${outOfTheWay ? "gone or leaving" : "still at rest"}`);
+      rows.push(
+        `${layout}: ${beforeClose} before, ${calls.length} after, panel ${outOfTheWay ? "gone or leaving" : "still at rest"}, ${
+          leaveRunsAfter.some(Boolean) ? "a leave running after the call" : "nothing running after the call"
+        }`,
+      );
     }
-    await expect(rows).toEqual(["fullscreen: 0 before, 1 after, panel gone or leaving", "default: 0 before, 1 after, panel gone or leaving"]);
+    await expect(rows).toEqual([
+      "fullscreen: 0 before, 1 after, panel gone or leaving, nothing running after the call",
+      "default: 0 before, 1 after, panel gone or leaving, nothing running after the call",
+    ]);
+  },
+};
+
+/* ── A leave that never ends ──────────────────────────────────────────── */
+
+export const AStalledLeaveIsRemovedAndReportedOnce: Story = {
+  tags: ["real-input"],
+  render: () => <Closing />,
+  play: async () => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    afterClose.calls = [];
+    const rows: string[] = [];
+    for (const layout of ["fullscreen", "default"] as const) {
+      const openerOf = () => document.querySelector<HTMLElement>(layout === "fullscreen" ? "[data-check-full]" : "[data-check-default]")!;
+      openerOf().focus();
+      await real.commands.realPress(["Enter"]);
+      await settledOpen();
+      stallLeave(findPanel()!);
+      afterClose.pressedAt = performance.now();
+      await real.commands.realPress(["Escape"]);
+      await closed();
+      const goneAfter = Math.round(performance.now() - afterClose.pressedAt);
+      await wait(400);
+      const calls = callsFor(layout);
+      const focus = (document.activeElement as HTMLElement | null)?.textContent?.trim();
+      console.info(`DIALOG STALLED ${layout} gone ${goneAfter}ms after Escape, focus on ${focus}, calls ${JSON.stringify(calls)}`);
+      /* The page is live again: the next open opens, and closes. */
+      openerOf().focus();
+      await real.commands.realPress(["Enter"]);
+      await settledOpen();
+      await real.commands.realPress(["Escape"]);
+      await closed();
+      rows.push(
+        `${layout}: gone ${goneAfter >= 450 ? "after the leave and the margin" : `too soon, ${goneAfter}ms`}, onAfterClose ${calls.length} with the panel ${
+          calls[0]?.atCall
+        }, opens again`,
+      );
+    }
+    await expect(rows).toEqual([
+      "fullscreen: gone after the leave and the margin, onAfterClose 1 with the panel gone, opens again",
+      "default: gone after the leave and the margin, onAfterClose 1 with the panel gone, opens again",
+    ]);
+  },
+};
+
+/* ── Reopened during the leave ────────────────────────────────────────── */
+
+export const ReopenedDuringTheLeaveItStaysOpen: Story = {
+  tags: ["real-input"],
+  render: () => <Closing />,
+  play: async () => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    afterClose.calls = [];
+    const rows: string[] = [];
+    for (const layout of ["fullscreen", "default"] as const) {
+      document.querySelector<HTMLElement>(layout === "fullscreen" ? "[data-check-full]" : "[data-check-default]")!.focus();
+      await real.commands.realPress(["Enter"]);
+      await settledOpen();
+      await real.commands.realPress(["Escape"]);
+      await wait(60);
+      const leaving = inTransition();
+      /* The opener is under the leaving scrim, so the app reopens it. */
+      afterClose.open(layout);
+      const element = dialog();
+      /* Past the watchdog's deadline, counted from the close. */
+      await wait(900);
+      await waitFor(() => expect(dialog() && !inTransition()).toBe(true));
+      const focus = document.activeElement as HTMLElement | null;
+      console.info(`DIALOG REOPENED ${layout} focus on ${focus?.closest('[role="dialog"]') ? "the dialog" : "the page"}: ${focus?.tagName} ${focus?.textContent?.trim().slice(0, 30)}`);
+      rows.push(`${layout}: reopened ${leaving ? "while leaving" : "after the leave"}, open ${!!dialog()}, ${
+        dialog() === element ? "the same element" : "remounted"
+      }, opacity ${getComputedStyle(findPanel()!).opacity}, onAfterClose ${callsFor(layout).length}`);
+      afterClose.open(null);
+      await closed();
+    }
+    await expect(rows).toEqual([
+      "fullscreen: reopened while leaving, open true, the same element, opacity 1, onAfterClose 0",
+      "default: reopened while leaving, open true, the same element, opacity 1, onAfterClose 0",
+    ]);
   },
 };
 
@@ -387,16 +524,15 @@ export const EscapeDuringTheEntranceCloses: Story = {
     if (!real) return;
     const outcomes: string[] = [];
     /* Pressed at points through the 300ms entrance, in both layouts. Each
-       must close: it ends gone from the page, the positive end state, and
-       an Escape the dialog never heard fails the check.
+       must close: it ends gone from the page, the positive end state. An
+       Escape the dialog never heard fails the check, and so does a dialog
+       closed but still mounted, holding `data-closed` and `data-enter`.
 
-       One ending is logged rather than failed: closed but still mounted,
-       holding `data-closed`, `data-enter` and `data-transition` with nothing
-       running. That is Headless UI's transition hook, shared by every dialog
-       built on it: when a close interrupts the entrance, it waits only for
-       the transitions it saw one frame in, and a transition that starts
-       after that is never waited for, so it never finishes. About 1 in 450
-       presses in either engine, either layout, 5.16.0's default included. */
+       That second ending is Headless UI's transition hook: when a close
+       interrupts the entrance, it can stop waiting while a transition is
+       unfinished and never look again (about 1 press in 450 in 5.16.0).
+       Roster removes such a dialog after the leave and a margin, well inside
+       the 3s this waits, so here it closes. */
     for (const layout of ["fullscreen", "default"] as const) {
       for (const delay of [0, 40, 120, 200]) {
         document.querySelector<HTMLElement>(layout === "fullscreen" ? "[data-check-full]" : "[data-check-default]")!.click();
@@ -417,7 +553,7 @@ export const EscapeDuringTheEntranceCloses: Story = {
       }
     }
     console.info(`DIALOG ESCAPE ${outcomes.join(", ")}`);
-    await expect(outcomes.filter((o) => o.endsWith("stayed open"))).toEqual([]);
+    await expect(outcomes.filter((o) => !o.endsWith(": closed"))).toEqual([]);
     /* The twin of the timing: most presses really did land mid-entrance. */
     await expect(outcomes.filter((o) => o.includes("(entering)")).length).toBeGreaterThanOrEqual(6);
   },

@@ -12,6 +12,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 import { withLabels } from "../../../lib/labels";
 import { lockPage } from "../../../internal/page-inert";
+import { useLeaveWatchdog } from "../../../internal/leave-watchdog";
 import { useKeyFocus } from "../../../internal/key-focus";
 
 const dialogVariants = /* @__PURE__ */ cva(
@@ -133,6 +134,9 @@ export interface DialogLabels {
 
 const LABELS: DialogLabels = { close: "Close dialog" };
 
+/** The leave's length, the backdrop's and the panel's: `duration-200` below. */
+const LEAVE_MS = 200;
+
 export interface DialogProps extends VariantProps<typeof dialogVariants> {
   isOpen: boolean;
   onClose: () => void;
@@ -141,11 +145,11 @@ export interface DialogProps extends VariantProps<typeof dialogVariants> {
   children: ReactNode;
   className?: string;
   /**
-   * Called once the dialog has finished closing, after its leave transition.
-   * The place to move focus somewhere other than where it was before the
-   * dialog opened, for instance when that element no longer exists. Not
-   * called for a close cut short by reopening, nor when the dialog unmounts
-   * while open.
+   * Called once the dialog has finished closing, after its leave transition,
+   * once for each close, a close during the entrance included. The place to
+   * move focus somewhere other than where it was before the dialog opened,
+   * for instance when that element no longer exists. Not called for a close
+   * cut short by reopening, nor when the dialog unmounts while open.
    */
   onAfterClose?: () => void;
   /** The component's own words, replaced; any left out stay English. */
@@ -247,6 +251,12 @@ const Dialog = ({
   }, []);
   const open = isOpen && mounted;
 
+  /* Removes a dialog Headless UI leaves mounted after a close cut into its
+     entrance, and calls `onAfterClose` once either way (the module says how). */
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const leave = useLeaveWatchdog(dialogRef, panelRef, open, LEAVE_MS, onAfterClose);
+
   /* Headless UI marks only the part of the page the dialog is written in;
      `lockPage` marks the rest, so a header or footer beside it is not left
      reachable, and a toast is. The span is where the dialog is written, which
@@ -262,13 +272,18 @@ const Dialog = ({
   return (
     <>
       {open && <span ref={anchorRef} hidden />}
-      {/* Headless UI puts `role="dialog"` on this element. Full screen, it's
-          the viewport's box, so whatever looks for the dialog's box finds it;
-          a role on a box-less wrapper reads as hidden. */}
+      {/* Headless UI puts `role="dialog"` on this element, so it's the
+          viewport's box in both layouts, and whatever looks for the dialog's
+          box finds it: a role on a box-less wrapper reads as hidden (to
+          Playwright's `toBeVisible`, for one). It draws nothing of its own.
+          The scrim and the panel's container cover it, so a click outside the
+          panel lands on them and closes the dialog, as it always has. */}
       <HeadlessDialog
+        key={leave.key}
+        ref={dialogRef}
         open={open}
         as="div"
-        className={fullscreen ? "rst:font-ui rst:fixed rst:inset-0 rst:z-50" : "rst:font-ui rst:relative rst:z-50"}
+        className="rst:font-ui rst:fixed rst:inset-0 rst:z-50"
         onClose={onClose}
       >
         <TransitionChild
@@ -306,11 +321,11 @@ const Dialog = ({
             leave="rst:ease-in rst:duration-200"
             leaveFrom="rst:opacity-100"
             leaveTo="rst:opacity-0"
-            afterLeave={onAfterClose}
+            afterLeave={leave.afterLeave}
           >
             {/* The viewport, and nothing of Roster's but the title, which names
                 the dialog whether it shows or not. */}
-            <DialogPanel className={cn("rst:fixed rst:inset-0 rst:overflow-y-auto", className)}>
+            <DialogPanel ref={panelRef} className={cn("rst:fixed rst:inset-0 rst:overflow-y-auto", className)}>
               <DialogTitle as="h2" className={titleHidden ? "rst:sr-only" : cn(titleVariants())}>
                 {title}
               </DialogTitle>
@@ -329,9 +344,10 @@ const Dialog = ({
                 leave="rst:ease-in rst:duration-200"
                 leaveFrom="rst:opacity-100 rst:scale-100"
                 leaveTo="rst:opacity-0 rst:scale-95"
-                afterLeave={onAfterClose}
+                afterLeave={leave.afterLeave}
               >
                 <DialogPanel
+                  ref={panelRef}
                   className={cn(
                     dialogVariants({ size, variant, status }),
                     className,

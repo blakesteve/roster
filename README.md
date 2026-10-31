@@ -896,6 +896,50 @@ bundled: its queue lives in module scope, so a bundled copy would give you two
 stores, and toasts fired from your own `import { toast } from "react-hot-toast"`
 would silently never appear.
 
+**What mounting it costs.** `Toaster` brings react-hot-toast's own
+`Toaster`, Roster's `Toast` with its icons, and Font Awesome's runtime;
+`toast` alone is about 3.7 KB. Measured against 5.17.0's build (esbuild,
+minified, gzipped), mounting it adds about 34 KB to a page that uses nothing
+else from Roster, 25 KB beside a `Button`, and under 4 KB beside a `Dialog`,
+which already carries Font Awesome. Mounted in a root layout, every page pays
+that for a message most visits never see.
+
+To pay only when there's something to say, mount it on the first toast. The
+queue is react-hot-toast's module-level store, so a toast raised while the
+host is still loading waits there and shows when it arrives:
+
+```tsx
+// toast-host.tsx: loaded on the first toast, never before.
+import { Toaster } from "@blakesteve/roster";
+export default function ToastHost() {
+  return <Toaster position="bottom-right" />;
+}
+```
+
+```ts
+// notify.ts: call these instead of `toast` directly.
+import { createElement } from "react";
+import { createRoot } from "react-dom/client";
+import { toast } from "@blakesteve/roster";
+
+let host: Promise<void> | null = null;
+function mountHost() {
+  host ??= import("./toast-host").then(({ default: ToastHost }) => {
+    const el = document.createElement("div");
+    document.body.append(el);
+    createRoot(el).render(createElement(ToastHost));
+  });
+}
+
+export const notify = {
+  success: (message: string) => (mountHost(), toast.success(message)),
+  error: (message: string) => (mountHost(), toast.error(message)),
+};
+```
+
+Mounted in its own root like this, it follows a `.dark` on `<html>` but not
+one scoped to part of your app.
+
 An app already using it keeps its call sites and only changes the import. What changes is
 the styling: the toast body is a real `Toast` component reading `--roster-*`
 rather than the inline hex each app was pinning.
@@ -1303,6 +1347,26 @@ close button close it, focus goes back to what opened it, and the page behind
 is inert and hidden from assistive technology (a toast still gets through: see
 [Toasts](#toasts)). `onAfterClose` runs once it has finished closing.
 
+**A close always leaves.** A close that cuts into the entrance could, now and
+then, leave the dialog mounted and invisible over the page, taking every
+click: Headless UI's transition stopped waiting before the leave had ended.
+Roster now removes a dialog still there after its leave and a short margin,
+and `onAfterClose` still runs once. It also waits for the leave: under load,
+Headless UI could report a leave over before it had run, and `onAfterClose`
+came with the dialog still on screen. Nothing to change in your code; `Sheet`
+gets the same. Headless UI tracks the cause in
+[#3902](https://github.com/tailwindlabs/headlessui/issues/3902), and
+[#3895](https://github.com/tailwindlabs/headlessui/pull/3895) would fix the
+stuck dialog: Roster's removal comes out once a Headless UI release carries
+that fix.
+
+**The dialog has a box.** The element carrying `role="dialog"` is the
+viewport's box, in either layout, so a test that finds the dialog by its role
+and checks it's visible (Playwright's `toBeVisible`, say) finds it open. In
+5.16.0 and before, the default layout's was a wrapper with no height, which
+read as hidden; `Sheet`'s was too, and is fixed the same way. Nothing on
+screen moves, and a click outside the panel still closes it.
+
 **Full screen.** `layout="fullscreen"` makes a bare dialog over the whole
 viewport, for a photo viewer or a full-screen card: no box, no padding, and no
 header or close button of Roster's. Everything inside is yours, a close
@@ -1323,9 +1387,7 @@ without showing it.
 ```
 
 - **The dialog is the viewport.** `className` lands on the full-viewport
-  panel, and the element carrying `role="dialog"` measures the viewport too,
-  so anything looking for the dialog's box finds it. A click anywhere in it
-  doesn't close it: give it your own close.
+  panel. A click anywhere in it doesn't close it: give it your own close.
 - **The scrim stays,** retinted by `--roster-backdrop`, and it fades in and
   out without scaling.
 - **`size` and `status` don't apply;** `variant` still picks the scrim.

@@ -275,6 +275,11 @@ export default defineConfig({
         ],
         test: {
           name: 'storybook-reduced-motion',
+          /* One file at a time, as in `storybook-real-input`: these stories
+             use real keys and the real mouse too. In parallel, a story's timers
+             ran late (a sheet removed at 450ms was seen at 976ms, and at 5s in
+             the full suite) and its next entrance never settled. */
+          fileParallelism: false,
           browser: {
             enabled: true,
             headless: true,

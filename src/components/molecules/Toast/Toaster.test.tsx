@@ -23,6 +23,16 @@ describe("Toaster", () => {
     expect(await screen.findByText("Saved")).toBeInTheDocument();
   });
 
+  it("shows a toast fired before it was mounted, once it mounts", async () => {
+    /* What the README's mount-on-first-toast pattern rests on: the queue is
+       react-hot-toast's module-level store, so a toast raised while the
+       Toaster is still loading waits there and is drawn when it arrives. */
+    fire(() => toast.success("Saved before the host loaded"));
+    render(<Toaster />);
+
+    expect(await screen.findByText("Saved before the host loaded")).toBeInTheDocument();
+  });
+
   it("gives info and warning real tones instead of falling back to neutral", async () => {
     /* This is the bug that shipped in a consumer. react-hot-toast has no
        `info`, so one app's wrapper called `toast.error` and every

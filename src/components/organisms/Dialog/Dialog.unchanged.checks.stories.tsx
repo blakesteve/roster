@@ -32,6 +32,14 @@ import { realInputOrSkip } from "../../../test/real-input";
  * React's and Headless UI's generated ids are masked too. A mismatch logs
  * everything it read, every Tab step's styles included.
  *
+ * Re-baselined once, on purpose, 28 Oct 2026: the element carrying
+ * `role="dialog"` became the viewport's box (in 5.16.0 it was a wrapper with
+ * no height), which moves the dialog's HTML (that element's class) and the
+ * computed styles (its position, inset and height). So the `open` and
+ * `hovered` digests changed, and nothing else: read with that one class put
+ * back to 5.16.0's, the new build gives 5.16.0's digests exactly, in both
+ * engines, and the focus walk is 5.16.0's untouched.
+ *
  * Checks, not documentation: hidden from the sidebar and the docs page.
  */
 const meta = {
@@ -168,19 +176,20 @@ async function settledOpen() {
 type Pinned = { open: Record<string, string>; hovered: Record<string, string>; walk: string[] };
 
 /* Read from 8e8817d, 5.16.0, 27 Oct 2026, with the browser's own focus ring
-   left out (above). */
+   left out (above). The `open` and `hovered` digests re-read 28 Oct 2026,
+   once the dialog's role had the viewport's box (above). */
 const OLD_BUILD: Record<Group, Record<"chromium" | "webkit", Pinned>> = {
   light: {
     chromium: {
       open: {
-        white: "b5f6ea9ea1a10b5f 00a28029b1388d2c",
-        slate: "3f317646f90ab967 f9a8957f8d58541d",
-        primary: "e9b22ff2e1ace6d2 d40516d716f2cbcc",
+        white: "029d9d2aada03134 b8a93dee0fd27a91",
+        slate: "65c65a45145cb191 097f2a236fd3433a",
+        primary: "c6d7843560919537 0ec2c43de9de994e",
       },
       hovered: {
-        white: "b5f6ea9ea1a10b5f 73bef63e3b0887dd",
-        slate: "3f317646f90ab967 855ab85350bfdd48",
-        primary: "e9b22ff2e1ace6d2 64f9320863127b26",
+        white: "029d9d2aada03134 252ee1bee563cbd3",
+        slate: "65c65a45145cb191 4f811b567c76f1c6",
+        primary: "c6d7843560919537 3f2fc4dfa59b079c",
       },
       walk: [
         "white opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
@@ -205,14 +214,14 @@ const OLD_BUILD: Record<Group, Record<"chromium" | "webkit", Pinned>> = {
     },
     webkit: {
       open: {
-        white: "4136a7bab7c11e07 ecd8683392a41b25",
-        slate: "d9569334454872c5 9193b5753b3c65b5",
-        primary: "78de349250ad879a 09b257bf0cc20af9",
+        white: "e849dc741a3f8e55 48e0c7fc26b976fd",
+        slate: "33e3f88c59487a0a da5a502ef3f4f24f",
+        primary: "e8efa34ff59cedd4 22d63581fb031266",
       },
       hovered: {
-        white: "4136a7bab7c11e07 ecd8683392a41b25",
-        slate: "d9569334454872c5 9193b5753b3c65b5",
-        primary: "78de349250ad879a 09b257bf0cc20af9",
+        white: "e849dc741a3f8e55 48e0c7fc26b976fd",
+        slate: "33e3f88c59487a0a da5a502ef3f4f24f",
+        primary: "e8efa34ff59cedd4 22d63581fb031266",
       },
       walk: [
         "white opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
@@ -239,12 +248,12 @@ const OLD_BUILD: Record<Group, Record<"chromium" | "webkit", Pinned>> = {
   others: {
     chromium: {
       open: {
-        glass: "7d45a0dc68ec2dc4 2d057e6fe92361d5",
-        dark: "1fa3df5d9fa9294a 1f6ca9a236725705",
+        glass: "75cf38311ee0e9d0 b90097589432cb9b",
+        dark: "f6915e3e3bb459e6 a2525f05b93fd972",
       },
       hovered: {
-        glass: "7d45a0dc68ec2dc4 0c173f3f97a970ee",
-        dark: "1fa3df5d9fa9294a 995c3f403736964d",
+        glass: "75cf38311ee0e9d0 9152a38a81ccc9e9",
+        dark: "f6915e3e3bb459e6 d99d1848d5a7b6f9",
       },
       walk: [
         "glass opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
@@ -263,12 +272,12 @@ const OLD_BUILD: Record<Group, Record<"chromium" | "webkit", Pinned>> = {
     },
     webkit: {
       open: {
-        glass: "3d518bccef9dc16c 6207a523a3e8d4a1",
-        dark: "53b0a8206b2fabe1 a9c5357dd62fcf8e",
+        glass: "e3556ef333bf1553 57765a8c08a180f2",
+        dark: "6ce91b2bc1ce333c bd8a42003ae81d8b",
       },
       hovered: {
-        glass: "3d518bccef9dc16c 6207a523a3e8d4a1",
-        dark: "53b0a8206b2fabe1 a9c5357dd62fcf8e",
+        glass: "e3556ef333bf1553 57765a8c08a180f2",
+        dark: "6ce91b2bc1ce333c bd8a42003ae81d8b",
       },
       walk: [
         "glass opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
