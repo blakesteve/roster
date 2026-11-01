@@ -12,9 +12,12 @@ import { realInputOrSkip } from "../../../test/real-input";
  * 320px with names that wrap, with its words replaced and on a dark page; the
  * segmented bar partway, past its last and on a dark page. What's pinned, as
  * SHA-256 digests: each one's HTML, and the computed styles of every element
- * in it (colors, borders, corners, type, spacing, sizes, transforms). Pinned
- * the same on macOS and Linux, as the other pins are: React's ids masked,
- * pixel values in the HTML masked, and an outline's platform values left out.
+ * in it (colors, borders, corners, type, spacing, transforms). Pinned the same
+ * on macOS and Linux, as the other pins are: React's ids masked, pixel values
+ * in the HTML masked, and an outline's platform values left out. So are the
+ * offsets and heights that follow the names' widths in the system font: a
+ * connector's `right` (half its step's width) and, where names wrap, a
+ * step's `height` and `top`. Linux's fonts gave other pixels for all three.
  *
  * Checks, not documentation: hidden from the sidebar and the docs page.
  */
@@ -70,7 +73,7 @@ const PROPS = [
   "padding-top", "padding-right", "padding-bottom", "padding-left", "margin-top", "margin-bottom",
   "gap", "flex-direction", "flex-grow", "align-items", "justify-content",
   "outline-style", "outline-width", "outline-color", "outline-offset", "box-shadow",
-  "opacity", "transform", "visibility", "top", "right", "z-index", "height", "min-width",
+  "opacity", "transform", "visibility", "z-index", "min-width",
   "overflow-wrap", "word-break",
 ];
 const look = (el: Element) => {
@@ -87,29 +90,30 @@ async function digest(text: string) {
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const chromium = () => /Chrome/.test(navigator.userAgent);
 
-/* Read from 5dc303a's build, 1 Nov 2026. */
+/* Read from 5dc303a's build, 1 Nov 2026, and again the same day without the
+   font-derived offsets (above), after Linux CI read other pixels for them. */
 const OLD_BUILD: Record<"chromium" | "webkit", Record<string, string>> = {
   chromium: {
-    first: "fdda6d3c10ea2254 c56cd5817227ce0b",
-    partway: "9c6973c63cd81a3e 2c18357ecc90b934",
-    finished: "9c0253655070902c 369275a0a123c6ba",
-    narrow: "02c563d92801428a 75a399deea777326",
-    words: "7faf2ed5a93a454c c8108f1ab9027a33",
-    dark: "c20c9cdcd1af26fb 5b4504fb272e58c5",
-    bar: "391d9cf1545c17be 2c99d3a1cd3fa9d0",
-    "bar-finished": "71630fe58e88fb35 714b25a7a211dc92",
-    "bar-dark": "e5c1f7f8c2f08553 7474fe46bc5600d4",
+    first: "fdda6d3c10ea2254 8c11e31cce93b8e4",
+    partway: "9c6973c63cd81a3e 3178aaa50f528954",
+    finished: "9c0253655070902c 0b56695dd2736fb3",
+    narrow: "02c563d92801428a 778bb9b117857a36",
+    words: "7faf2ed5a93a454c fa60ce376ead4538",
+    dark: "c20c9cdcd1af26fb 8cd6a0e68236c825",
+    bar: "391d9cf1545c17be 7fcd039286db1ce5",
+    "bar-finished": "71630fe58e88fb35 c6947aa9d6275708",
+    "bar-dark": "e5c1f7f8c2f08553 1053ff4e43059f6f",
   },
   webkit: {
-    first: "fdda6d3c10ea2254 a457ebfb7fb09b31",
-    partway: "9c6973c63cd81a3e 1b954d3f4b722784",
-    finished: "9c0253655070902c 8f10ee3372a0f1ed",
-    narrow: "02c563d92801428a 0527eab8ecbff1fa",
-    words: "7faf2ed5a93a454c 756698a5e92bb0ba",
-    dark: "c20c9cdcd1af26fb fa67ada4e0fa9b08",
-    bar: "391d9cf1545c17be 3895c6fe504f0262",
-    "bar-finished": "71630fe58e88fb35 bc2ce4b71293e6ad",
-    "bar-dark": "e5c1f7f8c2f08553 0832c9bee76323d6",
+    first: "fdda6d3c10ea2254 fd02dc04eaf66b7b",
+    partway: "9c6973c63cd81a3e 2007ab693cbf1d75",
+    finished: "9c0253655070902c 9e06c9dee0394d74",
+    narrow: "02c563d92801428a fd998a8137791deb",
+    words: "7faf2ed5a93a454c f8f69c77c0b65cae",
+    dark: "c20c9cdcd1af26fb 5380cde9b11bffae",
+    bar: "391d9cf1545c17be dd1de9961080d621",
+    "bar-finished": "71630fe58e88fb35 3b380fc25221afc8",
+    "bar-dark": "e5c1f7f8c2f08553 2301e39fd6ed0c30",
   },
 };
 
