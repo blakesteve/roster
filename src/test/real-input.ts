@@ -43,6 +43,7 @@ export interface RealInput {
         value: string | null;
         valueText: string | null;
         selected: boolean | null;
+        required: boolean;
       }[]
     >;
   };

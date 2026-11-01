@@ -1340,6 +1340,68 @@ escape the box. Lay the options out across with `orientation` rather than
 through `optionsClassName`, for the same reason: the horizontal spacing that
 keeps two radios 44px apart rides on that prop.
 
+### One answer, chosen by its picture
+
+`RadioTileGroup` is `RadioGroup` with tiles for options: a picture, a name and
+an optional description each, and no radio dot. For choosing between photos,
+avatars, swatches or layouts, where people know the options by sight. It's
+the same radio group to a keyboard and a screen reader: one tab stop, the
+arrows move and choose (wrapping, and skipping a disabled tile), Space
+chooses, and Home and End go to the first and last tile. `value`, `onChange`,
+`label`, `helperText`, `errorMessage` and `disabled` work as in `RadioGroup`,
+and `required` sets `aria-required`.
+
+```tsx
+<RadioTileGroup
+  label="Cover photo"
+  value={cover}
+  onChange={setCover}
+  options={[
+    { value: "harbor", label: "Harbor at dawn", picture: <img src={harbor} alt="" /> },
+    { value: "ridge", label: "Pine ridge", description: "Fog in the valley", picture: <img src={ridge} alt="" /> },
+    { value: "flats", label: "Salt flats", picture: <img src={flats} alt="" /> },
+  ]}
+/>
+```
+
+A tile is named by its `label` alone. The picture is hidden from assistive
+technology so the name isn't read twice, which is why the images above have
+`alt=""`.
+
+The arrows follow the tiles' order, not the grid's rows: Down is the next
+tile, as Right is. A row is however many tiles fit the width, so moving by
+row would change with the window, and the radio pattern a screen reader
+announces says Down is next.
+
+**Laying it out.** Two tiles to a row, then three from the `sm` breakpoint.
+`columns` takes one count, or a count per breakpoint, where one left out takes
+the count below it: `columns={{ base: 2, md: 4 }}`. `minTileWidth="9rem"`
+instead fits as many tiles to a row as the group's own width holds, whatever
+the viewport. In the default `outlined` look an `<img>` placed directly in the
+picture is cropped square, so photos of any shape make even rows; anything
+else keeps its own shape, and `pictureClassName` changes either.
+
+**Drawing your own chosen look.** Each tile, the element with `role="radio"`,
+carries `data-checked`, `data-disabled`, `data-hover` and `data-focus-visible`,
+and takes `tileClassName`. `variant="plain"` drops Roster's edge, fill and
+padding, so there's nothing to undo before drawing a frame or a stamp of your
+own. Roster's styles sit in a cascade layer below yours, so plain CSS wins
+without `!important`:
+
+```css
+.cover [data-checked] .frame { box-shadow: inset 0 0 0 3px #1c1917; }
+.cover [data-checked] .stamp { opacity: 1; }
+```
+
+The focus ring stays Roster's in both looks, offset outside the tile, so
+it's outside anything drawn on the tile or inside it.
+
+**Tokens.** The `outlined` look reads `--roster-tile-border` and
+`--roster-tile-bg` at rest, and `--roster-tile-border-checked` and
+`--roster-tile-bg-checked` on the chosen tile, whose edge is drawn two pixels
+wide so it differs in weight as well as color. Light and dark values ship in
+`roster.css`.
+
 ### Dialog
 
 A modal dialog. Focus moves in when it opens, Tab stays inside, Escape and its

@@ -63,6 +63,8 @@ export * from './components/molecules/CheckboxGroup/CheckboxGroup';
 export * from './components/molecules/CheckboxGroup/checkbox-group-variants';
 export * from './components/molecules/RadioGroup/RadioGroup';
 export * from './components/molecules/RadioGroup/radio-group-variants';
+export * from './components/molecules/RadioTileGroup/RadioTileGroup';
+export * from './components/molecules/RadioTileGroup/radio-tile-group-variants';
 export * from './components/molecules/Breadcrumbs/Breadcrumbs';
 export * from './components/molecules/Breadcrumbs/breadcrumb-variants';
 export * from './components/molecules/Tabs/Tabs';
