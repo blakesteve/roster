@@ -1328,6 +1328,12 @@ rather than a rewrite.
 short scannable set that would otherwise spend three rows of a wide form. It
 sets `aria-orientation` to match.
 
+`disabled` dims the whole group: its label, every option and the helper text.
+The dimmed text measures under 4.5:1, and a contrast checker such as axe will
+say so. That's on purpose: WCAG 1.4.3 exempts text that's part of an inactive
+control, and a disabled group is one. The same goes for `CheckboxGroup` and
+`RadioTileGroup`.
+
 Every radio is a 44x44 target, and the component is built so that it stays one:
 each option's box is sized to contain its own target, which is why the options
 can sit close together without a target ever reaching into its neighbor.
@@ -1794,7 +1800,8 @@ label and value on one baseline above the bar, an optional detail line below.
 numbered marker and connectors that fill behind the current one;
 `"segmented"` is the compact form, always with "Step 2 of 5". The current
 step is `aria-current="step"`, finished ones say "done", and the position is
-said when it changes.
+said when it changes. For steps down the page with content of their own, see
+[Timeline](#timeline).
 
 **LoadingDots.** Only for a model generating before its first token. It takes
 the surrounding text's size and color, rests at 1, 0.6 and 0.3 opacity (also
@@ -1802,6 +1809,56 @@ what reduced motion shows), and is replaced by the text once it starts: never
 shown beside it.
 
 Every string in all five is a prop with an English default.
+
+### Timeline
+
+Steps down the page, each with content of its own: a schedule, a history, an
+onboarding list. Every step has a `title`, any `content` under it, a leading
+`when` column, a trailing `actions` column, and a marker on a line that runs
+through them all: its number, a check once done, `"hollow"` for an empty step,
+or a mark of your own.
+
+```tsx
+<Timeline
+  label="The course, week by week"
+  current={3}
+  nowBefore={4}
+  labels={{ now: "Today" }}
+  steps={[
+    { id: "w1", when: "Week 1 · Sep 2", title: "Soil and compost", actions: <Button size="sm">Edit</Button> },
+    { id: "w2", when: "Week 2 · Sep 9", title: "Sowing in rows", content: "Depth, spacing and labels." },
+    { id: "w3", when: "Week 3 · Sep 16", title: "Water and mulch" },
+    { id: "w4", when: "Week 4 · Sep 23", title: "No topic yet", marker: "hollow" },
+  ]}
+/>
+```
+
+`current` is the step you're on, from 1: the steps before it are done, and
+past the last means every step is. `nowBefore` draws a "now" divider just
+before a step, where today falls, which needn't be beside the current step.
+
+Every column comes from one grid, so the columns line up from step to step
+whatever each step holds, and a column no step uses takes no room. Below 40rem
+of its own width (not the window's), the `when` moves above the body and the
+actions under it.
+
+It's an ordered list with a name (`label`, or `aria-labelledby` for a heading
+on the page). The current step is `aria-current="step"`, and a finished one
+says "done" after its title. The markers, the line and the divider are
+decoration, hidden from assistive technology. It takes no keys: a step's
+buttons and links are reached in reading order, which is the order they show.
+
+Each `<li>` carries `data-step` (`done`, `current` or `upcoming`), and every
+part takes a class of its own. A mark of your own needs a background, or the
+line shows through it. The line reads `--roster-timeline-rail` ahead and
+`--roster-timeline-rail-done` behind the current step, and the divider
+`--roster-timeline-now`. In forced colors they become GrayText, Highlight and
+CanvasText.
+
+**Why not `StepProgress orientation="vertical"`.** A timeline isn't always
+progress: a schedule doesn't advance while you watch it, so there's no "Step 3
+of 5" status here, and each step carries content where `StepProgress` takes
+names. The two share their markers.
 
 ### Menu
 
@@ -2493,8 +2550,10 @@ function App() {
 | `SkeletonCard`, `SkeletonTableRow`, `SkeletonAvatar`, `SkeletonStat` | Skeleton presets in the real component's box |
 | `ProgressField`   | Progress with a label and value on one baseline and a detail line: the form to reach for |
 | `StepProgress`    | Named steps: a stepper with markers and connectors, or a compact segmented "Step x of y" |
+| `Timeline`        | Steps down the page with content of their own: a when column, a marker on a line, the body and actions in one grid; a "now" divider (see [Timeline](#timeline)) |
 | `Pullquote`       | A line lifted out of prose, as `<figure>` + `<blockquote>` + `<figcaption>` |
 | `RadioGroup`      | Radio set reporting one `string`; descriptions, error, 44px targets         |
+| `RadioTileGroup`  | A radio group of picture tiles: one tab stop, the arrows, Home and End; `data-checked` for a chosen look of your own (see [One answer, chosen by its picture](#one-answer-chosen-by-its-picture)) |
 | `Slider`          | A value along a track, starting in the middle or not set on request; named snap-point chips, a visible number, the full keyboard, 44px targets (see [Slider](#slider)) |
 | `RangeSlider`     | A low and a high on one track: two thumbs that meet and never cross, each its own slider to the keyboard (see [RangeSlider](#rangeslider)) |
 | `Tabs`            | Tab strip, plain (an underline) or liquid (a sliding pill); arrow keys, one tab stop, counts, 44px `lg` size (see [Tabs](#tabs)) |

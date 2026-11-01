@@ -525,6 +525,24 @@
   --roster-tile-bg-checked: color-mix(in oklab, var(--roster-primary-950, #021724) 60%, transparent);
 }
 
+/* ── Timeline component tokens ───────────────────────────────────────────────
+   The rail between the markers: the skeleton gray ahead, and primary-600
+   (primary-400 in dark) behind the current step, as `StepProgress` fills its
+   connectors. The "now" divider is the ring's color. Restated in `.dark`, as
+   the tile tokens are, so a dark subtree gets the dark values.
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  --roster-timeline-rail: var(--roster-skeleton, #e7e5e4);
+  --roster-timeline-rail-done: var(--roster-primary-600, #0a4f7a);
+  --roster-timeline-now: var(--roster-primary-500, #0f6498);
+}
+
+.dark {
+  --roster-timeline-rail: var(--roster-skeleton, #44403c);
+  --roster-timeline-rail-done: var(--roster-primary-400, #5ea3de);
+  --roster-timeline-now: var(--roster-primary-400, #5ea3de);
+}
+
 /* ── Entrance animation ──────────────────────────────────────────────────────
    Tooltip asked for `animate-in`, `fade-in-0`, `zoom-in-95` and four
    `slide-in-from-*` classes, all of which come from `tailwindcss-animate` — a

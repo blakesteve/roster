@@ -88,6 +88,7 @@ export * from './components/molecules/Pagination/Pagination';
 export * from './components/molecules/SkeletonPresets/SkeletonPresets';
 export * from './components/molecules/ProgressField/ProgressField';
 export * from './components/molecules/StepProgress/StepProgress';
+export * from './components/molecules/Timeline/Timeline';
 export * from './components/molecules/ErrorState/ErrorState';
 export * from './components/molecules/ErrorState/error-state-variants';
 export * from './components/molecules/MatchupCard/MatchupCard';

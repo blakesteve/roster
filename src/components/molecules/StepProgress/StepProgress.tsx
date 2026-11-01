@@ -1,6 +1,8 @@
 import { cn } from "../../../lib/utils";
 import { withLabels } from "../../../lib/labels";
 import { Progress } from "../../atoms/Progress/Progress";
+import { stepMarkerClass } from "../../../internal/step-marker";
+import { StepCheck } from "../../../internal/step-check";
 
 /** Every word StepProgress shows or says. Pass any of them in `labels` to replace it. */
 export interface StepProgressLabels {
@@ -38,12 +40,6 @@ export interface StepProgressProps {
   labels?: Partial<StepProgressLabels>;
   className?: string;
 }
-
-const Check = () => (
-  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M20 6 9 17l-5-5" />
-  </svg>
-);
 
 /**
  * Discrete progress through named steps: a join flow, a setup, a checkout.
@@ -115,21 +111,8 @@ function StepProgress({ steps, current: rawCurrent, variant = "stepper", labels:
                   data-step-connector={step <= current ? "filled" : "empty"}
                 />
               )}
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "rst:relative rst:z-10 rst:flex rst:h-8 rst:w-8 rst:items-center rst:justify-center rst:rounded-full rst:text-sm rst:font-semibold rst:tabular-nums",
-                  state === "done" &&
-                    "rst:bg-primary-600 rst:text-primary-600-ink rst:dark:bg-primary-400 rst:dark:text-gray-950 rst:forced-colors:forced-color-adjust-none rst:forced-colors:bg-[Highlight] rst:forced-colors:text-[HighlightText]",
-                  /* A border, not a ring: forced colors keep a border and drop
-                     the shadow a ring is drawn with. */
-                  state === "current" &&
-                    "rst:border-2 rst:border-primary-600 rst:bg-[var(--roster-card-bg)] rst:text-primary-600 rst:dark:border-primary-400 rst:dark:text-primary-400",
-                  state === "upcoming" && "rst:bg-[var(--roster-skeleton)] rst:text-gray-600 rst:dark:text-gray-300 rst:forced-colors:border",
-                )}
-                data-step-marker=""
-              >
-                {state === "done" ? <Check /> : l.number(step)}
+              <span aria-hidden="true" className={stepMarkerClass(state)} data-step-marker="">
+                {state === "done" ? <StepCheck /> : l.number(step)}
               </span>
               <span
                 className={cn(
