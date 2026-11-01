@@ -71,7 +71,7 @@ function Rows() {
 }
 
 const ROWS = ["links", "plain", "pressed"] as const;
-const html = (row: string) => document.querySelector(`[data-pin="${row}"]`)!.innerHTML.replace(/[«:]r[0-9a-z]+[»:]/g, "ID");
+const html = (row: string) => document.querySelector(`[data-pin="${row}"]`)!.innerHTML.replace(/_r_[0-9a-z]+_|[«:]r[0-9a-z]+[»:]/g, "ID");
 async function digest(text: string) {
   const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)));
   return [...bytes.slice(0, 8)].map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -92,13 +92,16 @@ const chromium = () => /Chrome/.test(navigator.userAgent);
 
 type Pinned = { rest: Record<string, string>; hovered: Record<string, string>; clicked: Record<string, string>; walked: Record<string, string>; walk: string[] };
 
-/* Read from d087aba's build, 22 Oct 2026. */
+/* Read from d087aba's build, 22 Oct 2026.
+   The HTML digests re-read 1 Nov 2026, when the id mask was corrected:
+   it missed React 19.2's `_r_0_` ids, so each digest held them and moved
+   with what rendered before it. The walk didn't move. */
 const OLD_BUILD: Record<"chromium" | "webkit", Pinned> = {
   chromium: {
-    rest: { links: "4c375685ba4f3308", plain: "631bd75f8e3173e5", pressed: "5b8fa188d1b43e79" },
-    hovered: { links: "4c375685ba4f3308", plain: "631bd75f8e3173e5", pressed: "5b8fa188d1b43e79" },
-    clicked: { links: "4c375685ba4f3308", plain: "631bd75f8e3173e5", pressed: "2d6337cbf4be977e" },
-    walked: { links: "a52a5acf037a3ba5", plain: "5259aa9c1c4f6ce0", pressed: "22ea51f7e9fb22a4" },
+    rest: { links: "a81b38b668f04266", plain: "22b20e6f873f6df0", pressed: "73bd219e9dfc7112" },
+    hovered: { links: "a81b38b668f04266", plain: "22b20e6f873f6df0", pressed: "73bd219e9dfc7112" },
+    clicked: { links: "a81b38b668f04266", plain: "22b20e6f873f6df0", pressed: "71357ed26b8114d6" },
+    walked: { links: "26b07ba0f19e7a08", plain: "38958f8007341316", pressed: "067d305ede3cb5e1" },
     walk: [
       "hovered: body | 0,0,0",
       "clicked: button Item 3 | 0,0,0",
@@ -132,10 +135,10 @@ const OLD_BUILD: Record<"chromium" | "webkit", Pinned> = {
     ],
   },
   webkit: {
-    rest: { links: "924367926a088df6", plain: "49a29d6467d71334", pressed: "d1805a637a1a821e" },
-    hovered: { links: "924367926a088df6", plain: "49a29d6467d71334", pressed: "d1805a637a1a821e" },
-    clicked: { links: "924367926a088df6", plain: "49a29d6467d71334", pressed: "e57d6d464085b7f2" },
-    walked: { links: "8e2a82d7130a592f", plain: "788368f2da6f49c2", pressed: "9682c08537cc0c1e" },
+    rest: { links: "cfa87bd4f8189591", plain: "854b17c366e7c35e", pressed: "90514d5f45d2266a" },
+    hovered: { links: "cfa87bd4f8189591", plain: "854b17c366e7c35e", pressed: "90514d5f45d2266a" },
+    clicked: { links: "cfa87bd4f8189591", plain: "854b17c366e7c35e", pressed: "4d65b70333becc60" },
+    walked: { links: "4d18ac4ece3446c1", plain: "76f42aa79135d710", pressed: "a9024427df5fa0a0" },
     walk: [
       "hovered: body | 0,0,0",
       "clicked: the button, or where focus was | 0,0,0",

@@ -199,7 +199,7 @@ const row = (name: Row) => document.querySelector<HTMLElement>(`[data-pin="${nam
 const html = (name: Row) =>
   row(name)
     .innerHTML.replace(/-?\d+(\.\d+)?px/g, "#px")
-    .replace(/[«:_]r[0-9a-z]+[»:_]/g, "ID");
+    .replace(/_r_[0-9a-z]+_|[«:]r[0-9a-z]+[»:]/g, "ID");
 
 const PROPS = [
   "display", "position", "box-sizing", "color", "background-color",

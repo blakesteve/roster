@@ -34,7 +34,10 @@ import { stallLeave, transitionRunsOn } from "../../../test/leave";
  * - **Reopened during the leave, it stays open**, at rest, past the
  *   watchdog's deadline, and that close never reports. It's the same
  *   element, not remounted: a stray watchdog timer would remount it, replaying
- *   the entrance and losing what's in it.
+ *   the entrance and losing what's in it. Under load Headless UI can skip a
+ *   leave, leaving nothing to reopen into; that close is let finish and the
+ *   case tried again, up to five times, and it fails rather than pass on a
+ *   try with no leave.
  * - **Escape during the entrance closes**, at points through the 280ms
  *   entrance: gone from the page, never left mounted.
  *
@@ -258,22 +261,34 @@ export const ReopenedDuringTheLeaveItStaysOpen: Story = {
   play: async () => {
     const real = realInputOrSkip();
     if (!real) return;
-    sheet.calls = [];
-    await openFromKeys(real);
-    await real.commands.realPress(["Escape"]);
-    await wait(60);
-    const leaving = inTransition();
-    /* The opener is under the leaving backdrop, so the app reopens it. */
-    sheet.open(true);
-    const element = dialog();
-    /* Past the watchdog's deadline, counted from the close. */
-    await wait(900);
-    await settledOpen();
-    const row = `reopened ${leaving ? "while leaving" : "after the leave"}, open ${!!dialog()}, ${
-      dialog() === element ? "the same element" : "remounted"
-    }, ${panelNow()}, onAfterClose ${sheet.calls.length}`;
-    await real.commands.realPress(["Escape"]);
-    await closed();
+    const tries: string[] = [];
+    let row = "no leave ran in 5 tries";
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      sheet.calls = [];
+      await openFromKeys(real);
+      await real.commands.realPress(["Escape"]);
+      await wait(60);
+      const element = dialog();
+      if (!element || !inTransition()) {
+        /* No leave to reopen into: Headless UI skipped it. */
+        tries.push(`try ${attempt}: no leave 60ms after Escape`);
+        await closed();
+        await wait(300);
+        continue;
+      }
+      /* The opener is under the leaving backdrop, so the app reopens it. */
+      sheet.open(true);
+      /* Past the watchdog's deadline, counted from the close. */
+      await wait(900);
+      await settledOpen();
+      row = `reopened while leaving, open ${!!dialog()}, ${dialog() === element ? "the same element" : "remounted"}, ${panelNow()}, onAfterClose ${
+        sheet.calls.length
+      }`;
+      await real.commands.realPress(["Escape"]);
+      await closed();
+      break;
+    }
+    console.info(`SHEET REOPENED ${JSON.stringify([...tries, row])}`);
     await expect(row).toBe("reopened while leaving, open true, the same element, at rest, onAfterClose 0");
   },
 };
