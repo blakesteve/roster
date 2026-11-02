@@ -24,10 +24,17 @@
  * version went out with the writer wired up and never run. `prepack` runs for
  * `npm pack` too, so `tar -tzf` on a local tarball answers the question before
  * anyone publishes anything.
+ *
+ * Each failing test gets one retry (`--retry=1`), and `meta.json` records how
+ * many passed only on it. A real-browser test can time out once on a busy
+ * machine and pass on a second try, and a publish shouldn't stop for that; a
+ * test that fails twice still stops it. Then the failing tests' names are
+ * printed, since vitest's own output is ignored here, and no `meta.json` is
+ * written: a published count never includes a failure.
  */
 
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { pathToFileURL } from "node:url";
@@ -38,7 +45,15 @@ import { pathToFileURL } from "node:url";
  * page, which is the failure this file exists to prevent, so it is worth
  * pinning.
  */
-export function buildMeta(run, pkg) {
+export function buildMeta(run, pkg, retries = { failed: [], passedOnRetry: [] }) {
+  /* After the retry. Either report's word is enough: the JSON report's count
+     catches a failure the retry report missed, and the other way round. */
+  const failed = retries.failed.length || run.numFailedTests || 0;
+  if (failed) {
+    const names = retries.failed.length ? retries.failed.map((n) => `\n  ${n}`).join("") : "";
+    throw new Error(`${failed} ${failed === 1 ? "test" : "tests"} failed, retried once — refusing to write meta.json:${names}`);
+  }
+
   /* `numPassedTests` rather than `numTotalTests`: publishing a count that
      includes failures would be advertising the wrong number, and a failing
      suite should not reach publish anyway.
@@ -51,6 +66,8 @@ export function buildMeta(run, pkg) {
     version: pkg.version,
     tests: run.numPassedTests,
     testFiles: run.testResults.length,
+    /* Passed only on their retry: a number to watch, not a failure. */
+    passedOnRetry: retries.passedOnRetry.length,
   };
 
   if (!meta.tests) {
@@ -63,6 +80,18 @@ export function buildMeta(run, pkg) {
   return meta;
 }
 
+/** The run: every test, a failing one retried once, through both reports. */
+export function vitestArgs(report) {
+  return [
+    "vitest",
+    "run",
+    "--retry=1",
+    "--reporter=json",
+    `--outputFile.json=${report}`,
+    "--reporter=./scripts/meta-reporter.mjs",
+  ];
+}
+
 /**
  * Guarded so a test can import `buildMeta` without this running vitest inside
  * vitest.
@@ -70,22 +99,38 @@ export function buildMeta(run, pkg) {
 function main() {
   const scratch = mkdtempSync(join(tmpdir(), "roster-meta-"));
   const report = join(scratch, "vitest.json");
+  const retryReport = join(scratch, "retries.json");
+  /* No meta.json survives a run that doesn't earn one. */
+  rmSync("dist/meta.json", { force: true });
 
   try {
-    execFileSync(
-      "npx",
-      ["vitest", "run", "--reporter=json", `--outputFile=${report}`],
-      { stdio: ["ignore", "ignore", "inherit"] },
-    );
+    try {
+      execFileSync("npx", vitestArgs(report), {
+        stdio: ["ignore", "ignore", "inherit"],
+        env: { ...process.env, ROSTER_META_REPORT: retryReport },
+      });
+    } catch (error) {
+      /* A failing test exits non-zero; the reports below say which. With no
+         report at all, vitest stopped before running anything. */
+      if (!existsSync(report) || !existsSync(retryReport)) {
+        throw new Error(`vitest stopped before reporting (exit ${error.status ?? "unknown"}) — no meta.json written`);
+      }
+    }
 
     const run = JSON.parse(readFileSync(report, "utf8"));
+    const retries = JSON.parse(readFileSync(retryReport, "utf8"));
     const pkg = JSON.parse(readFileSync("package.json", "utf8"));
-    const meta = buildMeta(run, pkg);
+    for (const name of retries.passedOnRetry) console.log(`↻ passed on its retry: ${name}`);
+    const meta = buildMeta(run, pkg, retries);
 
     writeFileSync("dist/meta.json", JSON.stringify(meta, null, 2) + "\n");
     console.log(
-      `✓ dist/meta.json — ${meta.tests} tests across ${meta.testFiles} files @ ${meta.version}`,
+      `✓ dist/meta.json — ${meta.tests} tests across ${meta.testFiles} files @ ${meta.version}` +
+        (meta.passedOnRetry ? `, ${meta.passedOnRetry} only on retry` : ""),
     );
+  } catch (error) {
+    console.error(`✗ ${error.message}`);
+    process.exitCode = 1;
   } finally {
     rmSync(scratch, { recursive: true, force: true });
   }

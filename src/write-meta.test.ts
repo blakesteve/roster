@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 // @ts-expect-error — a build script, deliberately plain JS with no types.
-import { buildMeta } from "../scripts/write-meta.mjs";
+import { buildMeta, vitestArgs } from "../scripts/write-meta.mjs";
+// @ts-expect-error — the build script's reporter, plain JS too.
+import { summarize } from "../scripts/meta-reporter.mjs";
 
 /**
  * `dist/meta.json` is how the test count reaches a portfolio site's case
@@ -40,13 +42,10 @@ describe("the published meta", () => {
     expect(meta.testFiles).not.toBe(166);
   });
 
-  it("counts passing tests, not attempted ones", () => {
-    /* A suite with failures should not reach publish at all, but if it does,
-       the number advertised has to be the one that actually passed. */
-    const meta = buildMeta(
-      report({ numTotalTests: 1000, numPassedTests: 995, numFailedTests: 5 }),
-      pkg,
-    );
+  it("counts passing tests, not collected ones", () => {
+    /* A skipped test was collected and never ran, so it isn't counted. A
+       failing one doesn't get this far: it refuses (below). */
+    const meta = buildMeta(report({ numTotalTests: 1000, numPassedTests: 995, numFailedTests: 0, numPendingTests: 5 }), pkg);
     expect(meta.tests).toBe(995);
   });
 
@@ -70,5 +69,71 @@ describe("the published meta", () => {
     expect(() => buildMeta(report({ numPassedTests: undefined }), pkg)).toThrow(
       /zero passing tests/,
     );
+  });
+
+  it("refuses to write with a test that failed even on its retry, and names it", () => {
+    /* A meta.json is written only by a green run: a count that includes a
+       failure is the wrong number, published. */
+    const retries = { failed: ["unit src/a.test.ts > a > breaks"], passedOnRetry: [] };
+    expect(() => buildMeta(report({ numFailedTests: 1 }), pkg, retries)).toThrow(
+      "1 test failed, retried once — refusing to write meta.json:\n  unit src/a.test.ts > a > breaks",
+    );
+  });
+
+  it("refuses on either report's word of a failure", () => {
+    /* The JSON report's count stands when the retry report is missing one,
+       and the other way round. */
+    const none = { failed: [], passedOnRetry: [] };
+    const named = { failed: ["unit src/a.test.ts > a"], passedOnRetry: [] };
+    expect(() => buildMeta(report({ numFailedTests: 2 }), pkg, none)).toThrow(/^2 tests failed/);
+    expect(() => buildMeta(report({ numFailedTests: 0 }), pkg, named)).toThrow(/^1 test failed/);
+  });
+
+  it("records how many tests passed only on their retry", () => {
+    const retries = { failed: [], passedOnRetry: ["a", "b"] };
+    expect([buildMeta(report(), pkg, retries).passedOnRetry, buildMeta(report(), pkg).passedOnRetry]).toEqual([2, 0]);
+  });
+
+  it("runs every test with one retry, through both reports", () => {
+    expect(vitestArgs("/tmp/r.json")).toEqual([
+      "vitest",
+      "run",
+      "--retry=1",
+      "--reporter=json",
+      "--outputFile.json=/tmp/r.json",
+      "--reporter=./scripts/meta-reporter.mjs",
+    ]);
+  });
+});
+
+/** A vitest test case as the reporter API hands it over, trimmed. */
+function testCase(fullName: string, state: string, retryCount?: number, project = "unit") {
+  return {
+    fullName,
+    project: { name: project },
+    result: () => ({ state }),
+    diagnostic: () => (retryCount === undefined ? undefined : { retryCount }),
+  };
+}
+const testModule = (moduleId: string, tests: ReturnType<typeof testCase>[]) => ({
+  moduleId,
+  children: { allTests: () => tests[Symbol.iterator]() },
+});
+
+describe("the retry report", () => {
+  it("names every test that failed for good, and every one that passed only on its retry", () => {
+    const modules = [
+      testModule("/repo/src/a.test.ts", [
+        testCase("a > passes", "passed", 0),
+        testCase("a > passes second time", "passed", 1),
+        testCase("a > fails", "failed", 1),
+        testCase("a > skipped", "skipped"),
+      ]),
+      testModule("/repo/src/b.stories.tsx", [testCase("Walk", "failed", 1, "storybook-real-input (webkit)")]),
+    ];
+    expect(summarize(modules, "/repo")).toEqual({
+      failed: ["unit src/a.test.ts > a > fails", "storybook-real-input (webkit) src/b.stories.tsx > Walk"],
+      passedOnRetry: ["unit src/a.test.ts > a > passes second time"],
+    });
   });
 });
