@@ -27,10 +27,12 @@
  *
  * Each failing test gets one retry (`--retry=1`), and `meta.json` records how
  * many passed only on it. A real-browser test can time out once on a busy
- * machine and pass on a second try, and a publish shouldn't stop for that; a
- * test that fails twice still stops it. Then the failing tests' names are
+ * machine and pass on a second try, and a publish shouldn't stop for that.
+ * Anything else that fails the run stops it: vitest's exit code is the
+ * authority, so a file that throws as it loads, or an error thrown after a
+ * test passed, stops it too, though no test failed. Then what failed is
  * printed, since vitest's own output is ignored here, and no `meta.json` is
- * written: a published count never includes a failure.
+ * written: a published count never comes from a failed run.
  */
 
 import { execFileSync } from "node:child_process";
@@ -58,14 +60,20 @@ export function buildMeta(run, pkg, retries = { failed: [], passedOnRetry: [] })
      includes failures would be advertising the wrong number, and a failing
      suite should not reach publish anyway.
 
-     File count comes from `testResults.length`, not from `numTotalTestSuites`.
+     File count is the test files that ran, each once, not `numTotalTestSuites`.
      Despite the Jest-compatible name, vitest counts `describe` blocks there —
-     166 against 92 real files at the time of writing. Reporting suites as files
-     is exactly the class of quietly-wrong number this file exists to stop. */
+     166 against 92 real files at the time of writing. Nor is it
+     `testResults.length`, which has an entry for each file in each project
+     and browser that collects it, skipped or not: 699 entries for 219 files
+     on 2 Nov 2026. Reporting either as files is exactly the class of
+     quietly-wrong number this file exists to stop. */
+  const ran = run.testResults.filter((file) =>
+    (file.assertionResults ?? []).some((test) => test.status === "passed" || test.status === "failed"),
+  );
   const meta = {
     version: pkg.version,
     tests: run.numPassedTests,
-    testFiles: run.testResults.length,
+    testFiles: new Set(ran.map((file) => file.name)).size,
     /* Passed only on their retry: a number to watch, not a failure. */
     passedOnRetry: retries.passedOnRetry.length,
   };
@@ -78,6 +86,21 @@ export function buildMeta(run, pkg, retries = { failed: [], passedOnRetry: [] })
   }
 
   return meta;
+}
+
+/**
+ * The run's verdict. vitest's exit code decides it: any exit but 0 refuses,
+ * whatever the reports say, since a run can fail where no test result shows
+ * it. The retry report only names what failed: the tests, the files that
+ * didn't load, and the errors nothing caught.
+ */
+export function verdict(exit, run, retries, pkg) {
+  if (exit !== 0) {
+    const named = [...(retries?.failed ?? []), ...(retries?.failedFiles ?? []), ...(retries?.unhandled ?? [])];
+    const list = named.length ? `:${named.map((n) => `\n  ${n}`).join("")}` : ", naming nothing; run `npx vitest run` to see why";
+    throw new Error(`vitest exited ${exit} — refusing to write meta.json${list}`);
+  }
+  return buildMeta(run, pkg, retries);
 }
 
 /** The run: every test, a failing one retried once, through both reports. */
@@ -104,24 +127,24 @@ function main() {
   rmSync("dist/meta.json", { force: true });
 
   try {
+    let exit = 0;
     try {
       execFileSync("npx", vitestArgs(report), {
         stdio: ["ignore", "ignore", "inherit"],
         env: { ...process.env, ROSTER_META_REPORT: retryReport },
       });
     } catch (error) {
-      /* A failing test exits non-zero; the reports below say which. With no
-         report at all, vitest stopped before running anything. */
-      if (!existsSync(report) || !existsSync(retryReport)) {
-        throw new Error(`vitest stopped before reporting (exit ${error.status ?? "unknown"}) — no meta.json written`);
-      }
+      exit = typeof error.status === "number" ? error.status : 1;
     }
+    /* With no report at all, vitest stopped before running anything. */
+    const read = (path) => (existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : null);
+    const run = read(report);
+    const retries = read(retryReport);
+    if (exit === 0 && (!run || !retries)) throw new Error("vitest exited 0 but wrote no report — refusing to write meta.json");
 
-    const run = JSON.parse(readFileSync(report, "utf8"));
-    const retries = JSON.parse(readFileSync(retryReport, "utf8"));
+    for (const name of retries?.passedOnRetry ?? []) console.log(`↻ passed on its retry: ${name}`);
     const pkg = JSON.parse(readFileSync("package.json", "utf8"));
-    for (const name of retries.passedOnRetry) console.log(`↻ passed on its retry: ${name}`);
-    const meta = buildMeta(run, pkg, retries);
+    const meta = verdict(exit, run, retries, pkg);
 
     writeFileSync("dist/meta.json", JSON.stringify(meta, null, 2) + "\n");
     console.log(

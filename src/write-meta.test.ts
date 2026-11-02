@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 // @ts-expect-error — a build script, deliberately plain JS with no types.
-import { buildMeta, vitestArgs } from "../scripts/write-meta.mjs";
+import { buildMeta, verdict, vitestArgs } from "../scripts/write-meta.mjs";
 // @ts-expect-error — the build script's reporter, plain JS too.
 import { summarize } from "../scripts/meta-reporter.mjs";
 
@@ -26,7 +26,7 @@ function report(over: Record<string, unknown> = {}) {
        not files. The gap is the whole point of this fixture. */
     numTotalTestSuites: 166,
     numPassedTestSuites: 166,
-    testResults: Array.from({ length: 92 }, (_, i) => ({ name: `file-${i}.test.ts` })),
+    testResults: Array.from({ length: 92 }, (_, i) => ({ name: `file-${i}.test.ts`, assertionResults: [{ status: "passed" }] })),
     ...over,
   };
 }
@@ -89,6 +89,22 @@ describe("the published meta", () => {
     expect(() => buildMeta(report({ numFailedTests: 0 }), pkg, named)).toThrow(/^1 test failed/);
   });
 
+  it("counts each test file that ran once, across projects, and none whose tests were all skipped", () => {
+    /* vitest's report has an entry per file per project and browser, and one
+       for every file a project collects and then skips by its tags. */
+    const entry = (name: string, ...statuses: string[]) => ({ name, assertionResults: statuses.map((status) => ({ status })) });
+    const testResults = [
+      entry("/repo/src/a.test.ts", "passed", "passed"),
+      entry("/repo/src/b.stories.tsx", "passed"),
+      entry("/repo/src/b.stories.tsx", "passed"),
+      entry("/repo/src/b.stories.tsx", "skipped"),
+      entry("/repo/src/c.stories.tsx", "skipped", "skipped"),
+      entry("/repo/src/d.stories.tsx", "skipped", "passed"),
+      entry("/repo/src/e.stories.tsx"),
+    ];
+    expect(buildMeta(report({ testResults }), pkg).testFiles).toBe(3);
+  });
+
   it("records how many tests passed only on their retry", () => {
     const retries = { failed: [], passedOnRetry: ["a", "b"] };
     expect([buildMeta(report(), pkg, retries).passedOnRetry, buildMeta(report(), pkg).passedOnRetry]).toEqual([2, 0]);
@@ -106,18 +122,54 @@ describe("the published meta", () => {
   });
 });
 
-/** A vitest test case as the reporter API hands it over, trimmed. */
-function testCase(fullName: string, state: string, retryCount?: number, project = "unit") {
+/** vitest's test cases, suites and modules as the reporter API hands them over, trimmed. */
+function testCase(fullName: string, state: string, retryCount?: number, errors?: { name: string; message: string }[]) {
   return {
     fullName,
-    project: { name: project },
-    result: () => ({ state }),
+    result: () => ({ state, errors }),
     diagnostic: () => (retryCount === undefined ? undefined : { retryCount }),
   };
 }
-const testModule = (moduleId: string, tests: ReturnType<typeof testCase>[]) => ({
-  moduleId,
-  children: { allTests: () => tests[Symbol.iterator]() },
+const suite = (fullName: string, errors: { name: string; message: string }[] = []) => ({ fullName, errors: () => errors });
+function testModule(
+  moduleId: string,
+  tests: ReturnType<typeof testCase>[],
+  { project = "unit", errors = [], suites = [] }: { project?: string; errors?: { name: string; message: string }[]; suites?: ReturnType<typeof suite>[] } = {},
+) {
+  return {
+    moduleId,
+    project: { name: project },
+    errors: () => errors,
+    children: { allTests: () => tests[Symbol.iterator](), allSuites: () => suites[Symbol.iterator]() },
+  };
+}
+
+describe("the verdict", () => {
+  const clean = { failed: [], failedFiles: [], unhandled: [], passedOnRetry: [] };
+
+  it("refuses any exit but 0, though neither report names a failure", () => {
+    /* A file that throws as it loads, or an error thrown after its test
+       passed, exits 1 with nothing failed in either count. */
+    expect(() => verdict(1, report(), clean, pkg)).toThrow(
+      "vitest exited 1 — refusing to write meta.json, naming nothing; run `npx vitest run` to see why",
+    );
+  });
+
+  it("names the tests that failed, the files that didn't load, and the errors nothing caught", () => {
+    const retries = { ...clean, failed: ["unit src/a.test.ts > a"], failedFiles: ["unit src/b.test.ts: Error: boom"], unhandled: ["unhandled Error: late"] };
+    expect(() => verdict(1, report(), retries, pkg)).toThrow(
+      "vitest exited 1 — refusing to write meta.json:\n  unit src/a.test.ts > a\n  unit src/b.test.ts: Error: boom\n  unhandled Error: late",
+    );
+  });
+
+  it("writes on an exit of 0, a retried pass included", () => {
+    expect(verdict(0, report(), { ...clean, passedOnRetry: ["unit src/a.test.ts > a"] }, pkg)).toEqual({
+      version: "4.6.0",
+      tests: 995,
+      testFiles: 92,
+      passedOnRetry: 1,
+    });
+  });
 });
 
 describe("the retry report", () => {
@@ -126,14 +178,44 @@ describe("the retry report", () => {
       testModule("/repo/src/a.test.ts", [
         testCase("a > passes", "passed", 0),
         testCase("a > passes second time", "passed", 1),
-        testCase("a > fails", "failed", 1),
+        testCase("a > fails", "failed", 1, [{ name: "AssertionError", message: "expected 1 to be 2\n- Expected" }]),
         testCase("a > skipped", "skipped"),
       ]),
-      testModule("/repo/src/b.stories.tsx", [testCase("Walk", "failed", 1, "storybook-real-input (webkit)")]),
+      testModule(
+        "/repo/src/b.stories.tsx",
+        [
+          testCase("Walk", "failed", 1, [
+            { name: "Error", message: "\nClick to debug the error directly in Storybook: http://localhost:6006/?path=/story/b--walk\n\nTest timed out in 15000ms." },
+          ]),
+        ],
+        { project: "storybook-real-input (webkit)" },
+      ),
     ];
-    expect(summarize(modules, "/repo")).toEqual({
-      failed: ["unit src/a.test.ts > a > fails", "storybook-real-input (webkit) src/b.stories.tsx > Walk"],
+    expect(summarize(modules, [], "/repo")).toEqual({
+      failed: [
+        "unit src/a.test.ts > a > fails: AssertionError: expected 1 to be 2",
+        "storybook-real-input (webkit) src/b.stories.tsx > Walk: Error: Test timed out in 15000ms.",
+      ],
+      failedFiles: [],
+      unhandled: [],
       passedOnRetry: ["unit src/a.test.ts > a > passes second time"],
+    });
+  });
+
+  it("names a file that failed to load, a suite whose hook threw, and an error nothing caught", () => {
+    const modules = [
+      testModule("/repo/src/broken.test.ts", [], { errors: [{ name: "Error", message: "thrown at import\n    at line 3" }] }),
+      testModule("/repo/src/hook.test.ts", [testCase("hook > a", "skipped")], { suites: [suite("hook", [{ name: "TypeError", message: "x is undefined" }])] }),
+    ];
+    const unhandled = [
+      { name: "Error", message: "thrown from a timer", VITEST_TEST_PATH: "/repo/src/late.test.ts", VITEST_TEST_NAME: "passes, then throws" },
+      { name: "Error", message: "from nowhere" },
+    ];
+    expect(summarize(modules, unhandled, "/repo")).toEqual({
+      failed: [],
+      failedFiles: ["unit src/broken.test.ts: Error: thrown at import", "unit src/hook.test.ts > hook: TypeError: x is undefined"],
+      unhandled: ["unhandled Error: thrown from a timer, during src/late.test.ts > passes, then throws", "unhandled Error: from nowhere"],
+      passedOnRetry: [],
     });
   });
 });
