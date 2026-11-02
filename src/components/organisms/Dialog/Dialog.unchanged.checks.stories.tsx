@@ -107,7 +107,7 @@ const root = () => document.querySelector("#headlessui-portal-root");
 const html = () =>
   (root()?.innerHTML ?? "")
     .replace(/-?\d+(\.\d+)?px/g, "#px")
-    .replace(/[«:_]r[0-9a-z]+[»:_]/g, "ID");
+    .replace(/_r_[0-9a-z]+_|[«:]r[0-9a-z]+[»:]/g, "ID");
 
 const PROPS = [
   "display", "position", "box-sizing", "color", "background-color",
@@ -177,19 +177,22 @@ type Pinned = { open: Record<string, string>; hovered: Record<string, string>; w
 
 /* Read from 8e8817d, 5.16.0, 27 Oct 2026, with the browser's own focus ring
    left out (above). The `open` and `hovered` digests re-read 28 Oct 2026,
-   once the dialog's role had the viewport's box (above). */
+   once the dialog's role had the viewport's box (above).
+   The HTML digests re-read 1 Nov 2026, when the id mask was corrected:
+   it missed React 19.2's `_r_0_` ids, so each digest held them and moved
+   with what rendered before it. Styles and focus walks didn't move. */
 const OLD_BUILD: Record<Group, Record<"chromium" | "webkit", Pinned>> = {
   light: {
     chromium: {
       open: {
-        white: "029d9d2aada03134 b8a93dee0fd27a91",
-        slate: "65c65a45145cb191 097f2a236fd3433a",
-        primary: "c6d7843560919537 0ec2c43de9de994e",
+        white: "87f7ac4151de590a b8a93dee0fd27a91",
+        slate: "a98c7a97e4bbaaab 097f2a236fd3433a",
+        primary: "12a72d8edbf0b917 0ec2c43de9de994e",
       },
       hovered: {
-        white: "029d9d2aada03134 252ee1bee563cbd3",
-        slate: "65c65a45145cb191 4f811b567c76f1c6",
-        primary: "c6d7843560919537 3f2fc4dfa59b079c",
+        white: "87f7ac4151de590a 252ee1bee563cbd3",
+        slate: "a98c7a97e4bbaaab 4f811b567c76f1c6",
+        primary: "12a72d8edbf0b917 3f2fc4dfa59b079c",
       },
       walk: [
         "white opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
@@ -214,14 +217,14 @@ const OLD_BUILD: Record<Group, Record<"chromium" | "webkit", Pinned>> = {
     },
     webkit: {
       open: {
-        white: "e849dc741a3f8e55 48e0c7fc26b976fd",
-        slate: "33e3f88c59487a0a da5a502ef3f4f24f",
-        primary: "e8efa34ff59cedd4 22d63581fb031266",
+        white: "fa20fa152b76d9ae 48e0c7fc26b976fd",
+        slate: "8419617b7798ecee da5a502ef3f4f24f",
+        primary: "715ae82ffd7a708d 22d63581fb031266",
       },
       hovered: {
-        white: "e849dc741a3f8e55 48e0c7fc26b976fd",
-        slate: "33e3f88c59487a0a da5a502ef3f4f24f",
-        primary: "e8efa34ff59cedd4 22d63581fb031266",
+        white: "fa20fa152b76d9ae 48e0c7fc26b976fd",
+        slate: "8419617b7798ecee da5a502ef3f4f24f",
+        primary: "715ae82ffd7a708d 22d63581fb031266",
       },
       walk: [
         "white opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
@@ -248,12 +251,12 @@ const OLD_BUILD: Record<Group, Record<"chromium" | "webkit", Pinned>> = {
   others: {
     chromium: {
       open: {
-        glass: "75cf38311ee0e9d0 b90097589432cb9b",
-        dark: "f6915e3e3bb459e6 a2525f05b93fd972",
+        glass: "a66ae1220f60afff b90097589432cb9b",
+        dark: "87f7ac4151de590a a2525f05b93fd972",
       },
       hovered: {
-        glass: "75cf38311ee0e9d0 9152a38a81ccc9e9",
-        dark: "f6915e3e3bb459e6 d99d1848d5a7b6f9",
+        glass: "a66ae1220f60afff 9152a38a81ccc9e9",
+        dark: "87f7ac4151de590a d99d1848d5a7b6f9",
       },
       walk: [
         "glass opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",
@@ -272,12 +275,12 @@ const OLD_BUILD: Record<Group, Record<"chromium" | "webkit", Pinned>> = {
     },
     webkit: {
       open: {
-        glass: "e3556ef333bf1553 57765a8c08a180f2",
-        dark: "6ce91b2bc1ce333c bd8a42003ae81d8b",
+        glass: "092258c3b63d137c 57765a8c08a180f2",
+        dark: "fa20fa152b76d9ae bd8a42003ae81d8b",
       },
       hovered: {
-        glass: "e3556ef333bf1553 57765a8c08a180f2",
-        dark: "6ce91b2bc1ce333c bd8a42003ae81d8b",
+        glass: "092258c3b63d137c 57765a8c08a180f2",
+        dark: "fa20fa152b76d9ae bd8a42003ae81d8b",
       },
       walk: [
         "glass opened: dialog: div Rename itemChoose a new name.CancelSave (marked)",

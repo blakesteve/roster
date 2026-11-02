@@ -147,7 +147,7 @@ describe("the liquid variant", () => {
   /* `LiquidTabs` is a wrapper over this; the two render the same thing, prop
      for prop, which is what lets an app move from one to the other. */
   it("renders exactly what LiquidTabs does, for each of its styles", () => {
-    const html = (el: HTMLElement) => el.innerHTML.replace(/[«:_]r[0-9a-z]+[»:_]/g, "ID");
+    const html = (el: HTMLElement) => el.innerHTML.replace(/_r_[0-9a-z]+_|[«:]r[0-9a-z]+[»:]/g, "ID");
     for (const style of ["pill", "filled"] as const) {
       for (const extra of [{}, { fullWidth: true, size: "lg" as const, className: "mine" }]) {
         const tabs = [...TABS.slice(0, 2), { id: "gamma", label: "Gamma", count: 3, panelId: "p" }];

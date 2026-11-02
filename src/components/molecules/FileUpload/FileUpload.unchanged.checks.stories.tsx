@@ -105,7 +105,7 @@ const html = (name: Row) =>
     .innerHTML.replace(/-?\d+(\.\d+)?px/g, "#px")
     .replace(/>\d+(\.\d+)? (B|KB|MB)</g, ">size<")
     .replace(/blob:[^"]+/g, "blob")
-    .replace(/[«:_]r[0-9a-z]+[»:_]/g, "ID");
+    .replace(/_r_[0-9a-z]+_|[«:]r[0-9a-z]+[»:]/g, "ID");
 
 const PROPS = [
   "display", "position", "box-sizing", "color", "background-color",
@@ -179,33 +179,36 @@ type Pinned = {
 };
 
 /* Read from 6a1b30c, 5.15.0, 25 Oct 2026, and read again the same day with
-   the platform differences above left out. */
+   the platform differences above left out.
+   The HTML digests re-read 1 Nov 2026, when the id mask was corrected:
+   it missed React 19.2's `_r_0_` ids, so each digest held them and moved
+   with what rendered before it. Styles and focus walks didn't move. */
 const OLD_BUILD: Record<"chromium" | "webkit", Pinned> = {
   chromium: {
     rest: {
-      empty: "b29da041066f9a7a 40e8e7b915cadf79",
-      states: "c93ef1a773a6b7a5 02cdf06c1d412090",
-      one: "1f0b6b8911bbe59f 7184cac70d63389c",
-      disabled: "15511583629ba913 f1ca2108982bd636",
-      dark: "05890b8976ad35ec a66773f2bf6441d1",
+      empty: "566fef6a5be30810 40e8e7b915cadf79",
+      states: "d7148960b3cce18d 02cdf06c1d412090",
+      one: "7758b0fce38ecac4 7184cac70d63389c",
+      disabled: "aa880225043ed228 f1ca2108982bd636",
+      dark: "62f6b2c7fe4de7b6 a66773f2bf6441d1",
     },
     dragging: {
-      states: "82beb707ae645bd0 fa28dc76faed0a49",
+      states: "ef483b3c82dcadb9 fa28dc76faed0a49",
     },
     hovered: {
-      choose: "572097aaa8fa07ee b35abd5fbeab9b5b",
-      retry: "2788ba379d887fcf a357c6e83f8c2266",
-      remove: "5ff9c6c0c9401a95 a74c9c6940f62d69",
+      choose: "2922dbdc6ed11b32 b35abd5fbeab9b5b",
+      retry: "852f5569ef430af6 a357c6e83f8c2266",
+      remove: "15fa1e8a855513f2 a74c9c6940f62d69",
     },
     walked: {
-      empty: "b29da041066f9a7a 40e8e7b915cadf79",
-      states: "c93ef1a773a6b7a5 02cdf06c1d412090",
-      one: "1f0b6b8911bbe59f 7184cac70d63389c",
-      disabled: "15511583629ba913 f1ca2108982bd636",
-      dark: "c56d65aa32210000 24e12449c68e6d64",
+      empty: "566fef6a5be30810 40e8e7b915cadf79",
+      states: "d7148960b3cce18d 02cdf06c1d412090",
+      one: "7758b0fce38ecac4 7184cac70d63389c",
+      disabled: "aa880225043ed228 f1ca2108982bd636",
+      dark: "cc571be331cbb4b1 24e12449c68e6d64",
     },
     clicked: {
-      one: "979c3b0a41fd5442 2bac17fe7e326f59",
+      one: "d47f969d468fb497 2bac17fe7e326f59",
     },
     said: [
       "",
@@ -237,29 +240,29 @@ const OLD_BUILD: Record<"chromium" | "webkit", Pinned> = {
   },
   webkit: {
     rest: {
-      empty: "b29da041066f9a7a 574c6d7f7b7412e0",
-      states: "c93ef1a773a6b7a5 4ff4ad4c06467edd",
-      one: "1f0b6b8911bbe59f 7753f217dec0a790",
-      disabled: "15511583629ba913 77126d4fb12b4e84",
-      dark: "05890b8976ad35ec 87e08baaabbd0115",
+      empty: "566fef6a5be30810 574c6d7f7b7412e0",
+      states: "d7148960b3cce18d 4ff4ad4c06467edd",
+      one: "7758b0fce38ecac4 7753f217dec0a790",
+      disabled: "aa880225043ed228 77126d4fb12b4e84",
+      dark: "62f6b2c7fe4de7b6 87e08baaabbd0115",
     },
     dragging: {
-      states: "82beb707ae645bd0 fa91ebf0861763bc",
+      states: "ef483b3c82dcadb9 fa91ebf0861763bc",
     },
     hovered: {
-      choose: "572097aaa8fa07ee 4ff4ad4c06467edd",
-      retry: "2788ba379d887fcf 4ff4ad4c06467edd",
-      remove: "5ff9c6c0c9401a95 4ff4ad4c06467edd",
+      choose: "2922dbdc6ed11b32 4ff4ad4c06467edd",
+      retry: "852f5569ef430af6 4ff4ad4c06467edd",
+      remove: "15fa1e8a855513f2 4ff4ad4c06467edd",
     },
     walked: {
-      empty: "b29da041066f9a7a 574c6d7f7b7412e0",
-      states: "c93ef1a773a6b7a5 4ff4ad4c06467edd",
-      one: "1f0b6b8911bbe59f 7753f217dec0a790",
-      disabled: "15511583629ba913 77126d4fb12b4e84",
-      dark: "c56d65aa32210000 c094581222bdc6b1",
+      empty: "566fef6a5be30810 574c6d7f7b7412e0",
+      states: "d7148960b3cce18d 4ff4ad4c06467edd",
+      one: "7758b0fce38ecac4 7753f217dec0a790",
+      disabled: "aa880225043ed228 77126d4fb12b4e84",
+      dark: "cc571be331cbb4b1 c094581222bdc6b1",
     },
     clicked: {
-      one: "979c3b0a41fd5442 ce1a153c44748709",
+      one: "d47f969d468fb497 ce1a153c44748709",
     },
     said: [
       "",

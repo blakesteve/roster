@@ -47,7 +47,10 @@ import { stallLeave, transitionRunsOn } from "../../../test/leave";
  * - **Reopened during the leave, it stays open**, at rest, past the
  *   watchdog's deadline, and that close never reports. It's the same
  *   element, not remounted: a stray watchdog timer would remount it, replaying
- *   the entrance and losing what's in it.
+ *   the entrance and losing what's in it. Under load Headless UI can skip a
+ *   leave, leaving nothing to reopen into; that close is let finish and the
+ *   case tried again, up to five times, and it fails rather than pass on a
+ *   try with no leave.
  *
  * Every wait is for a positive end state (the dialog gone, or open and
  * settled), never for "nothing animating", which is also true before an
@@ -486,27 +489,41 @@ export const ReopenedDuringTheLeaveItStaysOpen: Story = {
     if (!real) return;
     afterClose.calls = [];
     const rows: string[] = [];
+    const tries: string[] = [];
     for (const layout of ["fullscreen", "default"] as const) {
-      document.querySelector<HTMLElement>(layout === "fullscreen" ? "[data-check-full]" : "[data-check-default]")!.focus();
-      await real.commands.realPress(["Enter"]);
-      await settledOpen();
-      await real.commands.realPress(["Escape"]);
-      await wait(60);
-      const leaving = inTransition();
-      /* The opener is under the leaving scrim, so the app reopens it. */
-      afterClose.open(layout);
-      const element = dialog();
-      /* Past the watchdog's deadline, counted from the close. */
-      await wait(900);
-      await waitFor(() => expect(dialog() && !inTransition()).toBe(true));
-      const focus = document.activeElement as HTMLElement | null;
-      console.info(`DIALOG REOPENED ${layout} focus on ${focus?.closest('[role="dialog"]') ? "the dialog" : "the page"}: ${focus?.tagName} ${focus?.textContent?.trim().slice(0, 30)}`);
-      rows.push(`${layout}: reopened ${leaving ? "while leaving" : "after the leave"}, open ${!!dialog()}, ${
-        dialog() === element ? "the same element" : "remounted"
-      }, opacity ${getComputedStyle(findPanel()!).opacity}, onAfterClose ${callsFor(layout).length}`);
-      afterClose.open(null);
-      await closed();
+      let row = `${layout}: no leave ran in 5 tries`;
+      for (let attempt = 1; attempt <= 5; attempt++) {
+        const callsBefore = callsFor(layout).length;
+        document.querySelector<HTMLElement>(layout === "fullscreen" ? "[data-check-full]" : "[data-check-default]")!.focus();
+        await real.commands.realPress(["Enter"]);
+        await settledOpen();
+        await real.commands.realPress(["Escape"]);
+        await wait(60);
+        const element = dialog();
+        if (!element || !inTransition()) {
+          /* No leave to reopen into: Headless UI skipped it. */
+          tries.push(`${layout} try ${attempt}: no leave 60ms after Escape`);
+          await closed();
+          await wait(300);
+          continue;
+        }
+        /* The opener is under the leaving scrim, so the app reopens it. */
+        afterClose.open(layout);
+        /* Past the watchdog's deadline, counted from the close. */
+        await wait(900);
+        await waitFor(() => expect(dialog() && !inTransition()).toBe(true));
+        const focus = document.activeElement as HTMLElement | null;
+        console.info(`DIALOG REOPENED ${layout} focus on ${focus?.closest('[role="dialog"]') ? "the dialog" : "the page"}: ${focus?.tagName} ${focus?.textContent?.trim().slice(0, 30)}`);
+        row = `${layout}: reopened while leaving, open ${!!dialog()}, ${dialog() === element ? "the same element" : "remounted"}, opacity ${
+          getComputedStyle(findPanel()!).opacity
+        }, onAfterClose ${callsFor(layout).length - callsBefore}`;
+        afterClose.open(null);
+        await closed();
+        break;
+      }
+      rows.push(row);
     }
+    if (tries.length) console.info(`DIALOG REOPENED retried: ${JSON.stringify(tries)}`);
     await expect(rows).toEqual([
       "fullscreen: reopened while leaving, open true, the same element, opacity 1, onAfterClose 0",
       "default: reopened while leaving, open true, the same element, opacity 1, onAfterClose 0",

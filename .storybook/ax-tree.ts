@@ -41,6 +41,8 @@ export type AXState = {
   valueText: string | null;
   /** Whether an option or a tab is selected; null where the role has no selected state. */
   selected: boolean | null;
+  /** Whether a field or a group says it needs an answer. */
+  required: boolean;
 };
 
 function documents(node: DOMNode, out: DOMNode[] = []): DOMNode[] {
@@ -105,6 +107,7 @@ async function read(session: Session, selectors: string[]): Promise<AXState[]> {
       value: node.value?.value === undefined ? null : String(node.value.value),
       valueText: prop("valuetext") === undefined ? null : String(prop("valuetext")),
       selected: prop("selected") === undefined ? null : !!prop("selected"),
+      required: !!prop("required"),
     });
   }
   return results;
