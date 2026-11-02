@@ -20,7 +20,10 @@ import { realInputOrSkip } from "../../../test/real-input";
  *
  * Each row is read at rest, under a real pointer, after a real click, and
  * along a real keyboard walk through every row (arrows, Home, End, Enter and
- * Space on the manual strip). What's pinned, as SHA-256 digests: each row's
+ * Space on the manual strip). Three stories per component: at rest and
+ * under the pointer; the strips' keys; and the Tab walk on to the end, each
+ * starting from the state the one before it left. Whole, the walk ran too
+ * close to a story's time limit (below). What's pinned, as SHA-256 digests: each row's
  * HTML, and the computed styles of every element in it (colors, borders,
  * corners, type, padding, outline, cursor, opacity, transform, heights). Also
  * pinned: where focus is at each step of the walk, whether every pill sits
@@ -413,17 +416,52 @@ const OLD_BUILD: Record<"chromium" | "webkit", Pinned> = {
   },
 };
 
-/** Reads every row through every state, as `OLD_BUILD` was read. */
-async function readEveryState(label: string): Promise<Pinned | null> {
+/* The pinned record in three parts, as the stories read it: at rest and
+   under the pointer (up to the clicks), the strips' keys (from the walk's
+   first Tab to "keyed"), and the Tab walk on to the end. */
+type PointerPart = Pick<Pinned, "rest" | "hovered" | "clicked" | "walk">;
+type KeysPart = Pick<Pinned, "keyed" | "walk">;
+type WalkPart = Pick<Pinned, "walked" | "walk">;
+function pinnedParts(engine: "chromium" | "webkit"): { pointer: PointerPart; keys: KeysPart; walk: WalkPart } {
+  const { rest, hovered, clicked, keyed, walked, walk } = OLD_BUILD[engine];
+  const firstTab = walk.findIndex((step) => step.startsWith("Tab: "));
+  const afterKeyed = walk.findIndex((step) => step.startsWith("keyed: ")) + 1;
+  return {
+    pointer: { rest, hovered, clicked, walk: walk.slice(0, firstTab) },
+    keys: { keyed, walk: walk.slice(firstTab, afterKeyed) },
+    walk: { walked, walk: walk.slice(afterKeyed) },
+  };
+}
+
+function logMismatch(label: string, engine: string, now: object, pinned: object) {
+  console.info(`LIQUID UNCHANGED ${label} ${engine} ${JSON.stringify(now)}`);
+  if (JSON.stringify(now) !== JSON.stringify(pinned)) {
+    for (const name of ROWS) console.info(`LIQUID UNCHANGED ${label} ${engine} ${name} html: ${html(name)}\nstyles:\n${styles(name)}`);
+  }
+}
+
+/* The pointer starts off every row: a story before this one leaves it
+   wherever its last click was, which may be over an item here. */
+async function start(real: NonNullable<ReturnType<typeof realInputOrSkip>>) {
+  await document.fonts.ready;
+  await real.commands.realHover("[data-pin-before]");
+  await wait(MOVE);
+}
+
+/* A real click on an item that isn't selected selects it, and the pill moves. */
+async function clickTwo(real: NonNullable<ReturnType<typeof realInputOrSkip>>) {
+  await real.commands.realClick('[data-pin="pill"] [data-tab-id="done"]');
+  await real.commands.realClick('[data-pin="nav"] [data-tab-id="sent"]');
+  await wait(MOVE);
+}
+
+/** Reads every row at rest, under the pointer and after the clicks, as `OLD_BUILD` was read. */
+async function readThePointer(label: string): Promise<{ now: PointerPart; pinned: PointerPart } | null> {
   const real = realInputOrSkip();
   if (!real) return null;
   const engine = chromium() ? "chromium" : "webkit";
-  await document.fonts.ready;
-  /* The pointer starts off every row: a story before this one leaves it
-     wherever its last click was, which may be over an item here. */
-  await real.commands.realHover("[data-pin-before]");
-  await wait(MOVE);
-  const now: Pinned = { rest: await read(), hovered: {}, clicked: {}, keyed: {}, walked: {}, walk: [] };
+  await start(real);
+  const now: PointerPart = { rest: await read(), hovered: {}, clicked: {}, walk: [] };
   now.walk.push(`first paint: ${firstPaint}`);
   now.walk.push(`rest: ${pills()}`);
 
@@ -436,10 +474,7 @@ async function readEveryState(label: string): Promise<Pinned | null> {
     Object.assign(now.hovered, await read([name]));
   }
 
-  /* A real click on an item that isn't selected selects it, and the pill moves. */
-  await real.commands.realClick('[data-pin="pill"] [data-tab-id="done"]');
-  await real.commands.realClick('[data-pin="nav"] [data-tab-id="sent"]');
-  await wait(MOVE);
+  await clickTwo(real);
   now.clicked = await read();
   /* Where a click leaves focus, per engine: Chromium focuses the clicked
      item; WebKit does on Linux, where CI runs, and leaves it where it was on
@@ -448,6 +483,24 @@ async function readEveryState(label: string): Promise<Pinned | null> {
   if (chromium() || (document.activeElement !== sent && document.activeElement !== document.body)) now.walk.push(`clicked: ${where()}`);
   else now.walk.push("clicked: the link, or where focus was");
   now.walk.push(`clicked: ${pills()}`);
+
+  const pinned = pinnedParts(engine).pointer;
+  logMismatch(`${label} pointer`, engine, now, pinned);
+  return { now, pinned };
+}
+
+/**
+ * Reads the strips along their keys, as `OLD_BUILD` was read. It starts where
+ * the pointer part ends: the same two clicks, with the pointer left on the
+ * second, so the keys begin from the state they always did.
+ */
+async function readTheKeys(label: string): Promise<{ now: KeysPart; pinned: KeysPart } | null> {
+  const real = realInputOrSkip();
+  if (!real) return null;
+  const engine = chromium() ? "chromium" : "webkit";
+  await start(real);
+  await clickTwo(real);
+  const now: KeysPart = { keyed: {}, walk: [] };
 
   /* The keyboard, from the button before every row. Safari's keyboard users
      reach links and buttons with Option+Tab. */
@@ -475,36 +528,103 @@ async function readEveryState(label: string): Promise<Pinned | null> {
   await press(" ", MOVE);
   Object.assign(now.keyed, await read(["filled", "manual"]));
   now.walk.push(`keyed: ${pills()}`);
-  for (let i = 0; i < 9; i++) await press(tab);
+
+  const pinned = pinnedParts(engine).keys;
+  logMismatch(`${label} keys`, engine, now, pinned);
+  return { now, pinned };
+}
+
+/**
+ * Reads every row along the Tab walk from the manual strip to the end, as
+ * `OLD_BUILD` was read. It starts where the keys part ends: each strip's
+ * selection clicked to where the keys left it (the nav's last, so the
+ * pointer rests where it did), and focus on the manual strip's Past.
+ */
+async function readTheTabWalk(label: string): Promise<{ now: WalkPart; pinned: WalkPart } | null> {
+  const real = realInputOrSkip();
+  if (!real) return null;
+  const engine = chromium() ? "chromium" : "webkit";
+  await start(real);
+  for (const [name, item] of [["pill", "node"], ["filled", "declined"], ["manual", "past"], ["nav", "sent"]] as const) {
+    await real.commands.realClick(`[data-pin="${name}"] [data-tab-id="${item}"]`);
+  }
+  await wait(MOVE);
+  row("manual").querySelector<HTMLElement>('[data-tab-id="past"]')!.focus();
+  const now: WalkPart = { walked: {}, walk: [] };
+  const tab = chromium() ? "Tab" : "Alt+Tab";
+  for (let i = 0; i < 9; i++) {
+    await real.commands.realPress([tab]);
+    await wait(200);
+    now.walk.push(`Tab: ${where()}`);
+  }
   now.walked = await read();
   now.walk.push(`walked: ${pills()}`);
 
-  console.info(`LIQUID UNCHANGED ${label} ${engine} ${JSON.stringify(now)}`);
-  if (JSON.stringify(now) !== JSON.stringify(OLD_BUILD[engine])) {
-    for (const name of ROWS) console.info(`LIQUID UNCHANGED ${label} ${engine} ${name} html: ${html(name)}\nstyles:\n${styles(name)}`);
-  }
-  return now;
+  const pinned = pinnedParts(engine).walk;
+  logMismatch(`${label} walk`, engine, now, pinned);
+  return { now, pinned };
 }
 
-export const LiquidTabsIsUnchanged: Story = {
+/* Each component's walk is three stories, not one. Whole, it took about 10s
+   in either engine (measured 1 Nov 2026, alone and in full runs at load 5 to
+   12), two thirds of the 15s a story is given, and it timed out once in a
+   full run. A story can't be given a longer time of its own, and a longer
+   time for every real-input story would let a hung one hold up the run. In
+   three, each starting from the state the one before it left, it's about 3s,
+   6s and 3s. */
+export const LiquidTabsIsUnchangedAtRestAndUnderThePointer: Story = {
   tags: ["real-input"],
   render: () => <Rows Strip={LiquidTabs} />,
   play: async () => {
-    const now = await readEveryState("LiquidTabs");
-    if (!now) return;
-    await expect(now).toEqual(OLD_BUILD[chromium() ? "chromium" : "webkit"]);
+    const read = await readThePointer("LiquidTabs");
+    if (read) await expect(read.now).toEqual(read.pinned);
+  },
+};
+
+export const LiquidTabsIsUnchangedAlongTheKeys: Story = {
+  tags: ["real-input"],
+  render: () => <Rows Strip={LiquidTabs} />,
+  play: async () => {
+    const read = await readTheKeys("LiquidTabs");
+    if (read) await expect(read.now).toEqual(read.pinned);
+  },
+};
+
+export const LiquidTabsIsUnchangedAlongTheTabWalk: Story = {
+  tags: ["real-input"],
+  render: () => <Rows Strip={LiquidTabs} />,
+  play: async () => {
+    const read = await readTheTabWalk("LiquidTabs");
+    if (read) await expect(read.now).toEqual(read.pinned);
   },
 };
 
 /* The migration: `variant` moves to `liquidStyle`, everything else as it was. */
 const LiquidVariant: StripRenderer = ({ variant, ...rest }) => <Tabs {...rest} variant="liquid" liquidStyle={variant} />;
 
-export const TabsLiquidIsLiquidTabs: Story = {
+export const TabsLiquidIsLiquidTabsAtRestAndUnderThePointer: Story = {
   tags: ["real-input"],
   render: () => <Rows Strip={LiquidVariant} />,
   play: async () => {
-    const now = await readEveryState("Tabs liquid");
-    if (!now) return;
-    await expect(now).toEqual(OLD_BUILD[chromium() ? "chromium" : "webkit"]);
+    const read = await readThePointer("Tabs liquid");
+    if (read) await expect(read.now).toEqual(read.pinned);
+  },
+};
+
+export const TabsLiquidIsLiquidTabsAlongTheKeys: Story = {
+  tags: ["real-input"],
+  render: () => <Rows Strip={LiquidVariant} />,
+  play: async () => {
+    const read = await readTheKeys("Tabs liquid");
+    if (read) await expect(read.now).toEqual(read.pinned);
+  },
+};
+
+export const TabsLiquidIsLiquidTabsAlongTheTabWalk: Story = {
+  tags: ["real-input"],
+  render: () => <Rows Strip={LiquidVariant} />,
+  play: async () => {
+    const read = await readTheTabWalk("Tabs liquid");
+    if (read) await expect(read.now).toEqual(read.pinned);
   },
 };

@@ -2794,7 +2794,7 @@ Output in `dist/`:
 | `tokens.css`       | Design token CSS variables                                          |
 | `preflight.css`    | Optional global reset (see Setup)                                   |
 | `index.d.ts`       | TypeScript definitions                                              |
-| `meta.json`        | Test count and version, written when the tarball is built           |
+| `meta.json`        | Test count, version and passes on retry, written when the tarball is built |
 
 ### What `meta.json` is for
 
@@ -2828,6 +2828,19 @@ rather than failing, and "live · 0 tests" would look authoritative while being
 the worst possible answer. `src/write-meta.test.ts` pins that guard and the
 field selection, including the one that bit first: `numTotalTestSuites` reads
 like a file count but counts `describe` blocks — 166 against 92 real files.
+`testFiles` counts each test file that ran, once: vitest's report has an entry
+for every file in every project and browser that collects it, skipped or not:
+699 entries for 219 files on 2 Nov 2026.
+
+It never writes from a failed run, and vitest's exit code decides what failed.
+Each failing test gets one retry (`vitest run --retry=1`): a real-browser test
+can time out once on a busy machine and pass on its second try, and a publish
+shouldn't stop for that. Anything else that fails the run stops it: a test that
+fails twice, a file that throws as it loads, an error thrown after its test has
+passed. Then `prepack` exits non-zero, what failed is printed (vitest's own
+output is hidden there), and no `meta.json` is written. A test that passed only
+on its retry is named in the output too, and `meta.json` records how many there
+were, as `passedOnRetry`.
 
 ## Contributing
 
