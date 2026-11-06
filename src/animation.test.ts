@@ -80,14 +80,8 @@ function blockAt(index: number): string {
  * honestly.
  */
 function definedIn(selector: ":root" | ".dark", token: string): boolean {
-  const needle = `${selector} {`;
-  let from = 0;
-  for (;;) {
-    const at = CSS.indexOf(needle, from);
-    if (at === -1) return false;
-    if (blockAt(at).includes(token)) return true;
-    from = at + needle.length;
-  }
+  const opener = selector === ":root" ? /^:root(, \[data-roster-scope\])? \{/gm : /^\.dark \{/gm;
+  return [...CSS.matchAll(opener)].some((match) => blockAt(match.index).includes(token));
 }
 
 /** One declaration's value, anchored so a longer value cannot pass as a prefix. */
@@ -473,7 +467,7 @@ describe("motion preferences", () => {
         [])[1];
 
     const scoped = block(
-      CSS.slice(CSS.indexOf(":root {", CSS.indexOf("Shimmer"))),
+      CSS.slice(CSS.indexOf(":root, [data-roster-scope] {", CSS.indexOf("Shimmer"))),
     );
     const family = scoped.match(
       new RegExp(`${tokenName}:\\s*var\\(--roster-([\\w-]+)`),

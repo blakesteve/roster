@@ -375,6 +375,24 @@
   --blur-backdrop: var(--roster-backdrop-blur, 8px);
 }
 
+/* ── Semantic tokens and `data-roster-scope` ─────────────────────────────────
+   A custom property resolves where it's declared, so a token derived from a
+   ramp at `:root` reaches the page as a finished value, and a ramp overridden
+   on a wrapper changes nothing below it. So every block here that derives from
+   a ramp is declared on `[data-roster-scope]` as well, and an element with the
+   attribute derives them again from the ramps in force there.
+
+   Each `.dark` block stays after its own block, at the same specificity, which
+   is what gives an element with both the dark values. A scope in a dark page
+   with no `.dark` of its own matches the light block directly and resets to
+   light: a scope owns its state.
+
+   Sheet timing and elevation read no ramp, so those two stay on `:root` alone,
+   and a scope inherits them. `scripts/check-tokens.mjs` reads all of this in
+   the built stylesheet: a block that derives a token without the attribute,
+   or a `.dark` block ahead of its own, fails the build.
+   ─────────────────────────────────────────────────────────────────────────── */
+
 /* ── Focus tokens ────────────────────────────────────────────────────────────
    The offset is the page behind the control, not a color in its own right: the
    2px gap it paints is what separates the ring from the fill, so it has to
@@ -382,7 +400,7 @@
    what Tailwind's default did while `--color-background` was undefined — put a
    white halo around every focused control on a dark page.
    ─────────────────────────────────────────────────────────────────────────── */
-:root {
+:root, [data-roster-scope] {
   --roster-ring: var(--roster-primary-500, #0f6498);
   --roster-ring-offset: var(--roster-white, #ffffff);
 }
@@ -409,7 +427,7 @@
    override per usage. Only the default variants (Card `white`, Footer
    `default`) are tokenized. The other variants stay deliberately literal.
    ─────────────────────────────────────────────────────────────────────────── */
-:root {
+:root, [data-roster-scope] {
   --roster-card-bg: var(--roster-white, #ffffff);
   --roster-card-border: var(--roster-gray-200, #e7e5e4);
   --roster-card-text: var(--roster-gray-900, #1c1917);
@@ -440,7 +458,7 @@
    `.dark nav { background-color: … }`. Setting these three variables retints
    the `default` variant with no selector overrides.
    ─────────────────────────────────────────────────────────────────────────── */
-:root {
+:root, [data-roster-scope] {
   --roster-nav-bg: var(--roster-white, #ffffff);
   --roster-nav-border: var(--roster-gray-200, #e7e5e4);
   --roster-nav-text: var(--roster-gray-900, #1c1917);
@@ -452,7 +470,7 @@
   --roster-nav-text: var(--roster-gray-100, #f5f5f4);
 }
 
-:root {
+:root, [data-roster-scope] {
   --roster-lt-bg: var(--roster-white, #ffffff);
   --roster-lt-border: var(--roster-gray-200, #e7e5e4);
   --roster-lt-pill: var(--roster-primary-500, #0f6498);
@@ -486,7 +504,7 @@
    lighter than the selected one, so the two never read alike. The liquid
    variant keeps its own `--roster-lt-*` tokens, below.
    ─────────────────────────────────────────────────────────────────────────── */
-:root {
+:root, [data-roster-scope] {
   --roster-tabs-border: var(--roster-gray-200, #e7e5e4);
   --roster-tabs-text: var(--roster-gray-500, #65635f);
   --roster-tabs-text-hover: var(--roster-gray-900, #1c1917);
@@ -511,7 +529,7 @@
    its fill the faintest primary tint. Restated in `.dark` rather than left to
    resolve at `:root`, so a dark subtree gets the dark values.
    ─────────────────────────────────────────────────────────────────────────── */
-:root {
+:root, [data-roster-scope] {
   --roster-tile-border: var(--roster-control-border, #65635f);
   --roster-tile-bg: transparent;
   --roster-tile-border-checked: var(--roster-primary-500, #0f6498);
@@ -531,7 +549,7 @@
    connectors. The "now" divider is the ring's color. Restated in `.dark`, as
    the tile tokens are, so a dark subtree gets the dark values.
    ─────────────────────────────────────────────────────────────────────────── */
-:root {
+:root, [data-roster-scope] {
   --roster-timeline-rail: var(--roster-skeleton, #e7e5e4);
   --roster-timeline-rail-done: var(--roster-primary-600, #0a4f7a);
   --roster-timeline-now: var(--roster-primary-500, #0f6498);
@@ -684,7 +702,7 @@
    in both themes, so it reads as light moving over the numerals instead of a
    second color appearing in them.
    ─────────────────────────────────────────────────────────────────────────── */
-:root {
+:root, [data-roster-scope] {
   --roster-shimmer-base: var(--roster-primary-700, #084063);
   --roster-shimmer-highlight: var(--roster-primary-300, #9bcce9);
 }
@@ -778,7 +796,7 @@
    done from not yet. A darker dark track (gray-800) was 1.15:1 against a
    gray-900 card, so a skeleton all but vanished.
    ─────────────────────────────────────────────────────────────────────────── */
-:root {
+:root, [data-roster-scope] {
   --roster-skeleton: var(--roster-gray-200, #e7e5e4);
   --roster-skeleton-highlight: var(--roster-gray-100, #f5f5f4);
 }
@@ -914,7 +932,7 @@
    live only in that legacy block. On anything current, `scrollbar-width: thin`
    is the entire shape control the standard gives you.
    ─────────────────────────────────────────────────────────────────────────── */
-:root {
+:root, [data-roster-scope] {
   --roster-scrollbar-thumb: var(--roster-gray-300, #d6d3d1);
   --roster-scrollbar-track: transparent;
 }
@@ -969,10 +987,11 @@
       by this unlayered `.dark`. Set them unlayered too.
    2. `var(--roster-gray-300, …)` resolves HERE, at `:root`, not on the element.
       The old `border-gray-300` utility resolved on the input, so a subtree
-      palette override reached it; a subtree override no longer does. Only
-      `:root`-scoped palette remaps carry.
+      palette override reached it; a subtree override now needs
+      `data-roster-scope` on that subtree. Otherwise only `:root`-scoped
+      palette remaps carry.
    ─────────────────────────────────────────────────────────────────────────── */
-:root {
+:root, [data-roster-scope] {
   /* gray-500, not gray-300, and the reason is 1.4.11: a control has to be
      identifiable from its surroundings at 3:1. gray-300 reached 1.49 on white
      and 1.43 on the gray-50 page — a hairline, not a boundary. gray-500 gives
@@ -1065,7 +1084,7 @@
    family exists to fix. Caught by a story that set them on a wrapper and got a
    white panel back.
    ─────────────────────────────────────────────────────────────────────────── */
-:root {
+:root, [data-roster-scope] {
   --roster-popover-bg: var(--roster-white, #fff);
   --roster-popover-border: var(--roster-gray-200, #e7e5e4);
   --roster-popover-text: var(--roster-gray-900, #1c1917);

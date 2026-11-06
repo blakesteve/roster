@@ -157,10 +157,22 @@ for (const token of ELEVATION) {
   }
 }
 
-/* The bodies of the plain `:root { … }` rules. Checked there specifically: a
-   token declared only under `.dark` would pass a whole-file search and leave
-   light mode with nothing, a transparent backdrop for instance. */
-const ROOT = [...css.matchAll(/(?:^|[}\s]):root\s*\{([^{}]*)\}/g)].map((m) => m[1]).join(";");
+/* Every rule in the file with no rule inside it, wherever it sits. The selector
+   stops at a `;`, since the first block follows the layer order. */
+const RULES = [...css.matchAll(/([^{};]+)\{([^{}]*)\}/g)].map((m) => ({
+  selector: m[1].trim(),
+  body: m[2],
+  at: m.index,
+}));
+const SCOPE = ":root,[data-roster-scope]";
+
+/* The bodies of the `:root { … }` rules, alone or with the scope, outside any
+   at-rule. Checked there specifically: a token declared only under `.dark`
+   would pass a whole-file search and leave light mode with nothing, a
+   transparent backdrop for instance. */
+const ROOT = RULES.filter(({ selector, at }) => (selector === ":root" || selector === SCOPE) && css[at - 1] !== "{")
+  .map(({ body }) => body)
+  .join(";");
 
 for (const token of COMPONENT) {
   if (!ROOT.includes(`--roster-${token}:`)) {
@@ -171,6 +183,48 @@ for (const token of COMPONENT) {
       `\`--roster-${token}\` is defined but nothing reads it, so setting it ` +
         `changes nothing.`,
     );
+  }
+}
+
+/* The semantic tokens' scope. A token derived at `:root` alone arrives in a
+   re-themed region as the page's finished value, which is the failure
+   `data-roster-scope` ends, and nothing else would say so. Read here because
+   the promise is the selector list and its order as they ship, and the build
+   sits between those and the source.
+
+   An allow-list: a rule that derives a `--roster-*` token is the scope, its
+   `.dark` twin or one of Roster's own utilities, so a block written any other
+   way fails rather than going unseen. Tailwind's `:root,:host` theme block
+   reads the font and radius hooks, and it declares no `--roster-*` itself.
+
+   Order: an element with both the scope and `.dark` takes whichever rule comes
+   last, at equal specificity, so a `.dark` rule ahead of a scoped rule it
+   shares a token with hands that element the light value. Text order, and the
+   `@supports` copies count: a rule moved into a layer is the pins' to catch. */
+const declared = (body) => [...body.matchAll(/(--roster-[\w-]+):/g)].map((m) => m[1]);
+const SCOPED_RULES = RULES.filter(({ selector }) => selector === SCOPE);
+const DARK_RULES = RULES.filter(({ selector }) => selector === ".dark");
+
+for (const { selector, body } of RULES) {
+  const derives = declared(body).length > 0 && body.includes("var(--roster-");
+  if (derives && selector !== SCOPE && selector !== ".dark" && !selector.startsWith(".rst\\:")) {
+    problems.push(
+      `\`${selector}\` derives ${declared(body).join(", ")}, and only ` +
+        `\`${SCOPE}\` lets a scope derive them again.`,
+    );
+  }
+}
+
+for (const rule of SCOPED_RULES) {
+  const tokens = declared(rule.body);
+  for (const dark of DARK_RULES) {
+    const shared = declared(dark.body).filter((token) => tokens.includes(token));
+    if (shared.length > 0 && dark.at < rule.at) {
+      problems.push(
+        `A \`.dark\` rule comes before its \`:root\` rule, so an element with ` +
+          `\`data-roster-scope\` and \`.dark\` gets the light ${shared.join(", ")}.`,
+      );
+    }
   }
 }
 
@@ -222,5 +276,5 @@ if (problems.length > 0) {
 }
 
 console.log(
-  `✓ ${ROLES.length} font roles, ${MOTION.length} motion knobs, ${ELEVATION.length} surface elevation levels, ${COMPONENT.length} component tokens, ${COMPONENT_HOOKS.length} component hooks and ${Object.keys(SHAPE).length + 1} shape tokens, the control level among them (read by ${Object.values(SHAPE).flat().length} utilities, and the backdrop by ${backdropReads} rules) are themeable via --roster-*`,
+  `✓ ${ROLES.length} font roles, ${MOTION.length} motion knobs, ${ELEVATION.length} surface elevation levels, ${COMPONENT.length} component tokens, ${COMPONENT_HOOKS.length} component hooks and ${Object.keys(SHAPE).length + 1} shape tokens, the control level among them (read by ${Object.values(SHAPE).flat().length} utilities, and the backdrop by ${backdropReads} rules) are themeable via --roster-*, and ${SCOPED_RULES.length} semantic blocks (${SCOPED_RULES.flatMap(({ body }) => declared(body)).length} tokens) carry data-roster-scope`,
 );
