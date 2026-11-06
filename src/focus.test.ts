@@ -60,7 +60,7 @@ describe("the focus indicator", () => {
   /**
    * Reads a focus token out of one scope of the stylesheet.
    *
-   * Anchored on the `Focus tokens` comment and then on the next `:root {` or
+   * Anchored on the `Focus tokens` comment and then on the next `:root,` or
    * `.dark {` after it. An earlier version searched for the literal dark value
    * it expected to find, which meant changing that value made the helper report
    * "no token found in the dark scope" — false, and it sent you looking in
@@ -69,7 +69,7 @@ describe("the focus indicator", () => {
   function themeVar(name: string, scope: "root" | "dark"): string | null {
     const from = INDEX.indexOf("Focus tokens");
     if (from === -1) return null;
-    const opener = scope === "dark" ? ".dark {" : ":root {";
+    const opener = scope === "dark" ? ".dark {" : ":root, [data-roster-scope] {";
     const blockStart = INDEX.indexOf(opener, from);
     if (blockStart === -1) return null;
     const block = INDEX.slice(blockStart, INDEX.indexOf("}", blockStart));

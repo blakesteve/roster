@@ -186,6 +186,72 @@ Tokens Roster never declares, such as the [shape tokens](#shape) and
 `--roster-elevation-control`, have no such rule to lose to, so `:root` alone
 covers both schemes.
 
+#### A region with its own palette
+
+Roster's semantic tokens, such as `--roster-tabs-indicator` and
+`--roster-card-bg`, derive from the ramps at `:root`. A custom property resolves
+where it's declared, so they reach the page as finished values, and a ramp
+overridden on a wrapper changes nothing below it: inside that wrapper, tab
+underlines and timeline rails keep the page's color. Add `data-roster-scope` and
+they derive again from the ramps in force on that element:
+
+```css
+.region {
+  --roster-primary-400: #a78bfa;
+  --roster-primary-500: #7c3aed;
+  --roster-primary-600: #6d28d9;
+}
+```
+
+```tsx
+<section className="region" data-roster-scope>
+  <Tabs tabs={tabs} activeTab={active} onChange={setActive} />
+</section>
+```
+
+A page that never sets the attribute computes exactly what it did before.
+
+**A scope owns its state.** The attribute matches the light tokens directly, so
+a scope inside a dark page, with no `.dark` of its own, resets to light while
+everything around it stays dark. To stay dark, a scope sets `.dark` too: an
+element with both gets the dark values, from its own ramps.
+
+```tsx
+<section className="region dark" data-roster-scope>
+```
+
+A scope that follows the page's theme has to do that itself, at two costs:
+
+- `ThemeToggle` and the blocking script above reach `<html>` and nothing else.
+  Until your code sets `.dark` on the scope, a server-rendered scope paints
+  light on a dark page.
+- `Select`, `Combobox`, `MultiSelect`, `Sheet` and the `Toaster` read a scoped
+  `.dark` once, when they mount. Give the scope a `key` that changes with the
+  theme, so they mount again and their panels follow it.
+
+A few more things follow from the same rule:
+
+- Scopes nest. An inner scope derives from the ramps in force at the inner
+  element, its own if it sets any and the outer scope's if it doesn't.
+- A semantic token you set at `:root` stops at a scope, which declares its own.
+  Set it on the scope as well. `[data-roster-scope]` weighs the same as a class
+  and sits outside any layer, so a class on the scope has to load after Roster's
+  stylesheet, unlayered, or it's discarded, as in the rule above.
+- Sheet timing and elevation read no ramp, so a scope doesn't re-declare them.
+  It inherits them, so a light scope in a dark page keeps the dark shadows and
+  the dark Sheet backdrop.
+
+Two things it doesn't do:
+
+- **It doesn't cross a portal.** `Select`'s menu, `Menu`, `Dialog` and `Tooltip`
+  render at `<body>`, outside the scope, so the scope's ramps don't reach them.
+  A `.dark` on the scope is carried across by the five surfaces above and by
+  `Menu`, which then open on Roster's own dark tokens rather than your page's.
+  `Dialog` and `Tooltip` don't carry it, so they open in the page's scheme.
+- **It doesn't stop `dark:` variants.** They fire under any `.dark` ancestor,
+  and a scope can't undo one, so a light scope in a dark page gets light tokens
+  and dark variants together.
+
 ### Elevation
 
 Three levels, each a themeable box-shadow, and the only way a surface should
@@ -754,8 +820,9 @@ something different in each would not be a token.
 One caveat worth knowing before you lean on these: like `--roster-card-*`,
 `--roster-nav-*` and `--roster-footer-*`, they are declared outside
 `@layer roster` and resolved at `:root`. A host that declares its override
-inside `@layer base` is outranked, and an override scoped to a subtree rather
-than the document root will not reach them.
+inside `@layer base` is outranked, and a ramp overridden on a subtree rather
+than the document root will not reach them unless that subtree carries
+[`data-roster-scope`](#a-region-with-its-own-palette).
 
 ### Floating surface colors
 
