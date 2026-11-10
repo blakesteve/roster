@@ -1502,6 +1502,23 @@ and checks it's visible (Playwright's `toBeVisible`, say) finds it open. In
 read as hidden; `Sheet`'s was too, and is fixed the same way. Nothing on
 screen moves, and a click outside the panel still closes it.
 
+**One opened as another leaves.** A `Dialog` or `Sheet` opened while another
+is still leaving holds the page from its first frame, so the other one's focus
+restore can't move focus out onto the page. An opener in the toast host is the
+exception: the host stays live, so one opened from a toast still gives focus
+back to it as it leaves, out of whatever opened in its place. In 5.19.0 and
+before, a `Sheet` that mounted already
+open, as one whose code loads on its first open does, never held the part of
+the page it was written in. That part stayed live behind it, and a sheet or
+dialog leaving at the same time restored focus onto it as its leave ended. A
+`Sheet` now opens a render later, before anything is painted, as `Dialog`
+already did, so on that first open it also slides in rather than appearing in
+place. Nothing to change in your code.
+
+Such a sheet may also have no opener to give focus back to: Headless UI keeps
+the record of what was pressed only once its code has loaded, after the press
+that opened the sheet. Remember the press and pass it as `returnFocus`.
+
 **Full screen.** `layout="fullscreen"` makes a bare dialog over the whole
 viewport, for a photo viewer or a full-screen card: no box, no padding, and no
 header or close button of Roster's. Everything inside is yours, a close

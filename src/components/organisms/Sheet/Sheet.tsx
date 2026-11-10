@@ -72,7 +72,10 @@ export interface SheetProps {
    * Where focus goes on close, over whatever opened the sheet.
    *
    * A sheet opened on page load from a deep link has no opener, so without
-   * this focus falls to `<body>`.
+   * this focus falls to `<body>`. A sheet whose code loads on its first open
+   * can have none either: Headless UI, which keeps the record of what was
+   * pressed, starts keeping it only once its code has loaded, after the press
+   * that opened the sheet. Remember the press yourself and pass it here.
    */
   returnFocus?: React.RefObject<HTMLElement | null> | HTMLElement | null;
   /** Sets `aria-busy` on the content region while its content loads. */
@@ -238,20 +241,35 @@ const Sheet = ({
   const { ref: scopeRef, inDarkScope } = useDarkScope<HTMLSpanElement>();
   const reducedMotion = useReducedMotion();
 
+  /* `mounted` keeps a sheet that is open on its first render closed for that
+     one render, and opens it in a layout effect, before anything is painted,
+     as `Dialog` does. To Headless UI that is an ordinary open. Mounted open
+     instead, as a sheet whose code loads on its first open is, Headless UI
+     never marks the part of the page the sheet is written in: it stayed live
+     behind the sheet, and a sheet still leaving restored focus into it, out
+     of this one, as its leave ended. Held, the page is inert, so that restore
+     can't land there and focus stays here. An opener in the toast host still
+     takes it: the host stays live. */
+  const [mounted, setMounted] = React.useState(false);
+  React.useLayoutEffect(() => {
+    setMounted(true);
+  }, []);
+  const open = isOpen && mounted;
+
   /* Removes a sheet Headless UI leaves mounted after a close cut into its
      entrance, and calls `onAfterClose` once either way (the module says how). */
   const dialogRef = React.useRef<HTMLDivElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
-  const leave = useLeaveWatchdog(dialogRef, panelRef, isOpen, reducedMotion ? LEAVE_MS.fade : LEAVE_MS.slide, onAfterClose);
+  const leave = useLeaveWatchdog(dialogRef, panelRef, open, reducedMotion ? LEAVE_MS.fade : LEAVE_MS.slide, onAfterClose);
 
   /* Headless UI marks only the part of the page the sheet is written in;
      `lockPage` marks the rest, the header and footer beside it, and leaves the
      toast host live. The scope span is where the sheet is written, which is
      how it finds the part to leave to Headless UI. */
   React.useLayoutEffect(() => {
-    if (!isOpen) return;
+    if (!open) return;
     return lockPage(scopeRef.current);
-  }, [isOpen, scopeRef]);
+  }, [open, scopeRef]);
 
   const handleRef = React.useRef<HTMLDivElement>(null);
   const titleRef = React.useRef<HTMLHeadingElement>(null);
@@ -267,11 +285,11 @@ const Sheet = ({
      object on every render, and a title whose words did not change is not new
      content. A string is its own signature. */
   const signature = titleSignature(title);
-  const seen = React.useRef({ signature, contentKey, open: isOpen, busy });
+  const seen = React.useRef({ signature, contentKey, open, busy });
   React.useEffect(() => {
     const previous = seen.current;
-    seen.current = { signature, contentKey, open: isOpen, busy };
-    if (!previous.open || !isOpen) return;
+    seen.current = { signature, contentKey, open, busy };
+    if (!previous.open || !open) return;
     const keyChanged = previous.contentKey !== contentKey;
     /* A title that changes while the content was loading is the provisional
        title being refined, not new content. */
@@ -279,7 +297,7 @@ const Sheet = ({
     if (!keyChanged && !titleChanged) return;
     titleRef.current?.focus();
     if (contentRef.current) contentRef.current.scrollTop = 0;
-  }, [signature, contentKey, isOpen, busy]);
+  }, [signature, contentKey, open, busy]);
 
   /* ── Touch devices ────────────────────────────────────────────────────────
      Headless UI skips `initialFocus` on a coarse pointer and focuses the dialog
@@ -288,7 +306,7 @@ const Sheet = ({
      button, which opens no keyboard, so land where a mouse user lands. An
      explicit `initialFocus` is the consumer's call either way. */
   React.useEffect(() => {
-    if (!isOpen) return;
+    if (!open) return;
     const frame = requestAnimationFrame(() => {
       const panel = panelRef.current;
       const active = document.activeElement;
@@ -296,7 +314,7 @@ const Sheet = ({
       (initialFocus?.current ?? closeRef.current)?.focus();
     });
     return () => cancelAnimationFrame(frame);
-  }, [isOpen, initialFocus]);
+  }, [open, initialFocus]);
 
   /* ── On-screen keyboard ───────────────────────────────────────────────────
      `dvh` does not shrink for the iOS keyboard, so a field near the bottom of
@@ -304,7 +322,7 @@ const Sheet = ({
      follows the visual viewport instead. */
   const [keyboardCap, setKeyboardCap] = React.useState<number | null>(null);
   React.useEffect(() => {
-    if (!isOpen) return;
+    if (!open) return;
     const viewport = window.visualViewport;
     if (!viewport) return;
     const update = () => {
@@ -324,7 +342,7 @@ const Sheet = ({
       document.removeEventListener("focusout", update);
       setKeyboardCap(null);
     };
-  }, [isOpen]);
+  }, [open]);
 
   /* ── Drag to dismiss ──────────────────────────────────────────────────────
      Starts only on the handle and the header, never the content, so reading
@@ -333,10 +351,10 @@ const Sheet = ({
      class-based leave transition can take over from it. */
   const drag = React.useRef<DragState | null>(null);
   const suppressClick = React.useRef(false);
-  const openRef = React.useRef(isOpen);
+  const openRef = React.useRef(open);
   React.useEffect(() => {
-    openRef.current = isOpen;
-  }, [isOpen]);
+    openRef.current = open;
+  }, [open]);
 
   const setOffset = (px: number) => {
     panelRef.current?.style.setProperty("--rst-sheet-drag", `${px}px`);
@@ -363,21 +381,21 @@ const Sheet = ({
   /* Closed by something else mid-drag, going back in history for instance:
      let go, so the leave starts from wherever the sheet is. */
   React.useEffect(() => {
-    if (!isOpen && drag.current) {
+    if (!open && drag.current) {
       drag.current = null;
       if (panelRef.current) delete panelRef.current.dataset.dragging;
     }
     /* Reopened while still leaving: Headless UI keeps the same panel, and it
        must not open where the last drag left it. */
-    if (isOpen && !drag.current) setOffset(0);
-  }, [isOpen]);
+    if (open && !drag.current) setOffset(0);
+  }, [open]);
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     /* One drag at a time. A second finger would otherwise replace the first
        drag's state and strand the sheet part-way down. */
     if (drag.current) return;
     suppressClick.current = false;
-    if (!dragToDismiss || !isOpen) return;
+    if (!dragToDismiss || !open) return;
     /* A mouse drags from the handle only. The header's title is text someone
        may want to select, and a mouse has no other way to do that. */
     if (event.pointerType === "mouse") {
@@ -484,7 +502,7 @@ const Sheet = ({
       <HeadlessDialog
         key={leave.key}
         ref={dialogRef}
-        open={isOpen}
+        open={open}
         as="div"
         onClose={onClose}
         initialFocus={initialFocus ?? closeRef}
