@@ -2909,6 +2909,46 @@ output is hidden there), and no `meta.json` is written. A test that passed only
 on its retry is named in the output too, and `meta.json` records how many there
 were, as `passedOnRetry`.
 
+## Discord notices
+
+`.github/workflows/discord.yml` posts to Roster's channel on Blake's Discord,
+through the webhook in the `DISCORD_WEBHOOK_URL` repository secret. It's a
+separate workflow, so nothing it does can fail or delay CI or a deploy. Without
+the secret, as in a fork, it skips cleanly and posts nothing.
+
+| Event | Posts when | Which copy of the file runs |
+| --- | --- | --- |
+| Storybook deployed, or its deploy failed | `deployment_status`, environment `Production`, state `success`, `failure` or `error` | The one in the deployed commit |
+| A release | `release: published` | The one in the tagged commit |
+| CI red | `workflow_run` on `CI`, `failure`, on `main`, from a push | The one on `main` |
+
+A deploy here is Storybook, at `https://roster-tan.vercel.app`, so the post
+says Storybook was deployed. The package itself ships on `npm publish`, which
+isn't a GitHub event, so nothing posts it; the GitHub release made beside it
+does. Previews and pull requests don't post, and neither does a fork's: CI on a
+pull request isn't a push. Nor does a CI run that ends canceled, which is how a
+job stopped at its own time limit ends it. The Storybook job's steps have their
+own limits, so a stalled step there fails and posts, but Unit Tests and Build
+have only the job's, so a hung step in either is silent.
+
+Each post has the version, the commit and a link. With `DETAILS: "on"`, a
+deploy lists the PRs merged since the last good deploy (not the `release/`
+PRs), a release carries its notes without the authors and links, and red CI
+names each failed job and its failed step, such as "Storybook Tests: Run
+Storybook tests with real input". All of that text is escaped, so a title can't
+ping anyone or draw a link.
+
+`src/discord-workflow.test.ts` runs the job's real condition and its real
+script, with stand-ins for `curl` and `gh`, in the `unit` project. To send each
+message as a test, from `main`:
+
+```bash
+gh workflow run discord.yml --repo blakesteve/roster -f message=deploy
+```
+
+The other three are `deploy-failed`, `release` and `ci-failed`. A `ci-failed`
+test names the steps of CI's latest failed push to `main`.
+
 ## Contributing
 
 Pull requests are welcome. Please:
