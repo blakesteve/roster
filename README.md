@@ -1519,6 +1519,15 @@ Such a sheet may also have no opener to give focus back to: Headless UI keeps
 the record of what was pressed only once its code has loaded, after the press
 that opened the sheet. Remember the press and pass it as `returnFocus`.
 
+**Closed and opened again during its entrance.** A `Sheet` closed while it is
+still coming in and opened again a moment later comes back whole. In 5.19.1, and
+in earlier releases for any open but one mounted open, a reopen that landed
+after the panel's part of the close had ended and before the backdrop's could
+bring back the backdrop, holding the page, and no panel, with focus on `<body>`
+until Escape or a tap closed it. `Dialog` did the same on any close when a
+`className` made its panel's transition end before the backdrop's, and came back
+with no backdrop when one made it end after. Nothing to change in your code.
+
 **Full screen.** `layout="fullscreen"` makes a bare dialog over the whole
 viewport, for a photo viewer or a full-screen card: no box, no padding, and no
 header or close button of Roster's. Everything inside is yours, a close

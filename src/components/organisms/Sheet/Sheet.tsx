@@ -304,7 +304,11 @@ const Sheet = ({
      element instead, so the keyboard does not pop up over a sheet the reader
      has not touched yet. That is right for a text field and wrong for the close
      button, which opens no keyboard, so land where a mouse user lands. An
-     explicit `initialFocus` is the consumer's call either way. */
+     explicit `initialFocus` is the consumer's call either way.
+
+     It is also all that puts focus back in a sheet opened again before its
+     leave ended: Headless UI counts the dialog open through the leave, so its
+     own initial focus doesn't run again. Keep it for every pointer. */
   React.useEffect(() => {
     if (!open) return;
     const frame = requestAnimationFrame(() => {
@@ -520,7 +524,17 @@ const Sheet = ({
           )}
         />
         <div className="rst:fixed rst:inset-0 rst:flex rst:items-end rst:justify-center">
-          <TransitionChild afterLeave={leave.afterLeave}>
+          {/* `unmount={false}`, as the backdrop's transition has from Headless
+              UI's Dialog. Unmounted, a child whose leave has ended can't come
+              back while the dialog is still there. Closed early in its
+              entrance, both turn around, and the panel's turnaround ends
+              first: the backdrop's ease-out has gone further, and a
+              turnaround lasts as long as the way back. A sheet opened again
+              between the two ends came back with its backdrop, holding the
+              page, and no panel, focus on `<body>`. Hidden instead, it shows
+              again. The whole dialog still leaves the page once both have
+              ended. */}
+          <TransitionChild unmount={false} afterLeave={leave.afterLeave}>
             <DialogPanel
               ref={panelRef}
               style={panelStyle}

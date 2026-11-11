@@ -56,12 +56,14 @@ jobs:
     env:
       TZ: UTC
     # Ceilings, so a stall fails with GitHub's "has timed out" message inside a
-    # stated bound rather than at six hours. Healthy steps, 16 to 23 Oct:
-    # dependencies 6 to 20s, the four test steps 40 to 63s, 14 to 25s, 76 to
-    # 132s and 15 to 29s. Each step gets about three to five times its worst
-    # healthy time; the job, about two and a half times its whole healthy run
-    # with the image pull.
-    timeout-minutes: 15
+    # stated bound rather than at six hours. Healthy, ten green runs from 6 to
+    # 10 Nov: the image 24 to 31s, dependencies 11 to 21s, the four test steps
+    # 46 to 68s, 29 to 48s, 204 to 262s and 19 to 30s, and the job 351 to 452s.
+    # The real-input step took 308s with the Sheet and Dialog reopen checks.
+    # Each step gets about three to five times its worst healthy time; the
+    # job, about two and a half times its whole healthy run with the image
+    # pull. Re-baseline from fresh runs when a step outgrows its ceiling.
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
@@ -80,7 +82,7 @@ jobs:
         run: npx vitest run --project storybook
 
       - name: Run Storybook tests under reduced motion
-        timeout-minutes: 2
+        timeout-minutes: 3
         run: npx vitest run --project storybook-reduced-motion
 
       # Stories that drive Playwright's real mouse and resize the viewport
@@ -88,7 +90,7 @@ jobs:
       # because they need the page's one mouse and one viewport to themselves.
       # They run in Chromium and in WebKit, where pointer and scroll differ.
       - name: Run Storybook tests with real input
-        timeout-minutes: 6
+        timeout-minutes: 15
         run: npx vitest run --project storybook-real-input
 
       # Checks that read Chromium's accessibility tree (.storybook/ax-tree.ts).
