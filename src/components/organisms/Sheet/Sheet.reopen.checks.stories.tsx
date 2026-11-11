@@ -20,6 +20,13 @@ import { realInputOrSkip } from "../../../test/real-input";
  * time: on a busy machine a set time lands before the entrance starts, or
  * too late. A try in which the entrance was never seen counts as no window.
  *
+ * That window is a few milliseconds wide, and where it falls depends on how
+ * soon the machine turns the entrance around: in CI's Linux Chromium it never
+ * came in 20 tries. So the window checks widen it with a style of the story's
+ * own that gives the backdrop a 700ms transition. Its leave then ends well
+ * after the panel's on every machine, the way the natural one does by a few
+ * milliseconds. The set-gaps check keeps the sheet's own timing.
+ *
  * - **Opened again in that window, it shows its panel:** the panel there,
  *   focus inside it, within the entrance (280ms) and a frame, and then at
  *   rest on screen, slid all the way in, for a sheet that mounts open and
@@ -32,7 +39,9 @@ import { realInputOrSkip } from "../../../test/real-input";
  *   first, as Escape and a tap outside do, and Headless UI counts the dialog
  *   open through its leave, so it doesn't focus it again.
  * - **At set gaps too:** opened again 20, 40, 60 and 100ms after that close,
- *   as a page's own reopen is.
+ *   as a page's own reopen is. A try whose entrance was never seen (once in
+ *   a WebKit run here; Headless UI skips a transition now and then, as the
+ *   older checks find for a leave) is tried again, up to twice.
  * - **A closed sheet never leaves the page held,** after every close.
  *
  * A try that doesn't come back logs what was there: each part, and focus.
@@ -54,7 +63,7 @@ const ENTRANCE_MS = 280 + 17;
 /* Set by the sheet as it renders, so a check can open and close it at any moment. */
 const sheet = { open: () => {}, close: () => {}, reset: () => {} };
 
-function Reopen({ mountsOpen }: { mountsOpen: boolean }) {
+function Reopen({ mountsOpen, slowBackdrop = false }: { mountsOpen: boolean; slowBackdrop?: boolean }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(!mountsOpen);
   useEffect(() => {
@@ -70,6 +79,9 @@ function Reopen({ mountsOpen }: { mountsOpen: boolean }) {
   }, [mountsOpen]);
   return (
     <PageRegions>
+      {/* Unlayered, so it beats Roster's layered utilities: the backdrop's
+          transition, made longer than the panel's. */}
+      {slowBackdrop && <style>{'[data-testid="sheet-backdrop"] { transition-duration: 700ms !important; }'}</style>}
       {mounted && (
         <Sheet isOpen={open} onClose={() => setOpen(false)} title="Again">
           <button type="button">Inside</button>
@@ -200,7 +212,7 @@ async function atGap(gap: number): Promise<Try> {
 
 function windowCheck(mountsOpen: boolean): Story {
   return {
-    render: () => <Reopen mountsOpen={mountsOpen} />,
+    render: () => <Reopen mountsOpen={mountsOpen} slowBackdrop />,
     play: async () => {
       if (!realInputOrSkip()) return;
       /* Tried until the window has come four times, for up to 20 tries or
@@ -228,13 +240,20 @@ export const OpenedAgainAtSetGaps: Story = {
     if (!realInputOrSkip()) return;
     const backs: Record<number, (number | null)[]> = {};
     const notes: string[] = [];
+    const retried: number[] = [];
     const noEntrance: number[] = [];
     const notIn: number[] = [];
     const leftHeld: number[] = [];
     for (const gap of [20, 40, 60, 100]) {
       backs[gap] = [];
       for (let i = 0; i < 2; i += 1) {
-        const t = await atGap(gap);
+        let t = await atGap(gap);
+        /* No entrance seen, so nothing was closed early: tried again, up to
+           twice. */
+        for (let again = 0; again < 2 && !t.reopened; again += 1) {
+          retried.push(gap);
+          t = await atGap(gap);
+        }
         backs[gap].push(t.backMs);
         if (t.seen) notes.push(`${gap}ms: ${t.seen}`);
         if (!t.reopened) noEntrance.push(gap);
@@ -242,7 +261,9 @@ export const OpenedAgainAtSetGaps: Story = {
         if (t.heldAfter) leftHeld.push(gap);
       }
     }
-    console.info(`SHEET REOPEN gaps: ${JSON.stringify(backs)}${notes.length ? ` ${JSON.stringify(notes)}` : ""}`);
+    console.info(
+      `SHEET REOPEN gaps: ${JSON.stringify(backs)}${notes.length ? ` ${JSON.stringify(notes)}` : ""}${retried.length ? `, retried ${JSON.stringify(retried)}` : ""}`,
+    );
     const late = Object.entries(backs).filter(([, ms]) => ms.some((m) => m === null || m > ENTRANCE_MS));
     await expect([late, noEntrance, notIn, leftHeld]).toEqual([[], [], [], []]);
   },
