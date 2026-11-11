@@ -286,7 +286,15 @@ const Dialog = ({
         className="rst:font-ui rst:fixed rst:inset-0 rst:z-50"
         onClose={onClose}
       >
+        {/* Every part's transition is `unmount={false}`, as a Sheet's is.
+            Unmounted, a part whose leave has ended can't come back while the
+            dialog is still there. A panel made quicker than the backdrop (a
+            `className` that drops its transition, say) ended first on every
+            close, and a dialog opened again before the backdrop's leave ended
+            came back holding the page with no panel. One made slower ended
+            last, and the dialog came back with no backdrop. */}
         <TransitionChild
+          unmount={false}
           as={Fragment}
           enter="rst:ease-out rst:duration-300"
           enterFrom="rst:opacity-0"
@@ -314,6 +322,7 @@ const Dialog = ({
         </TransitionChild>
         {fullscreen ? (
           <TransitionChild
+            unmount={false}
             as={Fragment}
             enter="rst:ease-out rst:duration-300"
             enterFrom="rst:opacity-0"
@@ -337,6 +346,7 @@ const Dialog = ({
           <div className="rst:fixed rst:inset-0 rst:overflow-y-auto">
             <div className="rst:flex rst:min-h-full rst:items-center rst:justify-center rst:p-4 rst:text-center">
               <TransitionChild
+                unmount={false}
                 as={Fragment}
                 enter="rst:ease-out rst:duration-300"
                 enterFrom="rst:opacity-0 rst:scale-95"
