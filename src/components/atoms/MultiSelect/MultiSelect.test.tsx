@@ -2,6 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { useState } from "react";
+import { renderToString } from "react-dom/server";
 import {
   MultiSelect,
   type MultiSelectProps,
@@ -44,6 +45,15 @@ const srSummary = () =>
   trigger().querySelector("[class*='sr-only']")?.textContent ?? null;
 
 describe("MultiSelect", () => {
+  it("says the trigger is a button from the server's render on", () => {
+    /* As in Select: rendered through Roster's own element, the trigger's type
+       has to be said, or the server's HTML has none and a tap before
+       hydration submits the form around it. */
+    const html = renderToString(<MultiSelect options={SPORTS} value={[]} onChange={() => {}} />);
+    const trigger = new DOMParser().parseFromString(html, "text/html").querySelector("button[aria-haspopup]");
+    expect(trigger?.getAttribute("type")).toBe("button");
+  });
+
   it("shows the placeholder until something is selected", () => {
     render(<Stateful placeholder="Pick sports" />);
     /* Twice on purpose: once inside the button where it becomes the accessible

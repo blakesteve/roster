@@ -26,6 +26,7 @@ import {
   useDarkScope,
 } from "../../../internal/popup";
 import { useKeyFocus } from "../../../internal/key-focus";
+import { DescribedButton } from "../../../internal/described";
 
 export type MultiSelectValue = string | number;
 
@@ -125,6 +126,7 @@ const MultiSelect = ({
   clearLabel = "Clear selection",
   removeLabel = (label: string) => `Remove ${label}`,
   countLabel = (count: number) => `${count} selected`,
+  "aria-describedby": ariaDescribedBy,
   ...props
 }: MultiSelectProps) => {
   useKeyFocus();
@@ -227,6 +229,13 @@ const MultiSelect = ({
           >
             <ListboxButton
               ref={triggerRef}
+              /* A caller's `aria-describedby` goes here, after the helper
+                 text's, not on the wrapper, which has no role, as in Select. */
+              as={DescribedButton}
+              callerDescribedBy={ariaDescribedBy}
+              /* Said, as in Select: with this `as`, Headless UI leaves it out
+                 until the element is there. */
+              type="button"
               aria-invalid={invalid || undefined}
               className="rst:absolute rst:inset-0 rst:h-full rst:w-full rst:cursor-pointer rst:rounded-md rst:focus:outline-hidden rst:disabled:cursor-not-allowed"
             >

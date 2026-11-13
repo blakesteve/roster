@@ -4,6 +4,7 @@ import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
 import { useKeyFocus } from "../../../internal/key-focus";
+import { DescribedDiv } from "../../../internal/described";
 import {
   radioTileGroupOptionsVariants,
   radioTilePictureVariants,
@@ -151,6 +152,7 @@ const RadioTileGroup = ({
   messageClassName,
   onKeyDown,
   "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedBy,
   ...props
 }: RadioTileGroupProps) => {
   useKeyFocus();
@@ -178,6 +180,9 @@ const RadioTileGroup = ({
       value={value}
       onChange={onChange}
       disabled={disabled}
+      /* A caller's `aria-describedby` after the message's, as in `RadioGroup`. */
+      as={DescribedDiv}
+      callerDescribedBy={ariaDescribedBy}
       className={cn("rst:font-ui rst:flex rst:flex-col rst:gap-1.5 rst:min-w-0", className)}
       {...groupProps}
       onKeyDown={onGroupKeyDown}

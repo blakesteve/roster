@@ -921,6 +921,36 @@ These merge last and win, not because they come later in the attribute (CSS
 ignores that) but because `cn` is tailwind-merge and deletes the class they
 conflict with.
 
+### Your own `id` and `aria-describedby`
+
+A field's label, helper text and error stay tied to its control whatever you
+pass, `Checkbox` aside (below). An `aria-describedby` of yours is added to the
+field's own description, never put in place of it.
+
+| Component                              | `id` goes on  | `aria-describedby` goes on                     |
+| -------------------------------------- | ------------- | ---------------------------------------------- |
+| `Input`, `PasswordInput`, `Textarea`   | the control   | the control, after the helper text or error    |
+| `Select`, `MultiSelect`                | the wrapper   | the trigger, after the helper text or error    |
+| `Combobox`                             | the wrapper   | the input, after the helper text or error      |
+| `RadioGroup`, `RadioTileGroup`         | the group     | the group, after the helper text or error      |
+| `CheckboxGroup`                        | the fieldset  | the fieldset, before the helper text or error  |
+| `Slider`                               | the slider    | the slider, after the helper text or error     |
+| `RangeSlider`                          | the group     | each thumb, after the helper text or error     |
+| `Checkbox`                             | the checkbox  | the checkbox, after its `Field`'s description  |
+
+`Checkbox` has no label of its own: it goes in Headless UI's `Field` beside a
+`Label`, and the `Field` gives it an id the `Label` points at. Give it an id of
+your own only with a `Label` given the same `htmlFor`, or a click on the label
+reaches nothing.
+
+**A field given an `id` (5.19.3).** In 5.19.2 and before, an `id` passed to
+`Input`, `PasswordInput` or `Textarea` went on the control while its label kept
+pointing at the id the field made up. The label still named the control, but a
+click on it reached nothing. A passed `aria-describedby` never reached the
+control in those three, `Select`, `MultiSelect`, `Combobox`, `RadioGroup` or
+`RadioTileGroup`, so it read only its own helper text or error, or nothing.
+Nothing to change in your code.
+
 ### Control heights
 
 `Button`, `Input` and `Select` share one size scale, so they line up when set

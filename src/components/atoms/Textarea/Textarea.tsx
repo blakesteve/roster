@@ -9,6 +9,7 @@ import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 import { textareaVariants } from "./textarea-variants";
 import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
+import { DescribedTextarea } from "../../../internal/described";
 
 export interface TextareaProps
   extends
@@ -40,6 +41,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       resize,
       disabled,
       textareaClassName,
+      id,
+      "aria-describedby": ariaDescribedBy,
       ...props
     },
     ref,
@@ -64,14 +67,22 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       <Field className={cn("rst:w-full", className)}>
         {label && (
           /* `--roster-control-text`, matching Input's label — see the comment
-             there for why not `text-inherit`. */
-          <Label className="rst:block rst:text-sm rst:font-medium rst:leading-none rst:text-[var(--roster-control-text)] rst:peer-disabled:cursor-not-allowed rst:peer-disabled:opacity-70 rst:text-left rst:mb-1.5">
+             there for why not `text-inherit`. `htmlFor` is a caller's `id`,
+             which goes on the textarea, as on Input's label. */
+          <Label
+            htmlFor={id}
+            className="rst:block rst:text-sm rst:font-medium rst:leading-none rst:text-[var(--roster-control-text)] rst:peer-disabled:cursor-not-allowed rst:peer-disabled:opacity-70 rst:text-left rst:mb-1.5"
+          >
             {label}
           </Label>
         )}
 
         <HeadlessTextarea
           ref={ref}
+          /* The caller's `aria-describedby` after the helper text's, as on Input. */
+          as={DescribedTextarea}
+          callerDescribedBy={ariaDescribedBy}
+          id={id}
           disabled={disabled}
           className={cn(
             textareaVariants({ variant, resize, error: hasError }),
