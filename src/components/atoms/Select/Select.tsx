@@ -24,6 +24,7 @@ import {
   useDarkScope,
 } from "../../../internal/popup";
 import { useKeyFocus } from "../../../internal/key-focus";
+import { DescribedButton } from "../../../internal/described";
 
 export type SelectOption = {
   value: string | number;
@@ -84,6 +85,7 @@ const Select = ({
   helperText,
   errorMessage,
   label,
+  "aria-describedby": ariaDescribedBy,
   ...props
 }: SelectProps) => {
   useKeyFocus();
@@ -108,12 +110,9 @@ const Select = ({
        extended `HTMLAttributes<HTMLDivElement>`, so `id`, `data-*` and the
        handlers all typechecked and were then silently dropped on the floor.
 
-       Still deliberately NOT claimed: `aria-*`. This is a plain wrapper div
-       with no role, so an `aria-describedby` landing here is inert. The
-       supported route is `helperText` / `errorMessage` below: Headless UI
-       wires the trigger's description from the Field's <Description> context,
-       which is the one path assistive tech actually follows. Before those
-       existed there was no way to describe this trigger at all. */
+       Except `aria-describedby`, which goes on the trigger, after the helper
+       text's: on this wrapper, with no role, it described nothing. Other
+       `aria-*` still land here. */
     <Field
       /* `disabled` reaches the Field, not only the Listbox. Without it the
          Field's DisabledProvider stays false, so the Label never picks up its
@@ -141,6 +140,15 @@ const Select = ({
       >
         <div ref={fieldRef} className="rst:relative">
           <ListboxButton
+            /* The caller's `aria-describedby` after the helper text's
+               (src/internal/described.tsx). */
+            as={DescribedButton}
+            callerDescribedBy={ariaDescribedBy}
+            /* Said, because Headless UI only works it out for an `as` of
+               "button", and otherwise not until the element is there: the
+               first render, and a server's, had no `type`, and a tap before
+               hydration could submit the form around it. */
+            type="button"
             /* Headless UI's `Listbox` emits `data-invalid` and no
                `aria-invalid`, and this component's `...props` land on the
                wrapper div, which has no role — so there was no route to it from

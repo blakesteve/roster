@@ -1,10 +1,11 @@
-import { forwardRef, useEffect, useRef, type ComponentProps, type ComponentPropsWithoutRef } from "react";
+import { forwardRef, useEffect, useRef, type ComponentProps } from "react";
 import { Checkbox as HeadlessCheckbox } from "@headlessui/react";
 import { type VariantProps } from "class-variance-authority";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faMinus } from "@fortawesome/free-solid-svg-icons";
 import { cn } from "../../../lib/utils";
 import { checkboxVariants } from "./checkbox-variants";
+import { DescribedSpan } from "../../../internal/described";
 
 export interface CheckboxProps
   extends
@@ -18,28 +19,14 @@ export interface CheckboxProps
    * in its `Field`. Headless UI's own props leave this out.
    */
   "aria-describedby"?: string;
+  /**
+   * Inside Headless UI's `Field`, leave it out: the `Field` gives the checkbox
+   * an id, and its `Label` points at that one. A checkbox given its own id
+   * must be given a `Label` with the same `htmlFor`, or a click on the label
+   * reaches nothing (its name still comes from the label).
+   */
+  id?: string;
 }
-
-/**
- * The element Headless UI renders, with the caller's `aria-describedby` added
- * to its own.
- *
- * Headless UI's Checkbox writes `aria-describedby` from the `Description`s in
- * its `Field`, and its props win over the caller's, so a caller's value was
- * dropped every time, even with no `Description` to replace it: the key is set
- * to `undefined`. Rendering through this keeps both, Headless UI's first.
- */
-type DescribedSpanProps = ComponentPropsWithoutRef<"span"> & { callerDescribedBy?: string };
-const DescribedSpan = forwardRef<HTMLSpanElement, DescribedSpanProps>(
-  ({ callerDescribedBy, "aria-describedby": own, ...props }, ref) => (
-    <span
-      ref={ref}
-      {...props}
-      aria-describedby={[own, callerDescribedBy].filter(Boolean).join(" ") || undefined}
-    />
-  ),
-);
-DescribedSpan.displayName = "Checkbox.DescribedSpan";
 
 const Checkbox = forwardRef<HTMLElement, CheckboxProps>(
   (

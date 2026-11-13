@@ -27,6 +27,7 @@ import {
   useDarkScope,
 } from "../../../internal/popup";
 import { useKeyFocus } from "../../../internal/key-focus";
+import { DescribedInput } from "../../../internal/described";
 
 export interface ComboboxProps
   extends
@@ -101,6 +102,7 @@ const Combobox = ({
   optionsClassName,
   emptyMessage = "No matches",
   filter = defaultFilter,
+  "aria-describedby": ariaDescribedBy,
   ...props
 }: ComboboxProps) => {
   useKeyFocus();
@@ -134,6 +136,10 @@ const Combobox = ({
       >
         <div ref={fieldRef} className="rst:relative">
           <ComboboxInput
+            /* A caller's `aria-describedby` goes here, after the helper
+               text's, not on the wrapper, which has no role, as in Select. */
+            as={DescribedInput}
+            callerDescribedBy={ariaDescribedBy}
             aria-invalid={invalid || undefined}
             /* `pr-9` AFTER `inputClassName`, unlike every other escape hatch
                in the library. It is structural rather than decorative: it is

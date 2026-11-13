@@ -9,6 +9,7 @@ import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 import { inputVariants, iconVariants } from "./input-variants";
 import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
+import { DescribedInput } from "../../../internal/described";
 
 export interface InputProps
   extends
@@ -50,6 +51,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       endIcon,
       disabled,
       inputClassName,
+      id,
+      "aria-describedby": ariaDescribedBy,
       ...props
     },
     ref,
@@ -80,6 +83,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <Field disabled={disabled} className={cn("rst:w-full", className)}>
         {label && (
           <Label
+            /* A caller's `id` goes on the input, so the label points at it.
+               Headless UI points it at the id the `Field` makes up, which the
+               caller's replaces: the label pointed at nothing, and a click on
+               it reached nothing. Without one, Headless UI's stands. */
+            htmlFor={id}
             /* `--roster-control-text`, not `text-inherit` and not a hardcoded
                pair. `text-inherit` followed the surface correctly and fell to
                the UA default black on any page that sets no body color — which
@@ -112,6 +120,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
           <HeadlessInput
             ref={ref}
+            /* The caller's `aria-describedby` after the helper text's, not in
+               place of it (src/internal/described.tsx). */
+            as={DescribedInput}
+            callerDescribedBy={ariaDescribedBy}
+            id={id}
             type={type}
             disabled={disabled}
             className={cn(

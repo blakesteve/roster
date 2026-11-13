@@ -16,6 +16,7 @@ import {
   radioVariants,
 } from "./radio-group-variants";
 import { useKeyFocus } from "../../../internal/key-focus";
+import { DescribedDiv } from "../../../internal/described";
 
 export type RadioGroupOption = {
   value: string;
@@ -60,16 +61,11 @@ export interface RadioGroupProps
    * `plain` variant: there is no panel here to repaint, and a radio is not the
    * thing that is invalid — the answer is.
    *
-   * One difference from `CheckboxGroup` worth knowing before you rely on it:
-   * a caller's own `aria-describedby` is REPLACED here rather than merged.
-   * `CheckboxGroup` owns a `<fieldset>` and so owns the attribute;
-   * `aria-describedby` is one of the props Headless UI controls on a
-   * `RadioGroup`, and a controlled prop is spread last. Passing one is
-   * therefore a no-op rather than an addition. `aria-invalid` is not one of
-   * Headless UI's: a caller's is read by the rule every Roster field follows
-   * (`src/internal/field-invalid.ts`), so any value but "false" marks the
-   * group invalid, as `"true"`, and an error message marks it invalid whatever
-   * the caller passed.
+   * A caller's own `aria-describedby` is added after the message, not in
+   * place of it. `aria-invalid` is read by the rule
+   * every Roster field follows (`src/internal/field-invalid.ts`), so any value
+   * but "false" marks the group invalid, as `"true"`, and an error message
+   * marks it invalid whatever the caller passed.
    */
   errorMessage?: string;
   /** Disables every option, and dims the label and helper text with them. */
@@ -173,6 +169,7 @@ const RadioGroup = ({
   descriptionClassName,
   messageClassName,
   "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedBy,
   ...props
 }: RadioGroupProps) => {
   useKeyFocus();
@@ -189,6 +186,10 @@ const RadioGroup = ({
       value={value}
       onChange={onChange}
       disabled={disabled}
+      /* Headless UI writes the group's `aria-describedby` from the message
+         and wins over a caller's: through this, both (src/internal/described.tsx). */
+      as={DescribedDiv}
+      callerDescribedBy={ariaDescribedBy}
       className={cn(
         "rst:font-ui rst:flex rst:flex-col rst:gap-1.5 rst:min-w-0",
         className,
@@ -356,12 +357,13 @@ const RadioGroup = ({
           quietly, it throws. `RadioGroup` does call it and wraps its children
           in the provider, so this registers on the group.
 
-          It is also the ONLY way to describe this group. `aria-describedby` is
-          a prop Headless controls, so setting it by hand does not merely lose
-          a caller's value — it loses this component's too: Headless's own
-          `undefined` is spread last and deletes the attribute outright. That
-          version rendered an error message wired to nothing, which is the
-          shape of bug that looks finished in a screenshot. */}
+          It is also how this component describes the group. `aria-describedby`
+          is a prop Headless controls, so setting it by hand would lose this
+          component's: Headless's own `undefined` is spread last and deletes
+          the attribute outright. That version rendered an error message wired
+          to nothing, which is the shape of bug that looks finished in a
+          screenshot. A caller's own is added after it, through the group's
+          `as` above. */}
       {(helperText || errorMessage) && (
         <Description
           as="p"

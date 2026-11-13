@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, within, cleanup } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
+import { renderToString } from "react-dom/server";
 import { Select } from "./Select";
 import { selectTriggerVariants, selectOptionVariants } from "./select-variants";
 import { inputVariants } from "../Input/input-variants";
@@ -404,6 +405,16 @@ describe("Select escape hatches", () => {
     const wrapper = container.firstElementChild!;
     expect(wrapper).toHaveAttribute("id", "region-field");
     expect(wrapper).toHaveAttribute("data-analytics-id", "region");
+  });
+
+  it("says the trigger is a button from the server's render on", () => {
+    /* Rendered through Roster's own element, the trigger's type isn't worked
+       out by Headless UI until the element is there, so it has to be said. A
+       trigger with none submits the form around it, and the server's HTML is
+       what a tap before hydration meets. */
+    const html = renderToString(<Select options={options} value={null} onChange={() => {}} />);
+    const trigger = new DOMParser().parseFromString(html, "text/html").querySelector("button[aria-haspopup]");
+    expect(trigger?.getAttribute("type")).toBe("button");
   });
 });
 
