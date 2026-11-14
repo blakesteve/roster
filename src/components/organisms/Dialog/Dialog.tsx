@@ -1,4 +1,4 @@
-import { Fragment, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import {
   Dialog as HeadlessDialog,
   DialogPanel,
@@ -13,6 +13,7 @@ import { cn } from "../../../lib/utils";
 import { withLabels } from "../../../lib/labels";
 import { lockPage } from "../../../internal/page-inert";
 import { useLeaveWatchdog } from "../../../internal/leave-watchdog";
+import { GiveFocusBack } from "../../../internal/give-back";
 import { useKeyFocus } from "../../../internal/key-focus";
 
 const dialogVariants = /* @__PURE__ */ cva(
@@ -148,8 +149,10 @@ export interface DialogProps extends VariantProps<typeof dialogVariants> {
    * Called once the dialog has finished closing, after its leave transition,
    * once for each close, a close during the entrance included. The place to
    * move focus somewhere other than where it was before the dialog opened,
-   * for instance when that element no longer exists. Not called for a close
-   * cut short by reopening, nor when the dialog unmounts while open.
+   * for instance when that element no longer exists. Focus moved here, or
+   * anywhere outside the dialog while it closes, stays where it's put. Not
+   * called for a close cut short by reopening, nor when the dialog unmounts
+   * while open.
    */
   onAfterClose?: () => void;
   /** The component's own words, replaced; any left out stay English. */
@@ -257,6 +260,39 @@ const Dialog = ({
   const panelRef = useRef<HTMLDivElement>(null);
   const leave = useLeaveWatchdog(dialogRef, panelRef, open, LEAVE_MS, onAfterClose);
 
+  /* A dialog opened again before its leave has ended takes focus to where an
+     open starts it: the element marked `data-autofocus`, or the dialog itself.
+     Headless UI counts the dialog open through its leave, so its own initial
+     focus doesn't run again, and focus stayed wherever the close left it: on
+     `<body>` after Escape, which takes focus off as it closes, or on the
+     close button a click focused. A frame later, once the dialog shows again.
+     A dialog that has left the page opens afresh, and Headless UI starts it. */
+  const leaving = useRef(false);
+  const dialogNode = useCallback((node: HTMLDivElement | null) => {
+    dialogRef.current = node;
+    if (!node) leaving.current = false;
+  }, []);
+  useEffect(() => {
+    if (!open) {
+      leaving.current = !!dialogRef.current?.isConnected;
+      return;
+    }
+    if (!leaving.current) return;
+    leaving.current = false;
+    const frame = requestAnimationFrame(() => {
+      const dialog = dialogRef.current;
+      if (!dialog?.isConnected) return;
+      /* Headless UI's own choice: the first marked element that takes focus,
+         else the dialog. */
+      for (const marked of dialog.querySelectorAll<HTMLElement>("[data-autofocus]:not([tabindex='-1'])")) {
+        marked.focus({ preventScroll: true });
+        if (document.activeElement === marked) return;
+      }
+      dialog.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [open]);
+
   /* Headless UI marks only the part of the page the dialog is written in;
      `lockPage` marks the rest, so a header or footer beside it is not left
      reachable, and a toast is. The span is where the dialog is written, which
@@ -280,7 +316,7 @@ const Dialog = ({
           panel lands on them and closes the dialog, as it always has. */}
       <HeadlessDialog
         key={leave.key}
-        ref={dialogRef}
+        ref={dialogNode}
         open={open}
         as="div"
         className="rst:font-ui rst:fixed rst:inset-0 rst:z-50"
@@ -340,6 +376,8 @@ const Dialog = ({
               </DialogTitle>
               {description && <p className={cn(descriptionVariants())}>{description}</p>}
               {children}
+              {/* Inside the panel, below Headless UI's focus trap: see the module. */}
+              <GiveFocusBack root={dialogRef} />
             </DialogPanel>
           </TransitionChild>
         ) : (
@@ -386,6 +424,7 @@ const Dialog = ({
                   </div>
 
                   <div className="rst:mt-6">{children}</div>
+                  <GiveFocusBack root={dialogRef} />
                 </DialogPanel>
               </TransitionChild>
             </div>
