@@ -28,16 +28,18 @@ function deepActive(): Element | null {
  * dialog and not on `<body>`, it was put there, and after Headless UI's
  * give-back it goes back there, where the page put it, without scrolling.
  * With nothing put anywhere, `fallback` takes it if there is one, and
- * Headless UI's give-back stands if not. Focus that was in the dialog is on
- * `<body>` by then, its nodes being gone; `root` rules it out where they
- * aren't.
+ * Headless UI's give-back stands if not. Focus that was in the dialog never
+ * reads as put: the dialog's nodes are gone by then, so it's on `<body>`.
+ * Under React's `<Activity mode="hidden">`, which runs these cleanups and
+ * keeps the nodes, they're hidden, and focus doesn't land back in them
+ * (checked in Chromium and WebKit).
  *
  * Rendered INSIDE the panel on purpose. React runs a deleted tree's cleanups
  * parent first, so a cleanup below the trap queues its microtask after the
  * trap's and runs second. Placed above the trap, this would focus the target
  * and then watch Headless UI take focus away again.
  */
-export function GiveFocusBack({ root, fallback }: { root: RefObject<HTMLElement | null>; fallback?: FocusTarget }) {
+export function GiveFocusBack({ fallback }: { fallback?: FocusTarget }) {
   const latest = useRef(fallback);
   const unmounted = useRef(false);
   useEffect(() => {
@@ -47,16 +49,10 @@ export function GiveFocusBack({ root, fallback }: { root: RefObject<HTMLElement 
     /* Reset on every mount: StrictMode unmounts and remounts once in
        development, and without this its pretend unmount would move focus. */
     unmounted.current = false;
-    /* Kept from the mount: a ref is emptied before this cleanup runs. */
-    const dialog = root.current;
     return () => {
       unmounted.current = true;
-      /* Inside the dialog is read on the outer element: `contains` doesn't
-         cross into a shadow root. What's focused again is the inner one. */
-      const outer = document.activeElement;
-      const inside = !!outer && !!dialog?.contains(outer);
       const active = deepActive();
-      const placed = !inside && active instanceof HTMLElement && active !== document.body && active.isConnected ? active : null;
+      const placed = active instanceof HTMLElement && active !== document.body && active.isConnected ? active : null;
       queueMicrotask(() => {
         if (!unmounted.current) return;
         if (placed) {
@@ -67,6 +63,6 @@ export function GiveFocusBack({ root, fallback }: { root: RefObject<HTMLElement 
         if (to?.isConnected && document.activeElement !== to) to.focus();
       });
     };
-  }, [root]);
+  }, []);
   return null;
 }

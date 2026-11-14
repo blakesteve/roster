@@ -608,7 +608,7 @@ const Sheet = ({
               >
                 {children}
               </div>
-              <GiveFocusBack root={dialogRef} fallback={returnFocus} />
+              <GiveFocusBack fallback={returnFocus} />
             </DialogPanel>
           </TransitionChild>
         </div>

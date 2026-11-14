@@ -261,7 +261,8 @@ const Dialog = ({
   const leave = useLeaveWatchdog(dialogRef, panelRef, open, LEAVE_MS, onAfterClose);
 
   /* A dialog opened again before its leave has ended takes focus to where an
-     open starts it: the element marked `data-autofocus`, or the dialog itself.
+     open starts it: the first element marked `data-autofocus` that takes
+     focus, or the dialog itself.
      Headless UI counts the dialog open through its leave, so its own initial
      focus doesn't run again, and focus stayed wherever the close left it: on
      `<body>` after Escape, which takes focus off as it closes, or on the
@@ -377,7 +378,7 @@ const Dialog = ({
               {description && <p className={cn(descriptionVariants())}>{description}</p>}
               {children}
               {/* Inside the panel, below Headless UI's focus trap: see the module. */}
-              <GiveFocusBack root={dialogRef} />
+              <GiveFocusBack />
             </DialogPanel>
           </TransitionChild>
         ) : (
@@ -424,7 +425,7 @@ const Dialog = ({
                   </div>
 
                   <div className="rst:mt-6">{children}</div>
-                  <GiveFocusBack root={dialogRef} />
+                  <GiveFocusBack />
                 </DialogPanel>
               </TransitionChild>
             </div>

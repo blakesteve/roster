@@ -1571,11 +1571,12 @@ goes back where it was put. So a page listening for `focusin`, `focus` or `blur`
 sees it leave and come back. Nothing to change in your code.
 
 **Opened again during its leave (5.19.4).** A `Dialog` opened again while it is
-still leaving takes focus to where an open starts it: the element marked `data-
-autofocus`, or the dialog itself. In 5.19.3 and before, focus stayed where the
-close had left it: on `<body>` after Escape, or, in Chromium, on the close
-button a click focused. `Sheet` already did this. Nothing to change in your
-code.
+still leaving takes focus to where a first open starts it: the first element
+marked `data-autofocus` that can take focus (one with `tabindex="-1"`, or
+disabled, is passed over), or the dialog itself. In 5.19.3 and before, focus
+stayed where the close had left it: on `<body>` after Escape, or, in Chromium,
+on the close button a click focused. `Sheet` already did this. Nothing to change
+in your code.
 
 **Full screen.** `layout="fullscreen"` makes a bare dialog over the whole
 viewport, for a photo viewer or a full-screen card: no box, no padding, and no

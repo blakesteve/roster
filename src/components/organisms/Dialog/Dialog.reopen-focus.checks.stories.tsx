@@ -16,9 +16,12 @@ import { realInputOrSkip } from "../../../test/real-input";
  * in Chromium, on the close button a click focuses.
  *
  * - **Opened again 20, 40, 60 and 100ms after the close, focus is on the
- *   dialog's initial focus** within its entrance (300ms) and a frame: the
- *   dialog itself here, as on a first open, or the element marked
- *   `data-autofocus`. Closed by Escape, by the Close button, by a click on
+ *   dialog's initial focus** within its entrance (300ms) and a frame: where
+ *   a first open of the same dialog starts it, read in the same check. The
+ *   dialog itself, or the first element marked `data-autofocus` that takes
+ *   focus: a marked element with `tabindex="-1"` is passed over, as is one
+ *   that's disabled, ahead of a marked one that isn't. Closed by Escape, by
+ *   the Close button, by a click on
  *   the backdrop and by `open` set false, each in its own story, each after
  *   focus has moved on from where the open put it, to First, so a reopen
  *   that leaves focus where the close left it fails. The backdrop is a
@@ -48,7 +51,14 @@ const ENTRANCE_MS = 300 + 17;
 
 const page = { open: () => {}, close: () => {} };
 
-function Reopen({ autofocus, focusFirstOnOpen = false }: { autofocus: boolean; focusFirstOnOpen?: boolean }) {
+/**
+ * The marked elements in the dialog, if any: one; one behind a marked one
+ * with `tabindex="-1"`, which Headless UI passes over; or one behind a
+ * disabled one, which can't take focus.
+ */
+type Marks = "none" | "one" | "behind a skipped one" | "behind a disabled one";
+
+function Reopen({ marks, focusFirstOnOpen = false }: { marks: Marks; focusFirstOnOpen?: boolean }) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     page.open = () => setOpen(true);
@@ -69,7 +79,17 @@ function Reopen({ autofocus, focusFirstOnOpen = false }: { autofocus: boolean; f
         <button type="button" data-check="first">
           First
         </button>
-        {autofocus ? (
+        {marks === "behind a skipped one" ? (
+          <button type="button" data-check="skipped" data-autofocus tabIndex={-1}>
+            Skipped
+          </button>
+        ) : null}
+        {marks === "behind a disabled one" ? (
+          <button type="button" data-check="disabled" data-autofocus disabled>
+            Disabled
+          </button>
+        ) : null}
+        {marks !== "none" ? (
           <button type="button" data-check="marked" data-autofocus>
             Marked
           </button>
@@ -135,9 +155,9 @@ async function reopenOnce(real: NonNullable<ReturnType<typeof realInputOrSkip>>,
   return { leaving, backMs, initial, ended };
 }
 
-function check(way: Way, autofocus = false, gaps = [20, 40, 60, 100]): Story {
+function check(way: Way, marks: Marks = "none", gaps = [20, 40, 60, 100]): Story {
   return {
-    render: () => <Reopen autofocus={autofocus} />,
+    render: () => <Reopen marks={marks} />,
     play: async () => {
       const real = realInputOrSkip();
       if (!real) return;
@@ -156,8 +176,10 @@ function check(way: Way, autofocus = false, gaps = [20, 40, 60, 100]): Story {
           break;
         }
       }
-      console.info(`DIALOG REOPEN FOCUS ${way}${autofocus ? ", data-autofocus" : ""}: started on ${[...initials].join(", ")}; ${JSON.stringify(tries)}`);
-      await expect([...initials]).toEqual([autofocus ? "marked" : "the dialog"]);
+      console.info(`DIALOG REOPEN FOCUS ${way}${marks === "none" ? "" : `, marked ${marks}`}: started on ${[...initials].join(", ")}; ${JSON.stringify(tries)}`);
+      /* Where a first open starts it, as the requirement reads it: pinned, so
+         a misread of Headless UI's choice can't pass as one. */
+      await expect([...initials]).toEqual([marks === "none" ? "the dialog" : "marked"]);
       /* A story with no reopen during a leave can't fail, so it doesn't pass. */
       await expect(counted).toBeGreaterThan(0);
       await expect(late).toEqual([]);
@@ -169,12 +191,14 @@ export const ClosedByEscapeAndOpenedAgain = check("Escape");
 export const ClosedByItsCloseButtonAndOpenedAgain = check("Close");
 export const ClosedByTheBackdropAndOpenedAgain = check("backdrop");
 export const ClosedByOpenSetFalseAndOpenedAgain = check("open false");
-export const WithAMarkedElementClosedByEscapeAndOpenedAgain = check("Escape", true, [20, 60]);
+export const WithAMarkedElementClosedByEscapeAndOpenedAgain = check("Escape", "one", [20, 60]);
+export const WithAMarkedElementBehindASkippedOneClosedByEscapeAndOpenedAgain = check("Escape", "behind a skipped one", [20, 60]);
+export const WithAMarkedElementBehindADisabledOneClosedByEscapeAndOpenedAgain = check("Escape", "behind a disabled one", [20, 60]);
 
 /* The guard: an open after the dialog has left the page is Headless UI's,
    and focus a page moves on open stays where it's put. */
 export const AFreshOpenLeavesFocusWhereThePagePutsIt: Story = {
-  render: () => <Reopen autofocus={false} focusFirstOnOpen />,
+  render: () => <Reopen marks="none" focusFirstOnOpen />,
   play: async () => {
     const real = realInputOrSkip();
     if (!real) return;
