@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
 import { Sheet } from "./Sheet";
@@ -35,9 +36,9 @@ import { realInputOrSkip } from "../../../test/real-input";
  *   checked at once only: here Headless UI often ends a Dialog's leave in its
  *   first frames (its issue #3902), leaving nothing to open into partway.
  *
- * What it doesn't cover: an opener in the toast host, which stays live by
- * design, still takes focus back from B as A leaves, for a Dialog B as for a
- * Sheet.
+ * - **An opener in the toast host,** which stays live by design, doesn't
+ *   take focus from B as A leaves, an A Dialog or Sheet. Through 5.19.3 it
+ *   did: A's give-back found it live and moved focus out of B onto it.
  *
  * Checks, not documentation: hidden from the sidebar and the docs page.
  */
@@ -145,9 +146,12 @@ const leftFor = (reads: Read[], closing: string) =>
   reads.map((r) => r.focus).filter((f) => f !== "body" && f !== `in ${closing}`).filter((f, i, all) => f !== all[i - 1]);
 
 /**
- * Reads the page and focus in every frame, and at the moment each overlay's
- * node leaves: a MutationObserver's callback runs before Headless UI's
- * restore, which is queued as the node is unmounted.
+ * Reads the page and focus in every frame, at the moment each overlay's node
+ * leaves (a MutationObserver's callback runs before Headless UI's restore,
+ * which is queued as the node is unmounted), and once when stopped. The last
+ * needs no frame: Linux's headless WebKit can hold animation frames, and a
+ * watch that read only on frames then saw nothing of where focus went (CI,
+ * 13 Nov).
  */
 function watch() {
   const reads: Read[] = [];
@@ -176,8 +180,58 @@ function watch() {
     stop() {
       running = false;
       observer.disconnect();
+      read("end");
     },
   };
+}
+
+/** How many animation frames the page ran over `ms`. A page that isn't drawing runs none. */
+function framesOver(ms: number): Promise<number> {
+  return new Promise((done) => {
+    let frames = 0;
+    let id = requestAnimationFrame(function tick() {
+      frames += 1;
+      id = requestAnimationFrame(tick);
+    });
+    setTimeout(() => {
+      cancelAnimationFrame(id);
+      done(frames);
+    }, ms);
+  });
+}
+
+/* An overlay's entrance still running: Headless UI's marks on it. */
+const entering = () => document.querySelector("#headlessui-portal-root [data-enter], #headlessui-portal-root [data-transition]") !== null;
+
+/**
+ * Waits for `done`, 1.5s, and then on while frames are held, up to five
+ * seconds more: an entrance runs on frames, and Linux's headless WebKit can
+ * hold them. Fails only when frames ran, ten in a second, and it still isn't.
+ */
+async function untilDone(done: () => boolean, what: string) {
+  const from = performance.now();
+  while (!done() && performance.now() - from < 1500) await wait(25);
+  for (let round = 0; !done() && round < 5; round += 1) {
+    const frames = await framesOver(1000);
+    if (done()) return;
+    if (frames >= 10) throw new Error(`${what}: not done after 1.5s, with ${frames} frames run in the next second`);
+  }
+  if (!done()) throw new Error(`${what}: frames held for five seconds`);
+}
+
+/**
+ * After B's close: 300ms past its unmount, and on until focus has left B and
+ * `<body>`, up to 1.5s. If it hasn't by then, frames are counted for a
+ * second. Whether frames were held: then the try is run again, since nothing
+ * could be read; with frames running, the check reads what happened, and a
+ * focus that never landed fails it.
+ */
+async function landed(): Promise<{ held: boolean }> {
+  await wait(300);
+  const from = performance.now();
+  while (["body", "in B"].includes(focus()) && performance.now() - from < 1500) await wait(25);
+  if (!["body", "in B"].includes(focus())) return { held: false };
+  return { held: (await framesOver(1000)) < 10 };
 }
 
 /** A's leave: how far its longest transition has got and how long it has left, or null when nothing runs in it. */
@@ -216,7 +270,7 @@ async function openA(real: NonNullable<ReturnType<typeof realInputOrSkip>>) {
   document.querySelector<HTMLElement>('[data-check="open-a"]')!.focus();
   await real.commands.realPress(["Enter"]);
   await waitFor(() => expect(named("A")?.contains(document.activeElement)).toBe(true));
-  await waitFor(() => expect(document.querySelector("#headlessui-portal-root [data-enter], #headlessui-portal-root [data-transition]")).toBeNull());
+  await untilDone(() => !entering(), "A's entrance");
   await wait(100);
 }
 
@@ -225,7 +279,8 @@ async function openA(real: NonNullable<ReturnType<typeof realInputOrSkip>>) {
  * its Close button. What happened in each frame, cut into what the checks
  * need. Under load Headless UI can skip A's leave, leaving no chain to read;
  * that try is thrown away and the chain run again, up to five times, and it
- * fails rather than pass on a try where A was gone before B came.
+ * fails rather than pass on a try where A was gone before B came. So is a try
+ * whose frames were held after B's close (`landed`).
  */
 async function runChain(when: When) {
   const real = realInputOrSkip();
@@ -235,6 +290,7 @@ async function runChain(when: When) {
     const w = watch();
     let beforeClose = 0;
     let onTime = false;
+    let held = false;
     try {
       await real.commands.realClick('[data-check="go"]');
       w.mark("pressed");
@@ -245,9 +301,13 @@ async function runChain(when: When) {
       beforeClose = w.reads.length;
       await real.commands.realClick('[role="dialog"] button[aria-label^="Close"]');
       await waitFor(() => expect(named("B")).toBeNull(), { timeout: 3000 });
-      await wait(300);
+      ({ held } = await landed());
     } finally {
       w.stop();
+    }
+    if (held) {
+      console.info(`SHEET CHAIN ${when}: try ${attempt} had its frames held after B's close`);
+      continue;
     }
     const reads = w.reads;
     const withB = reads.slice(0, beforeClose).filter((r) => r.b);
@@ -374,3 +434,76 @@ function loneCheck(mountsOpen: boolean): Story {
 
 export const ALoneSheetGivesFocusBack = loneCheck(false);
 export const ALoneSheetThatMountsOpenGivesFocusBack = loneCheck(true);
+
+/**
+ * A opened from a button in the toast host, written straight into `<body>`
+ * as `Toaster` is, with `data-roster-toaster`, so it stays live while the
+ * page behind a dialog is held. B opened as A closes.
+ */
+function FromAToast({ a }: { a: Kind }) {
+  const [openA, setA] = useState(false);
+  const [openB, setB] = useState(false);
+  const [mountedB, setMountedB] = useState(false);
+  return (
+    <PageRegions>
+      {createPortal(
+        <div data-roster-toaster="" style={{ position: "fixed", right: 16, bottom: 16 }}>
+          <button type="button" data-check="toast-opener" onClick={() => setA(true)}>
+            Open A from a toast
+          </button>
+        </div>,
+        document.body,
+      )}
+      <Overlay kind={a} name="A" open={openA} onClose={() => setA(false)}>
+        <button
+          type="button"
+          data-check="go"
+          onClick={() => {
+            setA(false);
+            setMountedB(true);
+            setB(true);
+          }}
+        >
+          On to B
+        </button>
+      </Overlay>
+      {mountedB && (
+        <Overlay kind="sheet" name="B" open={openB} onClose={() => setB(false)} onAfterClose={() => setMountedB(false)}>
+          <button type="button" data-check="in-b">
+            In B
+          </button>
+        </Overlay>
+      )}
+    </PageRegions>
+  );
+}
+
+function toastCheck(a: Kind): Story {
+  return {
+    render: () => <FromAToast a={a} />,
+    play: async () => {
+      const real = realInputOrSkip();
+      if (!real) return;
+      const ends: string[] = [];
+      for (let i = 0; i < 3; i += 1) {
+        await real.commands.realClick('[data-check="toast-opener"]');
+        await waitFor(() => expect(named("A")?.contains(document.activeElement)).toBe(true));
+        await untilDone(() => !entering(), "A's entrance");
+        await wait(100);
+        await real.commands.realClick('[data-check="go"]');
+        await waitFor(() => expect(named("A")).toBeNull(), { timeout: 3000 });
+        /* Past A's give-back, a microtask after its unmount. */
+        await wait(300);
+        ends.push(focus());
+        await real.commands.realPress(["Escape"]);
+        await waitFor(() => expect(named("B")).toBeNull(), { timeout: 3000 });
+        await wait(200);
+      }
+      console.info(`SHEET CHAIN from a toast, A ${a}: ${JSON.stringify(ends)}`);
+      await expect([...new Set(ends)]).toEqual(["in B"]);
+    },
+  };
+}
+
+export const AnOpenerInTheToastHostDoesntTakeFocusFromBASheet = toastCheck("sheet");
+export const AnOpenerInTheToastHostDoesntTakeFocusFromBADialog = toastCheck("dialog");

@@ -13,6 +13,7 @@ import { useDarkScope } from "../../../internal/popup";
 import { useReducedMotion } from "../../../internal/motion";
 import { lockPage } from "../../../internal/page-inert";
 import { useLeaveWatchdog } from "../../../internal/leave-watchdog";
+import { GiveFocusBack } from "../../../internal/give-back";
 import {
   exceedsSheetTapSlop,
   sheetDragOutcome,
@@ -40,6 +41,9 @@ export interface SheetProps {
    *
    * Clear the sheet's content here rather than in `onClose`. Cleared in
    * `onClose`, it empties while it is still sliding out.
+   *
+   * Focus moved here, or anywhere outside the sheet while it closes, stays
+   * where it's put, rather than going back to what opened the sheet.
    */
   onAfterClose?: () => void;
   /**
@@ -69,7 +73,9 @@ export interface SheetProps {
   /** What receives focus on open. Defaults to the close button. */
   initialFocus?: React.RefObject<HTMLElement | null>;
   /**
-   * Where focus goes on close, over whatever opened the sheet.
+   * Where focus goes on close, over whatever opened the sheet, when nothing
+   * else was focused while it closed: focus moved outside the sheet once the
+   * close has rendered, or in `onAfterClose`, stays where it's put.
    *
    * A sheet opened on page load from a deep link has no opener, so without
    * this focus falls to `<body>`. A sheet whose code loads on its first open
@@ -123,44 +129,6 @@ const FIELD_SELECTOR = [
   "select",
   "[contenteditable]:not([contenteditable=false])",
 ].join(",");
-
-function resolveElement(
-  target: SheetProps["returnFocus"],
-): HTMLElement | null {
-  if (!target) return null;
-  return "current" in target ? target.current : target;
-}
-
-/**
- * Sends focus to `returnFocus` when the sheet unmounts.
- *
- * Rendered INSIDE the panel on purpose. Headless UI restores focus to the
- * opener from its focus trap's unmount, in a microtask. React runs a deleted
- * tree's cleanups parent first, so a cleanup below the trap queues its
- * microtask after the trap's and runs second. Placed above the trap, this
- * would focus the target and then watch Headless UI take focus back.
- */
-function ReturnFocusOnUnmount({ target }: { target: SheetProps["returnFocus"] }) {
-  const latest = React.useRef(target);
-  const unmounted = React.useRef(false);
-  React.useEffect(() => {
-    latest.current = target;
-  });
-  React.useEffect(() => {
-    /* Reset on every mount: StrictMode unmounts and remounts once in
-       development, and without this its pretend unmount would move focus. */
-    unmounted.current = false;
-    return () => {
-      unmounted.current = true;
-      queueMicrotask(() => {
-        if (!unmounted.current) return;
-        const el = resolveElement(latest.current);
-        if (el?.isConnected) el.focus();
-      });
-    };
-  }, []);
-  return null;
-}
 
 /**
  * The close glyph, drawn inline. Not Font Awesome: importing `faXmark` here
@@ -248,8 +216,9 @@ const Sheet = ({
      never marks the part of the page the sheet is written in: it stayed live
      behind the sheet, and a sheet still leaving restored focus into it, out
      of this one, as its leave ended. Held, the page is inert, so that restore
-     can't land there and focus stays here. An opener in the toast host still
-     takes it: the host stays live. */
+     can't land there and focus stays here. An opener in the toast host, which
+     stays live, would take it; the closing one's give-back puts focus back
+     here (src/internal/give-back.tsx). */
   const [mounted, setMounted] = React.useState(false);
   React.useLayoutEffect(() => {
     setMounted(true);
@@ -639,7 +608,7 @@ const Sheet = ({
               >
                 {children}
               </div>
-              <ReturnFocusOnUnmount target={returnFocus} />
+              <GiveFocusBack fallback={returnFocus} />
             </DialogPanel>
           </TransitionChild>
         </div>
