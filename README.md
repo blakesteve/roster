@@ -1532,18 +1532,18 @@ and checks it's visible (Playwright's `toBeVisible`, say) finds it open. In
 read as hidden; `Sheet`'s was too, and is fixed the same way. Nothing on
 screen moves, and a click outside the panel still closes it.
 
-**One opened as another leaves.** A `Dialog` or `Sheet` opened while another
-is still leaving holds the page from its first frame, so the other one's focus
-restore can't move focus out onto the page. An opener in the toast host is the
-exception: the host stays live, so one opened from a toast still gives focus
-back to it as it leaves, out of whatever opened in its place. In 5.19.0 and
-before, a `Sheet` that mounted already
-open, as one whose code loads on its first open does, never held the part of
-the page it was written in. That part stayed live behind it, and a sheet or
-dialog leaving at the same time restored focus onto it as its leave ended. A
-`Sheet` now opens a render later, before anything is painted, as `Dialog`
-already did, so on that first open it also slides in rather than appearing in
-place. Nothing to change in your code.
+**One opened as another leaves.** A `Dialog` or `Sheet` opened while another is
+still leaving holds the page from its first frame, so the other one's focus
+restore can't move focus out onto the page. An opener in the toast host, which
+stays live, could take it through 5.19.3: one opened from a toast gave focus
+back to it as it left, out of whatever opened in its place. From 5.19.4 focus
+stays in the new one. In 5.19.0 and before, a `Sheet` that mounted already open,
+as one whose code loads on its first open does, never held the part of the page
+it was written in. That part stayed live behind it, and a sheet or dialog
+leaving at the same time restored focus onto it as its leave ended. A `Sheet`
+now opens a render later, before anything is painted, as `Dialog` already did,
+so on that first open it also slides in rather than appearing in place. Nothing
+to change in your code.
 
 Such a sheet may also have no opener to give focus back to: Headless UI keeps
 the record of what was pressed only once its code has loaded, after the press
@@ -1557,6 +1557,26 @@ bring back the backdrop, holding the page, and no panel, with focus on `<body>`
 until Escape or a tap closed it. `Dialog` did the same on any close when a
 `className` made its panel's transition end before the backdrop's, and came back
 with no backdrop when one made it end after. Nothing to change in your code.
+
+**Focus put elsewhere on close stays there (5.19.4).** Focus the page moves
+while a `Dialog` or `Sheet` closes, once the close has rendered (an effect on
+`isOpen`, say) or in `onAfterClose`, stays where it's put. Not inside `onClose`
+itself: the page is still held behind the dialog then, and can't take focus. In
+5.19.3 and before, Headless UI gave focus back to what opened the dialog as the
+dialog left the page, wherever focus was by then, and took it from where the
+page had put it almost every time. With nothing put anywhere, focus still goes
+back to the opener, or to a `Sheet`'s `returnFocus`. One thing remains: focus is
+on the opener for a moment, inside the same task and never painted, before it
+goes back where it was put. So a page listening for `focusin`, `focus` or `blur`
+sees it leave and come back. Nothing to change in your code.
+
+**Opened again during its leave (5.19.4).** A `Dialog` opened again while it is
+still leaving takes focus to where a first open starts it: the first element
+marked `data-autofocus` that can take focus (one with `tabindex="-1"`, or
+disabled, is passed over), or the dialog itself. In 5.19.3 and before, focus
+stayed where the close had left it: on `<body>` after Escape, or, in Chromium,
+on the close button a click focused. `Sheet` already did this. Nothing to change
+in your code.
 
 **Full screen.** `layout="fullscreen"` makes a bare dialog over the whole
 viewport, for a photo viewer or a full-screen card: no box, no padding, and no
