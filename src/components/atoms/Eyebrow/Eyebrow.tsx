@@ -2,6 +2,7 @@ import React from "react";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 import { eyebrowVariants } from "./eyebrow-variants";
+import { NOT_WORDS, WORDS, isText } from "../../../internal/words-line";
 
 type EyebrowOwnProps<E extends React.ElementType> = VariantProps<
   typeof eyebrowVariants
@@ -43,7 +44,13 @@ function Eyebrow<E extends React.ElementType = "span">({
 
   return (
     <Component
-      className={cn(eyebrowVariants({ size, tone, weight }), className)}
+      className={cn(
+        eyebrowVariants({ size, tone, weight }),
+        /* Words wrap with air between their lines; one line keeps its box
+           (internal/words-line.ts). */
+        isText(children) ? WORDS : NOT_WORDS,
+        className,
+      )}
       {...props}
     >
       {children}

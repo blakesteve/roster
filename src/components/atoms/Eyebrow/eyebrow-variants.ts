@@ -15,7 +15,8 @@ export const eyebrowVariants = /* @__PURE__ */ cva(
       /* `leading-none` after each size, never before it: tailwind-merge
          drops a line height that comes before a font size, because a size
          can carry its own. Placed first, it was lost, and the line was 1.5
-         times the size instead of 1. */
+         times the size instead of 1. The component spaces a label of words
+         that wraps (Eyebrow.tsx); these classes alone keep the solid line. */
       size: {
         xs: "rst:text-[0.625rem] rst:leading-none rst:tracking-[0.16em]",
         sm: "rst:text-[0.6875rem] rst:leading-none rst:tracking-[0.14em]",
