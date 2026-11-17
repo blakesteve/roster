@@ -2590,24 +2590,60 @@ a `"use client"` wrapper, as `linkComponent` does above.
 ### Eyebrow and Stat line height
 
 An `Eyebrow`'s line is as tall as its letters, and so is a `Stat`'s figure and
-its label. Through 5.7.0 neither was: `leading-none` sat before the font size
-in their variant tables, and `cn()`'s tailwind-merge drops a line height that
-comes before a size. An Eyebrow drew a line 1.5 times its size (15px for the
-default `xs`, not 10), and a Stat's figure and label drew lines taller than
-their type.
+its label. One line of an `xs` Eyebrow takes 10px, `sm` 11 and `md` 12, as a
+flex or grid item or rendered as a block. Inline in running text it sits on its
+parent's line.
 
-**Upgrading to 5.8.0 moves layouts.** An Eyebrow that makes its own line, as
-a flex or grid item or rendered as a block (`as="p"`, `as="h2"`), is a third
-shorter: 10px for `xs`, not 15. One inline in running text sits on its
-parent's line and doesn't change. A Stat in its default markup loses more:
-its figure's line was the size's own (28px for `sm`'s 20px figure) or the
-page's 1.5 (`md`, `lg`), and its label sat on the page's line (24px on a 16px,
-1.5 body). So a `sm` Stat goes from 55px tall to 33, and an `lg` one at 48px
-from 99 to 61. In the `standalone` markup only the label moves, 15px to 10.
-`LabeledDivider` sets its label in an Eyebrow of its own, so every rule is 5px
-shorter whatever label it's given. An Eyebrow that wraps now sets solid, its
-lines as close as its size. Spacing an app tuned against the old lines (a
-margin that cleared them) may want retuning.
+**A label that wraps has air between its lines.** An Eyebrow whose children are
+words (strings and numbers, so `{count} squads` too) sets its lines 14, 15 and
+16px apart for `xs`, `sm` and `md`: its size and 0.2em more each side, rounded
+to a whole pixel. Block margins of `(1em - 1lh) / 2` take the extra back from a
+one-line label, so it keeps the box it had and its letters stay where they
+were, in Chromium and WebKit. An Eyebrow holding an element keeps a line as
+tall as its size, and so does an Eyebrow nested in another one, such as a
+`LabeledDivider` label that is itself an Eyebrow. A `Stat`'s label wraps the
+same way, and so does its source (12.5px apart; 12 in WebKit, which draws its
+8.5px line at 8). `eyebrowVariants` on an element of your own keeps the solid
+line: the spacing is the component's.
+
+It needs `round()` and the `lh` unit (Chrome 125, Safari 16.4, Firefox 120). A
+browser without either keeps the solid line and no margins, the box 5.19 drew.
+
+**Upgrading to 5.20.0 moves a few layouts.** A one-line Eyebrow of words keeps
+its footprint, but:
+
+- **Its own box grows to its line,** 14, 15 and 16px rather than 10, 11 and 12,
+  2px out top and bottom, and a Stat source's from 8.5 to 12.5. Whatever is
+  drawn on that box follows it: a focus ring (`as="a"`, or anything focusable),
+  a background or border, and a clip (`truncate`, `overflow-hidden`). So does a
+  test that measures it: measure the space it takes, margins counted. Nothing
+  around it moves.
+- **A margin of your own replaces Roster's on that side,** since your utilities
+  sit in a layer above Roster's: `mb-2` on one adds 2px below it, at every
+  size. That's a `space-y-*` parent too, and global CSS outside a layer. Take
+  the 2px off your margin to keep the layout.
+- **A `leading-*` of your own sets the line,** and Roster's margins still trim
+  one line to 1em. A block Eyebrow that took 1.5 times its size takes its size.
+- **Inline in a line tighter than its own,** such as a parent at `leading-none`
+  and the same size, it makes that line taller: 10px to 14 at `xs`. Nested in
+  another Eyebrow it doesn't.
+
+Through 5.7.0 the line was taller than the letters: `leading-none` sat before
+the font size in Eyebrow's and Stat's variant tables, and `cn()`'s
+tailwind-merge drops a line height that comes before a size. An Eyebrow drew a
+line 1.5 times its size (15px for the default `xs`, not 10), and a Stat's
+figure and label drew lines taller than their type.
+
+**Upgrading to 5.8.0 moved layouts.** An Eyebrow that makes its own line, as a
+flex or grid item or rendered as a block (`as="p"`, `as="h2"`), became a third
+shorter: 10px for `xs`, not 15. One inline in running text sits on its parent's
+line and didn't change. A Stat in its default markup lost more: its figure's
+line was the size's own (28px for `sm`'s 20px figure) or the page's 1.5 (`md`,
+`lg`), and its label sat on the page's line (24px on a 16px, 1.5 body). So a
+`sm` Stat went from 55px tall to 33, and an `lg` one at 48px from 99 to 61. In
+the `standalone` markup only the label moved, 15px to 10. `LabeledDivider` sets
+its label in an Eyebrow of its own, so every rule became 5px shorter whatever
+label it's given.
 
 ## Quick start
 

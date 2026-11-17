@@ -3,6 +3,7 @@ import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 import { statSourceClass, statValueVariants } from "./stat-variants";
 import { Eyebrow } from "../Eyebrow/Eyebrow";
+import { NOT_WORDS, WORDS, isText } from "../../../internal/words-line";
 
 export interface StatProps
   extends
@@ -28,6 +29,11 @@ export interface StatProps
 }
 
 const SOURCE = statSourceClass;
+
+/* A source of words that wraps keeps air between its lines, as the label
+   does (internal/words-line.ts); on one line it takes its size, as before. */
+const sourceClass = (source: React.ReactNode, ...more: string[]) =>
+  cn(SOURCE, isText(source) ? WORDS : NOT_WORDS, ...more);
 
 /**
  * A figure with its label, and optionally where it came from.
@@ -63,7 +69,7 @@ const Stat = React.forwardRef<HTMLDivElement, StatProps>(
         <div ref={ref} className={cn("rst:flex rst:flex-col rst:gap-[3px]", className)} {...props}>
           <span className={valueClass}>{value}</span>
           <Eyebrow size="xs">{label}</Eyebrow>
-          {source && <span className={SOURCE}>{source}</span>}
+          {source && <span className={sourceClass(source)}>{source}</span>}
         </div>
       );
     }
@@ -89,7 +95,7 @@ const Stat = React.forwardRef<HTMLDivElement, StatProps>(
             )}
           >
             <span className="rst:row-start-1">{value}</span>
-            <span className={cn(SOURCE, "rst:row-start-3")}>{source}</span>
+            <span className={sourceClass(source, "rst:row-start-3")}>{source}</span>
           </dd>
         ) : (
           <dd className={cn("rst:m-0 rst:col-start-1 rst:row-start-1", valueClass)}>{value}</dd>

@@ -118,6 +118,26 @@ export const AboveAHeading: Story = {
   },
 };
 
+export const WhenItWraps: Story = {
+  args: { children: "placeholder" },
+  render: () => (
+    <div className="rst:flex rst:max-w-[12rem] rst:flex-col rst:gap-2">
+      <Eyebrow tone="primary">Case study · twelve weeks, two releases</Eyebrow>
+      <h3 className="rst:m-0 rst:text-lg rst:font-bold rst:text-gray-900 rst:dark:text-gray-100">
+        Lanternfish
+      </h3>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A label of words that runs to a second line keeps air between its lines, at any width, with nothing to set. On one line it takes the space it always did.",
+      },
+    },
+  },
+};
+
 export const AsAColumnHead: Story = {
   args: { children: "placeholder" },
   render: () => (

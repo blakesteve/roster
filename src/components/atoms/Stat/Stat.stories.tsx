@@ -139,8 +139,14 @@ export const VisualOrder: Story = {
        Stat does not push its neighbor's label down. */
     await expect(Math.abs(top("Orders placed") - top("Components"))).toBeLessThan(1);
     /* The same 3px between lines as the flex column this replaced, with and
-       without a source. */
-    const box = (text: string) => canvas.getByText(text).closest("dd, dt, span")!.getBoundingClientRect();
+       without a source. Apart by the space each takes, its margins counted:
+       a source of words draws a taller line and its margins take it back. */
+    const box = (text: string) => {
+      const el = canvas.getByText(text).closest("dd, dt, span")!;
+      const r = el.getBoundingClientRect();
+      const css = getComputedStyle(el);
+      return { top: r.top - parseFloat(css.marginTop), bottom: r.bottom + parseFloat(css.marginBottom) };
+    };
     const dt = (text: string) => canvas.getByText(text).closest("dt")!.getBoundingClientRect();
     await expect(dt("Orders placed").top - box("1,573").bottom).toBeCloseTo(3, 0);
     await expect(box("live").top - dt("Orders placed").bottom).toBeCloseTo(3, 0);
@@ -179,8 +185,19 @@ export const Standalone: Story = {
   play: async ({ canvasElement }) => {
     await expect(canvasElement.querySelector("dt, dd")).toBeNull();
     // The same lines as the definition markup: one left edge, 3px apart.
+    // Apart by the space each takes, its margins counted: the label's own
+    // box is its taller line, and its margins take that back.
     const canvas = within(canvasElement);
-    const box = (t: string) => canvas.getByText(t).getBoundingClientRect();
+    const box = (t: string) => {
+      const el = canvas.getByText(t);
+      const r = el.getBoundingClientRect();
+      const css = getComputedStyle(el);
+      return {
+        left: r.left,
+        top: r.top - parseFloat(css.marginTop),
+        bottom: r.bottom + parseFloat(css.marginBottom),
+      };
+    };
     await expect(box("Orders placed").left).toBeCloseTo(box("1,573").left, 0);
     await expect(box("live").left).toBeCloseTo(box("1,573").left, 0);
     await expect(box("Orders placed").top - box("1,573").bottom).toBeCloseTo(3, 0);
