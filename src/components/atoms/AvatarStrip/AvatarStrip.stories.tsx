@@ -68,7 +68,7 @@ const meta = {
     },
     onDismiss: {
       control: false,
-      description: "When provided, renders a ✕ button at the leading edge.",
+      description: "When provided, renders a 24px dismiss button, a drawn ✕, at the leading edge. With a `label`, the button is described by it.",
     },
     trailingSlot: {
       control: false,
@@ -240,7 +240,8 @@ export const WithDismiss: Story = {
     docs: {
       description: {
         story:
-          "`onDismiss` adds a `✕` button at the leading edge. " +
+          "`onDismiss` adds a dismiss button, a drawn ✕ in a 24px circle, at the leading edge. " +
+          "A screen reader hears it with the label: \"Dismiss, button\", then the label. " +
           "Used in contexts where the strip is a temporary post-action reveal that the user should be able to hide.",
       },
     },
@@ -262,7 +263,7 @@ export const WithTrailingSlot: Story = {
       }
       label={
         <p className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">
-          <span className="rst:text-primary-500 rst:dark:text-primary-400 rst:font-medium rst:cursor-pointer rst:hover:opacity-80 rst:transition-opacity">
+          <span className="rst:text-primary-500 rst:dark:text-primary-400 rst:font-medium rst:cursor-pointer rst:hover:underline rst:underline-offset-4">
             Join
           </span>{" "}
           to appear here

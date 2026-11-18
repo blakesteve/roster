@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { cn } from "../../../lib/utils";
 import { withLabels } from "../../../lib/labels";
 import { Avatar } from "../Avatar/Avatar";
@@ -49,7 +49,10 @@ export interface AvatarStripProps {
   totalCount?: number;
   /** Remove one item by key before rendering — typically used to hide the current user. */
   excludeKey?: string;
-  /** When provided, renders a `✕` dismiss button at the leading edge of the strip. */
+  /**
+   * When provided, renders a dismiss button, a drawn ✕, at the leading edge of
+   * the strip. With a `label`, the button is described by it.
+   */
   onDismiss?: () => void;
   /**
    * Rendered immediately after the overflow chip inside the avatar stack.
@@ -77,6 +80,26 @@ export interface AvatarStripProps {
   className?: string;
 }
 
+/* Drawn here rather than imported from Font Awesome: an import at module scope
+   would bring FA's runtime to every app that renders a strip, with or without
+   a dismiss. */
+function DismissGlyph() {
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      viewBox="0 0 12 12"
+      className="rst:size-3"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    >
+      <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
+    </svg>
+  );
+}
+
 /**
  * A compact social-proof strip: a stacked row of overlapping avatars with an
  * optional overflow chip, dismiss button, trailing slot, and label area.
@@ -96,6 +119,7 @@ export function AvatarStrip({
   className,
 }: AvatarStripProps) {
   const l = withLabels(LABELS, labels);
+  const labelId = useId();
   const visible = items
     .filter((item) => item.key !== excludeKey)
     .slice(0, maxDisplay);
@@ -113,14 +137,22 @@ export function AvatarStrip({
       className={cn("rst:font-ui rst:flex rst:items-center rst:gap-3", className)}
     >
       {onDismiss && (
+        /* A 24px icon button, not a bare glyph. The text "✕" was sized by the
+           host's font (12px wide in Chromium, 10 in WebKit), drew the
+           browser's outline instead of Roster's ring, and its faded ink
+           painted 1.54:1. The quiet ink is the "+N" chip's: 5.99:1 on white.
+           No negative margin, so the hit area never pokes out of a container
+           with no padding. Described by the label, so a screen reader hears
+           what it dismisses. */
         <button
           type="button"
           onClick={onDismiss}
           aria-label={l.dismiss}
+          aria-describedby={label ? labelId : undefined}
           data-testid="avatar-strip-dismiss"
-          className="rst:shrink-0 rst:text-gray-400/50 rst:dark:text-gray-500/50 rst:hover:text-gray-400 rst:dark:hover:text-gray-500 rst:transition-colors rst:cursor-pointer"
+          className="rst:inline-flex rst:size-6 rst:shrink-0 rst:items-center rst:justify-center rst:rounded-full rst:cursor-pointer rst:text-gray-500 rst:dark:text-gray-400 rst:hover:text-gray-700 rst:dark:hover:text-gray-200 rst:hover:bg-gray-500/10 rst:transition-colors rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring"
         >
-          ✕
+          <DismissGlyph />
         </button>
       )}
 
@@ -186,7 +218,9 @@ export function AvatarStrip({
       </div>
 
       {label && (
-        <div data-testid="avatar-strip-label">{label}</div>
+        <div id={labelId} data-testid="avatar-strip-label">
+          {label}
+        </div>
       )}
     </div>
   );

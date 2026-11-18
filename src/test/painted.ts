@@ -75,27 +75,47 @@ export function inkOf(el: Element, color = getComputedStyle(el).color): string {
  *
  * `color` stands in for the text's own color, a `::placeholder`'s say.
  * Backgrounds are colors only: an image or a gradient isn't read.
+ *
+ * `under` is an element painted beneath `el` that isn't one of its ancestors:
+ * the input a field's icon is positioned over, say. The walk up from `el`
+ * never meets it, so without it the icon reads against the page, not the
+ * field. Its branch is painted in where it leaves `el`'s, before `el`'s own.
  */
-export function textOn(el: Element, color = getComputedStyle(el).color): { ink: number[]; ground: number[] } {
-  const chain: Element[] = [];
-  for (let node: Element | null = el; node; node = node.parentElement) chain.unshift(node);
-  const layer = (i: number, behind: RGBA, text: boolean): RGBA => {
-    const style = getComputedStyle(chain[i]);
+export function textOn(el: Element, color = getComputedStyle(el).color, under?: Element): { ink: number[]; ground: number[] } {
+  const chain = ancestry(el);
+  const below = under ? ancestry(under) : [];
+  /* The last element both chains share: `under`'s branch starts below it. */
+  let fork = -1;
+  while (fork + 1 < Math.min(chain.length, below.length) && chain[fork + 1] === below[fork + 1]) fork++;
+  if (under && fork >= below.length - 1) throw new Error("textOn: `under` is `el` or one of its ancestors, which the walk meets anyway");
+  const layer = (nodes: Element[], i: number, behind: RGBA, top: (behind: RGBA) => RGBA): RGBA => {
+    const style = getComputedStyle(nodes[i]);
     const opacity = Number(style.opacity);
     /* An element below full opacity paints into a layer of its own, which
        then goes over what's behind it at that opacity. */
     let here: RGBA = opacity < 1 ? [0, 0, 0, 0] : behind;
     here = over(rgba(style.backgroundColor), here);
-    here = i < chain.length - 1 ? layer(i + 1, here, text) : text ? over(rgba(color), here) : here;
+    if (under && nodes === chain && i === fork) here = layer(below, i + 1, here, (b) => b);
+    here = i < nodes.length - 1 ? layer(nodes, i + 1, here, top) : top(here);
     return opacity < 1 ? over([here[0], here[1], here[2], here[3] * opacity], behind) : here;
   };
   const canvas: RGBA = [255, 255, 255, 1];
-  return { ink: layer(0, canvas, true).slice(0, 3), ground: layer(0, canvas, false).slice(0, 3) };
+  return {
+    ink: layer(chain, 0, canvas, (b) => over(rgba(color), b)).slice(0, 3),
+    ground: layer(chain, 0, canvas, (b) => b).slice(0, 3),
+  };
+}
+
+/* `el` and every ancestor, the root first. */
+function ancestry(el: Element): Element[] {
+  const chain: Element[] = [];
+  for (let node: Element | null = el; node; node = node.parentElement) chain.unshift(node);
+  return chain;
 }
 
 /** `el`'s text against the ground beside it, as `textOn` composites them. */
-export function textContrast(el: Element, color?: string): number {
-  const { ink, ground } = textOn(el, color);
+export function textContrast(el: Element, color?: string, under?: Element): number {
+  const { ink, ground } = textOn(el, color, under);
   return contrast(ink, ground);
 }
 

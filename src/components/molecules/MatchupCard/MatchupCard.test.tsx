@@ -59,11 +59,46 @@ describe("MatchupCard Component", () => {
     // Home team is the winner (isWinner: true)
     expect(homeLogo).toHaveClass("rst:ring-success-500");
 
-    // Away team is the loser (isWinner: false).
-    // The grayscale class is applied to the wrapper, which is the parent of the logo
-    const awayWrapper = awayLogo.closest("div.rst\\:flex.rst\\:items-center.rst\\:gap-2");
-    expect(awayWrapper).toHaveClass("rst:opacity-50");
-    expect(awayWrapper).toHaveClass("rst:grayscale");
+    // Away team is the loser (isWinner: false). The fade and the gray are on
+    // its logo alone; its words take the quiet ink at full strength.
+    expect(awayLogo).toHaveClass("rst:opacity-50", "rst:grayscale");
+    const awayWrapper = awayLogo.closest("div.rst\\:flex.rst\\:items-center.rst\\:gap-2")!;
+    expect(awayWrapper.className).not.toMatch(/opacity|grayscale/);
+    for (const text of ["(12)", "14"]) expect(screen.getByText(text)).toHaveClass("rst:text-gray-500", "rst:dark:text-gray-400");
+    // The winner's words keep their inks.
+    expect(screen.getByText("28")).toHaveClass("rst:text-gray-900", "rst:dark:text-white");
+    expect(screen.getByText("(4)")).toHaveClass("rst:font-bold", "rst:text-gray-800");
+    expect(homeLogo).not.toHaveClass("rst:opacity-50");
+    // The separator has its dark step.
+    expect(screen.getByText("-")).toHaveClass("rst:text-gray-500", "rst:dark:text-gray-400");
+  });
+
+  it("says each team's result after its name, in its own words", () => {
+    const { rerender } = render(<MatchupCard awayTeam={mockAwayTeam} homeTeam={mockHomeTeam} isCompleted />);
+    expect(screen.getByText(", lost")).toHaveClass("rst:sr-only");
+    expect(screen.getByText(", won")).toHaveClass("rst:sr-only");
+    rerender(
+      <MatchupCard
+        awayTeam={mockAwayTeam}
+        homeTeam={mockHomeTeam}
+        isCompleted
+        labels={{ won: "ganó", lost: "perdió" }}
+      />,
+    );
+    expect(screen.getByText(", perdió")).toBeInTheDocument();
+    expect(screen.getByText(", ganó")).toBeInTheDocument();
+    rerender(<MatchupCard awayTeam={mockAwayTeam} homeTeam={{ ...mockHomeTeam, isWinner: false }} isCompleted isTie />);
+    expect(screen.getAllByText(", tied")).toHaveLength(2);
+    // Before the game, nothing is said.
+    rerender(<MatchupCard awayTeam={mockAwayTeam} homeTeam={mockHomeTeam} />);
+    expect(document.querySelector(".rst\\:sr-only")).toBeNull();
+  });
+
+  it("draws Roster's ring on keyboard focus and hovers within the gray ramp", () => {
+    render(<MatchupCard awayTeam={mockAwayTeam} homeTeam={mockHomeTeam} />);
+    const button = screen.getByRole("button");
+    expect(button).toHaveClass("rst:focus:outline-hidden", "rst:focus-visible:ring-2", "rst:focus-visible:ring-ring", "rst:dark:hover:bg-gray-800");
+    expect(button.className).not.toMatch(/slate/);
   });
 
   it("renders a tied game correctly when isTie is true", () => {
@@ -83,9 +118,8 @@ describe("MatchupCard Component", () => {
     expect(awayLogo).toHaveClass("rst:ring-gray-400");
     expect(homeLogo).toHaveClass("rst:ring-gray-400");
 
-    // Neither should have the loser grayscale wrapper
-    const awayWrapper = awayLogo.closest("div.rst\\:flex.rst\\:items-center.rst\\:gap-2");
-    expect(awayWrapper).not.toHaveClass("rst:grayscale");
+    // Neither is faded or gray
+    for (const logo of [awayLogo, homeLogo]) expect(logo.className).not.toMatch(/opacity|grayscale/);
   });
 
   it("allows clicking the card and triggers the onClick handler", () => {

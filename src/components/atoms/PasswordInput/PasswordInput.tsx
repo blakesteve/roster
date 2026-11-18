@@ -23,6 +23,16 @@ export interface PasswordInputProps
   hideLabel?: string;
 }
 
+/* The toggle's hover ink: the text ink of the field it sits in. */
+const HOVER: Record<NonNullable<InputProps["variant"]>, string> = {
+  outline: "rst:hover:text-[var(--roster-control-text)]",
+  white: "rst:hover:text-gray-900 rst:dark:hover:text-gray-100",
+  soft: "rst:hover:text-gray-900 rst:dark:hover:text-gray-100",
+  ghost: "rst:hover:text-gray-900 rst:dark:hover:text-gray-100",
+  slate: "rst:hover:text-gray-100",
+};
+const HOVER_ERROR = "rst:hover:text-error-600 rst:dark:hover:text-error-400";
+
 /**
  * A password field with a reveal toggle: the pattern every sign-in form needs
  * and nobody should rewrite.
@@ -83,11 +93,16 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
               disabled={disabled}
               aria-label={revealed ? hideLabel : showLabel}
               aria-pressed={revealed}
+              /* The slot's ink at rest, with no fade of its own: at 70% on
+                 the slot's old gray-400 it painted 1.85:1. On hover, the
+                 field's own text ink. Disabled dims, as an inactive control
+                 may, and takes no hover. */
               className={cn(
-                "rst:-m-1 rst:flex rst:items-center rst:rounded-sm rst:p-1 rst:transition-opacity",
-                "rst:opacity-70 rst:hover:opacity-100",
+                "rst:-m-1 rst:flex rst:items-center rst:rounded-sm rst:p-1 rst:transition-colors",
                 "rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring",
-                disabled ? "rst:cursor-not-allowed rst:opacity-40 rst:hover:opacity-40" : "rst:cursor-pointer",
+                disabled
+                  ? "rst:cursor-not-allowed rst:opacity-40"
+                  : cn("rst:cursor-pointer", error || errorMessage ? HOVER_ERROR : HOVER[variant ?? "outline"]),
               )}
             >
               <FontAwesomeIcon

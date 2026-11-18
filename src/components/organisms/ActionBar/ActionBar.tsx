@@ -49,9 +49,11 @@ const ActionBar = forwardRef<HTMLDivElement, ActionBarProps>(
             {actions && <div className="rst:flex rst:gap-2">{actions}</div>}
           </div>
 
-          {/* Subtitle */}
+          {/* Subtitle, in a quieter ink rather than a fade: the steps nearest
+              what the title's ink at 80% painted. On primary, the bar's own
+              ink; white at 80% there was 2.33:1. */}
           {subtitle && (
-            <div className="rst:text-sm rst:opacity-80 rst:mt-1 rst:font-medium">
+            <div className={cn("rst:text-sm rst:mt-1 rst:font-medium", variant !== "primary" && "rst:text-gray-700 rst:dark:text-gray-300")}>
               {subtitle}
             </div>
           )}

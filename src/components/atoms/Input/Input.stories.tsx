@@ -153,6 +153,8 @@ export const SlateField: Story = {
 /**
  * Showcases how to pass interactive elements into the `endIcon` prop: a real
  * button, named, with a pointer cursor and a focus ring like any other control.
+ * It takes the slot's ink, which passes 3:1 for an icon, so it needs no fade;
+ * on hover it takes the field's text ink.
  * For a password, `PasswordInput` does all of this already.
  */
 export const PasswordAction: Story = {
@@ -164,7 +166,7 @@ export const PasswordAction: Story = {
       <button
         type="button"
         aria-label="Show password"
-        className="rst:cursor-pointer rst:rounded-sm rst:opacity-70 rst:hover:opacity-100 rst:transition-opacity rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring"
+        className="rst:cursor-pointer rst:rounded-sm rst:hover:text-[var(--roster-control-text)] rst:transition-colors rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring"
       >
         <FontAwesomeIcon icon={faEye} className="rst:h-4 rst:w-4" />
       </button>

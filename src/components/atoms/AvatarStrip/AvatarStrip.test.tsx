@@ -2,6 +2,8 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { AvatarStrip, type AvatarStripItem } from "./AvatarStrip";
 import "@testing-library/jest-dom";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -161,6 +163,43 @@ describe("AvatarStrip", () => {
   it("dismiss button has aria-label='Dismiss'", () => {
     render(<AvatarStrip items={THREE_ITEMS} onDismiss={vi.fn()} />);
     expect(screen.getByLabelText("Dismiss")).toBeInTheDocument();
+  });
+
+  it("describes the dismiss button by the label, when there is one", () => {
+    const { rerender } = render(
+      <AvatarStrip items={THREE_ITEMS} onDismiss={vi.fn()} label="3 other players prefer Controller" />,
+    );
+    const dismiss = screen.getByTestId("avatar-strip-dismiss");
+    const label = screen.getByTestId("avatar-strip-label");
+    expect(label.id).not.toBe("");
+    expect(dismiss).toHaveAttribute("aria-describedby", label.id);
+    expect(dismiss).toHaveAccessibleDescription("3 other players prefer Controller");
+    // No label, nothing to describe it by.
+    rerender(<AvatarStrip items={THREE_ITEMS} onDismiss={vi.fn()} />);
+    expect(screen.getByTestId("avatar-strip-dismiss")).not.toHaveAttribute("aria-describedby");
+  });
+
+  it("draws its ✕ as one hidden icon in a 24px round button", () => {
+    render(<AvatarStrip items={THREE_ITEMS} onDismiss={vi.fn()} />);
+    const dismiss = screen.getByTestId("avatar-strip-dismiss");
+    expect(dismiss.textContent).toBe("");
+    const icons = dismiss.querySelectorAll("svg");
+    expect(icons).toHaveLength(1);
+    expect(icons[0]).toHaveAttribute("aria-hidden", "true");
+    expect(dismiss).toHaveClass("rst:size-6", "rst:rounded-full", "rst:focus-visible:ring-2", "rst:focus-visible:ring-ring");
+    expect(dismiss).toHaveAttribute("type", "button");
+  });
+
+  /* An import at module scope would bring Font Awesome's runtime to every app
+     that renders a strip, with or without a dismiss. */
+  it("imports nothing from Font Awesome", () => {
+    const imports = (file: string) =>
+      [...readFileSync(join(__dirname, file), "utf8").matchAll(/^import\s(?:[\s\S]*?\sfrom\s)?["']([^"']+)["']/gm)].map((m) => m[1]);
+    const mine = imports("AvatarStrip.tsx");
+    expect(mine).toContain("../Avatar/Avatar");
+    expect(mine.filter((s) => s.startsWith("@fortawesome"))).toEqual([]);
+    // Twin: the same reading finds PasswordInput's.
+    expect(imports("../PasswordInput/PasswordInput.tsx")).toContain("@fortawesome/react-fontawesome");
   });
 
   // ── trailingSlot ───────────────────────────────────────────────────────────
