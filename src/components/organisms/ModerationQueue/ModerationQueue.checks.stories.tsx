@@ -850,19 +850,29 @@ export const NothingSlidesAsAnItemLeaves: Story = {
     await expect(color.getAnimations().flatMap(moves), "and doesn't count as motion").toEqual([]);
 
     await userEvent.click(button("a", "approve")!);
+    const root = q("section")!;
+    const sliding = () =>
+      document
+        .getAnimations()
+        .filter((a) => {
+          const target = (a.effect as KeyframeEffect | null)?.target;
+          return target instanceof Element && root.contains(target) && a.playState === "running";
+        })
+        .flatMap(moves);
     (await nextCall()).resolve();
+    /* Twin: read before the landed decision renders, the clicked button is
+       still busy, and its spinner's rotation counts as motion. One frame
+       wasn't always enough for that render on a slow runner, so the read
+       below once caught the spinner. Reduced motion stills the spinner, so
+       the twin holds only where it turns. */
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) await expect(sliding(), "the spinner, before the render").toContain("transform");
+    /* The decision has rendered once nothing in the item is busy: the item
+       is gone, or, if it played an exit, has stopped spinning. */
+    await waitFor(() => expect(itemEl("a")?.querySelector('[role="status"]') ?? null).toBeNull());
     /* Read in the next frame, while an exit would still be playing, not
        after the item has gone, by which time one would have finished. */
     await new Promise((r) => requestAnimationFrame(r));
-    const root = q("section")!;
-    const sliding = document
-      .getAnimations()
-      .filter((a) => {
-        const target = (a.effect as KeyframeEffect | null)?.target;
-        return target instanceof Element && root.contains(target) && a.playState === "running";
-      })
-      .flatMap(moves);
-    await expect(sliding).toEqual([]);
+    await expect(sliding()).toEqual([]);
     await waitFor(() => expect(itemEl("a")).toBeNull());
   },
 };
