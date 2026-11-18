@@ -68,7 +68,11 @@ const Footer = React.forwardRef<HTMLElement, FooterProps>(
                   key={link.href}
                   href={link.href}
                   to={link.href}
-                  className="rst:text-sm rst:text-inherit rst:opacity-70 rst:hover:opacity-100 rst:transition-opacity"
+                  /* The variant's text at full strength, as the copyright
+                     line beside it: at 70% they painted 3.04:1. The
+                     copyright's weight keeps the two apart. Hover underlines,
+                     and focus draws Roster's ring, as `Link` does. */
+                  className="rst:text-sm rst:text-inherit rst:rounded-sm rst:underline-offset-4 rst:hover:underline rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring"
                 >
                   {link.label}
                 </LinkEl>

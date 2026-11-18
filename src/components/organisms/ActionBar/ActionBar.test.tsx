@@ -51,16 +51,39 @@ describe("ActionBar Component", () => {
     expect(actionBar).toHaveClass("rst:sticky", "rst:bottom-0", "rst:border-t");
   });
 
-  // verifying the /50 opacities
+  /* Primary is Dialog primary's solid surface, with its ink token, not a
+     translucent fill under a hardcoded white. */
   it('applies the correct CSS classes for variant="primary"', () => {
     render(<ActionBar data-testid="action-bar" variant="primary" />);
 
     const actionBar = screen.getByTestId("action-bar");
-    expect(actionBar).toHaveClass("rst:bg-primary-700/50", "rst:text-white");
-    expect(actionBar).toHaveClass(
-      "rst:dark:bg-primary-950/50",
-      "rst:dark:text-primary-50",
-    );
+    expect(actionBar).toHaveClass("rst:bg-primary-700", "rst:text-primary-700-ink");
+    expect(actionBar).toHaveClass("rst:dark:bg-primary-950", "rst:dark:text-white");
+    expect(actionBar).not.toHaveClass("rst:text-white", "rst:bg-primary-700/50");
+  });
+
+  /* Default and soft are at 90%, so their text holds over whatever scrolls
+     under the sticky bar. */
+  it.each([
+    ["default", "rst:bg-white/90", "rst:dark:bg-gray-950/90"],
+    ["soft", "rst:bg-gray-50/90", "rst:dark:bg-gray-900/90"],
+  ] as const)('fills variant="%s" at 90%%', (variant, light, dark) => {
+    render(<ActionBar data-testid="action-bar" variant={variant} />);
+    expect(screen.getByTestId("action-bar")).toHaveClass(light, dark);
+  });
+
+  /* The subtitle is a quieter ink, not a fade; on primary, the bar's own. */
+  it.each([
+    ["default", true],
+    ["soft", true],
+    ["transparent", true],
+    ["primary", false],
+  ] as const)('inks the subtitle on variant="%s"', (variant, quiet) => {
+    render(<ActionBar variant={variant} subtitle="Under the title" />);
+    const subtitle = screen.getByText("Under the title");
+    expect(subtitle.className).not.toMatch(/opacity/);
+    if (quiet) expect(subtitle).toHaveClass("rst:text-gray-700", "rst:dark:text-gray-300");
+    else expect(subtitle.className).not.toMatch(/text-gray/);
   });
 
   // test for the transparent variant to ensure background drops out

@@ -524,8 +524,9 @@ the supported way now.
 rule stops matching.** Solid Button, Badge, Pill and Checkbox no longer carry
 `rst:text-white` or `rst:text-gray-950`, so a selector naming either matches
 nothing. It fails silently, and it fails *partially*: those classes are still on
-`ActionBar`, `Avatar` and `Breadcrumbs`, so a themed foreground keeps working
-there while reverting on every solid control. The `primary` fills of `Card`,
+`Avatar` and `Breadcrumbs`, so a themed foreground keeps working there while
+reverting on every solid control. (`ActionBar`'s primary carried `text-white`
+through 5.20; since 5.21.0 it reads `--roster-primary-700-ink`, as below.) The `primary` fills of `Card`,
 `Dialog` and, since 5.8.0, `Navbar` read their ink token too: Navbar's bar,
 brand and active link take `--roster-primary-700-ink`, and its other links and
 menu button the same ink at 80%. Each keeps white in dark mode, where its fill
@@ -595,12 +596,57 @@ on hover (`primary-600`, dark `primary-300`) instead of fading to 80%, which
 read 4.15:1.
 
 `src/text-opacity.checks.stories.tsx` measures every Roster text and icon that
-still carries an opacity or an alpha, as painted, and
-`src/text-opacity.test.ts` fails on any new one until it's measured there. Five
-still fall under their bar on 5.20.0, each queued to be fixed on its own:
-`Footer`'s links, `ActionBar`'s primary subtitle on its translucent fill,
-`AvatarStrip`'s ✕, `MatchupCard`'s losing side, and `PasswordInput`'s toggle.
-That story's ledger pins what each measures.
+carries an opacity or an alpha, as painted, and `src/text-opacity.test.ts`
+fails on any new one until it's measured there. None falls under its bar since
+5.21.0.
+
+#### Upgrading to 5.21.0
+
+**Five components change how they look, on purpose.** Each fell under its
+contrast bar on 5.20.0, so each moves however you use it. Sizes change only
+where a target was too small.
+
+- **`AvatarStrip`'s dismiss is a 24px round button** with a drawn ✕, in the
+  "+N" chip's ink: `gray-500`, `gray-400` in dark (5.99:1 on white; the text
+  "✕" at half strength was 1.54). It draws Roster's ring, and with a `label`
+  it's described by it, so a screen reader hears what it dismisses. The
+  avatars and label move about 12px right: the glyph was 12px wide in
+  Chromium and 10 in WebKit.
+  `onDismiss`, `labels` and the test ids don't change. It imports nothing from
+  Font Awesome.
+- **Every field's icon slot takes the ink its variant gives its placeholder**:
+  in `outline`, the text token at 65%, so it follows the surface you chose
+  your text for; `white` is `gray-500` (dark `gray-400`); `slate` is `gray-400`
+  in dark. `soft`, `ghost` and an error don't change. An icon you pass inherits
+  it, so a control of your own in `endIcon` needs no fade: the slot passes 3:1
+  (5.44:1 at its lowest, where `gray-400` was 2.52). One case still doesn't:
+  an error on `slate` in light, red on `gray-700`, which reads 1.61:1, as it
+  did before. The field's typed text there is lower still, at 1.24:1; neither
+  is part of this release. `iconVariants`, which is
+  exported, carries the new classes. `PasswordInput`'s toggle drops its
+  `opacity-70` (1.85:1 on 5.20.0) and takes the field's text ink on hover;
+  disabled, it still dims to 40%.
+- **`Footer`'s links take the variant's text at full strength**, the ink the
+  copyright line beside it already passes with (5.74:1 at the lowest, from
+  3.04). Hover underlines them, and focus draws Roster's ring. `primary` sets
+  its own ring on its subtree, `primary-400` on its own fill, as `Dialog`'s
+  `primary` does. A rule keyed on the links' `rst:opacity-70` stops matching.
+- **`ActionBar`'s fills hold their text.** `primary` is `Dialog` primary's
+  solid surface: `primary-700` with `--roster-primary-700-ink`, dark
+  `primary-950` with white, and Dialog's ring and control tokens on its
+  subtree (white on `primary-700` at 50% was 2.77:1, the subtitle 2.33).
+  `default` and `soft` go from 50% to 90%: the bar is sticky, and over a dark
+  photo at 50% its title read 4.43:1. The subtitle drops `opacity-80` for
+  `gray-700`, `gray-300` in dark, or the bar's own ink on `primary`. A
+  foreground you set on the bar through `className` no longer reaches the
+  subtitle on `default`, `soft` or `transparent`; color the node you pass as
+  `subtitle`. If you override the primary fill, yours still wins.
+- **`MatchupCard`'s losing side fades only its logo.** Its pick count and
+  score take `gray-500`, `gray-400` in dark, at full strength (the faded score
+  was 3.35:1, now 5.99), and the "-" between the teams gets the dark step it
+  was missing. Hover in dark is `gray-800`, on Roster's ramp, not `slate-800`.
+  Focus draws Roster's ring. Each team's result is also said after its name,
+  hidden ("won", "lost" or "tied"); replace the words with `labels`.
 
 ### Focus
 
@@ -2602,7 +2648,8 @@ and the rest stay:
 Since 5.8.0 that covers `Navbar`, `Sheet`, `Dialog`, `Breadcrumbs`, `Footer`,
 `CallToAction`, `AvatarStrip`, `ErrorState`, `Countdown`, `Carousel` and
 `ModerationQueue` (whose `labels.close` names the close button of its edit
-Dialog or Sheet), alongside `Pagination`, the loading system and DataTable's
+Dialog or Sheet), and since 5.21.0 `MatchupCard` (the "won", "lost" and "tied"
+it says after each team's name), alongside `Pagination`, the loading system and DataTable's
 `paginationLabels`. A few components name their words with single props
 instead, and 5.8.0 adds the ones that were missing: MultiSelect's
 `countLabel`, DataTable's `emptyMessage` and MediaPreview's `newTabLabel`, next
@@ -2993,7 +3040,11 @@ page up, each element's `opacity` applied to everything it holds as one layer,
 and the text on top. It's checked against hand-worked colors in
 `src/painted.checks.stories.tsx`. Reading `getComputedStyle(el).color` alone
 misses opacity on the text and on any ancestor; a placeholder check in a
-`Dialog` passed on the panel's first frame, at opacity 0.
+`Dialog` passed on the panel's first frame, at opacity 0. Text positioned over
+an element it isn't inside, as a field's icon sits over its input, takes that
+element as `under` (`textOn(icon, undefined, input)`): the walk up from the icon
+never meets the input's fill, so without it a filled field's icon reads against
+the page.
 
 `src/lib/utils.test.ts` pins `cn`. `tailwind-merge` has to be configured with the
 prefix or it stops recognising Roster's classes as utilities and silently

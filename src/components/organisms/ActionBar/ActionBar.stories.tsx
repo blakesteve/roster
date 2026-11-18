@@ -27,7 +27,7 @@ const meta = {
 The **ActionBar** provides a persistent, floating area for page-level actions and status indicators. It automatically handles responsive wrapping and includes a "bottom tray" slot (\`children\`) for complex filtering or dynamic data display.
 
 #### 🔧 Layout & Theming
-* **Glassmorphism:** Uses \`backdrop-blur\` to ensure scrolling content remains slightly visible underneath.
+* **Glassmorphism:** \`default\` and \`soft\` are 90% fills with \`backdrop-blur\`: a trace of the content scrolling underneath shows, and the bar's text holds over anything. \`primary\` is solid, as a primary \`Navbar\` is, so the two read as one band.
 * **Zero-Config Dark Mode:** Automatically adapts backgrounds, borders, and text contrast when the \`.dark\` class is present on the page.
 * **Positioning:** Pass \`position="bottom"\` to stick it to the bottom of the viewport instead of the top.
 `,

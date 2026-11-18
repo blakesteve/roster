@@ -29,14 +29,14 @@ import { Sheet } from "./components/organisms/Sheet/Sheet";
 
 /**
  * Every Roster text and icon that carries an `opacity-*` or an alpha color,
- * measured as painted (`textContrast`, src/test/painted.ts): its ink through
+ * or did until a fix gave it an ink of its own, measured as painted (`textContrast`, src/test/painted.ts): its ink through
  * its own opacity and every ancestor's, over what's behind it. Light and dark,
  * on a page and on a Card, in Chromium and WebKit (tagged `real-input` for the
  * project that runs both; nothing here takes input).
  *
- * Text is held to WCAG AA's 4.5:1 and an icon to 3:1 (1.4.11). The ones that
- * pass are held to it. The ones below it are pinned at what they measure, a
- * ledger of what's open: changing one fails here until the ledger moves.
+ * Text is held to WCAG AA's 4.5:1 and an icon to 3:1 (1.4.11). One found
+ * below its bar is pinned at what it measures, on a ledger of what's open,
+ * until a ruling fixes it. None is open now.
  *
  * Not measured, by WCAG's own exceptions or because nothing reads there: a
  * disabled or otherwise inactive control's dimming, an enter or leave
@@ -64,8 +64,10 @@ const CTAS = ["primary", "neutral", "warning", "error", "success", "info"] as co
 const FOOTERS = ["default", "primary", "transparent"] as const;
 const BARS = ["default", "soft", "primary", "transparent"] as const;
 
-/* Every inline site, with what to measure and its bar. */
-type Site = { name: string; bar: number; at: (root: Element) => Element[] };
+/* Every inline site, with what to measure and its bar. `under` is what the
+   text is positioned over without being inside, which the walk up from it
+   never meets: a field's icon sits over its input. */
+type Site = { name: string; bar: number; at: (root: Element) => Element[]; under?: (el: Element) => Element };
 const all = (selector: string) => (root: Element) => [...root.querySelectorAll(selector)];
 const leaves = (selector: string) => (root: Element) =>
   [...root.querySelectorAll(`${selector} *`), ...root.querySelectorAll(selector)].filter(
@@ -84,40 +86,46 @@ const SITES: Site[] = [
   ]),
   ...ALERTS.map((c): Site => ({ name: `Toast ${c} close`, bar: ICON, at: all(`[data-site="toast-${c}"] button`) })),
   ...FOOTERS.map((v): Site => ({ name: `Footer ${v} links`, bar: TEXT, at: all(`[data-site="footer-${v}"] nav a`) })),
-  ...BARS.map((v): Site => ({ name: `ActionBar ${v} subtitle`, bar: TEXT, at: all(`[data-site="bar-${v}"] .rst\\:opacity-80`) })),
+  ...BARS.map((v): Site => ({ name: `ActionBar ${v} subtitle`, bar: TEXT, at: all(`[data-site="bar-${v}"] .rst\\:mt-1`) })),
   { name: "ErrorState card description", bar: TEXT, at: all('[data-site="error"] .rst\\:mt-2') },
-  { name: "AvatarStrip dismiss", bar: TEXT, at: all('[data-site="avatars"] [data-testid="avatar-strip-dismiss"]') },
+  { name: "AvatarStrip dismiss", bar: ICON, at: all('[data-site="avatars"] [data-testid="avatar-strip-dismiss"]') },
   { name: "CollapsibleSection toggle", bar: TEXT, at: all('[data-site="collapsible"] button') },
-  { name: "MatchupCard loser", bar: TEXT, at: leaves('[data-site="matchup"] .rst\\:opacity-50') },
+  /* The away team lost: its accessory and score, not its hidden result. */
+  {
+    name: "MatchupCard loser",
+    bar: TEXT,
+    at: (root) => leaves('[data-site="matchup"] button > div:first-child')(root).filter((el) => !el.matches(".rst\\:sr-only")),
+  },
+  { name: "MatchupCard separator", bar: TEXT, at: all('[data-site="matchup"] button > span') },
   { name: "Carousel position", bar: TEXT, at: all('[data-site="carousel"] [data-carousel-position]') },
   { name: "DataTable sortable head", bar: TEXT, at: all('[data-site="table"] .rst\\:opacity-80') },
   { name: "Chip remove", bar: ICON, at: all('[data-site="chip"] .rst\\:opacity-70') },
   { name: "Badge icon", bar: ICON, at: all('[data-site="badge"] .rst\\:opacity-70') },
   { name: "Disclosure chevron", bar: ICON, at: all('[data-site="disclosure"] .rst\\:opacity-60') },
   { name: "Link external icon", bar: ICON, at: all('[data-site="link"] [data-testid="external-icon"]') },
-  { name: "PasswordInput toggle", bar: ICON, at: all('[data-site="password"] button[aria-pressed]') },
+  {
+    name: "PasswordInput toggle",
+    bar: ICON,
+    at: all('[data-site="password"] button[aria-pressed]'),
+    under: (el) => el.closest(".rst\\:relative")!.querySelector("input")!,
+  },
   { name: "MultiSelect remove", bar: ICON, at: all('[data-site="multiselect"] .rst\\:opacity-70') },
 ];
 
-/* Below the bar on 5.20.0, each at its lowest across the grounds, the same in
-   both engines to 0.02. Each is queued as its own ticket, ruled 17 Nov 2026,
-   and `src/text-opacity.test.ts` holds its classes as `open` until it lands. */
-const BELOW: Record<string, number> = {
-  "Footer default links": 3.04,
-  "Footer primary links": 3.93,
-  "Footer transparent links": 3.12,
-  /* Its translucent fill: the title on it is thin too. */
-  "ActionBar primary subtitle": 2.33,
-  "AvatarStrip dismiss": 1.54,
-  /* And its "-" between the scores, 3.3:1 in dark, which no opacity causes. */
-  "MatchupCard loser": 3.35,
-  /* Its icon slot is gray-400: about 2.5 even unfaded. */
-  "PasswordInput toggle": 1.85,
-};
+/* Below the bar, each at its lowest across the grounds, with a ruling to fix
+   it; `src/text-opacity.test.ts` holds its classes as `open` until the fix
+   lands. Empty: the five 5.20.0 left here (Footer's links, ActionBar
+   primary's subtitle, AvatarStrip's dismiss, MatchupCard's loser and
+   PasswordInput's toggle) were fixed in 5.21.0, each with a checks story of
+   its own that pins its figures and its twin. */
+const BELOW: Record<string, number> = {};
 
 /* Fixed in 5.20.0, each at what its 5.19 class painted, for the twins: the
    close and the dismiss at opacity 0.6, the toggle's hover at 0.8. */
 const BEFORE = { alertClose: 2.91, ctaDismiss: 2.86, toggleHover: 4.15 };
+
+/* A logo with nothing to load, for MatchupCard. */
+const LOGO = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'/%3E";
 
 function Sites() {
   const [tags, setTags] = useState<(string | number)[]>(["a"]);
@@ -167,8 +175,8 @@ function Sites() {
       <div data-site="matchup">
         <MatchupCard
           isCompleted
-          awayTeam={{ id: 1, logoSrc: "", name: "Away", score: 10, isWinner: false }}
-          homeTeam={{ id: 2, logoSrc: "", name: "Home", score: 20, isWinner: true }}
+          awayTeam={{ id: 1, logoSrc: LOGO, name: "Away", score: 10, isWinner: false, accessory: "(5)" }}
+          homeTeam={{ id: 2, logoSrc: LOGO, name: "Home", score: 20, isWinner: true, accessory: "(8)" }}
         />
       </div>
       <div data-site="carousel" style={{ width: 300 }}>
@@ -238,7 +246,7 @@ function measure(canvas: Element, sites: Site[]) {
       const found = site.at(ground);
       if (!found.length) missing.push(`${site.name} on ${id}`);
       for (const el of found) {
-        const ratio = round(textContrast(el));
+        const ratio = round(textContrast(el, undefined, site.under?.(el)));
         if (!lowest[site.name] || ratio < lowest[site.name].ratio) lowest[site.name] = { ratio, where: id };
       }
     }
@@ -260,12 +268,17 @@ export const EveryInlineSite: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
       <style>{STILL}</style>
+      <div data-pointer-rest="" style={{ width: 24, height: 24 }} />
       {GROUNDS.map((id) => (
         <Ground key={id} id={id} />
       ))}
     </div>
   ),
   play: async ({ canvasElement }) => {
+    /* The pointer rests on nothing with a hover style: a story or file before
+       this one leaves it wherever it last was, and over a close or a toggle
+       its hover would read as the rest. */
+    await realInputOrSkip()?.commands.realHover("[data-pointer-rest]");
     const { lowest, missing } = measure(canvasElement, SITES);
     console.info(`TEXT OPACITY inline ${JSON.stringify(lowest)}`);
     /* Reach: every site rendered on every ground. */

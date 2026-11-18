@@ -9,6 +9,7 @@ import { Breadcrumbs } from "./components/molecules/Breadcrumbs/Breadcrumbs";
 import { Footer } from "./components/organisms/Footer/Footer";
 import { CallToAction } from "./components/molecules/CallToAction/CallToAction";
 import { AvatarStrip } from "./components/atoms/AvatarStrip/AvatarStrip";
+import { MatchupCard } from "./components/molecules/MatchupCard/MatchupCard";
 import { ErrorState } from "./components/molecules/ErrorState/ErrorState";
 import { Countdown } from "./components/organisms/Countdown/Countdown";
 import { Carousel } from "./components/molecules/Carousel/Carousel";
@@ -203,6 +204,31 @@ describe("pseudo-locale: no built-in English is left once every label is replace
         />
       ),
       ["Dismiss", "more"],
+    ],
+    [
+      "MatchupCard",
+      (labeled) => (
+        <MatchupCard
+          isCompleted
+          awayTeam={{ id: 1, logoSrc: "/a.png", name: pseudo("Away"), score: 10, isWinner: false }}
+          homeTeam={{ id: 2, logoSrc: "/b.png", name: pseudo("Home"), score: 20, isWinner: true }}
+          labels={labeled ? { won: pseudo("won"), lost: pseudo("lost") } : undefined}
+        />
+      ),
+      ["won", "lost"],
+    ],
+    [
+      "MatchupCard, tied",
+      (labeled) => (
+        <MatchupCard
+          isCompleted
+          isTie
+          awayTeam={{ id: 1, logoSrc: "/a.png", name: pseudo("Away"), score: 14 }}
+          homeTeam={{ id: 2, logoSrc: "/b.png", name: pseudo("Home"), score: 14 }}
+          labels={labeled ? { tied: pseudo("tied") } : undefined}
+        />
+      ),
+      ["tied"],
     ],
     [
       "ErrorState",

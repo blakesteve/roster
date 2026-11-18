@@ -16,15 +16,16 @@ import { join, relative } from "node:path";
  * - `motion`: an enter or leave transition, or a mark shown and hidden.
  * - `decorative`: nothing to read: loading dots, a ping, a skeleton block, a
  *   sheet's drag grabber beside its close button.
- * - `open`: measured below its bar and queued as its own ticket, ruled 17 Nov
- *   2026, not 5.20.0. Its figure is on the ledger in the checks story, and it
- *   stays `open` here until its ticket lands.
+ * - `mark`: a logo's fade. A logo is exempt from contrast as a mark (WCAG
+ *   1.4.11's logotype and incidental exceptions), and its name is in its alt.
+ * - `open`: measured below its bar, with a ruling to fix it. Its figure goes on
+ *   the ledger in the checks story, and it stays `open` here until the fix
+ *   lands. None is open: the five 5.20.0 left open were fixed in 5.21.0.
  */
-type Why = "measured" | "inactive" | "motion" | "decorative" | "open";
+type Why = "measured" | "inactive" | "motion" | "decorative" | "mark" | "open";
 
 const KNOWN: Record<string, Record<string, Why>> = {
   "components/atoms/Avatar/Avatar.tsx": { "rst:data-closed:opacity-0": "motion" },
-  "components/atoms/AvatarStrip/AvatarStrip.tsx": { "rst:text-gray-400/50": "open", "rst:dark:text-gray-500/50": "open" },
   "components/atoms/Badge/Badge.tsx": { "rst:opacity-70": "measured" },
   "components/atoms/Button/button-variants.ts": { "rst:disabled:opacity-50": "inactive" },
   "components/atoms/Checkbox/Checkbox.tsx": { "rst:opacity-0": "motion", "rst:opacity-100": "motion", "rst:opacity-50": "inactive" },
@@ -44,12 +45,7 @@ const KNOWN: Record<string, Record<string, Why>> = {
     "rst:opacity-0": "motion",
     "rst:opacity-100": "motion",
   },
-  "components/atoms/PasswordInput/PasswordInput.tsx": {
-    "rst:opacity-70": "open",
-    "rst:hover:opacity-100": "open",
-    "rst:opacity-40": "inactive",
-    "rst:hover:opacity-40": "inactive",
-  },
+  "components/atoms/PasswordInput/PasswordInput.tsx": { "rst:opacity-40": "inactive" },
   "components/atoms/Pill/Pill.tsx": { "rst:opacity-75": "decorative" },
   "components/atoms/Select/Select.tsx": { "rst:opacity-0": "motion", "rst:opacity-100": "motion" },
   "components/atoms/Select/select-variants.ts": { "rst:data-disabled:opacity-50": "inactive", "rst:disabled:opacity-50": "inactive" },
@@ -68,7 +64,7 @@ const KNOWN: Record<string, Record<string, Why>> = {
   "components/molecules/CheckboxGroup/CheckboxGroup.tsx": { "rst:data-disabled:opacity-50": "inactive", "rst:opacity-50": "inactive" },
   "components/molecules/ErrorState/ErrorState.tsx": { "rst:text-error-800/80": "measured", "rst:dark:text-error-200/80": "measured" },
   "components/molecules/FileUpload/FileUpload.tsx": { "rst:opacity-50": "inactive", "rst:opacity-70": "inactive" },
-  "components/molecules/MatchupCard/MatchupCard.tsx": { "rst:opacity-50": "open" },
+  "components/molecules/MatchupCard/MatchupCard.tsx": { "rst:opacity-50": "mark" },
   "components/molecules/Menu/Menu.tsx": {
     "rst:opacity-75": "measured",
     "rst:opacity-70": "measured",
@@ -89,7 +85,6 @@ const KNOWN: Record<string, Record<string, Why>> = {
   "components/molecules/Slider/track.ts": { "rst:opacity-50": "inactive" },
   "components/molecules/Toast/Toast.tsx": { "rst:opacity-70": "measured", "rst:hover:opacity-100": "measured" },
   "components/molecules/Toast/Toaster.tsx": { "rst:opacity-0": "motion" },
-  "components/organisms/ActionBar/ActionBar.tsx": { "rst:opacity-80": "open" },
   "components/organisms/DataTable/DataTable.tsx": { "rst:opacity-80": "measured", "rst:hover:opacity-100": "measured" },
   "components/organisms/Dialog/Dialog.tsx": {
     "rst:opacity-75": "measured",
@@ -98,7 +93,6 @@ const KNOWN: Record<string, Record<string, Why>> = {
     "rst:opacity-0": "motion",
     "rst:opacity-100": "motion",
   },
-  "components/organisms/Footer/Footer.tsx": { "rst:opacity-70": "open", "rst:hover:opacity-100": "open" },
   "components/organisms/ModerationQueue/ModerationQueue.tsx": { "rst:opacity-50": "inactive" },
   "components/organisms/Navbar/Navbar.tsx": { "rst:opacity-0": "motion", "rst:opacity-100": "motion" },
   "components/organisms/Sheet/Sheet.tsx": {
@@ -150,24 +144,37 @@ describe("opacity and alpha text in the library", () => {
     expect(gone).toEqual([]);
   });
 
-  it("reaches the whole library, and the three fixed in 5.20.0 by an ink carry none", () => {
+  it("reaches the whole library, and the ones fixed by an ink carry none", () => {
     const seen = found();
     expect(Object.keys(seen).length).toBe(Object.keys(KNOWN).length);
     expect(Object.keys(seen).length).toBeGreaterThan(40);
-    expect(seen["components/atoms/SegmentBar/SegmentBar.tsx"]).toBeUndefined();
-    expect(seen["components/atoms/Stat/stat-variants.ts"]).toBeUndefined();
-    expect(seen["components/atoms/CollapsibleSection/CollapsibleSection.tsx"]).toBeUndefined();
+    for (const file of [
+      /* 5.20.0 */
+      "components/atoms/SegmentBar/SegmentBar.tsx",
+      "components/atoms/Stat/stat-variants.ts",
+      "components/atoms/CollapsibleSection/CollapsibleSection.tsx",
+      /* 5.21.0 */
+      "components/atoms/AvatarStrip/AvatarStrip.tsx",
+      "components/organisms/Footer/Footer.tsx",
+      "components/organisms/ActionBar/ActionBar.tsx",
+    ]) {
+      expect(statSync(join(__dirname, file)).isFile(), file).toBe(true);
+      expect(seen[file], file).toBeUndefined();
+    }
   });
 
-  it("the open ones are the five queued, each on the checks story's ledger", () => {
-    const open = Object.entries(KNOWN)
-      .filter(([, classes]) => Object.values(classes).includes("open"))
-      .map(([file]) => file.split("/").at(-1)!.replace(/\.tsx?$/, ""))
-      .sort();
-    expect(open).toEqual(["ActionBar", "AvatarStrip", "Footer", "MatchupCard", "PasswordInput"]);
+  it("none is open, and the checks story's ledger is empty", () => {
+    const open = Object.entries(KNOWN).flatMap(([file, classes]) =>
+      Object.entries(classes)
+        .filter(([, why]) => why === "open")
+        .map(([cls]) => `${file}: ${cls}`),
+    );
+    expect(open).toEqual([]);
     const story = readFileSync(join(__dirname, "text-opacity.checks.stories.tsx"), "utf8");
-    const ledger = story.slice(story.indexOf("const BELOW"), story.indexOf("};", story.indexOf("const BELOW")));
-    for (const name of open) expect(ledger, name).toContain(`"${name} `);
+    const from = story.indexOf("const BELOW");
+    expect(from).toBeGreaterThan(-1);
+    const ledger = story.slice(from, story.indexOf(";", from) + 1);
+    expect(ledger.replace(/\s+/g, "")).toBe("constBELOW:Record<string,number>={};");
   });
 
   it("twin: an opacity on text it hasn't seen is reported", () => {

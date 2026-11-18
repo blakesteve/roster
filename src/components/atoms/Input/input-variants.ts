@@ -79,15 +79,23 @@ export const inputVariants = /* @__PURE__ */ cva(
   }
 );
 
+/* The icon slot takes the ink its variant gives its placeholder. A slot can't
+   tell a mark from a control, and an end icon is often a control (a reveal
+   toggle, a clear button) whose icon is all there is of it, so it needs 3:1
+   (WCAG 1.4.11). gray-400 painted 2.52:1 on a white field; `outline`'s
+   placeholder ink follows whatever surface the field's text was chosen for,
+   as the placeholder does. An icon fainter than the placeholder beside it
+   also reads as disabled. Measured on each field's own fill,
+   src/components/atoms/Input/Input.checks.stories.tsx. */
 export const iconVariants = /* @__PURE__ */ cva(
   "rst:absolute rst:top-1/2 rst:-translate-y-1/2 rst:transition-colors",
   {
     variants: {
       variant: {
-        white: "rst:text-gray-400 rst:dark:text-gray-500",
+        white: "rst:text-gray-500 rst:dark:text-gray-400",
         soft: "rst:text-gray-500 rst:dark:text-gray-400",
-        slate: "rst:text-gray-300 rst:dark:text-gray-500",
-        outline: "rst:text-gray-400 rst:dark:text-gray-500",
+        slate: "rst:text-gray-300 rst:dark:text-gray-400",
+        outline: "rst:text-[color-mix(in_srgb,var(--roster-control-text)_65%,transparent)]",
         ghost: "rst:text-gray-500 rst:dark:text-gray-400",
       },
       error: {

@@ -39,7 +39,8 @@ describe("Input Component", () => {
     expect(screen.getByTestId("icon")).toBeInTheDocument();
 
     const iconWrapper = container.querySelector(".rst\\:left-3");
-    expect(iconWrapper).toHaveClass("rst:text-gray-300", "rst:dark:text-gray-500");
+    /* The ink slate gives its placeholder: gray-300, and gray-400 in dark. */
+    expect(iconWrapper).toHaveClass("rst:text-gray-300", "rst:dark:text-gray-400");
   });
 
   it("applies variant classes correctly to the input", () => {

@@ -16,7 +16,7 @@ The **MatchupCard** is a highly flexible molecule designed to display head-to-he
 
 #### 🎨 Use Cases
 * **Schedules:** Pass \`isCompleted={false}\` to show the \`@\` separator and upcoming game information.
-* **Results:** Pass \`isCompleted={true}\` along with scores to trigger grayscale loser states and highlighted winner states.
+* **Results:** Pass \`isCompleted={true}\` along with scores: the winner's logo is ringed, the loser's logo fades to gray and its words take a quieter ink. Each team's result is also said to a screen reader after its name ("won", "lost" or "tied"; replace them with \`labels\`).
 * **Flexibility:** The \`accessory\` prop is a \`ReactNode\`. You can pass simple strings like \`"(5)"\` for pick counts, team records like \`"10-2"\`, or styled spans for betting odds.
 `,
       },
@@ -43,10 +43,15 @@ The **MatchupCard** is a highly flexible molecule designed to display head-to-he
       description:
         "Data object containing the home team's logo, score, win state, and accessory slot.",
     },
+    labels: {
+      control: "object",
+      description:
+        "The words said, hidden, after each team's name once the game is completed: `won`, `lost` and `tied`. Any left out stay English.",
+    },
   },
   decorators: [
     (Story) => (
-      <div className="rst:p-8 rst:bg-white rst:dark:bg-slate-900 rst:rounded-xl rst:shadow-sm rst:border rst:border-gray-100 rst:dark:border-slate-800 rst:min-w-87.5 rst:flex rst:justify-center">
+      <div className="rst:p-8 rst:bg-white rst:dark:bg-gray-900 rst:rounded-xl rst:shadow-sm rst:border rst:border-gray-100 rst:dark:border-gray-800 rst:min-w-87.5 rst:flex rst:justify-center">
         <Story />
       </div>
     ),
@@ -116,7 +121,7 @@ export const CompletedHomeWin: Story = {
     docs: {
       description: {
         story:
-          "When `isCompleted` is true, the separator changes to a hyphen. The winning team receives a success highlight, while the losing team is faded and grayscaled.",
+          "When `isCompleted` is true, the separator changes to a hyphen. The winning team's logo receives a success ring. The losing team's logo is faded and gray, and its pick count and score take a quieter ink, still readable.",
       },
     },
   },
