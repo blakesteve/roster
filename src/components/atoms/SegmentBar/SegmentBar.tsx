@@ -24,6 +24,15 @@ export interface SegmentBarProps {
   className?: string;
 }
 
+/* The percent reads quieter than its label by its ink alone, a step down in
+   both themes: gray-500 in light (5.99:1 on white, the label 7.63), and in
+   dark gray-400 with 30% of gray-500 mixed in (5.45:1 on a dark Card, the
+   label 6.93), a step the ramp doesn't have. Both read the gray tokens, so a
+   retinted ramp moves them with the label. Never opacity: it painted the
+   percent at 2.88:1 while the span's own color read 7.63. */
+const PERCENT =
+  "rst:text-gray-500 rst:dark:text-[color-mix(in_oklab,var(--roster-gray-400,#a8a29e)_70%,var(--roster-gray-500,#65635f))]";
+
 /**
  * A proportional horizontal bar divided into colored segments.
  * Percentages are computed automatically from raw `value` fields.
@@ -87,7 +96,7 @@ export function SegmentBar({
                   aria-hidden="true"
                 />
                 {segment.label}
-                <span className="rst:opacity-60">{pct}%</span>
+                <span className={PERCENT}>{pct}%</span>
               </span>
             );
           })}

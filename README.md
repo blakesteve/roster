@@ -556,7 +556,9 @@ modifier, so a bare `rst:text-black` no longer holds through hover. Write
 `rst:text-black rst:hover:text-black`, or set the ink tokens instead.
 
 The `Foundations/Solid fill contrast` story measures rendered elements rather
-than tokens, so pointing it at your palette reports _your_ ratios.
+than tokens, as painted: each text's color through its own opacity and every
+ancestor's, over every background behind it. Pointing it at your palette
+reports _your_ ratios.
 
 Note also that a solid fill's contrast against the surface _behind_ it is a
 separate requirement (WCAG 1.4.11, 3:1) and is not covered here. Solid amber on
@@ -564,6 +566,31 @@ a white page is 1.67:1, so it has effectively no visible edge.
 
 Form controls **are** covered for that requirement, separately: see
 `--roster-control-border` under [Control surface colors](#control-surface-colors).
+
+### Quiet text is a quieter ink
+
+Secondary text in Roster gets its own color, not `opacity-*` on the text's
+color. A check that reads `getComputedStyle(el).color` scores faded text as if
+it were solid: `SegmentBar`'s legend percent, at `opacity-60` through 5.19,
+read 7.63:1 that way and painted 2.88:1 on white, under AA's 4.5:1 for its
+12px.
+
+**Upgrading to 5.20.0 changes two colors, nothing else.** `SegmentBar`'s
+percent is `gray-500` in light (5.99:1 on white) and, in dark, `gray-400` with
+30% of `gray-500` mixed in (6.15:1 on `gray-950`, 5.45:1 on a dark `Card`). It
+stays a step quieter than its label, which doesn't change. `Stat`'s source
+drops its `opacity-75`, so it's `gray-500` and `gray-400` at full strength
+(5.99:1 and 6.93:1). Both read the gray tokens, so a retinted ramp moves them.
+No element, test id or size changes, so a rule of your own on
+`[data-testid="segment-bar-legend"] > span > span:last-child` still matches;
+one keyed on the percent's old `rst:opacity-60` class doesn't. If your
+`--roster-gray-400` sits within about 0.4 of 4.5:1 on your dark surface, no
+quieter step passes there; keep your own color on the percent.
+
+`src/text-opacity.checks.stories.tsx` measures every Roster text and icon that
+still carries an opacity or an alpha, as painted, and
+`src/text-opacity.test.ts` fails on any new one until it's measured there. The
+ones below the bar on 5.20.0 are pinned in that story's ledger.
 
 ### Focus
 
@@ -2949,6 +2976,14 @@ scrolls the page, not the row" can't be tested without them. The commands fail
 loudly when the pointer isn't over their target, rather than letting a wheel
 land on the page and a test pass for the wrong reason. Storybook's own UI has
 no such input, so those steps are skipped there.
+
+Contrast checks that read rendered elements go through `src/test/painted.ts`.
+`textOn(el)` composites the way the browser paints: every background from the
+page up, each element's `opacity` applied to everything it holds as one layer,
+and the text on top. It's checked against hand-worked colors in
+`src/painted.checks.stories.tsx`. Reading `getComputedStyle(el).color` alone
+misses opacity on the text and on any ancestor; a placeholder check in a
+`Dialog` passed on the panel's first frame, at opacity 0.
 
 `src/lib/utils.test.ts` pins `cn`. `tailwind-merge` has to be configured with the
 prefix or it stops recognising Roster's classes as utilities and silently

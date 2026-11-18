@@ -101,6 +101,11 @@ export interface SkeletonStatProps {
   className?: string;
 }
 
+/* The source row's block keeps the fade the source's class gave it through
+   5.19: the class dropped its opacity for the text's sake, and a skeleton
+   holds no text. */
+const SOURCE_FADE = "rst:opacity-75";
+
 /**
  * A Stat loading. Stat's own markup in each of its forms, with lines in place
  * of its words, so the figure that arrives is the height of what held it:
@@ -116,7 +121,7 @@ function SkeletonStat({ size = "md", semantics = "definition", source = false, a
     </Eyebrow>
   );
   const sourceLine = (
-    <span className={statSourceClass}>
+    <span className={cn(statSourceClass, SOURCE_FADE)}>
       <Skeleton size="inherit" width="12em" animation={animation} />
     </span>
   );
@@ -135,7 +140,7 @@ function SkeletonStat({ size = "md", semantics = "definition", source = false, a
       {source ? (
         <dd className={cn("rst:m-0", valueClass, "rst:col-start-1 rst:row-span-3 rst:row-start-1 rst:grid rst:grid-rows-subgrid")}>
           <span className="rst:row-start-1">{value}</span>
-          <span className={cn(statSourceClass, "rst:row-start-3")}>
+          <span className={cn(statSourceClass, SOURCE_FADE, "rst:row-start-3")}>
             <Skeleton size="inherit" width="12em" animation={animation} />
           </span>
         </dd>

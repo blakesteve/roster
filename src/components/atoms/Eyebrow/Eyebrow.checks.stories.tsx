@@ -370,6 +370,10 @@ export const SkeletonStatStillMatchesStat: Story = {
     /* The source line is 8.5px, drawn at 8 in WebKit, so this pair is
        compared rather than pinned; Stat's own checks pin it in Chromium. */
     await expect(box("skeleton-source")).toBe(box("real-source"));
+    /* Its source row keeps the fade 5.19 gave it, which the real source's
+       text gave up for contrast. */
+    const fade = (k: string) => getComputedStyle(canvasElement.querySelector(`[data-k="${k}"] .rst\\:text-\\[0\\.53125rem\\]`)!).opacity;
+    await expect([fade("skeleton-source"), fade("real-source")]).toEqual(["0.75", "1"]);
   },
 };
 

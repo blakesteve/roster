@@ -35,6 +35,10 @@ export const statValueVariants = /* @__PURE__ */ cva(
    `font-normal` and `normal-nums` because in the definition markup the source
    sits inside the value's `dd` and would otherwise inherit its bold, tabular
    figures. In both markups this also means the source no longer inherits a
-   weight from outside the Stat: it is always regular. */
+   weight from outside the Stat: it is always regular.
+
+   No opacity: at `opacity-75` the source painted 3.45:1 on white and 4.47:1 on
+   a dark Card, under AA for text, while its own color read 5.99 and 6.93. It's
+   quiet by its size. */
 export const statSourceClass =
-  "rst:block rst:font-mono rst:text-[0.53125rem] rst:font-normal rst:normal-nums rst:leading-none rst:tracking-[0.06em] rst:text-gray-500 rst:opacity-75 rst:dark:text-gray-400";
+  "rst:block rst:font-mono rst:text-[0.53125rem] rst:font-normal rst:normal-nums rst:leading-none rst:tracking-[0.06em] rst:text-gray-500 rst:dark:text-gray-400";

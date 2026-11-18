@@ -4,7 +4,7 @@ import { expect, waitFor, within } from "storybook/test";
 import { LiquidTabs, type TabItem } from "./LiquidTabs";
 import { LiquidTabPanel } from "./LiquidTabPanel";
 import { Button } from "../../atoms/Button/Button";
-import { contrast, paint } from "../../../test/painted";
+import { contrast, inkOf, paint } from "../../../test/painted";
 import { realInputOrSkip } from "../../../test/real-input";
 import { settled } from "../../../test/settle";
 
@@ -181,7 +181,7 @@ export const ACountReadsOnEveryState: Story = {
       const mark = tab.querySelector("[data-tab-count]")!;
       const under = paint(ground(strip, tab));
       const withMark = paint([...ground(strip, tab), getComputedStyle(mark).backgroundColor]);
-      const ink = paint([...ground(strip, tab), getComputedStyle(mark).backgroundColor, getComputedStyle(mark).color]);
+      const ink = paint([...ground(strip, tab), getComputedStyle(mark).backgroundColor, inkOf(mark)]);
       rows.push([label, Number(contrast(ink, withMark).toFixed(2)), Number(contrast(withMark, under).toFixed(3))]);
     };
     await frames();
