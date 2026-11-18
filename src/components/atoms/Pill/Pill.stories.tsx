@@ -59,7 +59,7 @@ export const Variants: Story = {
     <div className="rst:flex rst:flex-col rst:gap-4">
       {(["soft", "outline", "solid"] as const).map((variant) => (
         <div key={variant} className="rst:flex rst:flex-wrap rst:items-center rst:gap-2">
-          <span className="rst:w-16 rst:text-xs rst:opacity-60">{variant}</span>
+          <span className="rst:w-16 rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">{variant}</span>
           <Pill variant={variant} colorScheme="primary">Primary</Pill>
           <Pill variant={variant} colorScheme="success">Success</Pill>
           <Pill variant={variant} colorScheme="error">Error</Pill>
@@ -189,13 +189,13 @@ export const VersusBadge: Story = {
     <div className="rst:flex rst:flex-col rst:gap-6">
       <div className="rst:flex rst:items-center rst:gap-3">
         <Pill dot colorScheme="success">3 friends voted</Pill>
-        <span className="rst:text-xs rst:opacity-60">
+        <span className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">
           Pill: standalone, reads as a phrase
         </span>
       </div>
       <div className="rst:flex rst:items-center rst:gap-3">
         <Badge variant="success">Active</Badge>
-        <span className="rst:text-xs rst:opacity-60">
+        <span className="rst:text-xs rst:text-gray-500 rst:dark:text-gray-400">
           Badge: a label attached to something
         </span>
       </div>

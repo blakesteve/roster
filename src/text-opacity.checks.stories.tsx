@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor } from "storybook/test";
 import { opacityOf, textContrast } from "./test/painted";
+import { realInputOrSkip } from "./test/real-input";
 import { Stat } from "./components/atoms/Stat/Stat";
 import { Card } from "./components/atoms/Card/Card";
 import { Chip } from "./components/atoms/Chip/Chip";
@@ -98,25 +99,25 @@ const SITES: Site[] = [
   { name: "MultiSelect remove", bar: ICON, at: all('[data-site="multiselect"] .rst\\:opacity-70') },
 ];
 
-/* Below the bar on 5.20.0, each at its lowest across the grounds, for a
-   ruling. The figures are the same in both engines to 0.02. */
+/* Below the bar on 5.20.0, each at its lowest across the grounds, the same in
+   both engines to 0.02. Each is queued as its own ticket, ruled 17 Nov 2026,
+   and `src/text-opacity.test.ts` holds its classes as `open` until it lands. */
 const BELOW: Record<string, number> = {
-  "Alert info close": 2.91,
-  "CallToAction primary dismiss": 2.98,
-  "CallToAction neutral dismiss": 2.93,
-  "CallToAction error dismiss": 2.97,
-  "CallToAction success dismiss": 2.92,
-  "CallToAction info dismiss": 2.96,
-  "CallToAction warning dismiss": 2.86,
   "Footer default links": 3.04,
   "Footer primary links": 3.93,
   "Footer transparent links": 3.12,
+  /* Its translucent fill: the title on it is thin too. */
   "ActionBar primary subtitle": 2.33,
   "AvatarStrip dismiss": 1.54,
+  /* And its "-" between the scores, 3.3:1 in dark, which no opacity causes. */
   "MatchupCard loser": 3.35,
+  /* Its icon slot is gray-400: about 2.5 even unfaded. */
   "PasswordInput toggle": 1.85,
-  "CollapsibleSection toggle hovered": 4.15,
 };
+
+/* Fixed in 5.20.0, each at what its 5.19 class painted, for the twins: the
+   close and the dismiss at opacity 0.6, the toggle's hover at 0.8. */
+const BEFORE = { alertClose: 2.91, ctaDismiss: 2.86, toggleHover: 4.15 };
 
 function Sites() {
   const [tags, setTags] = useState<(string | number)[]>(["a"]);
@@ -271,16 +272,46 @@ export const EveryInlineSite: Story = {
     await expect(missing).toEqual([]);
     await judge(lowest, Object.fromEntries(SITES.map((s) => [s.name, s.bar])));
 
-    /* A hover state set by opacity: the toggle at its hover's 0.8. */
-    const toggles = [...canvasElement.querySelectorAll<HTMLElement>('[data-site="collapsible"] button')];
-    const hovered = toggles.map((t) => {
-      t.style.opacity = "0.8";
-      const ratio = round(textContrast(t));
-      t.style.opacity = "";
-      return ratio;
-    });
+    /* Twins for the three fixed in 5.20.0: each at its 5.19 class, through the
+       same measurement, falls under its bar. */
+    const at = (selector: string, opacity: string) =>
+      Math.min(
+        ...[...canvasElement.querySelectorAll<HTMLElement>(selector)].map((el) => {
+          el.style.opacity = opacity;
+          const ratio = round(textContrast(el));
+          el.style.opacity = "";
+          return ratio;
+        }),
+      );
+    const alertBefore = at('[data-site^="alert-"] button', "0.6");
+    const ctaBefore = at('[data-site^="cta-"] button', "0.6");
+    const toggleBefore = at('[data-site="collapsible"] button', "0.8");
+    console.info(`TEXT OPACITY before ${JSON.stringify({ alertBefore, ctaBefore, toggleBefore })}`);
+    await expect(alertBefore).toBeCloseTo(BEFORE.alertClose, 1);
+    await expect(ctaBefore).toBeCloseTo(BEFORE.ctaDismiss, 1);
+    await expect(toggleBefore).toBeCloseTo(BEFORE.toggleHover, 1);
+    await expect(Math.max(alertBefore, ctaBefore)).toBeLessThan(ICON);
+    await expect(toggleBefore).toBeLessThan(TEXT);
+
+    /* The toggle's hover, under a real pointer: a darker ink now, not a fade.
+       Chromium only. Storybook's dev CSS keeps Tailwind's `@media (hover:
+       hover)` nested in `&:hover`, which Playwright's WebKit drops, so no
+       hover style applies there and a reading would be the rest state. The
+       built CSS flattens it, so Safari users get the hover. */
+    const real = realInputOrSkip();
+    if (!real || !navigator.userAgent.includes("Chrome")) return;
+    const hovered: number[] = [];
+    for (const toggle of canvasElement.querySelectorAll<HTMLElement>('[data-site="collapsible"] button')) {
+      const rest = getComputedStyle(toggle).color;
+      const probe = `toggle-${hovered.length}`;
+      toggle.setAttribute("data-hover-probe", probe);
+      await real.commands.realHover(`[data-hover-probe="${probe}"]`);
+      await waitFor(() => expect(getComputedStyle(toggle).color).not.toBe(rest));
+      hovered.push(round(textContrast(toggle)));
+    }
     console.info(`TEXT OPACITY hover ${JSON.stringify(hovered)}`);
-    await expect(Math.min(...hovered)).toBeCloseTo(BELOW["CollapsibleSection toggle hovered"], 1);
+    await expect(hovered.length).toBe(GROUNDS.length);
+    await expect(Math.min(...hovered)).toBeCloseTo(8.71, 1);
   },
 };
 

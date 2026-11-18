@@ -85,7 +85,7 @@ const DualPreviewDecorator: Decorator = (Story) => (
 const SampleContent = () => (
   <div className="rst:flex rst:flex-col rst:gap-2">
     <h3 className="rst:text-lg rst:font-bold">Weekly Performance</h3>
-    <p className="rst:text-sm rst:opacity-80 rst:leading-relaxed">
+    <p className="rst:text-sm rst:leading-relaxed">
       Your picks are looking solid this week. You are currently in the top 10%
       of your primary league.
     </p>
@@ -188,7 +188,7 @@ export const CustomBrandedColors: Story = {
     children: (
       <div className="rst:flex rst:flex-col rst:gap-2">
         <h3 className="rst:text-lg rst:font-bold">Custom Brand Alliance</h3>
-        <p className="rst:text-sm rst:opacity-80 rst:leading-relaxed">
+        <p className="rst:text-sm rst:leading-relaxed">
           This card demonstrates using completely custom colors for the top
           (#34D399) and bottom (#F472B6) brand stripes, overriding the default
           theme colors.
@@ -226,7 +226,7 @@ export const AllVariantsMatrix: Story = {
       {ALL_VARIANTS.map((variant) => (
         <Card key={variant} variant={variant} padding="md">
           <div className="rst:flex rst:flex-col rst:gap-1">
-            <h3 className="rst:text-sm rst:font-bold rst:uppercase rst:tracking-widest rst:opacity-50">
+            <h3 className="rst:text-sm rst:font-bold rst:uppercase rst:tracking-widest">
               Variant
             </h3>
             <p className="rst:text-lg rst:font-semibold rst:capitalize">{variant}</p>
@@ -253,10 +253,10 @@ export const LayoutClasses: Story = {
     children: (
       <>
         <h3 className="rst:text-lg rst:font-bold">Layout on the card itself</h3>
-        <p className="rst:text-sm rst:opacity-70">
+        <p className="rst:text-sm">
           The card is the flex container, so children lay out directly inside it.
         </p>
-        <span className="rst:mt-auto rst:text-xs rst:font-medium rst:opacity-60">
+        <span className="rst:mt-auto rst:text-xs rst:font-medium">
           Pinned to the bottom with mt-auto
         </span>
       </>

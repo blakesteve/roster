@@ -575,22 +575,32 @@ it were solid: `SegmentBar`'s legend percent, at `opacity-60` through 5.19,
 read 7.63:1 that way and painted 2.88:1 on white, under AA's 4.5:1 for its
 12px.
 
-**Upgrading to 5.20.0 changes two colors, nothing else.** `SegmentBar`'s
-percent is `gray-500` in light (5.99:1 on white) and, in dark, `gray-400` with
-30% of `gray-500` mixed in (6.15:1 on `gray-950`, 5.45:1 on a dark `Card`). It
-stays a step quieter than its label, which doesn't change. `Stat`'s source
-drops its `opacity-75`, so it's `gray-500` and `gray-400` at full strength
-(5.99:1 and 6.93:1). Both read the gray tokens, so a retinted ramp moves them.
-No element, test id or size changes, so a rule of your own on
-`[data-testid="segment-bar-legend"] > span > span:last-child` still matches;
-one keyed on the percent's old `rst:opacity-60` class doesn't. If your
-`--roster-gray-400` sits within about 0.4 of 4.5:1 on your dark surface, no
-quieter step passes there; keep your own color on the percent.
+**Upgrading to 5.20.0 changes colors, never a size.** `SegmentBar`'s percent is
+`gray-500` in light (5.99:1 on white) and, in dark, `gray-400` with 30% of
+`gray-500` mixed in (6.15:1 on `gray-950`, 5.45:1 on a dark `Card`; `gray-400`
+where `color-mix` isn't supported). It stays a step quieter than its label,
+which doesn't change. `Stat`'s source drops its `opacity-75`, so it's
+`gray-500` and `gray-400` at full strength (5.99:1 and 6.93:1). Both read the
+gray tokens, so a retinted ramp moves them. No element, test id or size
+changes, so a rule of your own on `[data-testid="segment-bar-legend"] > span >
+span:last-child` still matches; one keyed on the percent's old `rst:opacity-60`
+class doesn't. If your `--roster-gray-400` sits within about 0.4 of 4.5:1 on
+your dark surface, no quieter step passes there; keep your own color on the
+percent.
+
+Three more move a step: `Alert`'s and `CallToAction`'s close icons sit at 70%
+opacity, not 60% (3.60:1 and 3.41:1 at their lowest, against 3:1 for an icon;
+2.91 and 2.86 before), and `CollapsibleSection`'s toggle takes a stronger ink
+on hover (`primary-600`, dark `primary-300`) instead of fading to 80%, which
+read 4.15:1.
 
 `src/text-opacity.checks.stories.tsx` measures every Roster text and icon that
 still carries an opacity or an alpha, as painted, and
-`src/text-opacity.test.ts` fails on any new one until it's measured there. The
-ones below the bar on 5.20.0 are pinned in that story's ledger.
+`src/text-opacity.test.ts` fails on any new one until it's measured there. Five
+still fall under their bar on 5.20.0, each queued to be fixed on its own:
+`Footer`'s links, `ActionBar`'s primary subtitle on its translucent fill,
+`AvatarStrip`'s ✕, `MatchupCard`'s losing side, and `PasswordInput`'s toggle.
+That story's ledger pins what each measures.
 
 ### Focus
 
