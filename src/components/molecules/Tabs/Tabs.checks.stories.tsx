@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor, within } from "storybook/test";
 import { Tabs, type TabItem, type TabsProps } from "./Tabs";
 import { TheLook } from "./Tabs.stories";
-import { backgroundOf, contrast, paint } from "../../../test/painted";
+import { backgroundOf, contrast, paint, textContrast, textOn } from "../../../test/painted";
 import { realInputOrSkip } from "../../../test/real-input";
 import { heldOff, settled } from "../../../test/settle";
 
@@ -185,12 +185,8 @@ export const TheUnderlineMarksTheSelectedTab: Story = {
       const [alpha, beta, gamma] = within(strip).getAllByRole("tab");
       const page = paint(backgroundOf(strip));
       const lines = () => [alpha, beta, gamma].map((t) => after(t).borderBottomWidth).join(" ");
-      const ink = (t: HTMLElement) => contrast(paint([...backgroundOf(t), getComputedStyle(t).color]), page);
-      const mark = (t: HTMLElement) => {
-        const m = t.querySelector("[data-tab-count]")!;
-        const under = [...backgroundOf(t), getComputedStyle(m).backgroundColor];
-        return contrast(paint([...under, getComputedStyle(m).color]), paint(under));
-      };
+      const ink = (t: HTMLElement) => contrast(textOn(t).ink, page);
+      const mark = (t: HTMLElement) => textContrast(t.querySelector("[data-tab-count]")!);
       const line = (t: HTMLElement) => contrast(paint([...backgroundOf(t), after(t).borderBottomColor]), page);
       rows.push(`${scheme} at rest: ${lines()}`);
       ratios.push([`${scheme} selected label`, ink(alpha), 4.5], [`${scheme} label at rest`, ink(gamma), 4.5], [`${scheme} underline`, line(alpha), 3], [`${scheme} count at rest`, mark(beta), 4.5]);

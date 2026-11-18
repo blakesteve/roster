@@ -26,6 +26,79 @@ export function backgroundOf(el: Element): string[] {
   return layers;
 }
 
+type RGBA = [number, number, number, number];
+
+/** A CSS color as the browser resolves it: 0-255 channels and a 0-1 alpha. */
+export function rgba(color: string): RGBA {
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = 1;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, 1, 1);
+  const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+  return [r, g, b, a / 255];
+}
+
+/* Source over: `top` painted on `under`. */
+function over(top: RGBA, under: RGBA): RGBA {
+  const a = top[3] + under[3] * (1 - top[3]);
+  if (a === 0) return [0, 0, 0, 0];
+  const mix = (i: number) => (top[i] * top[3] + under[i] * under[3] * (1 - top[3])) / a;
+  return [mix(0), mix(1), mix(2), a];
+}
+
+/** How much of `el` reaches the page: its own `opacity` times every ancestor's. */
+export function opacityOf(el: Element): number {
+  let o = 1;
+  for (let node: Element | null = el; node; node = node.parentElement) o *= Number(getComputedStyle(node).opacity);
+  return o;
+}
+
+/**
+ * `el`'s text color as one CSS color: its own alpha times `opacityOf(el)`.
+ * For a check that builds its own ground (a sibling under the text, say) and
+ * paints this over it. Exact while the faded elements paint no background of
+ * their own under the text; `textOn` composites those too.
+ */
+export function inkOf(el: Element, color = getComputedStyle(el).color): string {
+  const [r, g, b, a] = rgba(color);
+  return `rgba(${r}, ${g}, ${b}, ${a * opacityOf(el)})`;
+}
+
+/**
+ * The color of `el`'s text and of the ground just beside it, as painted: every
+ * background from the page's white canvas up to `el`, the text on top, and
+ * each element's `opacity` applied as the browser applies it, to everything it
+ * holds as one layer over what's behind it. `getComputedStyle(el).color`
+ * alone misses all of that: a percent at `opacity-60` read 7.63:1 there and
+ * paints 2.88:1.
+ *
+ * `color` stands in for the text's own color, a `::placeholder`'s say.
+ * Backgrounds are colors only: an image or a gradient isn't read.
+ */
+export function textOn(el: Element, color = getComputedStyle(el).color): { ink: number[]; ground: number[] } {
+  const chain: Element[] = [];
+  for (let node: Element | null = el; node; node = node.parentElement) chain.unshift(node);
+  const layer = (i: number, behind: RGBA, text: boolean): RGBA => {
+    const style = getComputedStyle(chain[i]);
+    const opacity = Number(style.opacity);
+    /* An element below full opacity paints into a layer of its own, which
+       then goes over what's behind it at that opacity. */
+    let here: RGBA = opacity < 1 ? [0, 0, 0, 0] : behind;
+    here = over(rgba(style.backgroundColor), here);
+    here = i < chain.length - 1 ? layer(i + 1, here, text) : text ? over(rgba(color), here) : here;
+    return opacity < 1 ? over([here[0], here[1], here[2], here[3] * opacity], behind) : here;
+  };
+  const canvas: RGBA = [255, 255, 255, 1];
+  return { ink: layer(0, canvas, true).slice(0, 3), ground: layer(0, canvas, false).slice(0, 3) };
+}
+
+/** `el`'s text against the ground beside it, as `textOn` composites them. */
+export function textContrast(el: Element, color?: string): number {
+  const { ink, ground } = textOn(el, color);
+  return contrast(ink, ground);
+}
+
 export function luminance([r, g, b]: number[]) {
   const lin = (c: number) => ((c /= 255) <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
   return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);

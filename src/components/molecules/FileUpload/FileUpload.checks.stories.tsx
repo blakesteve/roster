@@ -6,7 +6,7 @@ import { FileUploadRejection } from "./file-upload-rejection";
 import { Progress } from "../../atoms/Progress/Progress";
 import { asRealFile, pickFiles, samplePhoto, sizedFile } from "../../../test/sample-files";
 import { realInputOrSkip } from "../../../test/real-input";
-import { backgroundOf, contrast, paint } from "../../../test/painted";
+import { backgroundOf, contrast, paint, textContrast } from "../../../test/painted";
 import { settled } from "../../../test/settle";
 
 /**
@@ -708,7 +708,7 @@ export const TheDashedEdgeAndThePicture: Story = {
       /* Its face eases in with the picture: read where it ends. */
       await settled(button);
       const face = getComputedStyle(button).backgroundColor;
-      const ink = contrast(paint([...backgroundOf(button), getComputedStyle(button).color]), paint(backgroundOf(button)));
+      const ink = textContrast(button);
       const p = painted(img()!);
       const r = zone.getBoundingClientRect();
       const gap = Math.min(p.left - r.left, p.top - r.top, r.right - p.right, r.bottom - p.bottom) - parseFloat(getComputedStyle(zone).borderTopWidth);

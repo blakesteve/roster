@@ -93,7 +93,7 @@ const CallToAction = ({
           <Button
             variant="ghost"
             size="sm"
-            className="rst:h-8 rst:w-8 rst:rounded-full rst:p-0 rst:opacity-60 rst:hover:opacity-100 rst:dark:hover:bg-black/20"
+            className="rst:h-8 rst:w-8 rst:rounded-full rst:p-0 rst:opacity-70 rst:hover:opacity-100 rst:dark:hover:bg-black/20"
             onClick={onDismiss}
             aria-label={l.dismiss}
           >

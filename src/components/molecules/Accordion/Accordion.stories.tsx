@@ -98,7 +98,7 @@ const richItems = [
     ),
     content: (
       <div className="rst:space-y-4">
-        <p className="rst:text-inherit rst:opacity-80">Visa ending in 4242</p>
+        <p className="rst:text-inherit">Visa ending in 4242</p>
         <div className="rst:flex rst:gap-2">
           <Button
             size="sm"
@@ -119,11 +119,11 @@ const richItems = [
     title: (
       <div className="rst:flex rst:items-center rst:justify-between rst:w-full rst:pr-4">
         <span>Billing History</span>
-        <span className="rst:text-inherit rst:opacity-60 rst:font-normal">3 Invoices</span>
+        <span className="rst:text-inherit rst:font-normal">3 Invoices</span>
       </div>
     ),
     content: (
-      <ul className="rst:list-disc rst:pl-5 rst:text-inherit rst:opacity-80 rst:space-y-1">
+      <ul className="rst:list-disc rst:pl-5 rst:text-inherit rst:space-y-1">
         <li>Jan 2026 - $12.00</li>
         <li>Dec 2025 - $12.00</li>
         <li>Nov 2025 - $12.00</li>

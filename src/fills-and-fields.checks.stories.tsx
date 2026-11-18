@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect } from "storybook/test";
+import { expect, waitFor } from "storybook/test";
 import { Input } from "./components/atoms/Input/Input";
 import { Textarea } from "./components/atoms/Textarea/Textarea";
 import { Card } from "./components/atoms/Card/Card";
 import { Dialog } from "./components/organisms/Dialog/Dialog";
 import { Navbar } from "./components/organisms/Navbar/Navbar";
-import { backgroundOf, contrast, paint } from "./test/painted";
+import { opacityOf, textContrast } from "./test/painted";
 
 /**
  * Two readability rules, checked rendered in Chromium.
@@ -136,10 +136,9 @@ export const PrimaryInkNavbar: Story = {
       [bar.querySelector("a span"), ...bar.querySelectorAll("a[href='/'], a[href='/cabinets'], [data-roster-hamburger] button")]
         .filter((el): el is HTMLElement => !!el && el.getClientRects().length > 0)
         .filter((el, i, all) => all.indexOf(el) === i);
-    const measure = () => {
-      const ground = backgroundOf(bar);
-      return shown().map((el) => contrast(paint([...ground, getComputedStyle(el).color]), paint(ground)));
-    };
+    /* Each as painted: its ink through every opacity on the way, over what's
+       behind it. */
+    const measure = () => shown().map((el) => textContrast(el));
     /* Reach: the brand, and both links (the active one and another), so the
        link colors are among what's measured. */
     await expect(shown().map((el) => el.getAttribute("href") ?? el.tagName)).toEqual(expect.arrayContaining(["SPAN", "/", "/cabinets"]));
@@ -171,8 +170,7 @@ const OLD = { light: "#a8a29e", dark: "#65635f" };
 
 /** The placeholder's contrast against its own field, as painted. */
 function placeholderContrast(field: Element, color = getComputedStyle(field, "::placeholder").color) {
-  const ground = backgroundOf(field);
-  return contrast(paint([...ground, color]), paint(ground));
+  return textContrast(field, color);
 }
 
 const INPUT_VARIANTS = ["outline", "white", "soft", "slate", "ghost"] as const;
@@ -244,6 +242,10 @@ async function checkInDialog() {
     await withTokens({}, async () => {
       const fields = Array.from(document.querySelectorAll("[role=dialog] input, [role=dialog] textarea"));
       await expect(fields.length).toBe(2);
+      /* Measured once the panel has entered. Its first frame is still
+         `data-closed`, at opacity 0, and a reading that ignored opacity
+         passed the placeholders there, unseen. */
+      await waitFor(() => expect(fields.map(opacityOf)).toEqual([1, 1]));
       for (const field of fields) {
         await expect(placeholderContrast(field), `${field.tagName} ${dark ? "dark" : "light"}`).toBeGreaterThanOrEqual(MINIMUM);
       }

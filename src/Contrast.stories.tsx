@@ -5,6 +5,7 @@ import { Pill } from "./components/atoms/Pill/Pill";
 import { Chip } from "./components/atoms/Chip/Chip";
 import { Button } from "./components/atoms/Button/Button";
 import { Checkbox } from "./components/atoms/Checkbox/Checkbox";
+import { textContrast } from "./test/painted";
 
 /**
  * A solid fill is the one place a component chooses both a background and the
@@ -18,36 +19,15 @@ import { Checkbox } from "./components/atoms/Checkbox/Checkbox";
  * and it reports that app's ratios.
  */
 
-function parse(rgb: string): [number, number, number] | null {
-  const m = rgb.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)/);
-  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
-}
-
-function channel(v: number): number {
-  const s = v / 255;
-  return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-}
-
-function luminance([r, g, b]: [number, number, number]): number {
-  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
-}
-
-function contrast(a: string, b: string): number | null {
-  const [x, y] = [parse(a), parse(b)];
-  if (!x || !y) return null;
-  const [hi, lo] = [luminance(x), luminance(y)].sort((p, q) => q - p);
-  return (hi + 0.05) / (lo + 0.05);
-}
-
 /**
  * Wraps a control, measures its painted colors, and prints the ratio underneath.
  *
- * Only meaningful for opaque fills, which is all this story renders. A
- * translucent one would be measured wrong rather than skipped: `bg-transparent`
- * computes to `rgba(0, 0, 0, 0)` and would score against black, and Tailwind's
- * `/10` opacity shorthand compiles to `color-mix(in oklab, ...)`, which the
- * parser does not read at all. Adding a soft or outline row here means
- * compositing against the parent background first.
+ * Measured as painted (`textContrast`, src/test/painted.ts): the text's color
+ * through its own opacity and every ancestor's, over every background behind
+ * it down to the page. So a translucent fill, an alpha color or an
+ * `opacity-*` on the text or anything around it counts, where reading the
+ * element's own `color` and `background-color` scored opacity as if it
+ * weren't there.
  */
 function Measured({
   label,
@@ -71,8 +51,7 @@ function Measured({
   const measure = useCallback((node: HTMLDivElement | null) => {
     const el = node?.firstElementChild;
     if (!el) return;
-    const style = getComputedStyle(el);
-    setRatio(contrast(style.backgroundColor, style.color));
+    setRatio(textContrast(el));
   }, []);
 
   const passes = ratio !== null && ratio >= bar;
@@ -239,7 +218,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Every solid fill, measured as painted. A solid variant picks its own background **and** its own foreground, so it is the one case where a component can fail contrast without any help from the consuming app.\n\nRatios are read from the rendered elements with `getComputedStyle`, not from the token file, so this reflects whatever palette is actually in play. **4.5:1** is WCAG AA for text at these sizes. Nothing here qualifies for the 3:1 large-text allowance \u2014 Badge runs 10-14px, Pill 12-14px, and Button's `lg` size changes only its height, not its 14px type.\n\nEleven pairings were previously below the line — solid teal at 2.49:1, solid info at 2.77:1. They were fixed by changing the foreground rather than the fill, which keeps the saturation and visual weight the solid variant exists for.\n\nThat foreground is no longer hardcoded. Each fill carries `--roster-{fill}-ink`, so a near-black foreground no longer assumes the fill stays light — retint `--roster-teal-500` darker and set `--roster-teal-500-ink` alongside it. Keyed by fill rather than by family because the right ink flips partway up three of the nine ramps: orange, purple and success all want dark ink at 500 and white at 600.\n\nThe measurement above reads rendered elements with `getComputedStyle`, so pointing it at your palette reports your ratios rather than Roster's. `src/contrast.test.ts` fails the build if a variant's default lands under its bar — 4.5:1 here, and 3:1 for `Checkbox`, whose tick is a graphical object under WCAG 1.4.11 rather than text.",
+          "Every solid fill, measured as painted. A solid variant picks its own background **and** its own foreground, so it is the one case where a component can fail contrast without any help from the consuming app.\n\nRatios are read from the rendered elements as painted, every opacity and translucent layer composited, not from the token file, so this reflects whatever palette is actually in play. **4.5:1** is WCAG AA for text at these sizes. Nothing here qualifies for the 3:1 large-text allowance \u2014 Badge runs 10-14px, Pill 12-14px, and Button's `lg` size changes only its height, not its 14px type.\n\nEleven pairings were previously below the line — solid teal at 2.49:1, solid info at 2.77:1. They were fixed by changing the foreground rather than the fill, which keeps the saturation and visual weight the solid variant exists for.\n\nThat foreground is no longer hardcoded. Each fill carries `--roster-{fill}-ink`, so a near-black foreground no longer assumes the fill stays light — retint `--roster-teal-500` darker and set `--roster-teal-500-ink` alongside it. Keyed by fill rather than by family because the right ink flips partway up three of the nine ramps: orange, purple and success all want dark ink at 500 and white at 600.\n\nThe measurement above reads rendered elements as painted, so pointing it at your palette reports your ratios rather than Roster's. `src/contrast.test.ts` fails the build if a variant's default lands under its bar — 4.5:1 here, and 3:1 for `Checkbox`, whose tick is a graphical object under WCAG 1.4.11 rather than text.",
       },
     },
   },

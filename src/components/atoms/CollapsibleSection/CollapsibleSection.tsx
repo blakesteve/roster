@@ -66,7 +66,7 @@ export function CollapsibleSection({
           type="button"
           data-testid="collapsible-toggle"
           onClick={() => setExpanded((e) => !e)}
-          className="rst:mt-2 rst:text-xs rst:font-medium rst:text-primary-500 rst:dark:text-primary-400 rst:hover:opacity-80 rst:transition-opacity rst:cursor-pointer"
+          className="rst:mt-2 rst:text-xs rst:font-medium rst:text-primary-500 rst:dark:text-primary-400 rst:hover:text-primary-600 rst:dark:hover:text-primary-300 rst:transition-colors rst:cursor-pointer"
         >
           {expanded ? collapseLabel : expandLabel}
         </button>
