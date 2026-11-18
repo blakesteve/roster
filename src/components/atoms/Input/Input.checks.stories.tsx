@@ -88,6 +88,7 @@ function Grounds() {
   return (
     <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
       <style>{STILL}</style>
+      <div data-pointer-rest="" style={{ width: 24, height: 24 }} />
       {GROUNDS.map((id) => (
         <Ground key={id} id={id} />
       ))}
@@ -141,9 +142,17 @@ const OLD_TOGGLE: Record<Variant, number[]> = {
   ghost: [3.12, 3.12, 4.3, 4.06],
 };
 
+/* Rests the real pointer beside the grounds, on nothing with a hover style:
+   a story or file before this one leaves it wherever it last was, and over a
+   toggle or a ghost field its hover ink or fill would read as the rest. */
+async function restPointer() {
+  await realInputOrSkip()?.commands.realHover("[data-pointer-rest]");
+}
+
 export const EveryIconSlotPassesOnItsField: Story = {
   render: () => <Grounds />,
   play: async ({ canvasElement }) => {
+    await restPointer();
     const readings: Record<string, Record<string, number[]>> = {};
     const premise: string[] = [];
     for (const v of VARIANTS) {
@@ -212,6 +221,7 @@ export const TheToggleTakesTheFieldsInkOnHover: Story = {
   play: async ({ canvasElement }) => {
     const real = realInputOrSkip();
     if (!real || !navigator.userAgent.includes("Chrome")) return;
+    await restPointer();
     const hover = async (el: HTMLElement, probe: string) => {
       el.setAttribute("data-hover-probe", probe);
       await real.commands.realHover(`[data-hover-probe="${probe}"]`);

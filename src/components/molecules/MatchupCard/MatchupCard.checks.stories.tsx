@@ -77,9 +77,17 @@ function parts(canvas: Element, id: string) {
   return { button, away, separator, home, accessory, score, logo: away.querySelector("img")!, winner: words(home) };
 }
 
+/* Rests the real pointer on the field before the grounds, which has no hover
+   style: a story or file before this one leaves it wherever it last was, and
+   over a card its hover fill would read as the rest. */
+async function restPointer() {
+  await realInputOrSkip()?.commands.realHover("[data-before]");
+}
+
 export const TheLosingSideReadsOnEveryGround: Story = {
   render: () => <Grounds />,
   play: async ({ canvasElement }) => {
+    await restPointer();
     const read = (id: string) => {
       const p = parts(canvasElement, id);
       const now = {
@@ -128,6 +136,7 @@ export const DarkHoverAndFocusUnderARealPointerAndKeyboard: Story = {
   play: async ({ canvasElement }) => {
     const real = realInputOrSkip();
     if (!real || !navigator.userAgent.includes("Chrome")) return;
+    await restPointer();
     /* Hover in dark is gray-800, where the "-" still reads. */
     const p = parts(canvasElement, "dark-page");
     const rest = getComputedStyle(p.button).backgroundColor;

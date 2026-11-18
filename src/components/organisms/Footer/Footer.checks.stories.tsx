@@ -10,9 +10,10 @@ import { realInputOrSkip } from "../../../test/real-input";
  * `real-input` for the project that runs both).
  *
  * A link is text at 14px, so its bar is WCAG AA's 4.5:1, in every variant,
- * on the page and on a Card, light and dark. The figures are literals, the
- * same in both engines to 0.01 but `default` in dark, whose fill is
- * translucent: WebKit reads it 0.04 to 0.05 higher.
+ * on the page and on a Card, light and dark. The figures are Chromium's, as
+ * literals. WebKit agrees on Linux; on macOS it mixes `default`'s
+ * translucent dark fill a little differently and reads 0.04 to 0.05 higher,
+ * so it's held within 0.06.
  *
  * The twin is the links as 5.20 drew them, at 70%: under the bar in every
  * variant.
@@ -75,14 +76,14 @@ const links = (canvas: Element, id: string, v: Variant) => [
   ...canvas.querySelectorAll<HTMLElement>(`[data-ground="${id}"] [data-variant="${v}"] nav a`),
 ];
 
-/* Per variant, on [light page, light Card, dark page, dark Card]: Chromium,
-   then WebKit where it differs. */
+/* Per variant, on [light page, light Card, dark page, dark Card], as
+   Chromium paints them. */
 const LINK: Record<Variant, number[]> = {
   default: [5.74, 5.74, 7.41, 6.91],
   primary: [12, 12, 6.75, 6.75],
   transparent: [5.99, 5.99, 7.83, 6.93],
 };
-const LINK_WEBKIT: Partial<Record<Variant, number[]>> = { default: [5.74, 5.74, 7.45, 6.96] };
+const WEBKIT_DRIFT = 0.06;
 /* 5.20's links at 70%, the lowest across the grounds. */
 const OLD: Record<Variant, number> = { default: 3.04, primary: 3.93, transparent: 3.12 };
 
@@ -112,7 +113,9 @@ export const TheLinksPassOnEveryGround: Story = {
     for (const v of VARIANTS) for (const id of GROUNDS) await expect(links(canvasElement, id, v).length, `${v} on ${id}`).toBe(2);
 
     for (const v of VARIANTS) {
-      await expect(readings[v].links, v).toEqual((webkit && LINK_WEBKIT[v]) || LINK[v]);
+      const drift = webkit ? WEBKIT_DRIFT : 0;
+      const off = readings[v].links.filter((r, i) => Math.abs(r - LINK[v][i]) > drift + 1e-9);
+      await expect(off, `${v}: ${readings[v].links}, pinned ${LINK[v]}`).toEqual([]);
       for (const ratio of readings[v].links) await expect(ratio, v).toBeGreaterThanOrEqual(TEXT);
       /* A link reads as the copyright beside it, at full strength. */
       const footer = canvasElement.querySelector(`[data-ground="light-page"] [data-variant="${v}"]`)!;
@@ -146,6 +149,9 @@ export const HoverUnderlinesAndFocusDrawsTheRing: Story = {
   play: async ({ canvasElement }) => {
     const real = realInputOrSkip();
     if (!real || !navigator.userAgent.includes("Chrome")) return;
+    /* From the field before the grounds, which has no hover style: a story
+       before this one leaves the pointer wherever it last was. */
+    await real.commands.realHover("[data-before]");
     /* Hover underlines, and the ink stays: the fade was the only cue. */
     for (const v of VARIANTS) {
       const [a] = links(canvasElement, "light-page", v);

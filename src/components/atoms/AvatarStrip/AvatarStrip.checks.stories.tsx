@@ -87,9 +87,17 @@ const dismissOn = (canvas: Element, id: string) =>
   canvas.querySelector<HTMLElement>(`[data-ground="${id}"] [data-testid="avatar-strip-dismiss"]`)!;
 const oldOn = (canvas: Element, id: string) => canvas.querySelector<HTMLElement>(`[data-ground="${id}"] [data-old]`)!;
 
+/* Rests the real pointer on the field before the grounds, which has no hover
+   style: a story or file before this one leaves it wherever it last was, and
+   over a dismiss its hover ink would read as the rest. */
+async function restPointer() {
+  await realInputOrSkip()?.commands.realHover("[data-before]");
+}
+
 export const TheDismissPassesOnEveryGround: Story = {
   render: () => <Grounds />,
   play: async ({ canvasElement }) => {
+    await restPointer();
     const read = (id: string) => {
       const dismiss = dismissOn(canvasElement, id);
       const box = dismiss.getBoundingClientRect();
@@ -127,6 +135,7 @@ export const HoverAndFocusUnderARealPointerAndKeyboard: Story = {
   play: async ({ canvasElement }) => {
     const real = realInputOrSkip();
     if (!real || !navigator.userAgent.includes("Chrome")) return;
+    await restPointer();
 
     /* Hover: a stronger ink and the chip's wash. */
     const hovered: Record<string, number> = {};

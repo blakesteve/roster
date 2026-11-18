@@ -268,12 +268,17 @@ export const EveryInlineSite: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
       <style>{STILL}</style>
+      <div data-pointer-rest="" style={{ width: 24, height: 24 }} />
       {GROUNDS.map((id) => (
         <Ground key={id} id={id} />
       ))}
     </div>
   ),
   play: async ({ canvasElement }) => {
+    /* The pointer rests on nothing with a hover style: a story or file before
+       this one leaves it wherever it last was, and over a close or a toggle
+       its hover would read as the rest. */
+    await realInputOrSkip()?.commands.realHover("[data-pointer-rest]");
     const { lowest, missing } = measure(canvasElement, SITES);
     console.info(`TEXT OPACITY inline ${JSON.stringify(lowest)}`);
     /* Reach: every site rendered on every ground. */
