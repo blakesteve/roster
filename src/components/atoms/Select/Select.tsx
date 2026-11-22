@@ -23,6 +23,7 @@ import {
   POPUP_PANEL,
   POPUP_WIDTH_OF_BUTTON,
   useDarkScope,
+  usePopupWidth,
 } from "../../../internal/popup";
 import { useKeyFocus } from "../../../internal/key-focus";
 import { DescribedButton } from "../../../internal/described";
@@ -105,6 +106,7 @@ const Select = ({
      its props do not admit a `ref`. Either element gives the same answer:
      `closest` walks ancestors and the two are in the same subtree. */
   const { ref: fieldRef, inDarkScope } = useDarkScope<HTMLDivElement>();
+  const { measure: measurePopupWidth, style: popupWidthStyle } = usePopupWidth<HTMLButtonElement>();
 
   return (
     /* `...props` is spread here, and was not before. The prop type has always
@@ -144,6 +146,7 @@ const Select = ({
             /* The caller's `aria-describedby` after the helper text's
                (src/internal/described.tsx). */
             as={DescribedButton}
+            ref={measurePopupWidth}
             callerDescribedBy={ariaDescribedBy}
             /* Said, because Headless UI only works it out for an `as` of
                "button", and otherwise not until the element is there: the
@@ -195,6 +198,7 @@ const Select = ({
           >
             <ListboxOptions
               anchor={POPUP_ANCHOR}
+              style={popupWidthStyle}
               className={cn(
                 popupInDarkPalette(inDarkScope, variant) && "dark",
                 POPUP_PANEL,

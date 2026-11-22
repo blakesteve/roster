@@ -10,6 +10,7 @@ import { Footer } from "./components/organisms/Footer/Footer";
 import { CallToAction } from "./components/molecules/CallToAction/CallToAction";
 import { AvatarStrip } from "./components/atoms/AvatarStrip/AvatarStrip";
 import { MatchupCard } from "./components/molecules/MatchupCard/MatchupCard";
+import { Combobox } from "./components/atoms/Combobox/Combobox";
 import { ErrorState } from "./components/molecules/ErrorState/ErrorState";
 import { Countdown } from "./components/organisms/Countdown/Countdown";
 import { Carousel } from "./components/molecules/Carousel/Carousel";
@@ -229,6 +230,21 @@ describe("pseudo-locale: no built-in English is left once every label is replace
         />
       ),
       ["tied"],
+    ],
+    [
+      "Combobox",
+      (labeled) => (
+        <Combobox
+          label={pseudo("Time zone")}
+          options={[{ value: "a", label: pseudo("Accra") }]}
+          value={null}
+          onChange={() => {}}
+          placeholder={pseudo("Search")}
+          emptyMessage={pseudo("No matches")}
+          labels={labeled ? { showOptions: (label) => `${pseudo("Show options for")} ${label}` } : undefined}
+        />
+      ),
+      ["Show", "options", "for"],
     ],
     [
       "ErrorState",

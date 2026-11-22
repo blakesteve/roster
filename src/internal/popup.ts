@@ -142,8 +142,70 @@ export function popupInDarkPalette(
   return inDarkScope || variant === "slate";
 }
 
-export const POPUP_WIDTH_OF_BUTTON = "rst:w-(--button-width)";
-export const POPUP_WIDTH_OF_INPUT = "rst:w-(--input-width)";
+/**
+ * The panel's width: the control's width as laid out, `--rst-popup-width`,
+ * which `usePopupWidth` measures, falling back to Headless UI's own variable
+ * until the first measure (and where there's no ResizeObserver).
+ *
+ * Headless UI's `--input-width` and `--button-width` are the control's box
+ * as painted, read every frame. Inside a `Dialog` that's still scaling in,
+ * that box grows a little each frame, so the panel's width changed each
+ * frame, and floating-ui's resize observer, repositioning it, resized it
+ * again in the same frame: a "ResizeObserver loop" page error on every open
+ * during the entrance, up to 18 in WebKit. The width as laid out doesn't
+ * move under a transform.
+ */
+export const POPUP_WIDTH_OF_BUTTON = "rst:w-[var(--rst-popup-width,var(--button-width))]";
+export const POPUP_WIDTH_OF_INPUT = "rst:w-[var(--rst-popup-width,var(--input-width))]";
+
+/* The border box's width as laid out, which a transform doesn't change (the
+   painted box, `getBoundingClientRect`, does), to a fraction of a pixel
+   (`offsetWidth` rounds). Exported for its test. */
+export function laidOutWidth(el: Element): number {
+  const s = getComputedStyle(el);
+  const width = parseFloat(s.width) || 0;
+  if (s.boxSizing === "border-box") return width;
+  const px = (v: string) => parseFloat(v) || 0;
+  return width + px(s.paddingLeft) + px(s.paddingRight) + px(s.borderLeftWidth) + px(s.borderRightWidth);
+}
+
+/**
+ * Measures the control a panel takes its width from, as laid out, for
+ * `POPUP_WIDTH_OF_*`. Pass `measure` as the control's `ref`, and put `style`
+ * on the panel.
+ *
+ * Read from the laid-out border box before the first paint, and again only
+ * when a ResizeObserver reports the control's own size changed. Set as state,
+ * so a change lands in a render after the observer has delivered, never
+ * inside its delivery.
+ */
+export function usePopupWidth<T extends HTMLElement>(): {
+  measure: (el: T | null) => void;
+  style: React.CSSProperties | undefined;
+} {
+  const [el, setEl] = React.useState<T | null>(null);
+  const [width, setWidth] = React.useState<number | null>(null);
+  /* Read once before the first paint too: a control mounted with its Dialog
+     can be opened before the observer first delivers, and a panel that took
+     the painted width until then changed width mid-entrance. */
+  React.useLayoutEffect(() => {
+    if (el) setWidth(laidOutWidth(el));
+  }, [el]);
+  React.useEffect(() => {
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => {
+      const next = laidOutWidth(el);
+      setWidth((was) => (was === next ? was : next));
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [el]);
+  const style = React.useMemo(
+    () => (width === null ? undefined : ({ "--rst-popup-width": `${width}px` } as React.CSSProperties)),
+    [width],
+  );
+  return { measure: setEl, style };
+}
 
 /** Where an anchored panel opens, and the only value Roster uses. */
 export const POPUP_ANCHOR = "bottom start" as const;

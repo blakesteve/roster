@@ -26,9 +26,24 @@ import {
   POPUP_PANEL,
   POPUP_WIDTH_OF_INPUT,
   useDarkScope,
+  usePopupWidth,
 } from "../../../internal/popup";
+import { withLabels } from "../../../lib/labels";
 import { useKeyFocus } from "../../../internal/key-focus";
 import { DescribedInput } from "../../../internal/described";
+
+/** Combobox's own words, each replaceable through `labels`. */
+export interface ComboboxLabels {
+  /**
+   * The toggle's name, given the field's `label` (undefined when it has
+   * none): "Show options for Time zone", or "Show options".
+   */
+  showOptions: (label: string | undefined) => string;
+}
+
+const LABELS: ComboboxLabels = {
+  showOptions: (label) => (label ? `Show options for ${label}` : "Show options"),
+};
 
 export interface ComboboxProps
   extends
@@ -64,6 +79,8 @@ export interface ComboboxProps
    * query here entirely.
    */
   filter?: (options: SelectOption[], query: string) => SelectOption[];
+  /** Replaces Combobox's own words; any left out stay English. */
+  labels?: Partial<ComboboxLabels>;
 }
 
 const defaultFilter = (options: SelectOption[], query: string) => {
@@ -103,12 +120,15 @@ const Combobox = ({
   optionsClassName,
   emptyMessage = "No matches",
   filter = defaultFilter,
+  labels,
   "aria-describedby": ariaDescribedBy,
   ...props
 }: ComboboxProps) => {
   useKeyFocus();
   const [query, setQuery] = React.useState("");
   const { ref: fieldRef, inDarkScope } = useDarkScope<HTMLDivElement>();
+  const { measure: measurePopupWidth, style: popupWidthStyle } = usePopupWidth<HTMLInputElement>();
+  const l = withLabels(LABELS, labels);
   const hasError = !!errorMessage || error;
   /* By the rule every Roster field follows. The consumer's `aria-invalid` and
      Headless UI's `invalid` are taken off `props`, which land on the wrapper,
@@ -140,6 +160,7 @@ const Combobox = ({
             /* A caller's `aria-describedby` goes here, after the helper
                text's, not on the wrapper, which has no role, as in Select. */
             as={DescribedInput}
+            ref={measurePopupWidth}
             callerDescribedBy={ariaDescribedBy}
             aria-invalid={invalid || undefined}
             /* `pr-9` AFTER `inputClassName`, unlike every other escape hatch
@@ -181,6 +202,10 @@ const Combobox = ({
                the panel instead of placing the caret. That is the cost of the
                target. The alternative is capping the button at the clearance,
                which is 36px and misses the rule. */
+            /* Named, so a screen reader meeting it doesn't hear a bare
+               "button": it had no name and no way to give it one. Headless UI
+               keeps it out of the tab order and says whether it's open. */
+            aria-label={l.showOptions(label)}
             className={cn(
               "rst:absolute rst:inset-y-0 rst:right-0 rst:flex rst:w-11 rst:cursor-pointer rst:items-center rst:justify-end",
               size === "sm" ? "rst:pr-2.5" : "rst:pr-3",
@@ -211,11 +236,20 @@ const Combobox = ({
           >
             <ComboboxOptions
               anchor={POPUP_ANCHOR}
+              /* Not modal. Headless UI's default makes the rest of the page
+                 inert while the list is open, the field's own label with it,
+                 so the field had no name just as someone chose from it.
+                 Without it, focus still stays in the input, Escape still
+                 closes, Tab still picks and moves on, and a click outside
+                 still closes. What changes: the page can scroll while the
+                 list is open. */
+              modal={false}
+              style={popupWidthStyle}
               className={cn(
                 popupInDarkPalette(inDarkScope, variant) && "dark",
                 POPUP_PANEL,
-                /* `--input-width`, not `--button-width`: the button here is
-                   the chevron, so matching it renders a 20px sliver. */
+                /* The input's width, not the button's: the button here is the
+                   chevron, so matching it renders a 20px sliver. */
                 POPUP_WIDTH_OF_INPUT,
                 optionsClassName,
               )}
