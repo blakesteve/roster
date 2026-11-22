@@ -112,6 +112,22 @@ describe("PasswordInput Component", () => {
     });
   });
 
+  describe("the toggle's hover in an error", () => {
+    /* The painted readings are src/components/atoms/Input/Input.checks.stories.tsx;
+       these pin which ink each case asks for. */
+    it("goes a step darker in light and a step lighter in dark", () => {
+      render(<PasswordInput aria-label="Password" errorMessage="Required" />);
+      expect(screen.getByRole("button")).toHaveClass("rst:hover:text-error-600", "rst:dark:hover:text-error-300");
+    });
+
+    it("goes lighter in both themes on slate, a dark field in both", () => {
+      render(<PasswordInput aria-label="Password" variant="slate" errorMessage="Required" />);
+      const toggle = screen.getByRole("button");
+      expect(toggle).toHaveClass("rst:hover:text-error-300");
+      expect(toggle).not.toHaveClass("rst:hover:text-error-600");
+    });
+  });
+
   describe("revealable", () => {
     it("renders no toggle when revealable is false", () => {
       render(<PasswordInput label="Password" revealable={false} />);

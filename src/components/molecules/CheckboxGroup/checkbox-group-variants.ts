@@ -40,10 +40,11 @@ export const checkboxGroupPanelVariants = /* @__PURE__ */ cva("rst:flex rst:flex
     {
       /* Only `panel` has a boundary to repaint. In `plain` the message text is
          the entire error state, which is stated in the README rather than left
-         for someone to discover. */
+         for someone to discover. Dark is error-400, as every field's error
+         edge is: error-500 read 2.74:1 on a dark Card. */
       variant: "panel",
       error: true,
-      class: "rst:border-error-500 rst:dark:border-error-500",
+      class: "rst:border-error-500 rst:dark:border-error-400",
     },
   ],
   defaultVariants: { variant: "plain", size: "md", error: false },

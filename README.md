@@ -619,10 +619,9 @@ where a target was too small.
   your text for; `white` is `gray-500` (dark `gray-400`); `slate` is `gray-400`
   in dark. `soft`, `ghost` and an error don't change. An icon you pass inherits
   it, so a control of your own in `endIcon` needs no fade: the slot passes 3:1
-  (5.44:1 at its lowest, where `gray-400` was 2.52). One case still doesn't:
-  an error on `slate` in light, red on `gray-700`, which reads 1.61:1, as it
-  did before. The field's typed text there is lower still, at 1.24:1; neither
-  is part of this release. `iconVariants`, which is
+  (5.44:1 at its lowest, where `gray-400` was 2.52). On 5.21.0 an error on
+  `slate` in light still read 1.61:1, its typed text 1.24; 5.22.0 fixes both
+  (below). `iconVariants`, which is
   exported, carries the new classes. `PasswordInput`'s toggle drops its
   `opacity-70` (1.85:1 on 5.20.0) and takes the field's text ink on hover;
   disabled, it still dims to 40%.
@@ -647,6 +646,55 @@ where a target was too small.
   was missing. Hover in dark is `gray-800`, on Roster's ramp, not `slate-800`.
   Focus draws Roster's ring. Each team's result is also said after its name,
   hidden ("won", "lost" or "tied"); replace the words with `labels`.
+
+#### Upgrading to 5.22.0
+
+**Fields in an error keep their red in every state, and every field has an
+edge.** These are contrast fixes, so they move however you use the fields. No
+size, element or prop changes.
+
+- **Every chevron takes its field's slot ink**, in `Combobox`, `Select` and
+  `MultiSelect`: the ink the field's icons and placeholder take, and the
+  error's in an error. It was `gray-400`, dark `gray-500`, whatever the field:
+  2.31:1 on a `soft` trigger, 1.71 on a hovered dark one. Now the lowest is
+  4.77 in light and 4.07 in dark, both on a hovered trigger, and 3.71 in an
+  error, on light `slate`. This is the one change on a field with no error, and
+  it reaches every one of the three.
+- **An error keeps its red at rest, hovered and focused.** Focused, an
+  `outline`, `white` or `soft` field used to trade its red border for the blue
+  focus border under a red ring, a `MultiSelect` showed no red at all, and a
+  hovered `ghost` Select turned its chosen text gray. Now the edge and the
+  typed or chosen text stay red, and focus shows by the ring, in red: a 2px
+  ring on Input, PasswordInput, Combobox and Textarea, a pixel heavier edge on
+  Select and MultiSelect.
+- **No field changes its fill while in an error.** `soft`, `slate` and `ghost`
+  fields stop tinting on focus, and `white`, `soft`, `slate` and `ghost`
+  triggers stop tinting on hover. The lighter fill was what sank the red: a
+  hovered dark `soft` Select's chosen text read 3.71:1.
+- **In dark, an error's edge is `error-400`**, not `error-500`: the border,
+  Select's and MultiSelect's edge, Textarea's focus ring and CheckboxGroup's
+  `panel`. `error-500` read 2.74:1 on a dark `Card`, where it's an `outline`
+  field's only edge; `error-400` reads 6.32. Light doesn't change.
+- **`PasswordInput`'s toggle in an error hovers to `error-300` in dark**, a
+  step lighter, as light hovers a step darker. It hovered to its own rest ink.
+- **`slate` in an error takes the dark-surface reds in light too**, being dark
+  in both themes: typed text `error-300`, the icon slot and chevron
+  `error-400`, the toggle's hover `error-300`. Its typed text read 1.24:1 and
+  1.09 focused; now 5.41, and the icon 3.71.
+- **Dark `slate` draws a `gray-400` edge**, where it had none (1.00:1 on a
+  dark `Card`). Light's `gray-700` fill is its own edge.
+- **`white` draws its edge with the field-border tokens**, as `outline` and
+  `soft` do: `--roster-control-border`, and `--roster-control-border-focus`
+  for Input's, Combobox's and Textarea's focus border. By day the `gray-300`
+  hairline (1.49:1 on white) becomes `gray-500`; at night `gray-700` becomes
+  `gray-400`, and the focus border `primary-400`. A field-border token you set
+  now reaches `white` too. Its fill, text and placeholder don't change.
+
+`inputVariants`, `iconVariants`, `selectTriggerVariants` and
+`textareaVariants`, which are exported, carry the new classes. If you build a
+field from one yourself, merge the result with tailwind-merge under the `rst`
+prefix, as Roster does: in an error both the variant's focus border and the
+error's come out, and the merge is what drops the variant's.
 
 ### Focus
 
@@ -892,13 +940,13 @@ One family rather than one per component is deliberate — these controls sit in
 the same row of the same form and are drawn to look identical, so being able to
 repaint one and not the other would be a bug, not a choice.
 
-`outline` reads all four. `soft` reads the border only, because a boundary is
-the one thing a filled field cannot supply for itself on an arbitrary surface;
-`white`, `slate` and `ghost` stay opinionated. `Checkbox` reads the border too,
-for its unchecked box. Historically `outline` was the only reader, and
-it carries no hover fill. The other variants each name a concrete surface
-(`white`, `soft`, `slate`, `ghost`) and stay opinionated: a token that meant
-something different in each would not be a token.
+`outline` reads all four. `soft` reads the border, and `white` the border and
+the focus border, because a boundary is the one thing a filled field cannot
+supply for itself on an arbitrary surface. Their fills, text and placeholders,
+and all of `slate` and `ghost`, stay opinionated: each names a concrete
+surface, and a token that meant something different in each would not be a
+token. `Checkbox` reads the border too, for its unchecked box. Historically
+`outline` was the only reader, and it carries no hover fill.
 
 One caveat worth knowing before you lean on these: like `--roster-card-*`,
 `--roster-nav-*` and `--roster-footer-*`, they are declared outside
@@ -1620,7 +1668,10 @@ still leaving holds the page from its first frame, so the other one's focus
 restore can't move focus out onto the page. An opener in the toast host, which
 stays live, could take it through 5.19.3: one opened from a toast gave focus
 back to it as it left, out of whatever opened in its place. From 5.19.4 focus
-stays in the new one. In 5.19.0 and before, a `Sheet` that mounted already open,
+ends in the new one. On the way it passes through the opener: Headless UI's
+give-back puts it there as the first one unmounts, and Roster puts it back a
+microtask later, before anything paints. Nothing on screen shows it; a
+`focusin`, `focus` or `blur` listener sees both moves. In 5.19.0 and before, a `Sheet` that mounted already open,
 as one whose code loads on its first open does, never held the part of the page
 it was written in. That part stayed live behind it, and a sheet or dialog
 leaving at the same time restored focus onto it as its leave ended. A `Sheet`
