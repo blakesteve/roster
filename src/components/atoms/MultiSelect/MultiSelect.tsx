@@ -25,6 +25,7 @@ import {
   POPUP_PANEL,
   POPUP_WIDTH_OF_BUTTON,
   useDarkScope,
+  usePopupWidth,
 } from "../../../internal/popup";
 import { useKeyFocus } from "../../../internal/key-focus";
 import { DescribedButton } from "../../../internal/described";
@@ -172,6 +173,15 @@ const MultiSelect = ({
      send focus, a keyboard user is dropped on <body> and their next Tab
      restarts at the top of the document. */
   const triggerRef = React.useRef<HTMLButtonElement>(null);
+  /* The button is stretched across the shell, so its width is the field's. */
+  const { measure: measurePopupWidth, style: popupWidthStyle } = usePopupWidth<HTMLButtonElement>();
+  const triggerRefs = React.useCallback(
+    (el: HTMLButtonElement | null) => {
+      triggerRef.current = el;
+      measurePopupWidth(el);
+    },
+    [measurePopupWidth],
+  );
 
   return (
     <Field
@@ -232,7 +242,7 @@ const MultiSelect = ({
             )}
           >
             <ListboxButton
-              ref={triggerRef}
+              ref={triggerRefs}
               /* A caller's `aria-describedby` goes here, after the helper
                  text's, not on the wrapper, which has no role, as in Select. */
               as={DescribedButton}
@@ -383,6 +393,7 @@ const MultiSelect = ({
           >
             <ListboxOptions
               anchor={POPUP_ANCHOR}
+              style={popupWidthStyle}
               className={cn(
                 popupInDarkPalette(inDarkScope, variant) && "dark",
                 POPUP_PANEL,

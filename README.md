@@ -1243,6 +1243,24 @@ with those components, not with you. The escape hatch you reach for is
 Two things in there are worth knowing about even from outside, because both
 look like oversights until you know why:
 
+- **The panel is its control's width, as laid out.** Since 5.23.0 Roster
+  measures the control's border box and sizes the panel from it, rather than
+  from Headless UI's `--input-width` or `--button-width`, which are the box as
+  painted and read every frame. Inside a `Dialog` still scaling in, the
+  painted box grew each frame and the panel with it, and floating-ui's
+  observer, repositioning it, resized it again in the same frame: a "ResizeObserver
+  loop" page error on every open during the entrance, which a test that fails
+  on page errors couldn't get past. A list taller than the room below its
+  field can still raise floating-ui's own loop, up to a few errors an open
+  in both engines; floating-ui has fixed that upstream, and Roster takes it
+  with the release.
+- **`Combobox`'s list doesn't lock the page.** Since 5.23.0 its options
+  aren't modal: Headless UI's default made everything outside the field inert
+  while the list was open, the field's own label with it, so the field had no
+  name just as someone chose from it. Focus still stays in the input, Escape
+  still closes, Tab still picks the active option and moves on, and a click
+  outside still closes; the page can now scroll while the list is open.
+  `Select` and `MultiSelect`, whose focus moves into the list, are unchanged.
 - **The panel sets no `max-height` and no `overflow`.** Headless UI's `size`
   middleware writes both inline whenever `anchor` is set, so a utility would
   lose to it anyway. To cap a menu shorter than the viewport allows, set the
@@ -1329,8 +1347,8 @@ with the `ListboxButton` stretched `inset-0` across it, and the chips are the
 button's siblings drawn on top.
 
 That keeps the button the full-width element, which matters more than it
-sounds: Headless UI anchors the panel to the button and sizes it from
-`--button-width`, and a trigger that stops being full width is how `Combobox`
+sounds: Headless UI anchors the panel to the button and Roster sizes it from
+the button's width, and a trigger that stops being full width is how `Combobox`
 once shipped a 20px unreadable menu. Measured after the change, the panel still
 matches the field exactly.
 
@@ -2699,8 +2717,9 @@ and the rest stay:
 Since 5.8.0 that covers `Navbar`, `Sheet`, `Dialog`, `Breadcrumbs`, `Footer`,
 `CallToAction`, `AvatarStrip`, `ErrorState`, `Countdown`, `Carousel` and
 `ModerationQueue` (whose `labels.close` names the close button of its edit
-Dialog or Sheet), and since 5.21.0 `MatchupCard` (the "won", "lost" and "tied"
-it says after each team's name), alongside `Pagination`, the loading system and DataTable's
+Dialog or Sheet), since 5.21.0 `MatchupCard` (the "won", "lost" and "tied"
+it says after each team's name), and since 5.23.0 `Combobox` (its toggle's
+name, "Show options for" the field's label, given the label), alongside `Pagination`, the loading system and DataTable's
 `paginationLabels`. A few components name their words with single props
 instead, and 5.8.0 adds the ones that were missing: MultiSelect's
 `countLabel`, DataTable's `emptyMessage` and MediaPreview's `newTabLabel`, next

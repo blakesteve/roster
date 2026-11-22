@@ -206,8 +206,56 @@ describe("Combobox", () => {
     open();
 
     const list = await screen.findByRole("listbox");
-    expect(list.className).toContain("rst:w-(--input-width)");
-    expect(list.className).not.toContain("rst:w-(--button-width)");
+    /* The input's width as laid out, Headless UI's painted one until then. */
+    expect(list.className).toContain("rst:w-[var(--rst-popup-width,var(--input-width))]");
+    expect(list.className).not.toContain("--button-width");
+  });
+
+  describe("an open list", () => {
+    it("leaves the field's label live: not inert, not hidden", async () => {
+      /* Headless UI's options are modal by default, which made everything
+         outside the field inert, its own label with it. */
+      render(<Combobox label="Time zone" options={options} value={null} onChange={() => {}} />);
+      open();
+      await screen.findByRole("listbox");
+      const label = screen.getByText("Time zone");
+      for (let node: Element | null = label; node && node !== document.body; node = node.parentElement) {
+        expect(node.hasAttribute("inert"), node.tagName).toBe(false);
+        expect(node.getAttribute("aria-hidden"), node.tagName).not.toBe("true");
+      }
+      expect(screen.getByRole("combobox", { name: "Time zone" })).toBeInTheDocument();
+    });
+
+    it("leaves the page free to scroll", async () => {
+      render(<Combobox label="Time zone" options={options} value={null} onChange={() => {}} />);
+      open();
+      await screen.findByRole("listbox");
+      expect(document.documentElement.style.overflow).not.toBe("hidden");
+    });
+  });
+
+  describe("the toggle's name", () => {
+    it("says what it opens, from the field's label", () => {
+      render(<Combobox label="Time zone" options={options} value={null} onChange={() => {}} />);
+      expect(screen.getByRole("button", { name: "Show options for Time zone" })).toBeInTheDocument();
+    });
+
+    it("says \"Show options\" for a field with no label", () => {
+      render(<Combobox options={options} value={null} onChange={() => {}} />);
+      expect(screen.getByRole("button", { name: "Show options" })).toBeInTheDocument();
+    });
+
+    it("is replaced through labels, given the label", () => {
+      render(
+        <Combobox label="Fuseau horaire" options={options} value={null} onChange={() => {}} labels={{ showOptions: (l) => `Afficher : ${l}` }} />,
+      );
+      expect(screen.getByRole("button", { name: "Afficher : Fuseau horaire" })).toBeInTheDocument();
+    });
+
+    it("keeps the English when a catalog passes undefined", () => {
+      render(<Combobox label="Time zone" options={options} value={null} onChange={() => {}} labels={{ showOptions: undefined }} />);
+      expect(screen.getByRole("button", { name: "Show options for Time zone" })).toBeInTheDocument();
+    });
   });
 
   it("opens a panel identical to Select's, class for class", async () => {

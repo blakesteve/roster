@@ -3,6 +3,7 @@ import {
   POPUP_PANEL,
   POPUP_WIDTH_OF_BUTTON,
   POPUP_WIDTH_OF_INPUT,
+  laidOutWidth,
   POPUP_ANCHOR,
 } from "./popup";
 
@@ -40,13 +41,38 @@ describe("the shared popup panel", () => {
        on the panel: for a Listbox the button IS the trigger, but for a
        Combobox it is the chevron beside the input — matching it rendered the
        menu about 20px wide and unreadable. */
-    expect(POPUP_WIDTH_OF_BUTTON).toBe("rst:w-(--button-width)");
-    expect(POPUP_WIDTH_OF_INPUT).toBe("rst:w-(--input-width)");
+    /* The width as laid out first (usePopupWidth), Headless UI's painted one
+       until it's measured: each falls back to its own control's. */
+    expect(POPUP_WIDTH_OF_BUTTON).toBe("rst:w-[var(--rst-popup-width,var(--button-width))]");
+    expect(POPUP_WIDTH_OF_INPUT).toBe("rst:w-[var(--rst-popup-width,var(--input-width))]");
     expect(POPUP_PANEL).not.toContain("--button-width");
     expect(POPUP_PANEL).not.toContain("--input-width");
   });
 
   it("opens below and start-aligned, the one anchor Roster uses", () => {
     expect(POPUP_ANCHOR).toBe("bottom start");
+  });
+});
+
+describe("laidOutWidth", () => {
+  /* The border box as laid out, which a transform doesn't change: a panel
+     sized from the painted box grew each frame of a Dialog's entrance. */
+  const box = (style: Partial<CSSStyleDeclaration>) => {
+    const el = document.createElement("div");
+    Object.assign(el.style, style);
+    document.body.append(el);
+    return el;
+  };
+
+  it("is the width itself for a border box", () => {
+    expect(laidOutWidth(box({ boxSizing: "border-box", width: "240.5px", padding: "0 16px", border: "1px solid" }))).toBe(240.5);
+  });
+
+  it("adds padding and border for a content box", () => {
+    expect(laidOutWidth(box({ boxSizing: "content-box", width: "200px", padding: "0 16px", border: "1px solid" }))).toBe(234);
+  });
+
+  it("ignores a transform", () => {
+    expect(laidOutWidth(box({ boxSizing: "border-box", width: "300px", transform: "scale(0.95)" }))).toBe(300);
   });
 });
