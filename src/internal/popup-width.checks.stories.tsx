@@ -27,7 +27,7 @@ import { realInputOrSkip } from "../test/real-input";
  *   each. Opened from the keyboard, since a pointer waits for a moving box to
  *   settle. The twin, Headless UI's combobox with its panel at
  *   `--input-width` inline as 5.22 had it, raises the error on every open.
- * - **The panel holds its width through the entrance**, read each frame, and
+ * - **The panel holds its width through the entrance**, read every 10ms, and
  *   is its control's width once settled, for all three. The twin's grows.
  * - **A long list is floating-ui's, and pinned as it is.** A list taller than
  *   the room below its field takes `max-height` from floating-ui's `size`,
@@ -205,26 +205,34 @@ export const TheTwinRaisesTheLoop: Story = {
   },
 };
 
-/* The panel's width each frame until 400ms after the Dialog opened (its
-   entrance is 300ms), opened at once, and when the first read came. */
+/* The panel's width every 10ms until 400ms after the Dialog opened (its
+   entrance is 300ms), opened at once, and how many reads fell inside the
+   entrance. On a
+   timer, not on frames: Linux's headless WebKit holds frames, and gave five
+   reads in 400ms. A read lays the page out, so it sees the entrance where it
+   is. */
 async function widthsThroughTheEntrance(real: Real) {
+  /* Polled every 5ms, not at `waitFor`'s 50, so the reads start early in the
+     entrance. */
+  const until = async (done: () => boolean) => {
+    for (const from = performance.now(); !done() && performance.now() - from < 2000; ) await wait(5);
+  };
   const t0 = performance.now();
   dialog.open();
-  await waitFor(() => expect(control("combobox")).not.toBeNull());
+  await until(() => control("combobox") !== null);
   control("combobox")!.focus();
   await real.commands.realPress(["ArrowDown"]);
-  await waitFor(() => expect(panel()).not.toBeNull());
-  const firstAt = Math.round(performance.now() - t0);
+  await until(() => panel() !== null);
   const widths = new Set<number>();
-  let frames = 0;
+  let inEntrance = 0;
   while (performance.now() - t0 < 400) {
     widths.add(Math.round(panel()!.getBoundingClientRect().width * 10) / 10);
-    frames += 1;
-    await new Promise((r) => requestAnimationFrame(r));
+    if (performance.now() - t0 < 300) inEntrance += 1;
+    await wait(10);
   }
   dialog.close();
   await waitFor(() => expect(document.querySelector('[role="dialog"]')).toBeNull(), { timeout: 3000 });
-  return { widths: [...widths], frames, firstAt };
+  return { widths: [...widths], inEntrance };
 }
 
 export const ThePanelHoldsItsWidthThroughTheEntrance: Story = {
@@ -236,8 +244,7 @@ export const ThePanelHoldsItsWidthThroughTheEntrance: Story = {
     const read = await widthsThroughTheEntrance(real);
     console.info(`POPUP WIDTH ${engine()} through the entrance: ${JSON.stringify(read)}`);
     /* Premise: read from inside the entrance. */
-    await expect(read.firstAt).toBeLessThan(200);
-    await expect(read.frames).toBeGreaterThan(5);
+    await expect(read.inEntrance).toBeGreaterThanOrEqual(3);
     await expect(read.widths).toHaveLength(1);
   },
 };
