@@ -31,7 +31,11 @@ const HOVER: Record<NonNullable<InputProps["variant"]>, string> = {
   ghost: "rst:hover:text-gray-900 rst:dark:hover:text-gray-100",
   slate: "rst:hover:text-gray-100",
 };
-const HOVER_ERROR = "rst:hover:text-error-600 rst:dark:hover:text-error-400";
+/* In an error, a step darker than the slot's red in light and a step lighter
+   in dark. `slate`'s fill is dark in both themes, so it goes lighter in both,
+   to its typed text's error-300. */
+const HOVER_ERROR = "rst:hover:text-error-600 rst:dark:hover:text-error-300";
+const HOVER_ERROR_SLATE = "rst:hover:text-error-300";
 
 /**
  * A password field with a reveal toggle: the pattern every sign-in form needs
@@ -102,7 +106,10 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
                 "rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring",
                 disabled
                   ? "rst:cursor-not-allowed rst:opacity-40"
-                  : cn("rst:cursor-pointer", error || errorMessage ? HOVER_ERROR : HOVER[variant ?? "outline"]),
+                  : cn(
+                      "rst:cursor-pointer",
+                      error || errorMessage ? (variant === "slate" ? HOVER_ERROR_SLATE : HOVER_ERROR) : HOVER[variant ?? "outline"],
+                    ),
               )}
             >
               <FontAwesomeIcon

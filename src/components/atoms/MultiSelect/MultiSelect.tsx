@@ -15,6 +15,7 @@ import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
 import { selectTriggerVariants } from "../Select/select-variants";
+import { slotInkVariants } from "../../../internal/slot-ink";
 import { type SelectOption } from "../Select/Select";
 import { Chip } from "../Chip/Chip";
 import { PopupOption } from "../../../internal/PopupOption";
@@ -221,8 +222,11 @@ const MultiSelect = ({
                  the element that actually takes focus is the invisible button
                  stretched across it — and, deliberately, from a dismiss
                  control too: those are inside the field and should light it.
-                 One pixel heavier than the edge, as Select's trigger is. */
-              "rst:focus-within:ring-[length:calc(var(--roster-border-width,1px)+1px)] rst:focus-within:ring-ring",
+                 One pixel heavier than the edge, as Select's trigger is, and
+                 in an error in the error's ink: the page's ring replaced the
+                 red, so a focused MultiSelect in an error showed none. */
+              "rst:focus-within:ring-[length:calc(var(--roster-border-width,1px)+1px)]",
+              hasError ? "rst:focus-within:ring-error-500 rst:dark:focus-within:ring-error-400" : "rst:focus-within:ring-ring",
               disabled && "rst:opacity-50 rst:cursor-not-allowed",
               triggerClassName,
             )}
@@ -326,7 +330,9 @@ const MultiSelect = ({
             >
               <FontAwesomeIcon
                 icon={faChevronDown}
-                className="rst:h-3.5 rst:w-3.5 rst:text-gray-400 rst:dark:text-gray-500"
+                /* The field's slot ink, as its icons take (src/internal/slot-ink.ts):
+                   the only sign it opens a list, so it needs 3:1. */
+                className={cn("rst:h-3.5 rst:w-3.5", slotInkVariants({ variant, error: hasError }))}
                 aria-hidden="true"
               />
             </span>

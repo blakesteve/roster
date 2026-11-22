@@ -23,13 +23,30 @@ describe("Input Component", () => {
     expect(screen.getByText("Invalid input")).toBeInTheDocument();
 
     const input = screen.getByRole("textbox");
-    expect(input).toHaveClass("rst:border-error-500", "rst:dark:border-error-500");
+    /* The dark edge is error-400, and focus keeps the error's edge. */
+    expect(input).toHaveClass("rst:border-error-500", "rst:dark:border-error-400", "rst:focus-visible:border-error-500", "rst:dark:focus-visible:border-error-400");
   });
 
   it("applies error styles when the boolean error prop is true", () => {
     render(<Input error={true} />);
     const input = screen.getByRole("textbox");
-    expect(input).toHaveClass("rst:border-error-500", "rst:dark:border-error-500");
+    expect(input).toHaveClass("rst:border-error-500", "rst:dark:border-error-400");
+    /* The variant's focus border gives way to the error's. */
+    expect(input).not.toHaveClass("rst:focus-visible:border-[var(--roster-control-border-focus)]");
+  });
+
+  it("holds a tinting variant's fill in an error", () => {
+    render(<Input variant="soft" error />);
+    const input = screen.getByRole("textbox");
+    expect(input).toHaveClass("rst:focus-visible:bg-gray-100", "rst:dark:focus-visible:bg-gray-800");
+    expect(input).not.toHaveClass("rst:focus-visible:bg-white");
+  });
+
+  it("gives slate in an error the dark-surface reds and holds its fill", () => {
+    const { container } = render(<Input variant="slate" error startIcon={<span />} />);
+    expect(screen.getByRole("textbox")).toHaveClass("rst:text-error-300", "rst:dark:text-error-400", "rst:focus-visible:bg-gray-700", "rst:dark:focus-visible:bg-gray-900");
+    expect(container.querySelector(".rst\\:left-3")).toHaveClass("rst:text-error-400");
+    expect(container.querySelector(".rst\\:left-3")).not.toHaveClass("rst:text-error-500");
   });
 
   it("renders icons when provided and applies correct icon variants", () => {

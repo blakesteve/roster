@@ -37,7 +37,7 @@ describe("Textarea Component", () => {
 
     // Check if error border classes are applied to the textarea
     const textarea = screen.getByRole("textbox");
-    expect(textarea).toHaveClass("rst:border-error-500", "rst:dark:border-error-500");
+    expect(textarea).toHaveClass("rst:border-error-500", "rst:dark:border-error-400", "rst:focus-visible:border-error-500", "rst:dark:focus-visible:ring-error-400");
   });
 
   // 4. Prop Priority
@@ -56,12 +56,14 @@ describe("Textarea Component", () => {
     render(<Textarea variant="white" />);
     const textarea = screen.getByRole("textbox");
 
-    // Verify the specific light and dark mode combo for the white variant
+    // Its fill named per scheme; its edge the field-border tokens.
     expect(textarea).toHaveClass(
       "rst:bg-white",
       "rst:dark:bg-gray-900",
-      "rst:dark:border-gray-800",
+      "rst:border-[var(--roster-control-border)]",
+      "rst:focus-visible:border-[var(--roster-control-border-focus)]",
     );
+    expect(textarea).not.toHaveClass("rst:dark:border-gray-800");
   });
 
   // 6. Resize Controls

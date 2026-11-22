@@ -2,12 +2,27 @@
    browser. Shared by every check that composites layers rather than reading
    one computed color. */
 
+/* One pixel, reused. A check reading a thousand fields makes tens of
+   thousands of reads, and a fresh canvas for each ran WebKit out of canvas
+   memory mid-check (`getImageData` threw InvalidStateError). */
+let pixel: CanvasRenderingContext2D | null = null;
+function blank(): CanvasRenderingContext2D {
+  if (!pixel) {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    pixel = canvas.getContext("2d", { willReadFrequently: true })!;
+  }
+  pixel.clearRect(0, 0, 1, 1);
+  /* A color the canvas can't parse leaves `fillStyle` as it was. On a fresh
+     canvas that was black; reused, it would be the last read's color. */
+  pixel.fillStyle = "#000000";
+  return pixel;
+}
+
 /** Paints `layers` bottom to top on one pixel and reads it back, so any CSS
     color the browser can compute, with any alpha, composites as the page does. */
 export function paint(layers: string[]): number[] {
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = 1;
-  const ctx = canvas.getContext("2d")!;
+  const ctx = blank();
   for (const color of layers) {
     ctx.fillStyle = color;
     ctx.fillRect(0, 0, 1, 1);
@@ -30,9 +45,7 @@ type RGBA = [number, number, number, number];
 
 /** A CSS color as the browser resolves it: 0-255 channels and a 0-1 alpha. */
 export function rgba(color: string): RGBA {
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = 1;
-  const ctx = canvas.getContext("2d")!;
+  const ctx = blank();
   ctx.fillStyle = color;
   ctx.fillRect(0, 0, 1, 1);
   const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;

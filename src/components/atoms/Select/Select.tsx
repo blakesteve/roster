@@ -15,6 +15,7 @@ import { type VariantProps } from "class-variance-authority";
 import { cn } from "../../../lib/utils";
 import { isFieldInvalid, withoutInvalidProps } from "../../../internal/field-invalid";
 import { selectTriggerVariants } from "./select-variants";
+import { slotInkVariants } from "../../../internal/slot-ink";
 import { PopupOption } from "../../../internal/PopupOption";
 import {
   POPUP_ANCHOR,
@@ -178,7 +179,9 @@ const Select = ({
             >
               <FontAwesomeIcon
                 icon={faChevronDown}
-                className="rst:h-3.5 rst:w-3.5 rst:text-gray-400 rst:dark:text-gray-500"
+                /* The field's slot ink, as its icons take (src/internal/slot-ink.ts):
+                   the only sign it opens a list, so it needs 3:1. */
+                className={cn("rst:h-3.5 rst:w-3.5", slotInkVariants({ variant, error: hasError }))}
                 aria-hidden="true"
               />
             </span>

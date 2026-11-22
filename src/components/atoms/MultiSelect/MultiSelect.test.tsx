@@ -322,6 +322,18 @@ describe("MultiSelect", () => {
     expect(trigger()).toHaveAccessibleDescription("Pick at least one sport.");
   });
 
+  it("lights its focus ring in the error's ink in an error, and the page's otherwise", () => {
+    /* The ring is on the shell, from `focus-within`. In an error the page's
+       ring replaced the red, so a focused MultiSelect showed none. */
+    const { rerender } = render(<MultiSelect options={SPORTS} value={[]} onChange={() => {}} errorMessage="Pick one." />);
+    const shell = () => trigger().parentElement!;
+    expect(shell()).toHaveClass("rst:focus-within:ring-error-500", "rst:dark:focus-within:ring-error-400");
+    expect(shell()).not.toHaveClass("rst:focus-within:ring-ring");
+    rerender(<MultiSelect options={SPORTS} value={[]} onChange={() => {}} />);
+    expect(shell()).toHaveClass("rst:focus-within:ring-ring");
+    expect(shell()).not.toHaveClass("rst:focus-within:ring-error-500");
+  });
+
   it("does not open when disabled", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

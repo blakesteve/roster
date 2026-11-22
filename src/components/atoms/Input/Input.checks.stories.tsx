@@ -24,7 +24,12 @@ import { realInputOrSkip } from "../../../test/real-input";
  *
  * The twin is the slot as 5.20 inked it, gray-400 (gray-500 in dark) with the
  * toggle at 70%, drawn with inline styles: it fails in four variants of the
- * five. `ghost` cleared 3:1 by 0.12.
+ * five. `ghost` cleared 3:1 by 0.12. In an error, light `slate` takes
+ * error-400, as dark does; its twin, 5.21's error-500, reads 1.61.
+ *
+ * The toggle's hover, at rest and in an error, is pinned in both themes. In
+ * an error it goes a step darker in light and a step lighter in dark; on
+ * 5.21 dark hovered to its rest ink.
  *
  * The toggle's hover is read under a real pointer in Chromium only:
  * Storybook's dev CSS keeps Tailwind's `@media (hover: hover)` nested in
@@ -120,11 +125,16 @@ const SLOT: Record<Variant, number[]> = {
   ghost: [5.99, 5.99, 7.83, 6.93],
 };
 
-/* Below the bar, and outside the slot ruling, which leaves an error's ink as
-   it was: error-500 on `slate`'s gray-700 field in light. The field's typed
-   text in an error, error-600 there, is 1.24:1. Pinned so it can't move
-   unnoticed until it's ruled. */
-const SLATE_ERROR_LIGHT = 1.61;
+/* An error inks the slot error-500, error-400 in dark; `slate`, a dark field
+   in both themes, error-400 in both. On 5.21 light slate took error-500 too,
+   1.61:1 on its gray-700. */
+const ERROR: Record<Variant, number[]> = {
+  outline: [6.38, 6.38, 7.14, 6.32],
+  white: [6.38, 6.38, 5.48, 5.48],
+  soft: [5.85, 5.85, 5.48, 5.48],
+  slate: [3.71, 3.71, 6.32, 6.32],
+  ghost: [6.38, 6.38, 7.14, 6.32],
+};
 
 /* 5.20's slot ink, and its toggle at 70%, on the same fills. */
 const OLD_INK: Record<Variant, [string, string]> = {
@@ -182,12 +192,7 @@ export const EveryIconSlotPassesOnItsField: Story = {
     for (const v of VARIANTS) {
       await expect(readings[v].start, `${v} start icon`).toEqual(SLOT[v]);
       await expect(readings[v].toggle, `${v} toggle`).toEqual(SLOT[v]);
-      /* An error inks the slot error-500, error-400 in dark. */
-      for (const [i, id] of GROUNDS.entries()) {
-        const ratio = readings[v].error[i];
-        if (v === "slate" && id.startsWith("light")) await expect(ratio, `slate error on ${id}`).toBe(SLATE_ERROR_LIGHT);
-        else await expect(ratio, `${v} error on ${id}`).toBeGreaterThanOrEqual(ICON);
-      }
+      await expect(readings[v].error, `${v} error`).toEqual(ERROR[v]);
       /* The twin: 5.20's slot, at its figures. */
       for (const [i, id] of GROUNDS.entries()) {
         await expect(Math.abs(readings[v].old[i] - OLD_TOGGLE[v][i]), `${v} old on ${id}: ${readings[v].old[i]}`).toBeLessThanOrEqual(0.03);
@@ -195,7 +200,14 @@ export const EveryIconSlotPassesOnItsField: Story = {
       if (v === "ghost") await expect(Math.min(...readings[v].old), "ghost old").toBeGreaterThanOrEqual(ICON);
       else await expect(Math.min(...readings[v].old), `${v} old`).toBeLessThan(ICON);
     }
-    await expect(Math.min(...VARIANTS.flatMap((v) => readings[v].error).filter((r) => r !== SLATE_ERROR_LIGHT))).toBe(5.48);
+    /* The lowest, light slate's error-400 on gray-700, clears 3:1. */
+    await expect(Math.min(...VARIANTS.flatMap((v) => readings[v].error))).toBe(3.71);
+    /* The twin: 5.21's error-500 on a light slate field. */
+    const { error: slateError } = fields(canvasElement, "light-page", "slate");
+    slateError.style.color = "var(--roster-error-500, #b92020)";
+    const oldSlate = round(textContrast(slateError, undefined, inputOf(slateError)));
+    slateError.style.color = "";
+    await expect(oldSlate).toBe(1.61);
 
     /* The premise's twin: read without the input, a filled field's icon is
        read on the page. On the dark page, white and soft paint gray-800 and
@@ -214,6 +226,16 @@ const HOVER: Record<Variant, number[]> = {
   soft: [16.03, 16.03, 13.9, 13.9],
   slate: [9.42, 9.42, 16.03, 16.03],
   ghost: [17.49, 17.49, 18.11, 16.03],
+};
+
+/* The error toggle's hover, on the same grounds. On 5.21 dark hovered to its
+   rest ink, error-400. */
+const HOVER_ERROR: Record<Variant, number[]> = {
+  outline: [8.31, 8.31, 10.41, 9.21],
+  white: [8.31, 8.31, 7.99, 7.99],
+  soft: [7.62, 7.62, 7.99, 7.99],
+  slate: [5.41, 5.41, 9.21, 9.21],
+  ghost: [8.31, 8.31, 10.41, 9.21],
 };
 
 export const TheToggleTakesTheFieldsInkOnHover: Story = {
@@ -240,6 +262,22 @@ export const TheToggleTakesTheFieldsInkOnHover: Story = {
     }
     console.info(`FIELD ICONS hover ${JSON.stringify(hovered)}`);
     for (const v of VARIANTS) await expect(hovered[v], v).toEqual(HOVER[v]);
+
+    /* In an error: a step darker in light, error-600, and a step lighter in
+       dark, error-300; `slate`, dark in both themes, error-300 in both. */
+    const inError: Record<string, number[]> = {};
+    for (const v of VARIANTS) {
+      inError[v] = [];
+      for (const id of GROUNDS) {
+        const { error } = fields(canvasElement, id, v);
+        const rest = getComputedStyle(error).color;
+        await hover(error, `${v}-${id}-error`);
+        await waitFor(() => expect(getComputedStyle(error).color).not.toBe(rest));
+        inError[v].push(round(textContrast(error, undefined, inputOf(error))));
+      }
+    }
+    console.info(`FIELD ICONS hover in an error ${JSON.stringify(inError)}`);
+    for (const v of VARIANTS) await expect(inError[v], `${v} in an error`).toEqual(HOVER_ERROR[v]);
 
     /* A disabled toggle dims and takes no hover. */
     const { disabled } = fields(canvasElement, "light-page", "outline");

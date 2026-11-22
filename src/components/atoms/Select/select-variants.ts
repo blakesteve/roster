@@ -22,14 +22,20 @@ export const selectTriggerVariants = /* @__PURE__ */ cva(
   {
     variants: {
       variant: {
+        /* The edge reads the field-border token, as Input's `white` does:
+           the gray-300 ring was 1.49:1 on white and gray-700 1.70 on a dark
+           Card. Focus is the shared ring, so `white` has no focus border to
+           read a token for. */
         white:
-          "rst:bg-white rst:text-gray-900 rst:ring-gray-300 rst:hover:bg-gray-50 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:ring-gray-700 rst:dark:hover:bg-gray-700",
+          "rst:bg-white rst:text-gray-900 rst:ring-[color:var(--roster-control-border)] rst:hover:bg-gray-50 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:hover:bg-gray-700",
         /* Same reasoning as Input's and Textarea's `soft`; the trigger draws a
            ring rather than a border, so the token lands there. */
         soft:
           "rst:bg-gray-100 rst:text-gray-900 rst:ring-[var(--roster-control-border)] rst:hover:bg-gray-200 rst:dark:bg-gray-800 rst:dark:text-gray-100 rst:dark:hover:bg-gray-700",
+        /* Dark draws gray-400, as Input's `slate` does: its gray-900 fill
+           had no edge on a dark Card (1.00:1). Light's fill is its edge. */
         slate:
-          "rst:bg-gray-700 rst:text-gray-100 rst:ring-transparent rst:hover:bg-gray-600 rst:dark:bg-gray-900 rst:dark:text-gray-100 rst:dark:hover:bg-gray-800",
+          "rst:bg-gray-700 rst:text-gray-100 rst:ring-transparent rst:hover:bg-gray-600 rst:dark:bg-gray-900 rst:dark:text-gray-100 rst:dark:ring-gray-400 rst:dark:hover:bg-gray-800",
         /* The default variant, and the only one that reads tokens, exactly as
            in Input. It takes three of the four: focus on the trigger is the
            shared ring, not a border color, so `--roster-control-border-focus`
@@ -62,11 +68,27 @@ export const selectTriggerVariants = /* @__PURE__ */ cva(
            tailwind-merge group, so both survived, and equal specificity meant
            the later rule in the stylesheet won — an errored Select drew the
            PRIMARY ring on keyboard focus. Input avoided this by accident of
-           modifier choice. */
-        true: "rst:ring-error-500 rst:text-error-600 rst:focus-visible:ring-error-500 rst:dark:ring-error-500 rst:dark:text-error-400 rst:dark:focus-visible:ring-error-400",
+           modifier choice.
+
+           The edge and the chosen text keep their error inks at rest,
+           hovered and focused; focus thickens the edge a pixel, in the same
+           ink. The dark edge is error-400, as the focused one already was:
+           error-500 read 2.74:1 on a dark Card. */
+        true: "rst:ring-error-500 rst:text-error-600 rst:focus-visible:ring-error-500 rst:dark:ring-error-400 rst:dark:text-error-400 rst:dark:focus-visible:ring-error-400",
         false: "",
       },
     },
+    /* In an error, the trigger holds its fill on hover: a lighter fill is
+       what sank the red (a hovered dark `soft` trigger's chosen text read
+       3.71:1, a light `slate` one's 1.09). The cursor and the chevron still
+       say it opens. A `ghost` trigger's hover keeps the error's ink, and
+       `slate` takes the dark-surface red in light too, as Input's does. */
+    compoundVariants: [
+      { variant: "white", error: true, class: "rst:hover:bg-white rst:dark:hover:bg-gray-800" },
+      { variant: "soft", error: true, class: "rst:hover:bg-gray-100 rst:dark:hover:bg-gray-800" },
+      { variant: "slate", error: true, class: "rst:text-error-300 rst:hover:bg-gray-700 rst:dark:text-error-400 rst:dark:hover:bg-gray-900" },
+      { variant: "ghost", error: true, class: "rst:hover:bg-transparent rst:hover:text-error-600 rst:dark:hover:bg-transparent rst:dark:hover:text-error-400" },
+    ],
     defaultVariants: {
       variant: "outline",
       size: "default",
