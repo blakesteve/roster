@@ -58,6 +58,11 @@ const TWO_LINES: Record<Size, number> = { xs: 44, sm: 56, default: 60, lg: 64 };
    4/3, 15.9996px, so two `xs` lines are 15 each there: 42px, the same padding
    and border. One line is the size's fixed 28 in both. */
 const twoLines = (size: Size) => (size === "xs" && !navigator.userAgent.includes("Chrome") ? 42 : TWO_LINES[size]);
+/* How far an icon's center may sit from its line's, the line read from its
+   glyphs. 0.75px, except `xs` in WebKit: its 15px line against the 1lh
+   (16px) slot puts the icon 0.5px low, and Linux's font adds about as much
+   again to where the glyphs sit, so 1.1px. */
+const iconBound = (size: Size) => (size === "xs" && !navigator.userAgent.includes("Chrome") ? 1.1 : 0.75);
 
 const Icon = () => (
   <svg data-icon="" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true" style={{ display: "block" }}>
@@ -391,7 +396,7 @@ export const TwoLinesAndTheirIcons: Story = {
       if (icon && ls.length === 2) {
         const line = content === "end" ? ls[1] : ls[0];
         const off_ = Math.abs(icon.top + icon.height / 2 - (line.top + line.height / 2));
-        if (off_ > 0.75) off.push(`${holder.dataset.two}: the icon is ${r2(off_)}px off its line`);
+        if (off_ > iconBound(size)) off.push(`${holder.dataset.two}: the icon is ${r2(off_)}px off its line`);
       }
     }
     console.info(`BUTTON TWO LINES ${JSON.stringify(seen)}`);
