@@ -15,9 +15,22 @@ import { cva } from "class-variance-authority";
  * call site and costs no build dependency. If a variant table ever needs a
  * call that is genuinely not pure, leave that one unannotated.
  */
+/* A label wraps when it can't fit, centered and balanced, and the button
+   grows to hold it: `min-height: fit-content` over each size's fixed height,
+   so a one-line button keeps its exact size and an app's own `h-auto` isn't
+   floored. `min-width: fit-content` keeps a Button at its one-line width
+   beside a neighbor that can wrap; without it a Button beside a wrapping
+   heading wrapped at 100% text. `whitespace-nowrap` made a label longer than
+   its room spill out of the button and its column, at 200% text on a phone.
+
+   Each size's vertical padding is half its height less one line, less the
+   border, so one line is exactly the size's height and a wrapped label keeps
+   the same space above and below. The line is `1lh`, through `--rst-line`,
+   so an app that changes a Button's text size keeps its height; a browser
+   without `lh` uses the size's own line in rem. */
 export const buttonVariants = /* @__PURE__ */ cva(
   // Base styles
-  "rst:font-ui rst:inline-flex rst:items-center rst:justify-center rst:cursor-pointer rst:whitespace-nowrap rst:rounded-md rst:text-sm rst:font-medium rst:ring-offset-background rst:transition-colors rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:disabled:pointer-events-none rst:disabled:opacity-50",
+  "rst:font-ui rst:inline-flex rst:items-center rst:justify-center rst:cursor-pointer rst:whitespace-normal rst:text-center rst:text-balance rst:min-w-fit rst:min-h-fit rst:supports-[height:1lh]:[--rst-line:1lh] rst:rounded-md rst:text-sm rst:font-medium rst:ring-offset-background rst:transition-colors rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:disabled:pointer-events-none rst:disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -41,12 +54,21 @@ export const buttonVariants = /* @__PURE__ */ cva(
         error: "",
         neutral: "",
       },
+      /* Heights on one line: 28, 36, 40 and 44px; two lines, 44, 56, 60 and
+         64. `icon` holds no label, so it keeps its square and no padding. */
       size: {
-        xs: "rst:h-7 rst:rounded-sm rst:px-2 rst:text-xs",
-        sm: "rst:h-9 rst:rounded-md rst:px-3",
-        default: "rst:h-10 rst:px-4 rst:py-2",
-        lg: "rst:h-11 rst:rounded-md rst:px-8",
+        xs: "rst:h-7 rst:rounded-sm rst:px-2 rst:text-xs rst:py-[calc((--spacing(7)-var(--rst-line,1rem))/2-var(--roster-border-width,1px))]",
+        sm: "rst:h-9 rst:rounded-md rst:px-3 rst:py-[calc((--spacing(9)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]",
+        default: "rst:h-10 rst:px-4 rst:py-[calc((--spacing(10)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]",
+        lg: "rst:h-11 rst:rounded-md rst:px-8 rst:py-[calc((--spacing(11)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]",
         icon: "rst:h-10 rst:w-10",
+      },
+      /* One line at the size's height, cut with an ellipsis when there's no
+         room (`Button` wraps text children in a `truncate` span), shrinking
+         to its container. */
+      singleLine: {
+        true: "rst:whitespace-nowrap rst:max-w-full rst:min-w-0",
+        false: "",
       },
     },
     compoundVariants: [
@@ -110,6 +132,7 @@ export const buttonVariants = /* @__PURE__ */ cva(
       colorScheme: "primary",
       variant: "solid",
       size: "default",
+      singleLine: false,
     },
   }
 );

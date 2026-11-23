@@ -207,7 +207,12 @@ export const ItChoosesItsFormByItsOwnWidth: Story = {
     /* The compact form's first and last arrows join at 24rem (384px). */
     await expect([380, 400].map((w) => !!control("First page (1)", at(w)))).toEqual([false, true]);
     /* The words beside the arrows wait for 36rem (576px). */
-    const prevTextShown = (w: number) => getComputedStyle(control("Previous page (39)", at(w)).querySelector("span")!).display !== "none";
+    /* The words' own span, the innermost holding them: Button holds its
+       label and icons in a row span of its own, whose text is the same. */
+    const prevTextShown = (w: number) => {
+      const words = [...control("Previous page (39)", at(w)).querySelectorAll("span")].filter((s) => s.textContent === "Previous").pop()!;
+      return getComputedStyle(words).display !== "none";
+    };
     await expect([prevTextShown(460), prevTextShown(900)]).toEqual([false, true]);
   },
 };

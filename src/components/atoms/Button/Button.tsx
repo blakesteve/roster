@@ -34,6 +34,29 @@ export interface ButtonProps
    * dark treatment regardless of the app's theme.
    */
   surface?: "auto" | "dark";
+  /**
+   * Keeps the label on one line at the size's height, cutting it with an ellipsis
+   * when there's no room, instead of wrapping. Only for a control whose label fits
+   * at 200% text or is shown in full elsewhere: a cut label fails WCAG 1.4.10.
+   * The full label stays the button's accessible name.
+   */
+  singleLine?: boolean;
+}
+
+/* An icon slot one line tall, pinned to the label's first line (`start`) or
+   last (`end`), so a wrapped label keeps the icon beside the words it goes
+   with: a start icon or spinner before the first, an end arrow after the
+   last. Without `lh` the slot is as tall as its icon and centers, as before
+   wrapping. */
+const SLOT_FIRST_LINE = "rst:supports-[height:1lh]:h-[1lh] rst:supports-[height:1lh]:self-start";
+const SLOT_LAST_LINE = "rst:supports-[height:1lh]:h-[1lh] rst:supports-[height:1lh]:self-end";
+
+/* Text children in a span that cuts with an ellipsis, for `singleLine`.
+   Elements pass through: an icon stays an icon. */
+function truncated(children: React.ReactNode) {
+  return React.Children.map(children, (child) =>
+    typeof child === "string" || typeof child === "number" ? <span className="rst:truncate">{child}</span> : child,
+  );
 }
 
 /* The handlers a press runs through, capture phase included. Not enter,
@@ -69,6 +92,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       startIcon,
       endIcon,
       surface = "auto",
+      singleLine = false,
       disabled,
       children,
       ...props
@@ -82,7 +106,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <HeadlessButton
         className={cn(
-          buttonVariants({ colorScheme, variant, size }),
+          buttonVariants({ colorScheme, variant, size, singleLine }),
           // Roster's dark variant is `&:where(.dark, .dark *)`, so an element
           // carrying `.dark` itself satisfies it. That is all forcing the
           // dark surface requires.
@@ -96,25 +120,31 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         aria-disabled={busy ? true : props["aria-disabled"]}
         aria-busy={busy ? true : props["aria-busy"]}
       >
-        {isLoading && (
-          <span className="rst:mr-2 rst:flex rst:shrink-0 rst:items-center">
-            <Spinner size="sm" variant="current" label={loadingLabel} />
-          </span>
-        )}
+        {/* The label and its icons in one row, which takes the button's
+            own `gap` and `justify-content`, so an app's `gap-1.5` or
+            `justify-start` still applies. Icons an app passes as children
+            stay centered on the label, as before. */}
+        <span className="rst:flex rst:grow rst:min-w-0 rst:items-center rst:[justify-content:inherit] rst:[gap:inherit]">
+          {isLoading && (
+            <span className={cn("rst:mr-2 rst:flex rst:shrink-0 rst:items-center", SLOT_FIRST_LINE)}>
+              <Spinner size="sm" variant="current" label={loadingLabel} />
+            </span>
+          )}
 
-        {!isLoading && startIcon && (
-          <span className="rst:mr-2 rst:inline-flex rst:shrink-0 rst:items-center">
-            {startIcon}
-          </span>
-        )}
+          {!isLoading && startIcon && (
+            <span className={cn("rst:mr-2 rst:inline-flex rst:shrink-0 rst:items-center", SLOT_FIRST_LINE)}>
+              {startIcon}
+            </span>
+          )}
 
-        {children}
+          {singleLine ? truncated(children) : children}
 
-        {!isLoading && endIcon && (
-          <span className="rst:ml-2 rst:inline-flex rst:shrink-0 rst:items-center">
-            {endIcon}
-          </span>
-        )}
+          {!isLoading && endIcon && (
+            <span className={cn("rst:ml-2 rst:inline-flex rst:shrink-0 rst:items-center", SLOT_LAST_LINE)}>
+              {endIcon}
+            </span>
+          )}
+        </span>
       </HeadlessButton>
     );
   },

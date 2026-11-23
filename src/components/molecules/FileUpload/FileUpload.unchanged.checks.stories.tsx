@@ -4,6 +4,7 @@ import { expect, waitFor } from "storybook/test";
 import { FileUpload, type FileUploadContext } from "./FileUpload";
 import { pickFiles, samplePhoto, sizedFile } from "../../../test/sample-files";
 import { realInputOrSkip } from "../../../test/real-input";
+import { as522, isRow523, styleAs522 } from "../../../test/button-522-markup";
 
 /**
  * FileUpload with none of its newer options set, pinned to 5.15.0's build, in
@@ -101,8 +102,8 @@ const item = (name: Row, file: string) =>
 /* Every pixel value masked (see above), the files' sizes, object URLs, and
    React's ids. */
 const html = (name: Row) =>
-  row(name)
-    .innerHTML.replace(/-?\d+(\.\d+)?px/g, "#px")
+  as522(row(name).innerHTML)
+    .replace(/-?\d+(\.\d+)?px/g, "#px")
     .replace(/>\d+(\.\d+)? (B|KB|MB)</g, ">size<")
     .replace(/blob:[^"]+/g, "blob")
     .replace(/_r_[0-9a-z]+_|[«:]r[0-9a-z]+[»:]/g, "ID");
@@ -120,13 +121,17 @@ const PROPS = [
 ];
 /* An element's styles, as pinned: an outline with no style draws nothing,
    so its width, color and offset, the platform's defaults, aren't read. */
+/* Roster Buttons as 5.22 drew them (src/test/button-522-markup.ts), as in `html`:
+   5.23's wrapping moved their padding, height floor and icon slots, and added
+   a row span, without moving their look, which Button.wrap.checks.stories.tsx
+   pins. */
 const look = (el: Element) => {
   const s = getComputedStyle(el);
   const drawn = s.outlineStyle !== "none";
-  return PROPS.map((p) => (!drawn && p.startsWith("outline-") && p !== "outline-style" ? "-" : s.getPropertyValue(p))).join(";");
+  return PROPS.map((p) => (!drawn && p.startsWith("outline-") && p !== "outline-style" ? "-" : styleAs522(el, p, s.getPropertyValue(p)))).join(";");
 };
 const styles = (name: Row) =>
-  [...row(name).querySelectorAll("*")].map((el) => `${el.tagName.toLowerCase()} ${look(el)}`).join("\n");
+  [...row(name).querySelectorAll("*")].filter((el) => !isRow523(el)).map((el) => `${el.tagName.toLowerCase()} ${look(el)}`).join("\n");
 
 async function digest(text: string) {
   const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)));

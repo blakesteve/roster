@@ -1087,11 +1087,14 @@ Nothing to change in your code.
 `Button`, `Input` and `Select` share one size scale, so they line up when set
 side by side in a row:
 
-| `size`    | Height | `Button` padding | `Input` padding | `Select` padding |
-| --------- | ------ | ---------------- | --------------- | ---------------- |
-| `sm`      | 36px   | `px-3`           | `px-3`          | `pl-3 pr-9`      |
-| `default` | 40px   | `px-4`           | `px-4`          | `pl-4 pr-10`     |
-| `lg`      | 44px   | `px-8`           | `px-4`          | `pl-4 pr-10`     |
+| `size`    | Height on one line | `Button` padding | `Input` padding | `Select` padding |
+| --------- | ------------------ | ---------------- | --------------- | ---------------- |
+| `sm`      | 36px               | `px-3`           | `px-3`          | `pl-3 pr-9`      |
+| `default` | 40px               | `px-4`           | `px-4`          | `pl-4 pr-10`     |
+| `lg`      | 44px               | `px-8`           | `px-4`          | `pl-4 pr-10`     |
+
+Since 5.23.0 a Button whose label wraps grows past its height
+([Buttons that wrap](#buttons-that-wrap)); on one line it's the height above.
 
 Padding diverges at `lg` on purpose. A button's label is centered and wants the
 room, while a field's text is left-aligned and a wide inset only pushes the
@@ -1986,6 +1989,37 @@ What it promises:
 - **Every word is replaceable** through `strings`, on screen and spoken.
 - **Phones.** Every button is a 44px target at 375px, and a long file name
   truncates rather than pushing Remove off its row.
+
+### Buttons that wrap
+
+**Long labels wrap.** A label that can't fit on one line wraps onto more, centered,
+with its lines balanced, and the button grows taller to hold them. A label that fits
+keeps the button's size exactly. `startIcon` and the loading spinner sit beside the
+first line and `endIcon` beside the last. An icon passed as a child stays centered on
+the label, so pass icons through the props. Lines center; pass `text-left` for a button
+whose content starts at the left. A Button keeps its one-line width beside a neighbor
+that can wrap, so in a row that can't wrap it can still be pushed out at 200% text: let
+the row wrap (`flex-wrap`).
+
+**`singleLine`** keeps the label on one line at the size's height and cuts it with an
+ellipsis when there's no room. Use it only where the label fits at 200% text or is
+shown in full elsewhere: a cut label fails WCAG 1.4.10. It cuts text passed directly;
+text inside an element of your own stays on one line without the ellipsis.
+
+Through 5.22 a label stayed on one line whatever its room, and a long one spilled out
+of the button and its column, most often at 200% text on a phone. Since 5.23.0, on one
+line, every Button is the same box, text and icons, to the pixel, in every variant and
+size, beside a wrapping heading or a growing field, and full width
+(`src/components/atoms/Button/Button.wrap.checks.stories.tsx`). Two lines are 44, 56,
+60 and 64px for `xs`, `sm`, `default` and `lg` (`xs` 42 in WebKit, which draws its
+line at a whole 15px). Each size's vertical padding is half its height less one line,
+less the border, so a padding of your own, `py-3` say, now applies where the fixed
+height used to clip it: a 40px Button with `py-3` becomes 46px. `size="icon"` keeps
+its square. `buttonVariants` on a link carries the wrap, padding and width floor too;
+merge the result with tailwind-merge under the `rst` prefix, as `Button` does, so
+`singleLine` and your own padding replace the defaults rather than sit beside them.
+Without `lh` (before Chrome 109 and Safari 16.4), the padding uses the size's line in
+rem and icons center; without `text-wrap: balance`, lines wrap unbalanced.
 
 ### Buttons that load
 

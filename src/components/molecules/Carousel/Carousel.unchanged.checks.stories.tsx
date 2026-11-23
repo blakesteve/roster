@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect } from "storybook/test";
 import { Carousel } from "./Carousel";
 import { realInputOrSkip } from "../../../test/real-input";
+import { as522 } from "../../../test/button-522-markup";
 
 /**
  * The default mode, pinned to the build before the selection mode existed
@@ -71,7 +72,10 @@ function Rows() {
 }
 
 const ROWS = ["links", "plain", "pressed"] as const;
-const html = (row: string) => document.querySelector(`[data-pin="${row}"]`)!.innerHTML.replace(/_r_[0-9a-z]+_|[«:]r[0-9a-z]+[»:]/g, "ID");
+/* Roster Buttons as 5.22 drew them (src/test/button-522-markup.ts): the arrows are
+   Buttons, and 5.23's wrapping changed their markup, not their look, which
+   Button.wrap.checks.stories.tsx pins. */
+const html = (row: string) => as522(document.querySelector(`[data-pin="${row}"]`)!.innerHTML).replace(/_r_[0-9a-z]+_|[«:]r[0-9a-z]+[»:]/g, "ID");
 async function digest(text: string) {
   const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)));
   return [...bytes.slice(0, 8)].map((b) => b.toString(16).padStart(2, "0")).join("");

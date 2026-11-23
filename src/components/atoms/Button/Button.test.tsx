@@ -201,6 +201,74 @@ describe("Button Component", () => {
     expect(button).toHaveClass("rst:h-7", "rst:px-2", "rst:text-xs");
   });
 
+  describe("a long label", () => {
+    /* Measured as rendered in Button.wrap.checks.stories.tsx; these pin the
+       classes each part asks for. */
+    it("wraps, centered and balanced, and grows only past its size's height", () => {
+      render(<Button>Save changes</Button>);
+      const button = screen.getByRole("button");
+      expect(button).toHaveClass("rst:whitespace-normal", "rst:text-center", "rst:text-balance", "rst:min-w-fit", "rst:min-h-fit", "rst:h-10");
+      expect(button).not.toHaveClass("rst:whitespace-nowrap");
+      /* The size's padding is half its height less a line, less the border. */
+      expect(button.className).toContain("rst:py-[calc((--spacing(10)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]");
+      expect(button).not.toHaveClass("rst:py-2");
+    });
+
+    it("lets a caller's own padding win", () => {
+      render(<Button className="rst:py-3">Save changes</Button>);
+      expect(screen.getByRole("button").className).not.toContain("rst:py-[calc");
+    });
+
+    it("keeps its icons beside the first line and the last, in one row", () => {
+      render(
+        <Button startIcon={<span data-testid="start" />} endIcon={<span data-testid="end" />}>
+          Content
+        </Button>,
+      );
+      const row = screen.getByText("Content");
+      expect(row).toHaveClass("rst:flex", "rst:grow", "rst:min-w-0", "rst:[justify-content:inherit]", "rst:[gap:inherit]");
+      expect(screen.getByTestId("start").parentElement).toHaveClass("rst:supports-[height:1lh]:self-start", "rst:supports-[height:1lh]:h-[1lh]");
+      expect(screen.getByTestId("end").parentElement).toHaveClass("rst:supports-[height:1lh]:self-end", "rst:supports-[height:1lh]:h-[1lh]");
+    });
+
+    it("puts the spinner beside the first line", () => {
+      render(<Button isLoading>Saving</Button>);
+      expect(screen.getByRole("status").parentElement).toHaveClass("rst:supports-[height:1lh]:self-start");
+    });
+
+    it("keeps the icon button's square", () => {
+      render(<Button size="icon" aria-label="Close" />);
+      expect(screen.getByRole("button")).toHaveClass("rst:h-10", "rst:w-10");
+      expect(screen.getByRole("button").className).not.toContain("rst:py-[");
+    });
+  });
+
+  describe("singleLine", () => {
+    it("stays on one line, shrinks to its container and cuts its text with an ellipsis", () => {
+      render(
+        <Button singleLine startIcon={<span data-testid="icon" />}>
+          A label far too long
+        </Button>,
+      );
+      const button = screen.getByRole("button");
+      expect(button).toHaveClass("rst:whitespace-nowrap", "rst:max-w-full", "rst:min-w-0");
+      expect(button).not.toHaveClass("rst:whitespace-normal", "rst:min-w-fit");
+      expect(screen.getByText("A label far too long")).toHaveClass("rst:truncate");
+      /* An element child passes through, not into the cut. */
+      expect(screen.getByTestId("icon").closest(".rst\\:truncate")).toBeNull();
+    });
+
+    it("keeps the whole label as its name", () => {
+      render(<Button singleLine>A label far too long</Button>);
+      expect(screen.getByRole("button", { name: "A label far too long" })).toBeInTheDocument();
+    });
+
+    it("wraps no text without it", () => {
+      render(<Button>A label</Button>);
+      expect(screen.getByText("A label")).not.toHaveClass("rst:truncate");
+    });
+  });
+
   it("forwards refs to the HTML element", () => {
     const ref = React.createRef<HTMLButtonElement>();
     render(<Button ref={ref}>Ref Test</Button>);
