@@ -16,7 +16,7 @@ import { realInputOrSkip } from "../../../test/real-input";
  * the page with no panel.
  *
  * - **Opened again as its panel leaves, it shows its panel** with focus in
- *   the dialog, within the entrance (300ms) and a frame, and then both parts
+ *   the dialog, within twice the entrance (600ms), and then both parts
  *   at full opacity: closed at rest, once nothing is moving, and closed on
  *   the first frame its entrance has started (a set time can land before
  *   that on a busy machine, and nothing turns around), and in the
@@ -52,8 +52,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/* `Dialog`'s entrance, and a frame. */
-const ENTRANCE_MS = 300 + 17;
+/* How soon a reopen must be back: `Dialog`'s entrance (300ms) twice over.
+   Linux WebKit on a busy CI runner has taken 407ms, and the bugs this
+   catches never came back at all in the second the check waits. */
+const BACK_WITHIN_MS = 2 * 300;
 
 const dialogs = { open: () => {}, close: () => {} };
 
@@ -211,7 +213,7 @@ function check(closeAt: CloseAt, layout: "default" | "fullscreen", speed: Panel)
       const reopened = tries.filter((t) => t.reopened);
       console.info(`DIALOG REOPEN ${layout}, ${speed} panel, closed ${closeAt}: ${JSON.stringify(tries)}`);
       await expect(reopened.length).toBeGreaterThan(0);
-      await expect(reopened.filter((t) => t.backMs === null || t.backMs > ENTRANCE_MS || !t.shown)).toEqual([]);
+      await expect(reopened.filter((t) => t.backMs === null || t.backMs > BACK_WITHIN_MS || !t.shown)).toEqual([]);
       await expect(tries.filter((t) => t.heldAfter)).toEqual([]);
     },
   };
