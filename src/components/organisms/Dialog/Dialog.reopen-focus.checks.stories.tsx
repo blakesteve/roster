@@ -16,7 +16,7 @@ import { realInputOrSkip } from "../../../test/real-input";
  * in Chromium, on the close button a click focuses.
  *
  * - **Opened again 20, 40, 60 and 100ms after the close, focus is on the
- *   dialog's initial focus** within its entrance (300ms) and a frame: where
+ *   dialog's initial focus** within twice its entrance (600ms): where
  *   a first open of the same dialog starts it, read in the same check. The
  *   dialog itself, or the first element marked `data-autofocus` that takes
  *   focus: a marked element with `tabindex="-1"` is passed over, as is one
@@ -48,6 +48,10 @@ type Story = StoryObj<typeof meta>;
 
 /* `Dialog`'s entrance, and a frame. */
 const ENTRANCE_MS = 300 + 17;
+/* How soon a reopen must be back: `Dialog`'s entrance (300ms) twice over.
+   Linux WebKit on a busy CI runner has taken 407ms, and the bugs this
+   catches never came back at all in the second the check waits. */
+const BACK_WITHIN_MS = 2 * 300;
 
 const page = { open: () => {}, close: () => {} };
 
@@ -172,7 +176,7 @@ function check(way: Way, marks: Marks = "none", gaps = [20, 40, 60, 100]): Story
           tries.push(`${gap}ms: ${t.leaving ? `back in ${t.backMs ?? "never"}ms, on ${t.ended}` : "the leave had ended"}`);
           if (!t.leaving) continue;
           counted += 1;
-          if (t.backMs === null || t.backMs > ENTRANCE_MS) late.push(`${gap}ms: on ${t.ended}`);
+          if (t.backMs === null || t.backMs > BACK_WITHIN_MS) late.push(`${gap}ms: on ${t.ended}`);
           break;
         }
       }
