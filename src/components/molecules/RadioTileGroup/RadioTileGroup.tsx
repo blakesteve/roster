@@ -8,6 +8,7 @@ import { DescribedDiv } from "../../../internal/described";
 import {
   radioTileGroupOptionsVariants,
   radioTilePictureVariants,
+  radioTileTintVariants,
   radioTileVariants,
 } from "./radio-tile-group-variants";
 
@@ -24,6 +25,11 @@ export type RadioTileOption = {
    */
   picture?: React.ReactNode;
   disabled?: boolean;
+  /**
+   * The chosen tile's color, in the `tinted` look, which needs one
+   * (`"primary"` if it's left out). The other looks ignore it.
+   */
+  colorScheme?: NonNullable<VariantProps<typeof radioTileTintVariants>["colorScheme"]>;
 };
 
 /**
@@ -202,7 +208,7 @@ const RadioTileGroup = ({
       )}
 
       <div
-        className={cn(radioTileGroupOptionsVariants({ fit: minTileWidth ? "width" : "columns" }), optionsClassName)}
+        className={cn(radioTileGroupOptionsVariants({ fit: minTileWidth ? "width" : "columns", variant: resolvedVariant }), optionsClassName)}
         style={minTileWidth ? ({ "--rst-tiles-min": minTileWidth } as React.CSSProperties) : columnCounts(columns)}
       >
         {options.map((option) => (
@@ -216,7 +222,11 @@ const RadioTileGroup = ({
                 if (element) tiles.current.set(option.value, element);
                 else tiles.current.delete(option.value);
               }}
-              className={cn(radioTileVariants({ variant: resolvedVariant }), tileClassName)}
+              className={cn(
+                radioTileVariants({ variant: resolvedVariant }),
+                resolvedVariant === "tinted" && radioTileTintVariants({ colorScheme: option.colorScheme }),
+                tileClassName,
+              )}
             >
               {option.picture != null && (
                 <span aria-hidden="true" className={cn(radioTilePictureVariants({ variant: resolvedVariant }), pictureClassName)}>
@@ -230,7 +240,10 @@ const RadioTileGroup = ({
                 as="span"
                 passive
                 className={cn(
-                  "rst:block rst:text-sm rst:font-medium rst:text-[var(--roster-control-text)] rst:[overflow-wrap:anywhere]",
+                  "rst:block rst:text-sm rst:font-medium rst:[overflow-wrap:anywhere]",
+                  /* The tinted name is the tile's own color, neutral until the
+                     tile is chosen. */
+                  resolvedVariant === "tinted" ? "rst:text-inherit" : "rst:text-[var(--roster-control-text)]",
                   "rst:forced-colors:group-data-checked:underline rst:forced-colors:group-data-checked:decoration-2 rst:forced-colors:group-data-checked:underline-offset-4",
                   optionLabelClassName,
                 )}

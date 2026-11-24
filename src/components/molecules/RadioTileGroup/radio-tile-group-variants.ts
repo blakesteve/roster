@@ -1,4 +1,5 @@
 import { cva } from "class-variance-authority";
+import { TONE } from "../../../internal/tone";
 
 /**
  * One tile: the whole tile is the radio, with no dot.
@@ -13,12 +14,16 @@ import { cva } from "class-variance-authority";
  * a consumer drawing its own chosen look from the tile's `data-checked`, a
  * printed border or a stamp, without first undoing Roster's.
  *
- * Both keep the focus ring, Roster's, on `focus-visible`. A box-shadow ring
+ * `tinted` is a bordered tile of icon over name, colored by its option's
+ * `colorScheme` once chosen: `radioTileTintVariants` draws the color, and the
+ * border and name stay neutral until then.
+ *
+ * All three keep the focus ring, Roster's, on `focus-visible`. A box-shadow ring
  * offset from the tile's border box, so it sits outside anything a consumer
- * draws on the tile or inside it. And both dim a disabled tile.
+ * draws on the tile or inside it. And all three dim a disabled tile.
  *
  * Forced colors drops box-shadows and repaints every edge and fill alike, so
- * there the chosen tile's name is underlined (in both looks, set where the
+ * there the chosen tile's name is underlined (in every look, set where the
  * name is drawn), and the `outlined` edge goes to two pixels: the same cues
  * `Pagination` gives its current page.
  */
@@ -30,11 +35,35 @@ export const radioTileVariants = /* @__PURE__ */ cva(
         outlined:
           "rst:border rst:border-(--roster-tile-border) rst:bg-(--roster-tile-bg) rst:p-2 rst:data-checked:border-(--roster-tile-border-checked) rst:data-checked:inset-ring rst:data-checked:inset-ring-(--roster-tile-border-checked) rst:data-checked:bg-(--roster-tile-bg-checked) rst:forced-colors:data-checked:border-2",
         plain: "",
+        tinted:
+          "rst:items-center rst:gap-1.5 rst:border rst:border-(--roster-tile-border) rst:px-4 rst:py-3 rst:text-center rst:text-gray-500 rst:dark:text-gray-400 rst:not-data-checked:hover:border-[color-mix(in_oklab,var(--rst-tone)_50%,transparent)] rst:data-checked:border-(--rst-tone) rst:data-checked:bg-[color-mix(in_oklab,var(--rst-tone)_10%,transparent)] rst:data-checked:text-(color:--rst-tone-ink)",
       },
     },
     defaultVariants: { variant: "outlined" },
   },
 );
+
+/**
+ * A `tinted` tile's color, from its option's `colorScheme`, read by the
+ * `tinted` look above. Not chosen, its border goes to half the 500 step on
+ * hover; chosen, its border is the 500 step, its fill a tenth of it, and its
+ * name and icon the tone's ink. A chosen tile has no hover change.
+ */
+export const radioTileTintVariants = /* @__PURE__ */ cva("", {
+  variants: {
+    colorScheme: {
+      primary: TONE.primary,
+      orange: TONE.orange,
+      teal: TONE.teal,
+      purple: TONE.purple,
+      amber: TONE.amber,
+      success: TONE.success,
+      error: TONE.error,
+      neutral: TONE.neutral,
+    },
+  },
+  defaultVariants: { colorScheme: "primary" },
+});
 
 /**
  * What holds an option's `picture`.
@@ -51,6 +80,8 @@ export const radioTilePictureVariants = /* @__PURE__ */ cva("rst:block rst:w-ful
       outlined:
         "rst:overflow-hidden rst:rounded-md rst:[&>img]:block rst:[&>img]:aspect-square rst:[&>img]:w-full rst:[&>img]:object-cover",
       plain: "",
+      /* An icon at its own size: no square, no full width, no clipping. */
+      tinted: "rst:w-auto",
     },
   },
   defaultVariants: { variant: "outlined" },
@@ -67,11 +98,16 @@ export const radioTilePictureVariants = /* @__PURE__ */ cva("rst:block rst:w-ful
  */
 export const radioTileGroupOptionsVariants = /* @__PURE__ */ cva("rst:grid rst:gap-3", {
   variants: {
+    variant: {
+      outlined: "",
+      plain: "",
+      tinted: "rst:gap-2",
+    },
     fit: {
       columns:
         "rst:grid-cols-[repeat(var(--rst-tiles-cols),minmax(0,1fr))] rst:sm:grid-cols-[repeat(var(--rst-tiles-cols-sm),minmax(0,1fr))] rst:md:grid-cols-[repeat(var(--rst-tiles-cols-md),minmax(0,1fr))] rst:lg:grid-cols-[repeat(var(--rst-tiles-cols-lg),minmax(0,1fr))]",
       width: "rst:grid-cols-[repeat(auto-fill,minmax(min(var(--rst-tiles-min),100%),1fr))]",
     },
   },
-  defaultVariants: { fit: "columns" },
+  defaultVariants: { fit: "columns", variant: "outlined" },
 });

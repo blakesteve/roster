@@ -15,6 +15,14 @@ function Scene({ sky, ground, sun }: { sky: string; ground: string; sun: string 
   );
 }
 
+function Glyph({ d }: { d: string }) {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" style={{ display: "block" }}>
+      <path d={d} fill="currentColor" />
+    </svg>
+  );
+}
+
 const COVERS: RadioTileOption[] = [
   { value: "harbor", label: "Harbor at dawn", description: "Boats under a pink sky", picture: <Scene sky="#f9d5c9" ground="#34557a" sun="#fff3e0" /> },
   { value: "ridge", label: "Pine ridge", description: "Fog in the valley", picture: <Scene sky="#d7e3e8" ground="#2f5d47" sun="#ffffff" /> },
@@ -40,13 +48,15 @@ const meta = {
           "",
           "**Drawing your own chosen look.** Every tile carries `data-checked`, `data-disabled`, `data-hover` and `data-focus-visible`, and takes `tileClassName`. `variant=\"plain\"` drops Roster's edge and fill so nothing needs undoing. Roster's styles sit in a cascade layer below yours, so a rule like `.my-tile[data-checked] .frame { … }` wins without `!important`. The focus ring stays Roster's, outside the tile.",
           "",
+          "**A tint per tile.** `variant=\"tinted\"` is a bordered tile of icon over name; each option takes a `colorScheme`, and the chosen tile takes its border, fill and ink from it.",
+          "",
           "**Tokens.** `--roster-tile-border`, `--roster-tile-bg`, `--roster-tile-border-checked` and `--roster-tile-bg-checked`, for the `outlined` look.",
         ].join("\n"),
       },
     },
   },
   argTypes: {
-    variant: { control: "inline-radio", options: ["outlined", "plain"] },
+    variant: { control: "inline-radio", options: ["outlined", "plain", "tinted"] },
     disabled: { control: "boolean" },
     required: { control: "boolean" },
     label: { control: "text" },
@@ -155,6 +165,22 @@ export const YourOwnChosenLook: Story = {
 };
 
 /** A tile that can't be chosen, and a group that can't be changed. */
+const METHODS: RadioTileOption[] = [
+  { value: "morning", label: "Morning", colorScheme: "primary", picture: <Glyph d="M2 10h12v2H2zM8 2l3 6H5z" /> },
+  { value: "noon", label: "Noon", colorScheme: "amber", picture: <Glyph d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2z" /> },
+  { value: "evening", label: "Evening", colorScheme: "success", picture: <Glyph d="M2 6h12v2H2zM4 10h8v2H4z" /> },
+];
+
+/** `tinted`: a bordered tile of icon over name, colored by its option's scheme once chosen. */
+export const Tinted: Story = {
+  args: { options: METHODS, value: "noon", onChange: () => {}, variant: "tinted", columns: { base: 1, sm: 3 } },
+  render: (args) => (
+    <div style={WIDE}>
+      <Stateful {...args} label="When do you plan to come?" initial="noon" />
+    </div>
+  ),
+};
+
 export const Disabled: Story = {
   args: { options: COVERS.map((o) => (o.value === "flats" ? { ...o, disabled: true } : o)), value: "", onChange: () => {} },
   render: (args) => (
