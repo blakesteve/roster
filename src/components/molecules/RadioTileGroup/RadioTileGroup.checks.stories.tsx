@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
 import { RadioTileGroup, type RadioTileGroupProps, type RadioTileOption } from "./RadioTileGroup";
+import { differs, goldLook, readLook, type Look } from "../../../test/tile-look";
+import { TILE_GOLD } from "../../../test/tile-parity-gold";
+import { Card } from "../../atoms/Card/Card";
+import { textContrast } from "../../../test/painted";
 import { realInputOrSkip } from "../../../test/real-input";
 
 /**
@@ -23,6 +27,14 @@ import { realInputOrSkip } from "../../../test/real-input";
  * - **In forced colors the chosen tile still stands out**: its name is
  *   underlined and the `outlined` edge is two pixels, where box-shadows and
  *   fills are gone. The twin: outside forced colors, neither changes.
+ * - **Tinted matches the bordered tiles it replaces**, unchosen, hovered
+ *   (Chromium's: see `Button.tiles.checks.stories.tsx`), chosen and chosen
+ *   hovered, field by field against the old build's captured values
+ *   (`src/test/tile-parity-gold.ts`). One value moves: the unchosen name and
+ *   icon are Roster's quiet ink, gray-400, where the old muted ink was 3.45:1.
+ *   Keyboard focus is Roster's ring.
+ * - **Tinted names clear 4.5:1**, every scheme, chosen and not, on a page and
+ *   a Card in light and dark, pinned at their lowest.
  * - **Two to a row at 375px, three at 1280px**, by default.
  * - **The name is the label, once**, though each picture is an image whose
  *   alt text is that name: the radio's name, its description, its checked
@@ -344,5 +356,129 @@ export const TheNameIsTheLabelOnce: Story = {
       'tile: radio "Pine ridge", checked true, described ""',
       "picture: ignored true",
     ]);
+  },
+};
+
+/* ── Tinted matches the bordered tiles it replaces ────────────────────── */
+
+const CARD = "#1a1f2e";
+/* Roster's schemes take the hues' own steps from the region. */
+const TINTED_REGION = {
+  "--roster-primary-300": "#a5b4fc",
+  "--roster-primary-500": "#6366f1",
+  "--roster-success-300": "#6ee7b7",
+  "--roster-success-500": "#10b981",
+  "--roster-amber-300": "#fcd34d",
+  "--roster-amber-500": "#f59e0b",
+  "--roster-tile-border": "#2d3748",
+  "--roster-gray-400": "#94a3b8",
+} as CSSProperties;
+const TINTED_ICON = (
+  <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" style={{ display: "block" }}>
+    <rect width="16" height="16" fill="currentColor" />
+  </svg>
+);
+const TINTED: RadioTileOption[] = [
+  { value: "indigo", label: "Label", colorScheme: "primary", picture: TINTED_ICON },
+  { value: "emerald", label: "Label", colorScheme: "success", picture: TINTED_ICON },
+  { value: "amber", label: "Label", colorScheme: "amber", picture: TINTED_ICON },
+];
+const tinted = (value: string) => document.querySelector<HTMLElement>(`[data-tinted] [role="radio"][data-value="${value}"]`)!;
+
+export const TintedMatchesTheOldTiles: Story = {
+  tags: ["real-input"],
+  render: () => (
+    <div className="dark" style={{ ...TINTED_REGION, background: CARD, padding: 24, width: 560 }}>
+      <style>{"*,*::before,*::after{transition:none!important}"}</style>
+      <button type="button" data-check="before">
+        Before
+      </button>
+      <div style={{ marginTop: 16 }} data-tinted="">
+        <Group options={TINTED} columns={{ base: 1, sm: 3 }} variant="tinted" label="Method" initial="emerald" />
+      </div>
+    </div>
+  ),
+  play: async () => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    const eng = chromium() ? ("chromium" as const) : ("webkit" as const);
+    const ids = ["indigo", "emerald", "amber"];
+    const radioOf = (id: string) => tinted(id);
+    radios(document.querySelector("[data-tinted]")!).forEach((r, i) => r.setAttribute("data-value", ids[i]!));
+    const misses: string[] = [];
+    const check = (id: string, state: string, changed: Partial<Look> = {}) => {
+      const want = { ...goldLook(TILE_GOLD[`method-${id}`], eng, state), ...changed };
+      /* The name's size is its Label's, not the tile's, and its color the tile's. */
+      misses.push(...differs(readLook(radioOf(id), CARD), want, ["font"]).map((d) => `${id} ${state}: ${d}`));
+    };
+    /* Unchosen, the name and icon in Roster's quiet ink. */
+    const quiet = { color: [148, 163, 184] };
+    for (const id of ["indigo", "amber"]) check(id, "rest", quiet);
+    check("emerald", "chosen");
+    const label = getComputedStyle(radioOf("indigo").querySelector("[id^='headlessui-label']")!);
+    const font = `${label.fontSize}/${label.lineHeight} ${label.fontWeight}`;
+    if (chromium()) {
+      for (const id of ["indigo", "amber"]) {
+        await real.commands.realHover(`[data-tinted] [data-value="${id}"]`);
+        check(id, "hover", quiet);
+      }
+      await real.commands.realHover('[data-tinted] [data-value="emerald"]');
+      check("emerald", "chosenHover");
+    }
+    document.querySelector<HTMLElement>('[data-check="before"]')!.focus();
+    await real.commands.realPress([chromium() ? "Tab" : "Alt+Tab"]);
+    const ring = getComputedStyle(document.activeElement!).boxShadow;
+    console.info(`TILES TINTED ${misses.length} misses, font ${font}, ring ${ring.includes("4px")}`);
+    await expect(misses).toEqual([]);
+    await expect(font).toBe("14px/20px 500");
+    /* Roster's ring, offset outside the tile. */
+    await expect(ring).toContain("4px");
+  },
+};
+
+/* ── Tinted names clear 4.5:1 ─────────────────────────────────────────── */
+
+const SCHEMES = ["primary", "orange", "teal", "purple", "amber", "success", "error", "neutral"] as const;
+
+function NamesOn({ dark, card }: { dark: boolean; card: boolean }) {
+  const groups = SCHEMES.flatMap((scheme) =>
+    [false, true].map((chosen) => (
+      <div key={`${scheme}-${chosen}`} data-name={`${scheme} ${chosen ? "chosen" : "unchosen"}`}>
+        <RadioTileGroup label={`${scheme}`} labelClassName="rst:sr-only" options={[{ value: "x", label: "Morning", colorScheme: scheme }]} value={chosen ? "x" : ""} onChange={() => {}} variant="tinted" columns={1} />
+      </div>
+    )),
+  );
+  const inner = <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>{groups}</div>;
+  return (
+    <div className={dark ? "dark" : undefined} data-tinted-ground={`${dark ? "dark" : "light"}-${card ? "card" : "page"}`} style={{ padding: 16, background: dark ? "#0c0a09" : "#fafaf9" }}>
+      {card ? <Card>{inner}</Card> : inner}
+    </div>
+  );
+}
+
+export const TintedNamesPass: Story = {
+  render: () => (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)" }}>
+      {[false, true].flatMap((dark) => [false, true].map((card) => <NamesOn key={`${dark}${card}`} dark={dark} card={card} />))}
+    </div>
+  ),
+  play: async () => {
+    const low: Record<string, number> = {};
+    let reached = 0;
+    for (const ground of document.querySelectorAll<HTMLElement>("[data-tinted-ground]")) {
+      for (const el of ground.querySelectorAll<HTMLElement>("[data-name]")) {
+        const state = el.dataset.name!.endsWith("unchosen") ? "unchosen" : "chosen";
+        /* The tile's name, not the group's own label beside it. */
+        const ratio = textContrast(el.querySelector("[role='radio'] [id^='headlessui-label']")!);
+        reached += 1;
+        const key = `${ground.dataset.tintedGround!.split("-")[0]} ${state}`;
+        low[key] = Math.min(low[key] ?? 99, Math.round(ratio * 100) / 100);
+      }
+    }
+    console.info(`TILES TINTED NAMES ${JSON.stringify(low)}`);
+    /* Four grounds, eight schemes, chosen and not. */
+    await expect(reached).toBe(64);
+    /* The unchosen name is Roster's quiet ink, at the ruling's figures. */
+    await expect(low).toEqual({ "light unchosen": 5.74, "light chosen": 6, "dark unchosen": 6.93, "dark chosen": 8.58 });
   },
 };

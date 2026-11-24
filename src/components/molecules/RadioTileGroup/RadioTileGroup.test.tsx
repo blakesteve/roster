@@ -200,6 +200,20 @@ describe("RadioTileGroup", () => {
       expect(screen.getAllByRole("radio").every((r) => r.classList.contains("my-tile"))).toBe(true);
     });
 
+    it("draws a tile's own color scheme in the tinted look only, 8px apart", () => {
+      const tinted = COVERS.slice(0, 2).map((o, i) => ({ ...o, colorScheme: (["amber", undefined] as const)[i] }));
+      const { rerender } = render(<RadioTileGroup label="Cover photo" options={tinted} value="harbor" onChange={() => {}} variant="tinted" />);
+      const [amber, fallback] = screen.getAllByRole("radio");
+      expect(amber).toHaveClass("rst:[--rst-tone:theme(--color-amber-500)]", "rst:[--rst-tone-ink:theme(--color-amber-800)]");
+      expect(fallback).toHaveClass("rst:[--rst-tone:theme(--color-primary-500)]");
+      expect(amber).toHaveClass("rst:items-center", "rst:border-(--roster-tile-border)");
+      expect(options()).toHaveClass("rst:gap-2");
+      /* Its own color names a scheme, which the other looks leave alone. */
+      rerender(<RadioTileGroup label="Cover photo" options={tinted} value="harbor" onChange={() => {}} />);
+      expect(screen.getAllByRole("radio")[0].className).not.toContain("--rst-tone");
+      expect(options()).not.toHaveClass("rst:gap-2");
+    });
+
     it("draws Roster's chosen look only for outlined, the default", () => {
       const { rerender } = render(<Stateful />);
       const outlined = radio("Pine ridge").className.includes("rst:data-checked:border-(--roster-tile-border-checked)");

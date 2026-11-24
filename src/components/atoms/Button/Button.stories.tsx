@@ -1,3 +1,4 @@
+import { useState, type CSSProperties } from "react";
 import type { Meta, StoryObj, Decorator } from "@storybook/react-vite";
 import { Button, type ButtonProps } from "./Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,6 +8,9 @@ import {
   faTrash,
   faDownload,
   faCheck,
+  faSun,
+  faCloudSun,
+  faMoon,
 } from "@fortawesome/free-solid-svg-icons";
 
 const meta = {
@@ -17,7 +21,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The **Button** is the primary interactive element for triggering actions. It supports multiple **visual hierarchies** (Solid, Soft, Outline, Ghost, Link) and a comprehensive **semantic color palette**. \n\n✨ **New in v2:** \n* **Crisp Colors:** Soft and Outline variants now use pristine light-mode backgrounds (`bg-[color]-50`) and dark-mode stained-glass translucent layers (`bg-[color]-900/30`).\n* **Smart Spinner:** The `isLoading` spinner now uses `text-current` to automatically inherit the perfect text color across all variants.",
+          "The **Button** is the primary interactive element for triggering actions. It supports multiple **visual hierarchies** (Solid, Soft, Outline, Ghost, Link, Tint, Tint-subtle, Plain) and a comprehensive **semantic color palette**. \n\n✨ **New in v2:** \n* **Crisp Colors:** Soft and Outline variants now use pristine light-mode backgrounds (`bg-[color]-50`) and dark-mode stained-glass translucent layers (`bg-[color]-900/30`).\n* **Smart Spinner:** The `isLoading` spinner now uses `text-current` to automatically inherit the perfect text color across all variants.",
       },
     },
   },
@@ -40,13 +44,13 @@ const meta = {
     },
     variant: {
       control: "select",
-      options: ["solid", "soft", "outline", "ghost", "link"],
+      options: ["solid", "soft", "outline", "ghost", "link", "tint", "tint-subtle", "plain"],
       description: "The visual style determining the button's prominence.",
       table: { defaultValue: { summary: "solid" } },
     },
     size: {
       control: "inline-radio",
-      options: ["xs", "sm", "default", "lg", "icon"],
+      options: ["xs", "sm", "default", "lg", "icon", "compact"],
       description: "The dimension of the button.",
       table: { defaultValue: { summary: "default" } },
     },
@@ -59,6 +63,21 @@ const meta = {
       control: "boolean",
       description: "Dims the button and prevents all user interaction.",
       table: { defaultValue: { summary: "false" } },
+    },
+    layout: {
+      control: "inline-radio",
+      options: ["inline", "tile"],
+      description: "A tile stacks its icon over its label and fills its grid cell.",
+      table: { defaultValue: { summary: "inline" } },
+    },
+    unavailable: {
+      control: "boolean",
+      description: "Focusable and in the Tab order, dimmed, and ignores presses.",
+      table: { defaultValue: { summary: "false" } },
+    },
+    pressed: {
+      control: "boolean",
+      description: "For a toggle: says aria-pressed, and draws it on in tint-subtle and plain.",
     },
     startIcon: {
       control: false,
@@ -210,6 +229,135 @@ export const WithIcons: Story = {
       description: {
         story:
           "Use `startIcon` and `endIcon` to add visual cues. The button automatically handles spacing and protects the icons from crushing.",
+      },
+    },
+  },
+};
+
+/* Three choices of a kind, one color each. */
+const CHOICES = [
+  { label: "Morning", icon: faSun, colorScheme: "amber" },
+  { label: "Cloudy", icon: faCloudSun, colorScheme: "primary" },
+  { label: "Night", icon: faMoon, colorScheme: "purple" },
+] as const;
+
+function Tiles({ busyFirst = false }: { busyFirst?: boolean }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 120px)", gap: 8 }}>
+      {CHOICES.map(({ label, icon, colorScheme }, i) => (
+        <Button
+          key={label}
+          variant="tint"
+          layout="tile"
+          colorScheme={colorScheme}
+          startIcon={<FontAwesomeIcon icon={icon} />}
+          isLoading={busyFirst && i === 0}
+          unavailable={busyFirst && i !== 0}
+        >
+          {label}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+export const TintTiles: Story = {
+  render: () => <Tiles />,
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`layout=\"tile\"` stacks an icon over a label and fills its grid cell, in any variant. `variant=\"tint\"` is the quietly filled look: a tenth of the 500 step and a 1px ring. Tints keep the browser's own focus outline.",
+      },
+    },
+  },
+};
+
+export const ATileBusyAndTheOthersUnavailable: Story = {
+  render: () => <Tiles busyFirst />,
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`isLoading` draws a tile's spinner over its icon, so nothing moves, and leaves it at full strength. `unavailable` dims the others, says so to a screen reader, and keeps them in the Tab order.",
+      },
+    },
+  },
+};
+
+function SubtleToggles() {
+  const [on, setOn] = useState("Maple");
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, maxWidth: 360 }}>
+      {["Oak", "Maple", "Birch", "Cedar"].map((name) => (
+        <Button key={name} variant="tint-subtle" size="compact" colorScheme="purple" pressed={on === name} onClick={() => setOn(on === name ? "" : name)}>
+          {name}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+export const TintSubtleToggles: Story = {
+  render: () => <SubtleToggles />,
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`variant=\"tint-subtle\"` is the quieter tint. With `pressed` it's a toggle: `aria-pressed` says it, and the pressed look drops the ring. `size=\"compact\"` is 30px.",
+      },
+    },
+  },
+};
+
+export const Plain: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
+      <Button variant="plain" size="xs" colorScheme="neutral" startIcon={<FontAwesomeIcon icon={faArrowRight} flip="horizontal" />}>
+        Back
+      </Button>
+      <Button variant="plain" size="xs" colorScheme="success" endIcon={<FontAwesomeIcon icon={faArrowRight} />}>
+        Skip for now
+      </Button>
+      <Button variant="plain" size="xs" colorScheme="neutral" unavailable>
+        Not now
+      </Button>
+    </div>
+  ),
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`variant=\"plain\"` is text alone: no fill, border, underline, padding or height. For a 44px target, add `min-h-11 px-2` of your own.",
+      },
+    },
+  },
+};
+
+/* A hue no scheme has: the 300, 400 and 500 steps of a ramp, on the Button. */
+const VIOLET = { "--roster-primary-300": "#c4b5fd", "--roster-primary-400": "#a78bfa", "--roster-primary-500": "#8b5cf6", "--roster-primary-600": "#7c3aed", "--roster-primary-700": "#6d28d9", "--roster-primary-800": "#5b21b6" } as CSSProperties;
+
+export const AColorOutsideTheSchemes: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 8 }}>
+      <Button variant="tint" layout="tile" colorScheme="primary" style={VIOLET}>
+        Lavender
+      </Button>
+      <Button variant="tint-subtle" size="compact" colorScheme="primary" style={VIOLET}>
+        Lavender
+      </Button>
+    </div>
+  ),
+  decorators: [DualPreviewDecorator],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "For a hue Roster has no scheme for, set `--roster-primary-300` to `-800` on the Button and pass `colorScheme=\"primary\"`. Copy the ramp as your app paints it.",
       },
     },
   },

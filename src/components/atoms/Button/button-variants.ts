@@ -1,4 +1,5 @@
 import { cva } from "class-variance-authority";
+import { TONE } from "../../../internal/tone";
 
 /**
  * Every module-scope `cva(...)` in the library carries a PURE annotation, and
@@ -21,13 +22,37 @@ import { cva } from "class-variance-authority";
    floored. `min-width: fit-content` keeps a Button at its one-line width
    beside a neighbor that can wrap; without it a Button beside a wrapping
    heading wrapped at 100% text. `whitespace-nowrap` made a label longer than
-   its room spill out of the button and its column, at 200% text on a phone.
+   its room spill out of the button and its column, at 200% text on a phone. */
 
-   Each size's vertical padding is half its height less one line, less the
-   border, so one line is exactly the size's height and a wrapped label keeps
-   the same space above and below. The line is `1lh`, through `--rst-line`,
-   so an app that changes a Button's text size keeps its height; a browser
-   without `lh` uses the size's own line in rem. */
+/* Looks that keep the browser's own focus outline, not Roster's ring: their
+   edge is a box-shadow, and the ring is a box-shadow too, so it would
+   replace the edge and focus would nearly vanish. `outline: revert` gives
+   the outline back over the base's `outline-hidden`. The ring and its offset
+   are zeroed by an arbitrary variant, which the stylesheet orders after the
+   base's `focus-visible:ring-2`, so the classes hold on a link styled with
+   `buttonVariants` too, where nothing merges them. */
+const FOCUS_NATIVE =
+  "rst:focus-visible:[outline:revert] rst:[&:is(:focus-visible,[data-key-focus])]:ring-0 rst:[&:is(:focus-visible,[data-key-focus])]:ring-offset-0";
+
+/* What these looks animate, and for how long: what `transition-all` animates
+   on them, and no more. */
+const LOOK_MOTION = "rst:transition-[color,background-color,border-color,box-shadow,opacity] rst:duration-150";
+
+/* The looks whose `size` sets a height. */
+const CLASSIC = ["solid", "soft", "outline", "ghost", "link"] as const;
+const LOOKS_WITH_PADDING = ["tint", "tint-subtle"] as const;
+
+/* The sizes, in the compounds: a classic Button keeps its height on one line
+   (28, 36, 40 and 44px; two lines, 44, 56, 60 and 64; `compact` 30 and 46),
+   and `tint` and `tint-subtle` keep the text and padding without the height.
+   `plain` keeps only the text. A tile takes none of it.
+
+   Vertical padding is half the height less one line, less the border, so one
+   line is exactly the height and a wrapped label keeps the same space above
+   and below. The line is `1lh`, through `--rst-line`, so an app that changes
+   a Button's text size keeps its height; a browser without `lh` uses the
+   size's own line in rem. `icon` holds no label, so it keeps its square and
+   no padding. */
 export const buttonVariants = /* @__PURE__ */ cva(
   // Base styles
   "rst:font-ui rst:inline-flex rst:items-center rst:justify-center rst:cursor-pointer rst:whitespace-normal rst:text-center rst:text-balance rst:min-w-fit rst:min-h-fit rst:supports-[height:1lh]:[--rst-line:1lh] rst:rounded-md rst:text-sm rst:font-medium rst:ring-offset-background rst:transition-colors rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:disabled:pointer-events-none rst:disabled:opacity-50",
@@ -43,6 +68,18 @@ export const buttonVariants = /* @__PURE__ */ cva(
         outline: "rst:border rst:bg-transparent rst:elevation-control",
         ghost: "rst:border rst:border-transparent rst:bg-transparent",
         link: "rst:border-0 rst:bg-transparent rst:underline-offset-4 rst:hover:underline",
+        /* A fill at 10% of the 500 step and a 1px ring in it. The ring is a
+           box-shadow set through `--tw-shadow`, not a `ring-*`, so it stands
+           apart from Roster's focus ring; it's the browser's own outline that
+           shows focus. `border-0`, as on `link`. */
+        tint: `rst:border-0 rst:bg-[color-mix(in_oklab,var(--rst-tone)_10%,transparent)] rst:hover:bg-[color-mix(in_oklab,var(--rst-tone)_20%,transparent)] rst:active:bg-[color-mix(in_oklab,var(--rst-tone)_30%,transparent)] rst:text-(color:--rst-tone-ink) rst:shadow-[0_0_0_1px_var(--rst-tone-edge)] rst:[--rst-tone-edge:var(--rst-tone)] rst:hover:[--rst-tone-edge:var(--rst-tone-strong)] ${LOOK_MOTION} ${FOCUS_NATIVE}`,
+        /* The quieter look: a 1px border and a 1px ring, both at 40% of the
+           500 step, over a 5% fill. Pressed, the ring goes and the border is
+           full. */
+        "tint-subtle": `rst:border ${LOOK_MOTION} ${FOCUS_NATIVE}`,
+        /* Text only, at the normal weight: no fill, border, radius, underline,
+           padding or height. Icons sit 4px from the label. */
+        plain: `rst:border-0 rst:rounded-none rst:bg-transparent rst:gap-1 rst:font-normal ${LOOK_MOTION} ${FOCUS_NATIVE}`,
       },
       colorScheme: {
         primary: "",
@@ -54,14 +91,17 @@ export const buttonVariants = /* @__PURE__ */ cva(
         error: "",
         neutral: "",
       },
-      /* Heights on one line: 28, 36, 40 and 44px; two lines, 44, 56, 60 and
-         64. `icon` holds no label, so it keeps its square and no padding. */
+      /* `size` is applied by the compounds below, because what it sets depends
+         on the look: a height for the five classic looks, text and padding
+         only for `tint` and `tint-subtle`, text only for `plain`, and nothing
+         on a tile, which has its own. */
       size: {
-        xs: "rst:h-7 rst:rounded-sm rst:px-2 rst:text-xs rst:py-[calc((--spacing(7)-var(--rst-line,1rem))/2-var(--roster-border-width,1px))]",
-        sm: "rst:h-9 rst:rounded-md rst:px-3 rst:py-[calc((--spacing(9)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]",
-        default: "rst:h-10 rst:px-4 rst:py-[calc((--spacing(10)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]",
-        lg: "rst:h-11 rst:rounded-md rst:px-8 rst:py-[calc((--spacing(11)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]",
-        icon: "rst:h-10 rst:w-10",
+        xs: "",
+        sm: "",
+        default: "",
+        lg: "",
+        icon: "",
+        compact: "",
       },
       /* One line at the size's height, cut with an ellipsis when there's no
          room (`Button` wraps text children in a `truncate` span), shrinking
@@ -70,8 +110,55 @@ export const buttonVariants = /* @__PURE__ */ cva(
         true: "rst:whitespace-nowrap rst:max-w-full rst:min-w-0",
         false: "",
       },
+      /* A tile: an icon over a label in a column, centered, filling its grid
+         cell. It sets its own padding, radius and text, and no height.
+         `py-2.5` is for a tile with no icon; `Button` gives one with an icon
+         `py-3`. */
+      layout: {
+        inline: "",
+        tile: "rst:flex-col rst:gap-1.5 rst:rounded-xl rst:px-2 rst:py-2.5 rst:text-xs rst:font-semibold",
+      },
+      /* Sets only `tint-subtle`'s and `plain`'s look (`Button` sets
+         `aria-pressed` for every variant): the compounds below. */
+      pressed: {
+        true: "",
+        false: "",
+      },
     },
     compoundVariants: [
+      // --- SIZES ---
+      { variant: [...CLASSIC], layout: "inline", size: "xs", className: "rst:h-7 rst:rounded-sm rst:px-2 rst:text-xs rst:py-[calc((--spacing(7)-var(--rst-line,1rem))/2-var(--roster-border-width,1px))]" },
+      { variant: [...CLASSIC], layout: "inline", size: "sm", className: "rst:h-9 rst:rounded-md rst:px-3 rst:py-[calc((--spacing(9)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]" },
+      { variant: [...CLASSIC], layout: "inline", size: "default", className: "rst:h-10 rst:px-4 rst:py-[calc((--spacing(10)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]" },
+      { variant: [...CLASSIC], layout: "inline", size: "lg", className: "rst:h-11 rst:rounded-md rst:px-8 rst:py-[calc((--spacing(11)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]" },
+      { variant: [...CLASSIC], layout: "inline", size: "icon", className: "rst:h-10 rst:w-10" },
+      { variant: [...CLASSIC], layout: "inline", size: "compact", className: "rst:h-7.5 rst:px-3 rst:text-xs rst:py-[calc((--spacing(7.5)-var(--rst-line,1rem))/2-var(--roster-border-width,1px))]" },
+      { variant: [...LOOKS_WITH_PADDING], layout: "inline", size: "xs", className: "rst:rounded-sm rst:px-2 rst:text-xs rst:py-[calc((--spacing(7)-var(--rst-line,1rem))/2-var(--roster-border-width,1px))]" },
+      { variant: [...LOOKS_WITH_PADDING], layout: "inline", size: "sm", className: "rst:rounded-md rst:px-3 rst:py-[calc((--spacing(9)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]" },
+      { variant: [...LOOKS_WITH_PADDING], layout: "inline", size: "default", className: "rst:px-4 rst:py-[calc((--spacing(10)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]" },
+      { variant: [...LOOKS_WITH_PADDING], layout: "inline", size: "lg", className: "rst:rounded-md rst:px-8 rst:py-[calc((--spacing(11)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]" },
+      { variant: [...LOOKS_WITH_PADDING], layout: "inline", size: "icon", className: "rst:h-10 rst:w-10" },
+      /* Its 30px height like the other sizes', so `tint-subtle`'s border sits
+         inside it. */
+      { variant: [...LOOKS_WITH_PADDING], layout: "inline", size: "compact", className: "rst:h-7.5 rst:px-3 rst:text-xs rst:py-[calc((--spacing(7.5)-var(--rst-line,1rem))/2-var(--roster-border-width,1px))]" },
+      { variant: "plain", layout: "inline", size: ["xs", "compact"], className: "rst:text-xs" },
+
+      // --- THE TONES the three quieter looks read, a set per scheme (tone.ts) ---
+      { variant: ["tint", "tint-subtle", "plain"], colorScheme: "primary", className: TONE.primary },
+      { variant: ["tint", "tint-subtle", "plain"], colorScheme: "orange", className: TONE.orange },
+      { variant: ["tint", "tint-subtle", "plain"], colorScheme: "teal", className: TONE.teal },
+      { variant: ["tint", "tint-subtle", "plain"], colorScheme: "purple", className: TONE.purple },
+      { variant: ["tint", "tint-subtle", "plain"], colorScheme: "amber", className: TONE.amber },
+      { variant: ["tint", "tint-subtle", "plain"], colorScheme: "success", className: TONE.success },
+      { variant: ["tint", "tint-subtle", "plain"], colorScheme: "error", className: TONE.error },
+      { variant: ["tint", "tint-subtle", "plain"], colorScheme: "neutral", className: TONE.neutral },
+
+      // --- TINT-SUBTLE AND PLAIN, at rest, hovered and pressed ---
+      { variant: "tint-subtle", pressed: false, className: "rst:border-[color-mix(in_oklab,var(--rst-tone)_40%,transparent)] rst:bg-[color-mix(in_oklab,var(--rst-tone)_5%,transparent)] rst:hover:bg-[color-mix(in_oklab,var(--rst-tone)_15%,transparent)] rst:text-(color:--rst-tone-ink) rst:shadow-[0_0_0_1px_var(--rst-tone-edge)] rst:[--rst-tone-edge:color-mix(in_oklab,var(--rst-tone)_40%,transparent)] rst:hover:[--rst-tone-edge:var(--rst-tone-strong)]" },
+      { variant: "tint-subtle", pressed: true, className: "rst:border-(--rst-tone-strong) rst:bg-[color-mix(in_oklab,var(--rst-tone)_20%,transparent)] rst:dark:bg-[color-mix(in_oklab,var(--rst-tone)_40%,transparent)] rst:text-(color:--rst-tone-ink-2) rst:dark:text-white rst:font-semibold" },
+      { variant: "plain", pressed: false, className: "rst:text-(color:--rst-tone-ink) rst:dark:text-(color:--rst-tone-plain) rst:hover:text-(color:--rst-tone-ink-2)" },
+      { variant: "plain", pressed: true, className: "rst:text-(color:--rst-tone-ink-2)" },
+
       // --- SOLID VARIANTS (Bold Backgrounds) ---
       { variant: "solid", colorScheme: "primary", className: "rst:bg-primary-600 rst:hover:bg-primary-700 rst:dark:bg-primary-600 rst:dark:hover:bg-primary-500 rst:text-primary-600-ink rst:hover:text-primary-700-ink rst:dark:hover:text-primary-500-ink" },
       { variant: "solid", colorScheme: "orange",  className: "rst:bg-orange-600 rst:hover:bg-orange-700 rst:dark:bg-orange-600 rst:dark:hover:bg-orange-700 rst:text-orange-600-ink rst:hover:text-orange-700-ink rst:dark:hover:text-orange-700-ink" },
@@ -133,6 +220,8 @@ export const buttonVariants = /* @__PURE__ */ cva(
       variant: "solid",
       size: "default",
       singleLine: false,
+      layout: "inline",
+      pressed: false,
     },
   }
 );

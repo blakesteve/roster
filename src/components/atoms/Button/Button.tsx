@@ -41,6 +41,25 @@ export interface ButtonProps
    * The full label stays the button's accessible name.
    */
   singleLine?: boolean;
+  /**
+   * `"tile"` stacks `startIcon` over the label in a column, centered, with its
+   * own padding and no height of its own, so it fills the grid cell it's in.
+   * Any variant. A tile takes one icon, in `startIcon`.
+   */
+  layout?: "inline" | "tile";
+  /**
+   * A control that can't be used right now: focusable and in the Tab order,
+   * unlike `disabled`, and dimmed to 50%. `aria-disabled` says so, and presses
+   * are swallowed as they are while `isLoading`. Tab and other keys pass.
+   * `disabled` wins over it, then `isLoading`, which is never dimmed.
+   */
+  unavailable?: boolean;
+  /**
+   * For a toggle: says whether it's on, as `aria-pressed` (left off when this
+   * is), and draws it on in `tint-subtle` and `plain`. Other variants take the
+   * attribute and no new look.
+   */
+  pressed?: boolean;
 }
 
 /* An icon slot one line tall, pinned to the label's first line (`start`) or
@@ -58,6 +77,18 @@ function truncated(children: React.ReactNode) {
     typeof child === "string" || typeof child === "number" ? <span className="rst:truncate">{child}</span> : child,
   );
 }
+
+/* A tile's icon, centered over its label and spaced by the row's gap. */
+const SLOT_TILE = "rst:inline-flex rst:shrink-0 rst:items-center";
+
+/* A `plain` icon sits beside the first line, or the last for an end icon,
+   spaced by the row's gap. Its slot has no height of its own (the icon
+   overflows it, centered on the line), so it can't make the row taller than
+   the text: WebKit lays a 15.9996px line at 15, against a 16px slot. */
+const SLOT_PLAIN_FIRST_LINE =
+  "rst:inline-flex rst:h-0 rst:shrink-0 rst:items-center rst:self-start rst:mt-[calc(var(--rst-line,1rem)/2)]";
+const SLOT_PLAIN_LAST_LINE =
+  "rst:inline-flex rst:h-0 rst:shrink-0 rst:items-center rst:self-end rst:mb-[calc(var(--rst-line,1rem)/2)]";
 
 /* The handlers a press runs through, capture phase included. Not enter,
    leave or move, which a tooltip needs whether the button is busy or not. */
@@ -93,54 +124,97 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       endIcon,
       surface = "auto",
       singleLine = false,
+      layout = "inline",
+      unavailable = false,
+      pressed,
       disabled,
       children,
       ...props
     },
     ref,
   ) => {
-    /* `disabled` wins: a disabled button that's also loading is disabled. */
+    /* `disabled` wins, then `isLoading`, then `unavailable`: a disabled button
+       that's also loading is disabled, and a busy one is never dimmed. */
     const busy = isLoading && !disabled;
-    const pressProps = busy ? withoutPresses(props) : props;
+    const off = unavailable && !disabled && !isLoading;
+    const pressProps = busy || off ? withoutPresses(props) : props;
+
+    const tile = layout === "tile";
+    const plain = variant === "plain" && !tile;
+    const byGap = tile || plain;
+    /* Loading, a tile with an icon draws its spinner over the icon's box, so
+       nothing moves. A tile without one, and `plain`, have no icon box to
+       stand in: the spinner replaces what shows, and the label stays as the
+       accessible name. Every other Button puts the spinner before its label. */
+    const overIcon = isLoading && tile && !!startIcon;
+    const replaced = isLoading && !overIcon && byGap;
+    const label = singleLine ? truncated(children) : children;
 
     return (
       <HeadlessButton
         className={cn(
-          buttonVariants({ colorScheme, variant, size, singleLine }),
+          buttonVariants({ colorScheme, variant, size, singleLine, layout, pressed }),
+          tile && startIcon && "rst:py-3",
           // Roster's dark variant is `&:where(.dark, .dark *)`, so an element
           // carrying `.dark` itself satisfies it. That is all forcing the
           // dark surface requires.
           surface === "dark" && "dark",
           busy && "rst:cursor-progress",
+          off && "rst:cursor-not-allowed rst:opacity-50",
           className,
         )}
         ref={ref}
         disabled={disabled}
         {...pressProps}
-        aria-disabled={busy ? true : props["aria-disabled"]}
+        aria-disabled={busy || off ? true : props["aria-disabled"]}
         aria-busy={busy ? true : props["aria-busy"]}
+        aria-pressed={pressed ?? props["aria-pressed"]}
       >
         {/* The label and its icons in one row, which takes the button's
             own `gap` and `justify-content`, so an app's `gap-1.5` or
             `justify-start` still applies. Icons an app passes as children
-            stay centered on the label, as before. */}
-        <span className="rst:flex rst:grow rst:min-w-0 rst:items-center rst:[justify-content:inherit] rst:[gap:inherit]">
-          {isLoading && (
+            stay centered on the label, as before. A tile's row is a column,
+            as its button is. */}
+        <span
+          className={cn(
+            "rst:flex rst:grow rst:min-w-0 rst:items-center rst:[justify-content:inherit] rst:[gap:inherit]",
+            tile && "rst:flex-col",
+          )}
+        >
+          {overIcon && (
+            <span className={cn(SLOT_TILE, "rst:relative")}>
+              <span className="rst:invisible rst:inline-flex rst:items-center">{startIcon}</span>
+              <Spinner size="sm" variant="current" label={loadingLabel} className="rst:absolute rst:inset-0 rst:h-full rst:w-full" />
+            </span>
+          )}
+          {/* Keeps the spinner's name and the label's apart wherever a name is
+              computed without the row's layout. It draws nothing: a flex row
+              drops text that is only a space. */}
+          {overIcon && " "}
+
+          {replaced && (
+            <>
+              <Spinner size="sm" variant="current" label={loadingLabel} />
+              <span className="rst:sr-only">{label}</span>
+            </>
+          )}
+
+          {isLoading && !overIcon && !replaced && (
             <span className={cn("rst:mr-2 rst:flex rst:shrink-0 rst:items-center", SLOT_FIRST_LINE)}>
               <Spinner size="sm" variant="current" label={loadingLabel} />
             </span>
           )}
 
           {!isLoading && startIcon && (
-            <span className={cn("rst:mr-2 rst:inline-flex rst:shrink-0 rst:items-center", SLOT_FIRST_LINE)}>
+            <span className={tile ? SLOT_TILE : plain ? SLOT_PLAIN_FIRST_LINE : cn("rst:mr-2 rst:inline-flex rst:shrink-0 rst:items-center", SLOT_FIRST_LINE)}>
               {startIcon}
             </span>
           )}
 
-          {singleLine ? truncated(children) : children}
+          {!replaced && label}
 
           {!isLoading && endIcon && (
-            <span className={cn("rst:ml-2 rst:inline-flex rst:shrink-0 rst:items-center", SLOT_LAST_LINE)}>
+            <span className={tile ? SLOT_TILE : plain ? SLOT_PLAIN_LAST_LINE : cn("rst:ml-2 rst:inline-flex rst:shrink-0 rst:items-center", SLOT_LAST_LINE)}>
               {endIcon}
             </span>
           )}

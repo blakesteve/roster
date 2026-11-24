@@ -27,6 +27,7 @@ type Why = "measured" | "inactive" | "motion" | "decorative" | "mark" | "open";
 const KNOWN: Record<string, Record<string, Why>> = {
   "components/atoms/Avatar/Avatar.tsx": { "rst:data-closed:opacity-0": "motion" },
   "components/atoms/Badge/Badge.tsx": { "rst:opacity-70": "measured" },
+  "components/atoms/Button/Button.tsx": { "rst:opacity-50": "inactive" },
   "components/atoms/Button/button-variants.ts": { "rst:disabled:opacity-50": "inactive" },
   "components/atoms/Checkbox/Checkbox.tsx": { "rst:opacity-0": "motion", "rst:opacity-100": "motion", "rst:opacity-50": "inactive" },
   "components/atoms/Chip/Chip.tsx": { "rst:opacity-70": "measured", "rst:hover:opacity-100": "measured", "rst:disabled:hover:opacity-70": "inactive" },

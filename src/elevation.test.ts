@@ -34,6 +34,15 @@ const CONTROLS: Record<string, string[]> = {
   "switch-variants.ts": ["the thumb"],
 };
 
+/**
+ * A `shadow-*` that isn't depth: the tint looks' 1px edge in `Button`, in the
+ * scheme's tone. It's a line drawn as a box-shadow because the focus ring is
+ * one too, and the two have to be told apart. Only that line's shape passes;
+ * any other shadow in that file still fails. (The pattern below stops at the
+ * paren, so this does too.)
+ */
+const EDGES: Record<string, RegExp> = { "button-variants.ts": /^rst:shadow-\[0_0_0_1px_var$/ };
+
 function sourceFiles(): { name: string; path: string }[] {
   const out: { name: string; path: string }[] = [];
   const walk = (dir: string) => {
@@ -80,7 +89,9 @@ describe("elevation scale", () => {
       const raw = source.match(
         /rst:(?:[\w@[\]./-]+:)*(?:inset-)?shadow(?!-none\b)(?:-[\w[\]/.%-]+)?/g,
       );
-      if (raw) offenders.push(`${file.name}: ${[...new Set(raw)].join(", ")}`);
+      const edge = EDGES[file.name];
+      const left = [...new Set(raw ?? [])].filter((c) => !edge?.test(c));
+      if (left.length) offenders.push(`${file.name}: ${left.join(", ")}`);
     }
 
     expect(

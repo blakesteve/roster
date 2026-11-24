@@ -241,7 +241,26 @@ A few more things follow from the same rule:
   It inherits them, so a light scope in a dark page keeps the dark shadows and
   the dark Sheet backdrop.
 
-Two things it doesn't do:
+**One control with its own color.** Roster's color classes read their ramp
+where they're used, so a ramp set on a single control reaches only that one,
+with no scope needed. For a hue Roster has no scheme for, set
+`--roster-primary-300`, `-400` and `-500` (and `-600`, `-700` and `-800`, which
+light mode's tints and their labels read) on a `Button` and pass
+`colorScheme="primary"`. Copy the ramp as your app paints it, in whatever color
+space it's written: a hex copy of an oklch ramp drifts.
+
+```tsx
+<Button
+  variant="tint"
+  layout="tile"
+  colorScheme="primary"
+  style={{ "--roster-primary-300": "#c4b5fd", "--roster-primary-400": "#a78bfa", "--roster-primary-500": "#8b5cf6" }}
+>
+  Lavender
+</Button>
+```
+
+Two things a scope doesn't do:
 
 - **It doesn't cross a portal.** `Select`'s menu, `Menu`, `Dialog` and `Tooltip`
   render at `<body>`, outside the scope, so the scope's ramps don't reach them.
@@ -737,6 +756,14 @@ Set it in **both** scopes. Roster's own `.dark` rule has the same specificity,
 so a `:root`-only override is wrong in dark mode one way or the other
 ([Dark mode and `:root` overrides](#dark-mode-and-root-overrides)).
 
+**One exception: `Button`'s `tint`, `tint-subtle` and `plain` keep the browser's
+own outline.** A tint's edge is a 1px box-shadow ring, and Roster's ring is a
+box-shadow too, so it would replace the edge: on one tile the edge read as the
+ring's own color and focus nearly vanished. The browser's outline draws outside
+the box, so it doesn't. `plain` keeps it for the same look as a native text
+button. Other variants on a tile keep Roster's ring, and so do the bordered
+tiles of `RadioTileGroup`, which have no ring edge for it to replace.
+
 The band matters more than it looks. Without it the ring sits directly on the
 fill, and a `primary-500` ring on a `primary-600` button is 1.37:1 — which is
 why the ring and its offset are a pair rather than two independent knobs.
@@ -1101,8 +1128,13 @@ room, while a field's text is left-aligned and a wide inset only pushes the
 caret toward the middle. `Select`'s right padding is clearance for the chevron,
 which is a fixed 14px at every size, so it has nothing to grow for.
 
+`Button` also takes `size="compact"`, 30px: 12px sides and the `xs` text, for a
+row of small toggles. `tint` and `tint-subtle` take a size's text and padding and
+none of its height, except `compact`'s; `plain` takes only its text, and a tile
+takes none of it.
+
 Unit tests assert the three components resolve to the same height at every
-shared size, so they cannot drift apart. `Button` also has `xs` and `icon`,
+shared size, so they cannot drift apart. `Button` also has `xs`, `compact` and `icon`,
 which neither field has an equivalent for. `Textarea` is not on this scale — it
 is multi-line, so the answer there is a min-height rather than a height.
 
@@ -1636,6 +1668,26 @@ the viewport. In the default `outlined` look an `<img>` placed directly in the
 picture is cropped square, so photos of any shape make even rows; anything
 else keeps its own shape, and `pictureClassName` changes either.
 
+**Tinted tiles.** `variant="tinted"` is a bordered tile of icon over name, each
+colored by its option's `colorScheme` once chosen: border and fill from the 500
+step, name and icon from the 700 step (800 for amber, teal and orange), 300 in
+dark. Unchosen, the border is `--roster-tile-border` and the name is a quiet
+gray. An icon keeps its own size: no square, no full width.
+
+```tsx
+<RadioTileGroup
+  variant="tinted"
+  label="When do you plan to come?"
+  columns={{ base: 1, sm: 3 }}
+  value={time}
+  onChange={setTime}
+  options={[
+    { value: "morning", label: "Morning", colorScheme: "amber", picture: <Sun /> },
+    { value: "evening", label: "Evening", colorScheme: "purple", picture: <Moon /> },
+  ]}
+/>
+```
+
 **Drawing your own chosen look.** Each tile, the element with `role="radio"`,
 carries `data-checked`, `data-disabled`, `data-hover` and `data-focus-visible`,
 and takes `tileClassName`. `variant="plain"` drops Roster's edge, fill and
@@ -1648,7 +1700,7 @@ without `!important`:
 .cover [data-checked] .stamp { opacity: 1; }
 ```
 
-The focus ring stays Roster's in both looks, offset outside the tile, so
+The focus ring stays Roster's in every look, offset outside the tile, so
 it's outside anything drawn on the tile or inside it.
 
 **Tokens.** The `outlined` look reads `--roster-tile-border` and
@@ -2032,6 +2084,52 @@ app's own press handlers, while hover ones still run), which also keeps a
 submit button from sending its form twice. It no longer dims, since
 the spinner says it's busy. `loadingLabel` names the spinner ("loading" by
 default). `disabled` is unchanged and wins over `isLoading`.
+
+On a tile with a `startIcon` the icon stays laid out, invisible, and the spinner
+draws over its box at the box's size, so nothing moves. A tile with no icon, and
+`plain`, show the spinner alone, at 16px; the label stays the accessible name.
+
+**`unavailable`** is for a control that can't be used right now: dimmed to 50% and
+`aria-disabled`, but focusable and in the Tab order, unlike `disabled`, so a
+keyboard or screen reader user keeps their place while a choice sends. Presses
+are ignored as they are while loading; Tab and other keys pass. `disabled` wins
+over it, and so does `isLoading`, which is never dimmed: while one button's
+request is on its way, make the others `unavailable`.
+
+### Tiles, tints and plain actions
+
+`Button` takes three quieter looks, in any `colorScheme`:
+
+| `variant`     | What it draws                                                                                                        |
+| ------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `tint`        | A fill at 10% of the 500 step and a 1px ring in it; 20% hovered, 30% pressed.                                         |
+| `tint-subtle` | A fill at 5%, a 1px border and a 1px ring at 40%; 15% hovered. `pressed`, the ring goes and the border is full.       |
+| `plain`       | Text only: no fill, border, radius, underline, padding or height. Icons sit 4px from the label.                       |
+
+Labels are the 300 step in dark. In light they're the 700 step, and the 800 step
+for amber, teal and orange, which clear 4.5:1 at every state (the lowest is
+4.67:1, purple pressed on `gray-50`).
+
+`layout="tile"` stacks `startIcon` over the label in a column, centered, with its
+own padding and 12px radius, and no height of its own, so it fills its grid cell.
+Any variant; a tile takes one icon.
+
+```tsx
+<div className="grid grid-cols-3 gap-2">
+  <Button variant="tint" layout="tile" colorScheme="amber" startIcon={<Sun />}>
+    Morning
+  </Button>
+</div>
+```
+
+`pressed` is for a toggle: it sets `aria-pressed`, left off when the prop is, and
+draws it on in `tint-subtle` and `plain`. Other variants set the attribute and
+draw nothing new. A 44px target is yours to add: `min-h-11 px-2` on a `plain`
+Button.
+
+These three keep the browser's own focus outline rather than Roster's ring
+([Focus](#focus)), and a color outside Roster's schemes is a ramp on the Button
+([A region with its own palette](#a-region-with-its-own-palette)).
 
 ### The loading system
 
@@ -2865,7 +2963,7 @@ function App() {
 | -------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `Avatar`             | User avatar with image, initials fallback, and optional popover                                              |
 | `Badge`              | Status label with semantic color schemes and fill variants                                                   |
-| `Button`             | Primary interactive element: solid, soft, outline, ghost, link variants                                      |
+| `Button`             | Primary interactive element: solid, soft, outline, ghost, link, tint, tint-subtle and plain variants, and a tile layout |
 | `Card`               | Bordered surface container                                                                                   |
 | `Checkbox`           | Accessible checkbox with label support                                                                       |
 | `Combobox`           | A `Select` you can type into: filters as you type, same panel and size scale                                 |

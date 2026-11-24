@@ -192,6 +192,49 @@ export const LoadingIsBusyAndUnavailableToAScreenReader: Story = {
   },
 };
 
+/* A tile and a `plain` Button are named by their label, once, whatever they
+   show: the label stays the name while a spinner stands in for it, and an
+   unavailable one says it's disabled. Twins: the same controls at rest. */
+export const ATileAndAPlainButtonAreNamedOnceWhateverTheyShow: Story = {
+  tags: ["ax-tree"],
+  render: () => {
+    const icon = <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" />;
+    const props = [
+      ["tile", { layout: "tile", variant: "tint", startIcon: icon }],
+      ["tile-busy", { layout: "tile", variant: "tint", startIcon: icon, isLoading: true }],
+      ["none-busy", { layout: "tile", variant: "tint", isLoading: true }],
+      ["plain-busy", { variant: "plain", isLoading: true, startIcon: icon }],
+      ["off", { variant: "tint", unavailable: true }],
+      ["on", { variant: "tint-subtle", pressed: true }],
+    ] as const;
+    return (
+      <div style={{ display: "grid", gap: 8, justifyItems: "start" }}>
+        {props.map(([id, p]) => (
+          <Button key={id} data-probe={id} {...p}>
+            Keyboard
+          </Button>
+        ))}
+      </div>
+    );
+  },
+  play: async () => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    const ids = ["tile", "tile-busy", "none-busy", "plain-busy", "off", "on"];
+    const states = await real.commands.axStates(ids.map((id) => `[data-probe="${id}"]`));
+    await expect(states.map((s, i) => [ids[i], s.role, s.name, s.disabled, s.busy])).toEqual([
+      ["tile", "button", "Keyboard", false, false],
+      ["tile-busy", "button", "loading Keyboard", true, true],
+      ["none-busy", "button", "loading Keyboard", true, true],
+      ["plain-busy", "button", "loading Keyboard", true, true],
+      ["off", "button", "Keyboard", true, false],
+      ["on", "button", "Keyboard", false, false],
+    ]);
+    const pressed = document.querySelector('[data-probe="on"]')!;
+    await expect([pressed.getAttribute("aria-pressed"), document.querySelector('[data-probe="off"]')!.getAttribute("aria-pressed")]).toEqual(["true", null]);
+  },
+};
+
 /* An app with no reset: the browser's own button border comes back. Restored
    inside Roster's lowest layer here, so only what Roster itself sets can
    remove it, which is what an app without a preflight sees. */

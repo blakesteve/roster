@@ -269,6 +269,195 @@ describe("Button Component", () => {
     });
   });
 
+  describe("a tile", () => {
+    /* Measured as rendered in Button.tiles.checks.stories.tsx; these pin the
+       classes each part asks for. */
+    it("stacks its icon over the label, with no size's height or padding", () => {
+      render(
+        <Button layout="tile" size="lg" variant="tint" startIcon={<span data-testid="icon" />}>
+          Keyboard
+        </Button>,
+      );
+      const button = screen.getByRole("button", { name: "Keyboard" });
+      expect(button).toHaveClass("rst:flex-col", "rst:gap-1.5", "rst:rounded-xl", "rst:px-2", "rst:py-3", "rst:text-xs", "rst:font-semibold");
+      expect(button.className).not.toMatch(/rst:h-|rst:px-8|rst:py-\[/);
+      expect(screen.getByText("Keyboard")).toHaveClass("rst:flex-col");
+      expect(screen.getByTestId("icon").parentElement).not.toHaveClass("rst:mr-2");
+    });
+
+    it("has less padding without an icon", () => {
+      render(<Button layout="tile">Keyboard</Button>);
+      expect(screen.getByRole("button")).toHaveClass("rst:py-2.5");
+    });
+
+    it("keeps its icon's box while loading, with the spinner over it", () => {
+      render(
+        <Button layout="tile" isLoading startIcon={<span data-testid="icon" />}>
+          Keyboard
+        </Button>,
+      );
+      expect(screen.getByTestId("icon").closest(".rst\\:invisible")).not.toBeNull();
+      expect(screen.getByRole("status")).toHaveClass("rst:h-full", "rst:w-full", "rst:border-2");
+      /* The label shows, and the button is named by it and the spinner. */
+      expect(screen.getByText("Keyboard")).not.toHaveClass("rst:sr-only");
+      expect(screen.getByRole("button", { name: "loading Keyboard" })).toBeInTheDocument();
+    });
+
+    it.each([
+      ["a tile with no icon", { layout: "tile" as const }],
+      ["a plain Button", { variant: "plain" as const }],
+    ])("shows only the spinner while loading %s, and keeps its label as its name", (_, props) => {
+      render(
+        <Button {...props} isLoading endIcon={<span data-testid="end" />}>
+          Continue
+        </Button>,
+      );
+      expect(screen.getByText("Continue")).toHaveClass("rst:sr-only");
+      expect(screen.queryByTestId("end")).toBeNull();
+      expect(screen.getByRole("status")).toHaveClass("rst:h-4", "rst:w-4");
+      expect(screen.getByRole("button", { name: "loading Continue" })).toBeInTheDocument();
+    });
+
+    it("leaves every other loading Button as it was", () => {
+      render(
+        <Button isLoading startIcon={<span data-testid="icon" />}>
+          Save
+        </Button>,
+      );
+      expect(screen.getByText("Save")).not.toHaveClass("rst:sr-only");
+      expect(screen.queryByTestId("icon")).toBeNull();
+      expect(screen.getByRole("status").parentElement).toHaveClass("rst:mr-2");
+    });
+  });
+
+  describe("plain, tint and tint-subtle", () => {
+    it.each(["tint", "tint-subtle", "plain"] as const)("%s keeps the browser's own focus outline, not Roster's ring", (variant) => {
+      render(<Button variant={variant}>Look</Button>);
+      expect(screen.getByRole("button")).toHaveClass(
+        "rst:focus-visible:[outline:revert]",
+        "rst:[&:is(:focus-visible,[data-key-focus])]:ring-0",
+        "rst:[&:is(:focus-visible,[data-key-focus])]:ring-offset-0",
+      );
+    });
+
+    it("keeps Roster's ring on the others, tiles included", () => {
+      render(
+        <Button variant="outline" layout="tile">
+          Tile
+        </Button>,
+      );
+      expect(screen.getByRole("button").className).not.toContain("outline:revert");
+      expect(screen.getByRole("button")).toHaveClass("rst:focus-visible:ring-2");
+    });
+
+    it("draws no fill, border, padding or height in plain, at the normal weight", () => {
+      render(<Button variant="plain">Back</Button>);
+      const button = screen.getByRole("button");
+      expect(button).toHaveClass("rst:border-0", "rst:bg-transparent", "rst:font-normal", "rst:rounded-none");
+      expect(button.className).not.toMatch(/rst:h-|rst:px-|rst:py-/);
+    });
+
+    it("sets no height from a size on these looks, and the size's text", () => {
+      render(
+        <>
+          <Button variant="tint" size="xs">Tint</Button>
+          <Button variant="plain" size="xs">Plain</Button>
+          <Button variant="solid" size="xs">Solid</Button>
+        </>,
+      );
+      expect(screen.getByRole("button", { name: "Tint" }).className).not.toContain("rst:h-7");
+      expect(screen.getByRole("button", { name: "Plain" })).toHaveClass("rst:text-xs");
+      expect(screen.getByRole("button", { name: "Solid" })).toHaveClass("rst:h-7");
+    });
+  });
+
+  describe("unavailable", () => {
+    it("is focusable, says so, and ignores presses, while other keys pass", async () => {
+      const onClick = vi.fn();
+      const onKeyDown = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <>
+          <Button unavailable onClick={onClick} onKeyDown={onKeyDown}>Vote</Button>
+          <Button>Next</Button>
+        </>,
+      );
+      const vote = screen.getByRole("button", { name: "Vote" });
+      expect(vote).toHaveAttribute("aria-disabled", "true");
+      expect(vote).not.toBeDisabled();
+      await user.click(vote);
+      vote.focus();
+      await user.keyboard("{Enter} ");
+      expect(onClick).not.toHaveBeenCalled();
+      await user.tab();
+      expect(screen.getByRole("button", { name: "Next" })).toHaveFocus();
+      expect(onKeyDown).not.toHaveBeenCalled();
+    });
+
+    it("dims and says not-allowed, and can be dimmed and lit by an app's own class", () => {
+      render(<Button unavailable className="rst:opacity-70">Vote</Button>);
+      expect(screen.getByRole("button")).toHaveClass("rst:cursor-not-allowed", "rst:opacity-70");
+      expect(screen.getByRole("button")).not.toHaveClass("rst:opacity-50");
+    });
+
+    it("gives way to disabled, then to loading, which is never dimmed", () => {
+      render(
+        <>
+          <Button unavailable disabled>Both</Button>
+          <Button unavailable isLoading>Busy</Button>
+          <Button unavailable disabled isLoading>All</Button>
+        </>,
+      );
+      const both = screen.getByRole("button", { name: "Both" });
+      expect(both).toBeDisabled();
+      expect(both).not.toHaveClass("rst:cursor-not-allowed");
+      const busy = screen.getByRole("button", { name: /busy/i });
+      expect(busy).toHaveClass("rst:cursor-progress");
+      expect(busy).not.toHaveClass("rst:opacity-50");
+      expect(busy).toHaveAttribute("aria-busy", "true");
+      const all = screen.getByRole("button", { name: /all/i });
+      expect(all).toBeDisabled();
+      expect(all).not.toHaveClass("rst:cursor-progress");
+    });
+  });
+
+  describe("pressed", () => {
+    it("says aria-pressed, and leaves it off when it isn't given", () => {
+      render(
+        <>
+          <Button pressed>On</Button>
+          <Button pressed={false}>Off</Button>
+          <Button>Neither</Button>
+          <Button aria-pressed>Own</Button>
+        </>,
+      );
+      const pressed = (name: string) => screen.getByRole("button", { name }).getAttribute("aria-pressed");
+      expect([pressed("On"), pressed("Off"), pressed("Neither"), pressed("Own")]).toEqual(["true", "false", null, "true"]);
+    });
+
+    it("draws a new look in tint-subtle and plain only", () => {
+      const look = (variant: "tint-subtle" | "plain" | "solid" | "tint", pressed?: boolean) => {
+        const { unmount } = render(<Button variant={variant} pressed={pressed} />);
+        const cls = screen.getByRole("button").className;
+        unmount();
+        return cls;
+      };
+      expect(look("tint-subtle", true)).toContain("rst:font-semibold");
+      expect(look("tint-subtle", true)).not.toContain("rst:hover:");
+      expect(look("tint-subtle", false)).toContain("rst:hover:");
+      expect(look("plain", true)).not.toContain("rst:hover:");
+      expect(look("solid", true)).toBe(look("solid", false));
+      expect(look("tint", true)).toBe(look("tint", false));
+    });
+  });
+
+  describe("compact", () => {
+    it("is 30px with 12px sides and the xs text", () => {
+      render(<Button size="compact">Types</Button>);
+      expect(screen.getByRole("button")).toHaveClass("rst:h-7.5", "rst:px-3", "rst:text-xs");
+    });
+  });
+
   it("forwards refs to the HTML element", () => {
     const ref = React.createRef<HTMLButtonElement>();
     render(<Button ref={ref}>Ref Test</Button>);
