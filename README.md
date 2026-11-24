@@ -2086,8 +2086,9 @@ the spinner says it's busy. `loadingLabel` names the spinner ("loading" by
 default). `disabled` is unchanged and wins over `isLoading`.
 
 On a tile with a `startIcon` the icon stays laid out, invisible, and the spinner
-draws over its box at the box's size, so nothing moves. A tile with no icon, and
-`plain`, show the spinner alone, at 16px; the label stays the accessible name.
+draws over it, so nothing moves: a circle as wide as the shorter side of the icon's
+box, centered on it. A tile with no icon, and `plain`, show the spinner alone, at
+16px; the label stays the accessible name.
 
 **`unavailable`** is for a control that can't be used right now: dimmed to 50% and
 `aria-disabled`, but focusable and in the Tab order, unlike `disabled`, so a

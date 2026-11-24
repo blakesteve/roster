@@ -184,7 +184,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           {overIcon && (
             <span className={cn(SLOT_TILE, "rst:relative")}>
               <span className="rst:invisible rst:inline-flex rst:items-center">{startIcon}</span>
-              <Spinner size="sm" variant="current" label={loadingLabel} className="rst:absolute rst:inset-0 rst:h-full rst:w-full" />
+              {/* An icon's box needn't be square (Font Awesome's is wider
+                  than tall), and a spinner filling it would be an ellipse. So
+                  it's a circle as wide as the box's shorter side (`cqmin`),
+                  centered without a transform, so the spin's is the only one. */}
+              <span className="rst:absolute rst:inset-0 rst:flex rst:items-center rst:justify-center rst:[container-type:size]">
+                <Spinner size="sm" variant="current" label={loadingLabel} className="rst:size-[100cqmin]" />
+              </span>
             </span>
           )}
           {/* Keeps the spinner's name and the label's apart wherever a name is
