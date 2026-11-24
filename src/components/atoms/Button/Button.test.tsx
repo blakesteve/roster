@@ -297,7 +297,10 @@ describe("Button Component", () => {
         </Button>,
       );
       expect(screen.getByTestId("icon").closest(".rst\\:invisible")).not.toBeNull();
-      expect(screen.getByRole("status")).toHaveClass("rst:h-full", "rst:w-full", "rst:border-2");
+      /* A circle as wide as the box's shorter side, not `sm`'s 16px. */
+      expect(screen.getByRole("status")).toHaveClass("rst:size-[100cqmin]", "rst:border-2");
+      expect(screen.getByRole("status")).not.toHaveClass("rst:h-4");
+      expect(screen.getByRole("status").parentElement).toHaveClass("rst:absolute", "rst:inset-0", "rst:[container-type:size]");
       /* The label shows, and the button is named by it and the spinner. */
       expect(screen.getByText("Keyboard")).not.toHaveClass("rst:sr-only");
       expect(screen.getByRole("button", { name: "loading Keyboard" })).toBeInTheDocument();

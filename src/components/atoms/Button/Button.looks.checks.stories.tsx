@@ -1,9 +1,12 @@
 import { useState, type ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor } from "storybook/test";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "./Button";
 import { buttonVariants } from "./button-variants";
 import { Card } from "../Card/Card";
+import { Spinner } from "../Spinner/Spinner";
 import { textContrast } from "../../../test/painted";
 import { realInputOrSkip, type RealInput } from "../../../test/real-input";
 
@@ -17,8 +20,11 @@ import { realInputOrSkip, type RealInput } from "../../../test/real-input";
  *   on an `<a>`, which nothing merges, show the browser's outline, no ring,
  *   and a tint's edge. A `solid` tile keeps Roster's ring.
  * - **Nothing moves while a tile is busy:** the icon's box, the label and the
- *   tile, at rest against busy, to 0.05px, and the spinner fills the icon's
- *   box. The twin is a tile without an icon, whose label sits elsewhere.
+ *   tile, at rest against busy, to 0.05px. The twin is a tile without an icon,
+ *   whose label sits elsewhere.
+ * - **A busy tile's spinner is a circle** as wide as its icon's box's shorter
+ *   side, centered on it, over a wide icon (Font Awesome's), a square one and
+ *   a tall one. The twin fills the box: an ellipse over the wide and the tall.
  * - **`unavailable` is a control you can reach and can't use:** focus stays on
  *   it, Tab passes, a press, Enter and Space do nothing, `aria-disabled` says
  *   so. The twin, native `disabled`, drops focus.
@@ -45,8 +51,8 @@ const chromium = () => /Chrome/.test(navigator.userAgent);
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const r2 = (n: number) => Math.round(n * 100) / 100;
 
-const Icon = ({ size = 12 }: { size?: number }) => (
-  <svg viewBox="0 0 16 16" width={size} height={size} aria-hidden="true" style={{ display: "block" }}>
+const Icon = ({ width = 12, height = width }: { width?: number; height?: number }) => (
+  <svg viewBox="0 0 16 16" width={width} height={height} aria-hidden="true" style={{ display: "block" }}>
     <rect width="16" height="16" fill="currentColor" />
   </svg>
 );
@@ -149,14 +155,12 @@ export const NothingMovesWhileATileIsBusy: Story = {
     const height = (id: string) => r2(tile(id).getBoundingClientRect().height);
     const got = {
       icon: [icon("rest"), icon("busy")],
-      spinner: inTile("busy", tile("busy").querySelector("[role=status]")!),
       label: [label("rest"), label("busy")],
       height: [height("rest"), height("busy"), height("rest-none"), height("busy-none")],
       without: label("rest-none"),
     };
     console.info(`LOOKS STILL ${JSON.stringify(got)}`);
     await expect(got.icon[1]).toBe(got.icon[0]);
-    await expect(got.spinner).toBe(got.icon[0]);
     await expect(got.label[1]).toBe(got.label[0]);
     await expect(got.height[1]).toBe(got.height[0]);
     /* A spinner with no icon to stand over is 16px, where WebKit lays the
@@ -165,6 +169,101 @@ export const NothingMovesWhileATileIsBusy: Story = {
     await expect(Math.abs(got.height[3] - got.height[2])).toBeLessThanOrEqual(chromium() ? 0 : 1);
     /* The twin: the label without an icon isn't where the one with it is. */
     await expect(got.without).not.toBe(got.label[0]);
+  },
+};
+
+/* ── A circle over any icon ───────────────────────────────────────────── */
+
+/* The wide one is Font Awesome's own box, so a change to it is seen here. */
+const SHAPES = {
+  wide: <FontAwesomeIcon icon={faCheck} />,
+  square: <Icon />,
+  tall: <Icon width={12} height={15} />,
+};
+type Shape = keyof typeof SHAPES;
+const shapes = Object.keys(SHAPES) as Shape[];
+
+export const ABusyTilesSpinnerIsACircleOverAnyIcon: Story = {
+  render: () => (
+    <div className="dark" style={{ background: "#1a1f2e", padding: 24, display: "grid", gap: 16, gridTemplateColumns: "repeat(3, 140px)", alignItems: "start", color: "#fff" }}>
+      {/* The twin's spinner fills the box it's over, whatever its shape. */}
+      <style>{`${STILL} [data-filling]{position:relative;display:inline-flex;justify-self:center;font-size:12px} [data-filling] [role=status]{position:absolute;inset:0;width:100%;height:100%}`}</style>
+      {shapes.map((s) => (
+        <Button key={s} variant="tint" layout="tile" startIcon={SHAPES[s]} data-spin={`${s} rest`}>
+          Keyboard
+        </Button>
+      ))}
+      {shapes.map((s) => (
+        <Button key={s} variant="tint" layout="tile" startIcon={SHAPES[s]} isLoading data-spin={`${s} busy`}>
+          Keyboard
+        </Button>
+      ))}
+      {shapes.map((s) => (
+        <span key={s} data-filling="" data-spin={`${s} filling`}>
+          {SHAPES[s]}
+          <Spinner size="sm" variant="current" />
+        </span>
+      ))}
+    </div>
+  ),
+  play: async () => {
+    const at = (s: Shape, state: string) => document.querySelector<HTMLElement>(`[data-spin="${s} ${state}"]`)!;
+    const size = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return [r2(r.width), r2(r.height)];
+    };
+    /* An element's or a range's box inside its tile. */
+    const inTile = (tile: Element, el: Element | Range) => {
+      const o = tile.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      return [r.left - o.left, r.top - o.top, r.width, r.height].map(r2).join(" ");
+    };
+    /* The spinner against the icon it's over: its box, its border and corners,
+       and how far its center is from the icon's. */
+    const spinner = (over: Element) => {
+      const spin = over.querySelector("[role=status]")!;
+      const a = spin.getBoundingClientRect();
+      const b = over.querySelector("svg")!.getBoundingClientRect();
+      const cs = getComputedStyle(spin);
+      return {
+        size: size(spin),
+        off: [r2(Math.abs(a.left + a.width / 2 - b.left - b.width / 2)), r2(Math.abs(a.top + a.height / 2 - b.top - b.height / 2))],
+        border: cs.borderTopWidth,
+        round: parseFloat(cs.borderTopLeftRadius) >= a.width / 2,
+      };
+    };
+    const svg = (s: Shape, state: string) => at(s, state).querySelector("svg")!;
+    const label = (s: Shape, state: string) => {
+      const range = document.createRange();
+      range.selectNode(document.createTreeWalker(at(s, state), NodeFilter.SHOW_TEXT, (n) => (n.textContent === "Keyboard" ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP)).nextNode()!);
+      return inTile(at(s, state), range);
+    };
+    const got = Object.fromEntries(
+      shapes.map((s) => [
+        s,
+        {
+          icon: size(svg(s, "rest")),
+          still: [inTile(at(s, "rest"), svg(s, "rest")), inTile(at(s, "busy"), svg(s, "busy"))],
+          label: [label(s, "rest"), label(s, "busy")],
+          tile: [size(at(s, "rest")), size(at(s, "busy"))],
+          spinner: spinner(at(s, "busy")),
+          filling: spinner(at(s, "filling")).size,
+        },
+      ]),
+    );
+    console.info(`LOOKS CIRCLE ${JSON.stringify(got)}`);
+    /* Each icon is the shape it's here for. */
+    const shapeOf = ([w, h]: number[]) => (w > h ? "wide" : w < h ? "tall" : "square");
+    await expect(shapes.map((s) => shapeOf(got[s].icon))).toEqual(shapes);
+    for (const s of shapes) {
+      const shorter = Math.min(...got[s].icon);
+      await expect({ shape: s, ...got[s].spinner }).toEqual({ shape: s, size: [shorter, shorter], off: [0, 0], border: "2px", round: true });
+      await expect(got[s].still[1]).toBe(got[s].still[0]);
+      await expect(got[s].label[1]).toBe(got[s].label[0]);
+      await expect(got[s].tile[1]).toEqual(got[s].tile[0]);
+    }
+    /* The twin: filling the box is a circle over the square icon alone. */
+    await expect(shapes.map((s) => shapeOf(got[s].filling))).toEqual(shapes);
   },
 };
 
