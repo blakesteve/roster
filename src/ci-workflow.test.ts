@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 /**
@@ -26,6 +26,23 @@ describe("ci.yml", () => {
 
   it("installs no browsers and no system libraries", () => {
     expect(workflow).not.toMatch(/playwright install|apt-get/);
+  });
+
+  it("runs every Vitest project", () => {
+    const projects = [...readFileSync(join(ROOT, "vite.config.ts"), "utf8").matchAll(/\n {10}name: '([\w-]+)',\n/g)].map((m) => m[1]);
+    const run = [...workflow.matchAll(/vitest run --project ([\w-]+)/g)].map((m) => m[1]);
+    expect(projects.length).toBeGreaterThanOrEqual(6);
+    expect(run.sort()).toEqual(projects.sort());
+  });
+
+  /* `storybook-touch` reads only `*.touch.checks.stories.tsx`, and every other
+     project leaves the tag out, so a story tagged `touch` in another file
+     would run nowhere. */
+  it("finds every story tagged touch in a file the touch project reads", () => {
+    const files = readdirSync(join(ROOT, "src"), { recursive: true, encoding: "utf8" }).filter((f) => f.endsWith(".stories.tsx"));
+    const tagged = files.filter((f) => /tags: \[[^\]]*["']touch["']/.test(readFileSync(join(ROOT, "src", f), "utf8")));
+    expect(tagged.length).toBeGreaterThan(0);
+    expect(tagged.filter((f) => !f.endsWith(".touch.checks.stories.tsx"))).toEqual([]);
   });
 
   it("gives every job a ceiling", () => {

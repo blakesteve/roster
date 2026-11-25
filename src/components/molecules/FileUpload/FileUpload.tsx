@@ -41,6 +41,8 @@ export interface FileUploadItem<R = unknown> {
   result?: R;
   /** Why it `failed`, or why it was `rejected`: by the rules, or by `upload` with a `FileUploadRejection`. */
   reason?: string;
+  /** Which shot this is, from 1, for one taken with `camera`: the number in its name (`strings.cameraPhoto`). */
+  shot?: number;
 }
 
 /** Every word FileUpload shows or says. Pass any of them in `strings` to replace it. */
@@ -48,6 +50,14 @@ export interface FileUploadStrings {
   choose: string;
   /** The Choose button's words while the drop box shows a picture (`preview="dropzone"`). */
   replace: string;
+  /** The button that opens the camera (`camera`). */
+  camera: string;
+  /**
+   * What a shot is called, wherever its name shows or is said: `n` counts the
+   * shots from 1, in the order taken, and is never used again. A phone can
+   * name every shot the same (`image.jpg`), so its own name tells none apart.
+   */
+  cameraPhoto: (n: number) => string;
   /** Beside the button where a pointer can drag; hidden on touch screens. */
   dropHint: string;
   /** While files are dragged over. */
@@ -77,6 +87,8 @@ export interface FileUploadStrings {
 const STRINGS: FileUploadStrings = {
   choose: "Choose photos",
   replace: "Replace photo",
+  camera: "Take a photo",
+  cameraPhoto: (n) => `Camera photo ${n}`,
   dropHint: "or drag them here",
   dropHere: "Drop to add them",
   queued: "Waiting",
@@ -121,7 +133,7 @@ export interface FileUploadProps<R = unknown> {
    * file browser. Exact types are riskier than they look: a picker that
    * filters by the type a photo reports can hide photos whose reported type
    * doesn't match. Narrow what's allowed with `types`, which is checked after
-   * picking.
+   * picking. That picker has no camera in it, so `camera` adds one apart.
    */
   accept?: string;
   /**
@@ -145,6 +157,24 @@ export interface FileUploadProps<R = unknown> {
   /** A problem with the field as a whole, from the form: "Add at least one photo." */
   errorMessage?: string;
   disabled?: boolean;
+  /**
+   * Adds a Take a photo button beside Choose, on a device whose main pointer
+   * is a finger (`pointer: coarse`). It opens the phone's camera, the back
+   * one, for one shot a press, through an input of its own: `capture` on the
+   * first input would take the photo library away. A shot goes through
+   * everything a picked file does, and is called `strings.cameraPhoto`.
+   *
+   * While the list is full the button is unavailable (`aria-disabled`), since
+   * a shot turned away may be kept nowhere else. In `preview="dropzone"` it
+   * stays, and a shot replaces the picture.
+   */
+  camera?: boolean;
+  /**
+   * Makes the camera button unavailable and nothing else: `aria-disabled`,
+   * dimmed and still focusable. For a moment when a shot would be lost, while
+   * a form waits for its uploads, say.
+   */
+  cameraDisabled?: boolean;
   strings?: Partial<FileUploadStrings>;
   className?: string;
   /**
@@ -253,6 +283,14 @@ function BoxPreview({ file, status }: Thumb) {
    them, and this makes them look it. */
 const DIMMED = "rst:cursor-not-allowed rst:opacity-50";
 
+/* Over a picture in the drop box: a button above it, on a surface of its own,
+   so it reads whatever the photo is. */
+const OVER_PICTURE = "rst:relative rst:z-10 rst:bg-[var(--roster-card-bg)] rst:dark:hover:bg-gray-800";
+
+/* What a file is called: its own name, or a shot's number in words. */
+const nameIn = (t: FileUploadStrings, item: Pick<FileUploadItem, "file" | "shot">) =>
+  item.shot === undefined ? item.file.name : t.cameraPhoto(item.shot);
+
 const ICON = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" } as const;
 
 /**
@@ -279,6 +317,8 @@ function FileUpload<R = unknown>({
   helperText,
   errorMessage,
   disabled = false,
+  camera = false,
+  cameraDisabled = false,
   strings: overrides,
   className,
   preview = "row",
@@ -301,9 +341,11 @@ function FileUpload<R = unknown>({
   const [items, setItems] = useState<FileUploadItem<R>[]>([]);
   const itemsRef = useRef(items);
   const nextId = useRef(0);
+  const shots = useRef(0);
   const controllers = useRef(new Map<string, AbortController>());
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   /* The latest props, for callbacks that outlive the render that made them:
      an upload resolves long after the click that started it. */
@@ -416,11 +458,11 @@ function FileUpload<R = unknown>({
           const message = (error as { message?: unknown }).message;
           const reason = typeof message === "string" && message ? message : words.uploadError(error);
           patch(item.id, { status: "rejected", progress: null, reason });
-          say(words.rejectedNotice(item.file.name, reason));
+          say(words.rejectedNotice(nameIn(words, item), reason));
         } else {
           const reason = words.uploadError(error);
           patch(item.id, { status: "failed", reason });
-          say(words.failedNotice(item.file.name, reason));
+          say(words.failedNotice(nameIn(words, item), reason));
         }
         pump();
       },
@@ -469,7 +511,7 @@ function FileUpload<R = unknown>({
     return undefined;
   };
 
-  const add = (files: File[]) => {
+  const add = (files: File[], fromCamera = false) => {
     if (disabled || files.length === 0) return;
     /* In the drop box, a file that passes the rules takes the place of the
        one there: its place is counted as free, and it's removed only once
@@ -480,7 +522,15 @@ function FileUpload<R = unknown>({
     for (const file of files) {
       const reason =
         current && sameFile(current.file, file) ? t.duplicate(file) : reasonFor(file, [...kept, ...added.filter((i) => i.status !== "rejected")]);
-      added.push({ id: `${id}-file-${nextId.current++}`, file, status: reason ? "rejected" : "queued", progress: null, reason });
+      added.push({
+        id: `${id}-file-${nextId.current++}`,
+        file,
+        status: reason ? "rejected" : "queued",
+        progress: null,
+        reason,
+        /* Counted when it's turned away too: its row is on screen. */
+        ...(fromCamera && { shot: ++shots.current }),
+      });
     }
     const accepted = added.filter((i) => i.status === "queued").length;
     const replaced = accepted ? current : undefined;
@@ -489,9 +539,9 @@ function FileUpload<R = unknown>({
       controllers.current.delete(replaced.id);
     }
     commit([...itemsRef.current.filter((i) => i !== replaced), ...added]);
-    if (replaced) say(t.removed(replaced.file.name));
+    if (replaced) say(t.removed(nameIn(t, replaced)));
     if (accepted) say(t.added(accepted));
-    for (const i of added) if (i.reason) say(t.rejectedNotice(i.file.name, i.reason));
+    for (const i of added) if (i.reason) say(t.rejectedNotice(nameIn(t, i), i.reason));
     pump();
   };
 
@@ -504,7 +554,7 @@ function FileUpload<R = unknown>({
     controllers.current.delete(itemId);
     const neighbor = list[index + 1] ?? list[index - 1];
     commit(list.filter((i) => i.id !== itemId));
-    say(t.removed(list[index].file.name));
+    say(t.removed(nameIn(t, list[index])));
     requestFocus(neighbor ? `[data-file-remove="${neighbor.id}"]` : "[data-file-choose]");
     pump();
   };
@@ -569,6 +619,9 @@ function FileUpload<R = unknown>({
   /* What the drop box pictures: the file that's in, else the latest one
      turned away, faded, until it's removed. Never a removed file. */
   const shown = boxed ? (items.find((i) => i.status !== "rejected") ?? items.at(-1)) : undefined;
+  /* No place left for a shot. In the drop box one takes the place of the
+     picture there. */
+  const full = !boxed && maxFiles !== undefined && items.filter((i) => i.status !== "rejected").length >= maxFiles;
 
   return (
     <div
@@ -598,6 +651,14 @@ function FileUpload<R = unknown>({
              it arrives; the button sits at the foot of a picture. */
           boxed && "rst:relative rst:h-[var(--roster-file-preview-height,13rem)]",
           boxed && shown && "rst:justify-end",
+          /* With the camera, and for a finger: Choose and Take a photo fill the
+             box, side by side where both fit on a line and as equal as their
+             words allow (`flex-1` and their own one-line minimum), else one
+             under the other. The box is the row, so nothing wraps Choose, and
+             with a mouse it's the column it was. The lines sit in the middle
+             of the box, or at its foot under a picture. */
+          camera && "rst:pointer-coarse:flex-row rst:pointer-coarse:flex-wrap rst:pointer-coarse:content-center",
+          camera && boxed && shown && "rst:pointer-coarse:content-end",
           dragging
             ? "rst:border-primary-500 rst:bg-primary-500/10"
             : errorMessage
@@ -614,9 +675,8 @@ function FileUpload<R = unknown>({
           className={cn(
             "rst:px-5",
             disabled && DIMMED,
-            /* Over a picture: above it, on a surface of its own, so it reads
-               whatever the photo is. */
-            shown && "rst:relative rst:z-10 rst:bg-[var(--roster-card-bg)] rst:dark:hover:bg-gray-800",
+            shown && OVER_PICTURE,
+            camera && "rst:pointer-coarse:flex-1",
           )}
           aria-disabled={disabled || undefined}
           aria-describedby={describedBy}
@@ -630,6 +690,27 @@ function FileUpload<R = unknown>({
         >
           {shown ? t.replace : t.choose}
         </Button>
+        {camera && (
+          <Button
+            type="button"
+            variant="outline"
+            colorScheme="neutral"
+            size="lg"
+            className={cn("rst:hidden rst:px-5 rst:pointer-coarse:inline-flex rst:pointer-coarse:flex-1", shown && OVER_PICTURE)}
+            unavailable={disabled || cameraDisabled || full}
+            aria-describedby={describedBy}
+            onClick={() => cameraRef.current?.click()}
+            data-file-camera=""
+            startIcon={
+              <svg {...ICON} aria-hidden="true">
+                <path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z" />
+                <circle cx="12" cy="13" r="3.5" />
+              </svg>
+            }
+          >
+            {t.camera}
+          </Button>
+        )}
         {/* For a pointer that can drag; a touch screen can't drop files here.
             Not over a picture, where it wouldn't read: the border still
             lights up for a drag. */}
@@ -656,6 +737,24 @@ function FileUpload<R = unknown>({
           }}
           data-file-input=""
         />
+        {camera && (
+          /* Apart from the first input: `capture` there would leave no way to
+             the photo library. No `multiple`: a camera gives one shot a press. */
+          <input
+            ref={cameraRef}
+            type="file"
+            hidden
+            tabIndex={-1}
+            accept={accept}
+            capture="environment"
+            disabled={disabled}
+            onChange={(e) => {
+              add(Array.from(e.currentTarget.files ?? []), true);
+              e.currentTarget.value = "";
+            }}
+            data-file-camera-input=""
+          />
+        )}
       </div>
 
       {helperText && (
@@ -672,6 +771,7 @@ function FileUpload<R = unknown>({
       {items.length > 0 && (
         <ul className="rst:mt-3 rst:flex rst:flex-col rst:gap-2" aria-labelledby={labelId}>
           {items.map((item) => {
+            const name = nameIn(t, item);
             const problem = item.status === "failed" || item.status === "rejected";
             const moving = item.status === "uploading" || item.status === "processing" || item.status === "queued";
             return (
@@ -683,8 +783,8 @@ function FileUpload<R = unknown>({
               >
                 {!boxed && <Thumbnail file={item.file} status={item.status} />}
                 <div className="rst:min-w-0 rst:flex-1 rst:text-left">
-                  <p className="rst:truncate rst:text-sm rst:font-medium rst:text-[var(--roster-control-text)]" title={item.file.name}>
-                    {item.file.name}
+                  <p className="rst:truncate rst:text-sm rst:font-medium rst:text-[var(--roster-control-text)]" title={name}>
+                    {name}
                   </p>
                   <p
                     className={cn(
@@ -727,7 +827,7 @@ function FileUpload<R = unknown>({
                     size="icon"
                     className={cn("rst:h-11 rst:w-11", disabled && DIMMED)}
                     aria-disabled={disabled || undefined}
-                    aria-label={t.retry(item.file.name)}
+                    aria-label={t.retry(name)}
                     onClick={() => retry(item.id)}
                     data-file-retry={item.id}
                   >
@@ -744,7 +844,7 @@ function FileUpload<R = unknown>({
                   size="icon"
                   className={cn("rst:h-11 rst:w-11", disabled && DIMMED)}
                   aria-disabled={disabled || undefined}
-                  aria-label={t.remove(item.file.name)}
+                  aria-label={t.remove(name)}
                   onClick={() => remove(item.id)}
                   data-file-remove={item.id}
                 >

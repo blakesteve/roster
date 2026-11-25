@@ -77,6 +77,8 @@ const meta = {
           "When your server can tell a file will never go up, reject with a `FileUploadRejection` and it's turned away rather than failed. A picture of each file shows as a thumbnail on its row, or, for one picture, `preview=\"dropzone\"` shows it big in the drop box.",
           "",
           "On phones the picker stays `accept=\"image/*\"` with no `capture`, which is what gets Android's photo picker with albums and cloud photos rather than a file browser. Narrow what's allowed with `types`, checked after picking. Dragging files onto the field works where there's a pointer, and is never the only way in. Every word it shows or says can be replaced through `strings`.",
+          "",
+          "That picker has no camera in it, so `camera` adds a Take a photo button beside Choose, where the main pointer is a finger. It opens an input of its own: `capture` on the first one would take the photo library away, so there are two.",
         ].join("\n"),
       },
     },
@@ -90,6 +92,8 @@ const meta = {
     maxSize: 15 * 1024 * 1024,
     concurrency: 3,
     disabled: false,
+    camera: false,
+    cameraDisabled: false,
     preview: "row",
     upload: simulatedUpload(),
   },
@@ -103,6 +107,16 @@ const meta = {
     maxSize: { control: { type: "number", min: 0, step: 1024 * 1024 } },
     concurrency: { control: { type: "number", min: 1, step: 1 }, table: { defaultValue: { summary: "3" } } },
     disabled: { control: "boolean", table: { defaultValue: { summary: "false" } } },
+    camera: {
+      control: "boolean",
+      description: "Take a photo beside Choose, on a device whose main pointer is a finger. See it on a phone, or in your browser's device mode.",
+      table: { defaultValue: { summary: "false" } },
+    },
+    cameraDisabled: {
+      control: "boolean",
+      description: "Makes Take a photo unavailable, and nothing else.",
+      table: { defaultValue: { summary: "false" } },
+    },
     preview: {
       control: "inline-radio",
       options: ["row", "dropzone"],
@@ -280,6 +294,33 @@ export const PictureInTheDropBox: Story = {
   },
 };
 
+/* Where the main pointer isn't a finger the button isn't there, so the story
+   says where it is. A style of its own, so nothing is added to the library's. */
+function OnATouchScreen(args: FileUploadProps) {
+  return (
+    <>
+      <style>{"@media (pointer: coarse) { [data-touch-note] { display: none } }"}</style>
+      <p data-touch-note="" style={{ margin: "0 0 12px", fontSize: 14, maxWidth: 520 }}>
+        Take a photo shows on a touch screen. Open this on a phone, or in your browser&apos;s device mode.
+      </p>
+      <Field {...args} />
+    </>
+  );
+}
+
+export const TakeAPhoto: Story = {
+  render: OnATouchScreen,
+  args: { camera: true, maxFiles: 3, types: undefined, helperText: "Up to 3 photos." },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "On a phone or a tablet, Choose photos and Take a photo fill the box, side by side where both fit and stacked where they don't. With a mouse there's only Choose: open this story on a phone, or in your browser's device mode. Take a photo opens the back camera for one shot a press. Phones name every shot the same, so each is called by its number instead, Camera photo 1 and on, in the list and in what's said. Take three and the list is full: the button is unavailable until one is removed, since a shot turned away may be kept nowhere else.",
+      },
+    },
+  },
+};
+
 export const SlowServer: Story = {
   args: { upload: simulatedUpload({ steps: 4, stepMs: 150, serverMs: 5000 }) },
   parameters: {
@@ -370,9 +411,12 @@ export const Translated: Story = {
     label: "Fotos",
     helperText: "JPEG o PNG, hasta 15 MB cada una.",
     maxFiles: undefined,
+    camera: true,
     strings: {
       choose: "Elegir fotos",
       replace: "Cambiar foto",
+      camera: "Hacer una foto",
+      cameraPhoto: (n) => `Foto de la cámara ${n}`,
       dropHint: "o arrástralas aquí",
       dropHere: "Suelta para añadirlas",
       queued: "En espera",
@@ -399,7 +443,7 @@ export const Translated: Story = {
   parameters: {
     docs: {
       description: {
-        story: "Every word it shows or says, on screen or to a screen reader, comes from `strings`. Nothing is left in English, the drop box's Replace included.",
+        story: "Every word it shows or says, on screen or to a screen reader, comes from `strings`. Nothing is left in English, the drop box's Replace and the camera's Take a photo included.",
       },
     },
   },

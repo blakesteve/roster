@@ -93,6 +93,11 @@ jobs:
         timeout-minutes: 15
         run: npx vitest run --project storybook-real-input
 
+      # In a browser whose main pointer is a finger.
+      - name: Run Storybook tests on a touch screen
+        timeout-minutes: 2
+        run: npx vitest run --project storybook-touch
+
       # Checks that read Chromium's accessibility tree (.storybook/ax-tree.ts).
       # Last, and alone: beside other story files the page didn't answer the
       # DevTools protocol in time.
