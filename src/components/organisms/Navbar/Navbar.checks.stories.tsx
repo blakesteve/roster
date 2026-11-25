@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
 import { Navbar } from "./Navbar";
+import { Menu, MenuButton } from "../../molecules/Menu/Menu";
 import { realInputOrSkip } from "../../../test/real-input";
 
 /**
@@ -304,5 +305,82 @@ export const TheOpenPanelCoversTheHamburger: Story = {
     } finally {
       await real.page.viewport(1280, 720);
     }
+  },
+};
+
+/* Anything clickable shows the pointer. Read under the middle of each control,
+   where a person points: an icon or an avatar inside could bring its own. The
+   twins: a bare button, which a browser gives the arrow, and a plain
+   `MenuButton` that's disabled. */
+const cursors = (root: ParentNode) =>
+  [...root.querySelectorAll<HTMLElement>("a[href], button, [role='switch'], [role^='menuitem']")]
+    .filter((el) => el.offsetWidth > 0)
+    .map((el) => {
+      const r = el.getBoundingClientRect();
+      const under = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      const name = (el.textContent ?? "").replace(/\s+/g, " ").trim();
+      return `${name}: ${under && el.contains(under) ? getComputedStyle(under).cursor : "covered"}`;
+    });
+
+export const EveryControlShowsThePointer: Story = {
+  tags: ["real-input"],
+  render: () => (
+    <div style={{ minHeight: 800 }}>
+      <Navbar
+        logoSrc={LOGO}
+        brandName="Tidewater"
+        position="static"
+        items={[{ label: "Charts", path: "/charts" }]}
+        user={{ initials: "TW", notificationCount: 2 }}
+        onInboxClick={() => {}}
+        onThemeToggle={() => {}}
+        onLogout={() => {}}
+        userMenuItems={[{ label: "Settings", path: "/settings" }]}
+      />
+      <button type="button" data-twin="bare">
+        Bare
+      </button>
+      <Menu>
+        <MenuButton plain disabled data-twin="disabled">
+          Off
+        </MenuButton>
+      </Menu>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    const nav = canvasElement.querySelector("nav")!;
+    const twin = (id: string) => getComputedStyle(canvasElement.querySelector(`[data-twin="${id}"]`)!).cursor;
+    let bar: string[] = [];
+    let phone: string[] = [];
+    let menu: string[] = [];
+    let rows: string[] = [];
+    try {
+      bar = cursors(nav);
+      const { trigger, panel } = await openUserMenu(canvasElement);
+      rows = cursors(panel);
+      trigger.click();
+      await real.page.viewport(414, 800);
+      await waitFor(() => expect(window.innerWidth).toBe(414));
+      phone = cursors(nav);
+      nav.querySelector<HTMLButtonElement>("[data-roster-hamburger] button")!.click();
+      const card = await waitFor(() => {
+        const c = document.querySelector<HTMLElement>("[data-roster-mobile-panel]")!;
+        expect(c).not.toBeNull();
+        expect(c.parentElement!.getAnimations({ subtree: true })).toHaveLength(0);
+        return c;
+      });
+      await waitFor(() => expect(cursors(card).some((c) => c.endsWith("covered"))).toBe(false));
+      menu = cursors(card);
+    } finally {
+      await real.page.viewport(1280, 720);
+    }
+    console.info(`NAVBAR CURSORS ${JSON.stringify({ bar, rows, phone, menu })}`);
+    await expect(bar).toEqual(["Tidewater: pointer", "Charts: pointer", "Open user menuTW2: pointer"]);
+    await expect(rows).toEqual(["Inbox (2): pointer", "Dark Mode: pointer", "Settings: pointer", "Log Out: pointer"]);
+    await expect(phone).toEqual(["Tidewater: pointer", "Open main menu: pointer"]);
+    await expect(menu).toEqual(["Close menu: pointer", "Charts: pointer", "Settings: pointer", "Pending Invitations2: pointer", "Dark Mode: pointer", "Log Out: pointer"]);
+    await expect([twin("bare"), twin("disabled")]).toEqual(["default", "not-allowed"]);
   },
 };

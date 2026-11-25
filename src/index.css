@@ -53,6 +53,28 @@
    moves. `group-`, `peer-`, `has-` and the rest compose with it. */
 @custom-variant focus-visible (&:is(:focus-visible, [data-key-focus]));
 
+/* `Navbar`'s bar where its brand gives way: on a phone, and in the wide row
+   once the page's text has outgrown it (the viewport is narrower than 48 of
+   the root's own rem, which a media query can't see: its rem is the browser's
+   default). `Navbar` sets the property on its root, and registering it as a
+   length makes it compute to 0px or 1px, which the style query compares (the
+   half pixel it takes off keeps a viewport a hair under 48rem at 0). A
+   style query needs no containment, so nothing an app puts in the bar changes
+   its containing block. Without style queries the wide row is as it was. */
+@custom-variant nav-tight {
+  @media (width < 48rem) {
+    @slot;
+  }
+  @container style(--rst-nav-tight: 1px) {
+    @slot;
+  }
+}
+@property --rst-nav-tight {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
 @theme inline {
   /* --- Primary (Deep Blue) --- */
   --color-primary-50: var(--roster-primary-50, #f2f8fc);
