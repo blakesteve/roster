@@ -2064,7 +2064,21 @@ first line and `endIcon` beside the last. An icon passed as a child stays center
 the label, so pass icons through the props. Lines center; pass `text-left` for a button
 whose content starts at the left. A Button keeps its one-line width beside a neighbor
 that can wrap, so in a row that can't wrap it can still be pushed out at 200% text: let
-the row wrap (`flex-wrap`).
+the row wrap (`flex-wrap`). A tile doesn't: its label wraps in its cell.
+
+**In a grid, give a Button `w-full`.** Safari works out a Button's one-line width from
+the whole grid, not its column, so a label too long for its column overlaps the next
+one. With `w-full` it's the column's width in every browser. The same goes for a link
+wearing `buttonVariants`. A tile needs nothing: it doesn't take the one-line width.
+
+**A Button's height is its padding and a line**, and not fixed (`height: fit-content`,
+which nothing stretches). Through 5.24.0 it was fixed, and in Safari a Button in a flex
+column never grew for a label that wrapped, and in no browser under a `min-h-11` of your
+own. Your own `h-*` replaces it, `h-auto` too, and a vertical padding of your own makes
+the height with no `h-*`: a 40px Button is 46px with `py-3`, and 30px with `py-1`, where
+the fixed height held it at 40. Content shorter than a line still takes a line. A link
+wearing `buttonVariants` keeps the fixed height, so give one in a flex column `h-fit`
+(`src/components/atoms/Button/Button.layouts.checks.stories.tsx`).
 
 **`singleLine`** keeps the label on one line at the size's height and cuts it with an
 ellipsis when there's no room. Use it only where the label fits at 200% text or is
@@ -2077,10 +2091,9 @@ line, every Button is the same box, text and icons, to the pixel, in every varia
 size, beside a wrapping heading or a growing field, and full width
 (`src/components/atoms/Button/Button.wrap.checks.stories.tsx`). Two lines are 44, 56,
 60 and 64px for `xs`, `sm`, `default` and `lg` (`xs` 42 in WebKit, which draws its
-line at a whole 15px). Each size's vertical padding is half its height less one line,
-less the border, so a padding of your own, `py-3` say, now applies where the fixed
-height used to clip it: a 40px Button with `py-3` becomes 46px. `size="icon"` keeps
-its square. `buttonVariants` on a link carries the wrap, padding and width floor too;
+line at a whole 15px), in every look. Each size's vertical padding is half its height
+less one line, less the border it draws. `size="icon"` keeps its square.
+`buttonVariants` on a link carries the wrap, padding and width floor too;
 merge the result with tailwind-merge under the `rst` prefix, as `Button` does, so
 `singleLine` and your own padding replace the defaults rather than sit beside them.
 Without `lh` (before Chrome 109 and Safari 16.4), the padding uses the size's line in
