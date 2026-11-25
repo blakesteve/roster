@@ -356,8 +356,9 @@ describe("Menu", () => {
     );
     const button = screen.getByRole("button", { name: "Account" });
     expect(button.getAttributeNames().sort()).toEqual(["aria-expanded", "aria-haspopup", "aria-label", "class", "data-menu-tree", "id", "type"]);
-    /* The twin: the class it was given and the cursor, none of Button's. */
-    expect(button).toHaveAttribute("class", "rst:cursor-pointer rst:disabled:cursor-not-allowed rst:aria-disabled:cursor-not-allowed avatar");
+    /* The twin: the class it was given, the cursor and where a press lands,
+       none of Button's. */
+    expect(button).toHaveAttribute("class", "rst:*:pointer-events-none rst:cursor-pointer rst:disabled:cursor-not-allowed rst:aria-disabled:cursor-not-allowed avatar");
   });
 
   it("renders a plain link by default, without a to attribute", async () => {

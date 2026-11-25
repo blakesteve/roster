@@ -793,6 +793,19 @@ so Chromium's rings are unchanged. It runs while a component that moves focus
 is mounted (Menu, the select family, Dialog, Sheet, RadioGroup, Tabs,
 Slider and the rest), on one set of document listeners.
 
+**A press on a button's label or icon is the button's.** In Safari a press whose
+target is an element inside a button, a span or an icon's svg, doesn't count as
+the mouse's, so the next thing a script focused drew a ring: through 5.24.0 a
+dialog closed with the mouse ringed what opened it. Now nothing in a `Button`
+takes pointer events, so the press lands on the button, and the same goes for
+`MenuButton plain`, `Disclosure`, `MatchupCard`, `PasswordInput`'s reveal, and
+the dismiss or close of `Alert`, `Toast`, `AvatarStrip` and `Dialog`. The
+button's own handlers, `title`, cursor and tooltip are untouched. A child of a
+`Button` that needs a handler, a `title` or a `hover:` style of its own can take
+`pointer-events-auto`, and a press on it then rings in Safari again. A link
+draws that ring in Safari whatever it holds, `buttonVariants` on one included:
+that one is the browser's (`src/press.checks.stories.tsx`).
+
 Your own components' rings come from your Tailwind, not Roster's, so they
 don't follow the mark on their own. To have them do the same, redefine the
 variant in your stylesheet as Roster does:

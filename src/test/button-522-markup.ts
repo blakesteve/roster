@@ -5,7 +5,7 @@
 /* Classes 5.23 added to `buttonVariants`' base, and the one it replaced. */
 const ADDED = ["rst:text-center", "rst:text-balance", "rst:min-w-fit", "rst:min-h-fit", "rst:supports-[height:1lh]:[--rst-line:1lh]"];
 const MARK = "rst:supports-[height:1lh]:[--rst-line:1lh]";
-const ROW = "rst:flex rst:grow rst:min-w-0 rst:items-center rst:[justify-content:inherit] rst:[gap:inherit]";
+const ROW = "rst:pointer-events-none rst:flex rst:grow rst:min-w-0 rst:items-center rst:[justify-content:inherit] rst:[gap:inherit]";
 /* Prefixes, joined from parts so the build's class check doesn't read them
    as classes that should exist. */
 const OTHER_PADDING = [7, 9, 11].map((n) => ["rst", `py-[calc((--spacing(${n})-var(--rst-line,`].join(":"));

@@ -214,6 +214,23 @@ describe("Button Component", () => {
       expect(button).not.toHaveClass("rst:py-2");
     });
 
+    it("takes no press on its row or what's in it", () => {
+      render(
+        <>
+          <Button>Inline</Button>
+          <Button layout="tile" startIcon={<span />}>Tile</Button>
+          <Button variant="plain">Plain</Button>
+          <Button size="icon" aria-label="Icon"><svg /></Button>
+          <Button isLoading>Busy</Button>
+        </>,
+      );
+      for (const button of screen.getAllByRole("button")) {
+        expect(button.children).toHaveLength(1);
+        expect(button.firstElementChild).toHaveClass("rst:pointer-events-none");
+        expect(button).not.toHaveClass("rst:pointer-events-none");
+      }
+    });
+
     it("lets a caller's own padding win", () => {
       render(<Button className="rst:py-3">Save changes</Button>);
       expect(screen.getByRole("button").className).not.toContain("rst:py-[calc");

@@ -13,8 +13,8 @@ export interface ButtonProps
   /**
    * Shows a spinner and ignores presses while something the button started is
    * in flight. Unlike `disabled`, it keeps the button focusable: a native
-   * `disabled` drops focus to the page the moment it lands, so a keyboard or
-   * screen reader user who just pressed Save is thrown back to the top. A
+   * `disabled` drops focus to the page, so a keyboard or screen reader user
+   * who just pressed Save is thrown back to the top. A
    * loading button stays where it is, says it's busy (`aria-busy`) and
    * unavailable (`aria-disabled`), and swallows clicks, Enter and Space, which
    * also stops a submit button sending its form twice.
@@ -174,10 +174,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             own `gap` and `justify-content`, so an app's `gap-1.5` or
             `justify-start` still applies. Icons an app passes as children
             stay centered on the label, as before. A tile's row is a column,
-            as its button is. */}
+            as its button is.
+
+            A press lands on the button, never on the row or what's in it: in
+            WebKit a press on an element inside a button doesn't count as the
+            mouse's, so the next thing a script focused drew a focus ring. A
+            child that needs its own events can take `pointer-events-auto`. */}
         <span
           className={cn(
-            "rst:flex rst:grow rst:min-w-0 rst:items-center rst:[justify-content:inherit] rst:[gap:inherit]",
+            "rst:pointer-events-none rst:flex rst:grow rst:min-w-0 rst:items-center rst:[justify-content:inherit] rst:[gap:inherit]",
             tile && "rst:flex-col",
           )}
         >

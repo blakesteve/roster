@@ -89,7 +89,7 @@ function DismissGlyph() {
       aria-hidden="true"
       focusable="false"
       viewBox="0 0 12 12"
-      className="rst:size-3"
+      className="rst:pointer-events-none rst:size-3"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.5"

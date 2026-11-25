@@ -106,6 +106,9 @@ const dialog = () => document.querySelector<HTMLElement>('[role="dialog"]');
 const root = () => document.querySelector("#headlessui-portal-root");
 const html = () =>
   (root()?.innerHTML ?? "")
+    /* The close button's glyph takes no press, since after 5.24.0; pinned by
+       `press.checks.stories.tsx`. */
+    .replace("rst:pointer-events-none rst:h-5 rst:w-5", "rst:h-5 rst:w-5")
     .replace(/-?\d+(\.\d+)?px/g, "#px")
     .replace(/_r_[0-9a-z]+_|[«:]r[0-9a-z]+[»:]/g, "ID");
 
