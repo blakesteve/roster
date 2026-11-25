@@ -2368,6 +2368,32 @@ that its rows are 44px tall rather than 36, and that with neither an inbox nor
 a theme row it no longer draws an empty band and rule at the top. It keeps its
 own white fill, whatever `--roster-popover-bg` says.
 
+### Navbar at large text
+
+At 320px and 200% text the menu button stays on the bar, and the menu's close button on
+the menu. The brand gives way instead:
+
+- **The name** wraps where it can, at its spaces, and leaves the bar whole once its
+  longest word can't fit beside the logo, rather than be cut to a fragment. The link keeps
+  it as its name. The menu shows it beside the logo, or on a line of its own under the
+  logo and the close button.
+- **A name breaks only where you allow.** Pass `brandElement={<span>Tide<wbr />water</span>}`
+  to let one long word become two lines; the accessible name doesn't change. A word with no
+  such point that can't fit a full line of the menu breaks rather than run off it.
+- **The logo** keeps its size, unless you gave it `logoWidth` or `logoHeight`: then it shrinks
+  by what's missing, fitted and never stretched, to 2rem wide.
+- **`brandElement`** follows the same rules with nothing to pass. A fragment's children
+  keep 12px between them, and each gives way on its own.
+- **The side margins** of the bar and the menu stop growing on a phone (`min(1rem, 5vw)` for
+  the bar): at 100% text and 320px or wider they're what they were.
+- **The bar stays 4rem tall,** so the page padding you set by it holds. It fits two lines of
+  the default name.
+
+In the wide row (768px and up) the links give way first, then the brand, and only once the
+page's own text is larger than the row was drawn for: the viewport is narrower than 48 of the
+root's rem. That's read with a style query, so a browser without one keeps the row as it was.
+Nothing in the row moves at 100% text.
+
 ### Slider
 
 A value picked along a track: tapped, dragged, stepped with the keys, or set
@@ -3038,7 +3064,7 @@ function App() {
 | `ModerationQueue` | Items waiting for a decision: busy per action, confirm, reason and edit steps, focus after an item leaves, a live region. Never fetches (see [ModerationQueue](#moderationqueue)) |
 | `QueueEditDialog` | A ModerationQueue edit step in a Dialog: pass it as an edit's `surface`. A separate export, so a queue that never uses it doesn't ship it |
 | `QueueEditSheet` | A ModerationQueue edit step in a Sheet, for a long form: pass it as an edit's `surface`. A separate export, like `QueueEditDialog` |
-| `Navbar`    | Responsive navigation bar with mobile slide-out; its user menu is a `Menu`. A wide logo keeps its own proportions through `logoHeight` and `logoWidth`; its built-in words are in `labels` |
+| `Navbar`    | Responsive navigation bar with mobile slide-out; its user menu is a `Menu`. A wide logo keeps its own proportions through `logoHeight` and `logoWidth`; its built-in words are in `labels`. Its brand gives way at large text ([Navbar at large text](#navbar-at-large-text)) |
 | `Sheet`     | Bottom sheet: drag, Escape or backdrop to dismiss; only its content scrolls; returns focus, even from a deep link; the title may be a node |
 | `Table`     | Static data table                                                                                                                                                  |
 
@@ -3144,6 +3170,8 @@ browser gives a button the arrow; Tailwind v3's preflight gave it the pointer
 and v4's doesn't, so a `<button>` with no cursor class shows the arrow. Until 5.11.0 the option rows
 in `Select`, `Combobox` and `MultiSelect` showed the arrow while `Menu`'s
 showed the pointer, and `PasswordInput`'s reveal button showed the arrow too.
+Until 5.24.0 so did `MenuButton plain`, with it Navbar's avatar, and Navbar's
+menu button and the menu's close button.
 
 - A disabled control shows `not-allowed`.
 - A busy one may say so: `Button`'s `loading` shows `progress`.
@@ -3160,7 +3188,9 @@ Three things keep another cursor, because they aren't click targets:
   handle show `grab`, then `grabbing`.
 
 `src/internal/popups.checks.stories.tsx` reads the computed cursor on a row in
-each popup, with a disabled row as its twin.
+each popup, with a disabled row as its twin, and
+`src/components/organisms/Navbar/Navbar.checks.stories.tsx` on every control in
+Navbar's bar and menu.
 
 ## Development
 

@@ -79,6 +79,55 @@ const USER_MENU_ACTION = /* @__PURE__ */ cn(
   "rst:border rst:border-transparent rst:font-medium rst:text-gray-600 rst:dark:text-gray-400 rst:focus:text-gray-600 rst:dark:focus:text-gray-400 rst:hover:bg-gray-500/10 rst:dark:hover:bg-gray-400/15 rst:hover:focus:bg-gray-500/10 rst:dark:hover:focus:bg-gray-400/15",
 );
 
+/* The brand's name in the bar. Where the bar is tight (`nav-tight`, see
+   index.css) it wraps at its spaces, and leaves whole once its longest word
+   can't fit beside the logo: a part that can't fit wraps onto a line of its
+   own, past the clip. The words are clipped, not removed, so the link keeps
+   its name. Everywhere else the two are `contents`, so the row lays out as if
+   they weren't there.
+
+   The slot opens with a zero-width edge, so a part has something on the line
+   to wrap past. Its padding, undone by its margins, keeps the clip off the
+   letters' edges. It shrinks before the logo does.
+
+   A part is one element of the brand, laid out as it is in the row: after a
+   12px gap, at its own width, or wrapped in what's left. The gap hangs on an
+   edge of the part's own, so a screen-reader-only element, out of flow, adds
+   none. Both edges are elements: crossing the breakpoint in a frame, WebKit
+   kept a `::before` that no longer applied, and drew its gap. */
+const BAR_NAME =
+  "rst:contents rst:nav-tight:flex rst:nav-tight:flex-wrap rst:nav-tight:items-center rst:nav-tight:min-w-0 rst:nav-tight:shrink-999999 rst:nav-tight:gap-y-24 rst:nav-tight:max-h-20 rst:nav-tight:overflow-clip rst:nav-tight:-my-2 rst:nav-tight:py-2 rst:nav-tight:-me-1 rst:nav-tight:pe-1";
+const BAR_PART =
+  "rst:contents rst:nav-tight:flex rst:nav-tight:items-center rst:nav-tight:gap-3 rst:nav-tight:flex-[1_1_min-content] rst:nav-tight:max-w-max";
+const BAR_EDGE = <span aria-hidden="true" className="rst:hidden rst:nav-tight:block" />;
+
+/* The brand's name in the menu panel's head: beside the logo while its longest
+   word fits between the logo and the close button, and otherwise on a line of
+   its own, the head's full width under them both.
+
+   `::after` holds the close button's room on the first line, so the name wraps
+   by it and stops short of it; `::before` carries the 12px gap, as in the bar.
+   On a line of its own neither belongs, and there the name is as wide as the
+   head (`100cqi`), so both are sized by the difference: zero then, and all of
+   it whenever the logo shares the line. Intrinsic sizing reads their
+   percentages as none, so the room still counts when deciding whether it fits.
+
+   Inside, the parts of a fragment each take a line before a word of theirs
+   breaks, and a word breaks only when a full line can't hold it. */
+const PANEL_NAME =
+  "rst:flex rst:min-w-0 rst:flex-[1_1_min-content] rst:items-center rst:gap-3 rst:before:content-[''] rst:before:me-[clamp(-0.75rem,calc((100cqi-100%-1px)*999-0.75rem),0px)] rst:after:content-[''] rst:after:-ms-3 rst:after:w-[calc(0.5rem+1.25em)] rst:after:max-w-[calc((100cqi-100%-1px)*999)] rst:after:shrink-0";
+const PANEL_PARTS =
+  "rst:flex rst:min-w-0 rst:max-w-max rst:flex-[1_1_min-content] rst:flex-wrap rst:items-center rst:gap-x-3";
+const PANEL_PART =
+  "rst:flex rst:min-w-0 rst:max-w-max rst:flex-[1_1_min-content] rst:items-center rst:gap-3 rst:[&>*]:min-w-0 rst:[&>*]:[overflow-wrap:break-word]";
+
+/* The brand's elements, each to give way on its own: a fragment's children, or
+   the one there is. A bare string gets a box of its own to wrap or leave. */
+function brandParts(brand: React.ReactNode): React.ReactNode[] {
+  const all = React.isValidElement<{ children?: React.ReactNode }>(brand) && brand.type === Fragment ? React.Children.toArray(brand.props.children) : [brand];
+  return all.map((part) => (typeof part === "string" || typeof part === "number" ? <span>{part}</span> : part));
+}
+
 /**
  * Content for a consumer-supplied slot. Pass a plain node, or a function that
  * receives `close` so anything inside the slot can dismiss the mobile panel —
@@ -153,7 +202,8 @@ export interface NavbarProps
   /**
    * The logo's width, for a logo that isn't square. Alone, the height follows
    * the image; with `logoHeight`, the image is fitted inside that box,
-   * never stretched.
+   * never stretched. At large text a logo given either side shrinks to make
+   * room for the menu button, to 2rem wide.
    */
   logoWidth?: string | number;
   /**
@@ -217,6 +267,11 @@ export interface NavbarProps
    * The logo image is always rendered; this only affects the text element.
    * The logo is decorative (empty alt) because this or the brand name names
    * the link, so give it text a screen reader can read, visible or not.
+   *
+   * At large text it gives way to the menu button: it wraps at its spaces and
+   * at any `<wbr>` you put in it, and leaves the bar whole when its longest
+   * word can't fit beside the logo. The link keeps its name, and the menu
+   * shows it.
    */
   brandElement?: React.ReactNode;
   /**
@@ -396,6 +451,10 @@ const Navbar = ({
       }
     : { width: length(logoSize), height: length(logoSize) };
   const logoFit = logoFree && "rst:object-contain rst:object-left rst:rtl:object-right";
+  /* A logo given its own width or height may shrink where the bar is tight,
+     fitted in its box, to 2rem wide. A square one keeps its size. */
+  if (logoWidth !== undefined) logoStyle.minWidth = `min(2rem, ${length(logoWidth)})`;
+  else if (logoFree) logoStyle.minWidth = 0;
 
   const autoIsDark = useDarkClass(themeMode === "auto");
 
@@ -459,7 +518,11 @@ const Navbar = ({
   return (
     <Popover
       as="nav"
-      className={cn("rst:z-50", navbarVariants({ variant, position }), className)}
+      className={cn(
+        "rst:z-50 rst:[--rst-nav-tight:clamp(0px,(48rem_-_100vw_-_0.5px)*9999,1px)]",
+        navbarVariants({ variant, position }),
+        className,
+      )}
       {...props}
     >
       {({ open, close }) => {
@@ -470,7 +533,7 @@ const Navbar = ({
 
         return (
         <>
-          <div className="rst:container rst:mx-auto rst:flex rst:items-center rst:justify-between rst:px-4 rst:h-16">
+          <div className="rst:container rst:mx-auto rst:flex rst:items-center rst:justify-between rst:px-[min(1rem,5vw)] rst:h-16">
             {/* Brand Logo */}
             <Link
               as={routerElement}
@@ -479,7 +542,7 @@ const Navbar = ({
               variant="neutral"
               underline="none"
               className={cn(
-                "rst:flex rst:items-center rst:gap-3 rst:transition-opacity",
+                "rst:flex rst:items-center rst:gap-3 rst:nav-tight:gap-0 rst:nav-tight:min-w-0 rst:transition-opacity",
                 surfaceColors.brand,
               )}
             >
@@ -489,17 +552,27 @@ const Navbar = ({
                 src={logoSrc}
                 alt=""
                 style={logoStyle}
-                className={cn("rst:shrink-0", logoFit, logoClassName ?? "rst:rounded-md")}
+                className={cn("rst:shrink-0", logoFree && "rst:nav-tight:shrink", logoFit, logoClassName ?? "rst:rounded-md")}
               />
-              {brandElement ?? (
-                <span className="rst:text-xl rst:font-bold rst:tracking-tight">
-                  {brandName}
-                </span>
-              )}
+              <span className={BAR_NAME}>
+                {BAR_EDGE}
+                {brandParts(
+                  brandElement ?? (
+                    <span className="rst:text-xl rst:font-bold rst:tracking-tight">
+                      {brandName}
+                    </span>
+                  ),
+                ).map((part, i) => (
+                  <span key={i} className={BAR_PART}>
+                    {BAR_EDGE}
+                    {part}
+                  </span>
+                ))}
+              </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="rst:hidden rst:md:flex rst:items-center rst:gap-8">
+            <div className="rst:hidden rst:md:flex rst:items-center rst:gap-8 rst:nav-tight:shrink-999999">
               <div className="rst:flex rst:items-center rst:gap-6">
                 {items.map((item) => {
                   const isActive = activePath === item.path;
@@ -637,10 +710,10 @@ const Navbar = ({
             </div>
 
             {/* Mobile Hamburger */}
-            <div ref={hamburger} data-roster-hamburger className="rst:flex rst:md:hidden">
+            <div ref={hamburger} data-roster-hamburger className="rst:flex rst:shrink-0 rst:md:hidden">
               <PopoverButton
                 className={cn(
-                  "rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background",
+                  "rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:cursor-pointer rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background",
                   surfaceColors.hamburger,
                 )}
               >
@@ -687,33 +760,52 @@ const Navbar = ({
             leaveTo="rst:opacity-0 rst:scale-95"
           >
             <PopoverPanel
-              className="rst:absolute rst:top-0 rst:inset-x-0 rst:z-50 rst:origin-top-right rst:transform rst:p-2 rst:transition rst:md:hidden"
+              className="rst:absolute rst:top-0 rst:inset-x-0 rst:z-50 rst:origin-top-right rst:transform rst:p-[min(0.5rem,2.5vw)] rst:transition rst:md:hidden"
             >
               <div ref={mobilePanel} data-roster-mobile-panel className="rst:rounded-lg rst:elevation-anchored rst:ring rst:ring-black/5 rst:dark:ring-white/10 rst:divide-y rst:divide-gray-100 rst:dark:divide-gray-700 rst:bg-white rst:dark:bg-gray-800">
-                <div className="rst:px-5 rst:pt-5 rst:pb-6">
-                  <div className="rst:flex rst:items-center rst:justify-between">
-                    <div className="rst:flex rst:items-center rst:gap-3">
-                      <img
-                        src={logoSrc}
-                        alt=""
-                        style={logoStyle}
-                        className={cn("rst:shrink-0", logoFit, logoClassName ?? "rst:rounded-md")}
-                      />
-                      {brandElement ?? (
-                        <span className="rst:font-bold rst:text-gray-900 rst:dark:text-white">
-                          {brandName}
-                        </span>
-                      )}
-                    </div>
-                    <div className="rst:-mr-2">
-                      <PopoverButton className="rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:text-gray-400 rst:hover:bg-gray-100 rst:dark:hover:bg-gray-700 rst:hover:text-gray-500 rst:dark:hover:text-white rst:focus:outline-hidden">
-                        <span className="rst:sr-only">{l.closeMainMenu}</span>
-                        <FontAwesomeIcon
-                          icon={faXmark}
-                          className="rst:h-6 rst:w-6"
-                          aria-hidden="true"
+                <div className="rst:px-[min(1.25rem,6.25vw)] rst:pt-5 rst:pb-6">
+                  <div className="rst:[container-type:inline-size]">
+                    <div className="rst:flex rst:flex-wrap rst:items-center">
+                      {/* A wide logo stops short of the close button, whatever
+                          width the app's own classes cap it at. */}
+                      <span className={cn("rst:flex", logoFree ? "rst:min-w-0 rst:max-w-[calc(100%-0.5rem-1.25em)]" : "rst:shrink-0")}>
+                        <img
+                          src={logoSrc}
+                          alt=""
+                          style={logoStyle}
+                          className={cn(logoFree ? "rst:shrink" : "rst:shrink-0", logoFit, logoClassName ?? "rst:rounded-md")}
                         />
-                      </PopoverButton>
+                      </span>
+                      <span className={PANEL_NAME}>
+                        <span className={PANEL_PARTS}>
+                          {brandParts(
+                            brandElement ?? (
+                              <span className="rst:font-bold rst:text-gray-900 rst:dark:text-white">
+                                {brandName}
+                              </span>
+                            ),
+                          ).map((part, i) => (
+                            <span key={i} className={PANEL_PART}>
+                              {part}
+                            </span>
+                          ))}
+                        </span>
+                      </span>
+                      {/* The close button, last in the page and drawn at the
+                          end of the first line: a zero-width item first on it,
+                          so the line is as tall as the button and centers it,
+                          moved to the head's end. It sits 0.5rem past that
+                          end in a left-to-right page, as it always has. */}
+                      <div className="rst:relative rst:order-first rst:w-0 rst:start-[calc(100cqi-0.5rem-1.25em)] rst:rtl:start-[calc(100cqi-1rem-1.25em)]">
+                        <PopoverButton className="rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:cursor-pointer rst:text-gray-400 rst:hover:bg-gray-100 rst:dark:hover:bg-gray-700 rst:hover:text-gray-500 rst:dark:hover:text-white rst:focus:outline-hidden">
+                          <span className="rst:sr-only">{l.closeMainMenu}</span>
+                          <FontAwesomeIcon
+                            icon={faXmark}
+                            className="rst:h-6 rst:w-6"
+                            aria-hidden="true"
+                          />
+                        </PopoverButton>
+                      </div>
                     </div>
                   </div>
                   <div className="rst:mt-6">
@@ -733,7 +825,7 @@ const Navbar = ({
                             variant="neutral"
                             underline="none"
                             className={cn(
-                              "rst:-m-3 rst:flex rst:items-center rst:rounded-md rst:p-3 rst:transition-colors",
+                              "rst:-my-3 rst:mx-[max(-0.75rem,-3.75vw)] rst:flex rst:items-center rst:rounded-md rst:p-3 rst:transition-colors",
                               "rst:hover:bg-gray-50 rst:dark:hover:bg-gray-700",
                               isActive
                                 ? "rst:bg-gray-50 rst:dark:bg-gray-700"
@@ -769,7 +861,7 @@ const Navbar = ({
                                 variant="neutral"
                                 underline="none"
                                 className={cn(
-                                  "rst:-m-3 rst:flex rst:items-center rst:rounded-md rst:p-3 rst:transition-colors",
+                                  "rst:-my-3 rst:mx-[max(-0.75rem,-3.75vw)] rst:flex rst:items-center rst:rounded-md rst:p-3 rst:transition-colors",
                                   "rst:hover:bg-gray-50 rst:dark:hover:bg-gray-700",
                                   isActive
                                     ? "rst:bg-gray-50 rst:dark:bg-gray-700"
@@ -799,7 +891,7 @@ const Navbar = ({
                 </div>
 
                 {(user || resolvedActions || onLogin) && (
-                  <div className="rst:py-6 rst:px-5 rst:space-y-4">
+                  <div className="rst:py-6 rst:px-[min(1.25rem,6.25vw)] rst:space-y-4">
                     {resolvedActions ? (
                       resolvedActions
                     ) : !user && onLogin ? (

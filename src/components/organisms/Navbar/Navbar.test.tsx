@@ -79,6 +79,61 @@ describe("Navbar Component", () => {
   // The default variant is driven by --roster-nav-* rather than literal
   // colors, so a themed app can retint the bar without selector overrides.
   // The token defaults resolve to the previous white / gray-950 pair.
+  describe("a brand that gives way", () => {
+    /* Measured as rendered in Navbar.reflow.checks.stories.tsx; these pin what
+       each part is given to do it with. */
+    const bar = () => screen.getByRole("link", { name: /Harbor/ });
+    const parts = () => [...bar().querySelector(":scope > span")!.children].slice(1);
+
+    it("gives a fragment's children, a string and an element a box each", () => {
+      render(<Navbar {...defaultProps} brandName="Harbor" brandElement={<><b>Harbor</b> Watch</>} />);
+      expect(parts().map((p) => [p.lastElementChild!.tagName, p.textContent])).toEqual([
+        ["B", "Harbor"],
+        ["SPAN", " Watch"],
+      ]);
+      cleanupAndRender(<Navbar {...defaultProps} brandName="Harbor" brandElement="Harbor Watch" />);
+      /* Its own box, not the part's: a bare string can't be made to break. */
+      expect(parts().map((p) => p.lastElementChild!.textContent)).toEqual(["Harbor Watch"]);
+      cleanupAndRender(<Navbar {...defaultProps} brandName="Harbor" brandElement={<em>Harbor</em>} />);
+      expect(parts().map((p) => [p.lastElementChild!.tagName, p.textContent])).toEqual([["EM", "Harbor"]]);
+    });
+
+    it("keeps the link's name, the boxes that hold it adding nothing", () => {
+      render(<Navbar {...defaultProps} brandName="Harbor Watch" />);
+      expect(screen.getByRole("link", { name: "Harbor Watch" })).toBeInTheDocument();
+    });
+
+    it("lays out as if its boxes weren't there unless the bar is tight", () => {
+      render(<Navbar {...defaultProps} brandName="Harbor" />);
+      const slot = bar().querySelector(":scope > span")!;
+      expect(slot).toHaveClass("rst:contents", "rst:nav-tight:flex");
+      for (const part of parts()) expect(part).toHaveClass("rst:contents", "rst:nav-tight:flex");
+      for (const edge of [slot.firstElementChild!, parts()[0]!.firstElementChild!]) expect(edge).toHaveClass("rst:hidden", "rst:nav-tight:block");
+      expect(bar()).toHaveClass("rst:gap-3", "rst:nav-tight:gap-0", "rst:nav-tight:min-w-0");
+    });
+
+    it("never lets the menu button give way", () => {
+      render(<Navbar {...defaultProps} />);
+      expect(document.querySelector("[data-roster-hamburger]")).toHaveClass("rst:shrink-0");
+    });
+
+    it("lets a logo with its own width or height shrink, and a square one not", () => {
+      const logo = () => document.querySelector<HTMLImageElement>('img[src="/logo.png"]')!;
+      render(<Navbar {...defaultProps} logoWidth={241} logoHeight={32} />);
+      expect(logo()).toHaveClass("rst:nav-tight:shrink");
+      cleanupAndRender(<Navbar {...defaultProps} logoSize={44} />);
+      expect(logo()).not.toHaveClass("rst:nav-tight:shrink");
+    });
+
+    it("says the close button after the brand in the menu", async () => {
+      render(<Navbar {...defaultProps} brandName="Harbor" />);
+      fireEvent.click(screen.getByRole("button", { name: "Open main menu" }));
+      const close = await screen.findByRole("button", { name: "Close menu" });
+      const name = within(document.querySelector<HTMLElement>("[data-roster-mobile-panel]")!).getByText("Harbor");
+      expect(name.compareDocumentPosition(close) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+  });
+
   it("applies the token-driven 'default' variant classes by default", () => {
     render(<Navbar {...defaultProps} />);
 

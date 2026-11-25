@@ -133,7 +133,8 @@ export const PrimaryInkNavbar: Story = {
     /* What a reader sees on the bar: the brand's name, each link at the
        width the test page has, and the menu button where links fold away. */
     const shown = () =>
-      [bar.querySelector("a span"), ...bar.querySelectorAll("a[href='/'], a[href='/cabinets'], [data-roster-hamburger] button")]
+      /* The brand's words, wherever the link's boxes put them. */
+      [[...bar.querySelectorAll("a span")].find((el) => el.childElementCount === 0 && el.textContent?.trim()), ...bar.querySelectorAll("a[href='/'], a[href='/cabinets'], [data-roster-hamburger] button")]
         .filter((el): el is HTMLElement => !!el && el.getClientRects().length > 0)
         .filter((el, i, all) => all.indexOf(el) === i);
     /* Each as painted: its ink through every opacity on the way, over what's
