@@ -19,10 +19,21 @@ import { TONE } from "../../../internal/tone";
 /* A label wraps when it can't fit, centered and balanced, and the button
    grows to hold it: `min-height: fit-content` over each size's fixed height,
    so a one-line button keeps its exact size and an app's own `h-auto` isn't
-   floored. `min-width: fit-content` keeps a Button at its one-line width
-   beside a neighbor that can wrap; without it a Button beside a wrapping
-   heading wrapped at 100% text. `whitespace-nowrap` made a label longer than
-   its room spill out of the button and its column, at 200% text on a phone. */
+   floored. `whitespace-nowrap` made a label longer than its room spill out of
+   the button and its column, at 200% text on a phone. */
+
+/* `min-width: fit-content` (`layout`, below) keeps a Button at its one-line
+   width beside a neighbor that can wrap; without it a Button beside a wrapping
+   heading wrapped at 100% text.
+
+   In a grid it needs `w-full` beside it, for WebKit: a grid item that fills
+   its column but not its row (a Button has a height) gets its minimum from the
+   width of the whole grid, not of its column
+   (`RenderGrid::stretchInlineSizeForGridItem`), so a label longer than its
+   column overlaps the next one. Nothing on the item says its parent is a grid,
+   and nothing but a minimum holds that width beside a `flex-1` or a `w-full`
+   neighbor, so it can't be right for both from here. A tile is made for a
+   grid, so it doesn't take it. */
 
 /* Looks that keep the browser's own focus outline, not Roster's ring: their
    edge is a box-shadow, and the ring is a box-shadow too, so it would
@@ -51,11 +62,13 @@ const LOOKS_WITH_PADDING = ["tint", "tint-subtle"] as const;
    line is exactly the height and a wrapped label keeps the same space above
    and below. The line is `1lh`, through `--rst-line`, so an app that changes
    a Button's text size keeps its height; a browser without `lh` uses the
-   size's own line in rem. `icon` holds no label, so it keeps its square and
-   no padding. */
+   size's own line in rem. The border is `--rst-edge`, which `Button` sets to
+   zero on the looks that draw none, since it takes its height from the padding
+   where a link keeps the fixed one. `icon` holds no label, so it keeps its
+   square and no padding. */
 export const buttonVariants = /* @__PURE__ */ cva(
   // Base styles
-  "rst:font-ui rst:inline-flex rst:items-center rst:justify-center rst:cursor-pointer rst:whitespace-normal rst:text-center rst:text-balance rst:min-w-fit rst:min-h-fit rst:supports-[height:1lh]:[--rst-line:1lh] rst:rounded-md rst:text-sm rst:font-medium rst:ring-offset-background rst:transition-colors rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:disabled:pointer-events-none rst:disabled:opacity-50",
+  "rst:font-ui rst:inline-flex rst:items-center rst:justify-center rst:cursor-pointer rst:whitespace-normal rst:text-center rst:text-balance rst:min-h-fit rst:supports-[height:1lh]:[--rst-line:1lh] rst:rounded-md rst:text-sm rst:font-medium rst:ring-offset-background rst:transition-colors rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:disabled:pointer-events-none rst:disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -103,20 +116,21 @@ export const buttonVariants = /* @__PURE__ */ cva(
         icon: "",
         compact: "",
       },
+      /* A tile: an icon over a label in a column, centered, filling its grid
+         cell. It sets its own padding, radius and text, and no height.
+         `py-2.5` is for a tile with no icon; `Button` gives one with an icon
+         `py-3`. No one-line floor: its label wraps in its cell. Before
+         `singleLine`, whose own minimum replaces the floor. */
+      layout: {
+        inline: "rst:min-w-fit",
+        tile: "rst:flex-col rst:gap-1.5 rst:rounded-xl rst:px-2 rst:py-2.5 rst:text-xs rst:font-semibold",
+      },
       /* One line at the size's height, cut with an ellipsis when there's no
          room (`Button` wraps text children in a `truncate` span), shrinking
          to its container. */
       singleLine: {
         true: "rst:whitespace-nowrap rst:max-w-full rst:min-w-0",
         false: "",
-      },
-      /* A tile: an icon over a label in a column, centered, filling its grid
-         cell. It sets its own padding, radius and text, and no height.
-         `py-2.5` is for a tile with no icon; `Button` gives one with an icon
-         `py-3`. */
-      layout: {
-        inline: "",
-        tile: "rst:flex-col rst:gap-1.5 rst:rounded-xl rst:px-2 rst:py-2.5 rst:text-xs rst:font-semibold",
       },
       /* Sets only `tint-subtle`'s and `plain`'s look (`Button` sets
          `aria-pressed` for every variant): the compounds below. */
@@ -127,12 +141,12 @@ export const buttonVariants = /* @__PURE__ */ cva(
     },
     compoundVariants: [
       // --- SIZES ---
-      { variant: [...CLASSIC], layout: "inline", size: "xs", className: "rst:h-7 rst:rounded-sm rst:px-2 rst:text-xs rst:py-[calc((--spacing(7)-var(--rst-line,1rem))/2-var(--roster-border-width,1px))]" },
-      { variant: [...CLASSIC], layout: "inline", size: "sm", className: "rst:h-9 rst:rounded-md rst:px-3 rst:py-[calc((--spacing(9)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]" },
-      { variant: [...CLASSIC], layout: "inline", size: "default", className: "rst:h-10 rst:px-4 rst:py-[calc((--spacing(10)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]" },
-      { variant: [...CLASSIC], layout: "inline", size: "lg", className: "rst:h-11 rst:rounded-md rst:px-8 rst:py-[calc((--spacing(11)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]" },
+      { variant: [...CLASSIC], layout: "inline", size: "xs", className: "rst:h-7 rst:rounded-sm rst:px-2 rst:text-xs rst:py-[calc((--spacing(7)-var(--rst-line,1rem))/2-var(--rst-edge,var(--roster-border-width,1px)))]" },
+      { variant: [...CLASSIC], layout: "inline", size: "sm", className: "rst:h-9 rst:rounded-md rst:px-3 rst:py-[calc((--spacing(9)-var(--rst-line,1.25rem))/2-var(--rst-edge,var(--roster-border-width,1px)))]" },
+      { variant: [...CLASSIC], layout: "inline", size: "default", className: "rst:h-10 rst:px-4 rst:py-[calc((--spacing(10)-var(--rst-line,1.25rem))/2-var(--rst-edge,var(--roster-border-width,1px)))]" },
+      { variant: [...CLASSIC], layout: "inline", size: "lg", className: "rst:h-11 rst:rounded-md rst:px-8 rst:py-[calc((--spacing(11)-var(--rst-line,1.25rem))/2-var(--rst-edge,var(--roster-border-width,1px)))]" },
       { variant: [...CLASSIC], layout: "inline", size: "icon", className: "rst:h-10 rst:w-10" },
-      { variant: [...CLASSIC], layout: "inline", size: "compact", className: "rst:h-7.5 rst:px-3 rst:text-xs rst:py-[calc((--spacing(7.5)-var(--rst-line,1rem))/2-var(--roster-border-width,1px))]" },
+      { variant: [...CLASSIC], layout: "inline", size: "compact", className: "rst:h-7.5 rst:px-3 rst:text-xs rst:py-[calc((--spacing(7.5)-var(--rst-line,1rem))/2-var(--rst-edge,var(--roster-border-width,1px)))]" },
       { variant: [...LOOKS_WITH_PADDING], layout: "inline", size: "xs", className: "rst:rounded-sm rst:px-2 rst:text-xs rst:py-[calc((--spacing(7)-var(--rst-line,1rem))/2-var(--roster-border-width,1px))]" },
       { variant: [...LOOKS_WITH_PADDING], layout: "inline", size: "sm", className: "rst:rounded-md rst:px-3 rst:py-[calc((--spacing(9)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]" },
       { variant: [...LOOKS_WITH_PADDING], layout: "inline", size: "default", className: "rst:px-4 rst:py-[calc((--spacing(10)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]" },
@@ -140,7 +154,7 @@ export const buttonVariants = /* @__PURE__ */ cva(
       { variant: [...LOOKS_WITH_PADDING], layout: "inline", size: "icon", className: "rst:h-10 rst:w-10" },
       /* Its 30px height like the other sizes', so `tint-subtle`'s border sits
          inside it. */
-      { variant: [...LOOKS_WITH_PADDING], layout: "inline", size: "compact", className: "rst:h-7.5 rst:px-3 rst:text-xs rst:py-[calc((--spacing(7.5)-var(--rst-line,1rem))/2-var(--roster-border-width,1px))]" },
+      { variant: [...LOOKS_WITH_PADDING], layout: "inline", size: "compact", className: "rst:h-7.5 rst:px-3 rst:text-xs rst:py-[calc((--spacing(7.5)-var(--rst-line,1rem))/2-var(--rst-edge,var(--roster-border-width,1px)))]" },
       { variant: "plain", layout: "inline", size: ["xs", "compact"], className: "rst:text-xs" },
 
       // --- THE TONES the three quieter looks read, a set per scheme (tone.ts) ---

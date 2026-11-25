@@ -303,10 +303,15 @@ export const UnavailableKeepsFocusAndSwallowsPresses: Story = {
     await expect(document.activeElement).toBe(q("vote"));
     await userEvent.tab();
     await expect(document.activeElement).toBe(q("toggle"));
-    /* The twin: a native disabled drops focus the moment it lands. */
+    /* The twin: a native `disabled` drops focus. Chromium drops it at once,
+       WebKit when it next draws, and with nothing changing it draws only when
+       asked: so each try asks for a frame. */
     q("native").focus();
     await userEvent.click(q("native"));
-    await expect(document.activeElement).not.toBe(q("native"));
+    await waitFor(() => {
+      requestAnimationFrame(() => {});
+      return expect(document.activeElement).not.toBe(q("native"));
+    });
   },
 };
 

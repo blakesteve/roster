@@ -98,7 +98,7 @@ const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
             "rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:ring-offset-background rst:focus-visible:ring-offset-2",
           )}
         >
-          <FontAwesomeIcon icon={faXmark} className="rst:h-3.5 rst:w-3.5" aria-hidden="true" />
+          <FontAwesomeIcon icon={faXmark} className="rst:pointer-events-none rst:h-3.5 rst:w-3.5" aria-hidden="true" />
         </button>
       )}
     </div>

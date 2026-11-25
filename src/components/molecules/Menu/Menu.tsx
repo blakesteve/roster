@@ -529,7 +529,8 @@ function Menu({ children, open: openProp, onOpenChange, linkComponent = DefaultL
 export interface MenuButtonProps extends ButtonProps {
   /**
    * A plain `<button>` with your `className` and the cursor, nothing else, for
-   * a trigger drawn its own way: an avatar, an icon. Keep its target at least 44 by 44, with
+   * a trigger drawn its own way: an avatar, an icon. A press on what's in it
+   * lands on it, as on a Button. Keep its target at least 44 by 44, with
    * padding or a hit area, if you draw it smaller.
    */
   plain?: boolean;
@@ -585,7 +586,7 @@ const MenuButton = React.forwardRef<HTMLButtonElement, MenuButtonProps>(function
       <button
         ref={setRefs}
         type="button"
-        className={cn("rst:cursor-pointer rst:disabled:cursor-not-allowed rst:aria-disabled:cursor-not-allowed", className)}
+        className={cn("rst:*:pointer-events-none rst:cursor-pointer rst:disabled:cursor-not-allowed rst:aria-disabled:cursor-not-allowed", className)}
         {...nativeProps}
         {...wiring}
       >

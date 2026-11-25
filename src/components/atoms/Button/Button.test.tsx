@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import { Button } from "./Button";
+import { buttonVariants } from "./button-variants";
 import "@testing-library/jest-dom";
 
 describe("Button Component", () => {
@@ -198,7 +199,8 @@ describe("Button Component", () => {
 
     const button = screen.getByRole("button", { name: /tiny button/i });
 
-    expect(button).toHaveClass("rst:h-7", "rst:px-2", "rst:text-xs");
+    expect(button).toHaveClass("rst:px-2", "rst:text-xs");
+    expect(button.className).toContain("rst:py-[calc((--spacing(7)-");
   });
 
   describe("a long label", () => {
@@ -207,11 +209,72 @@ describe("Button Component", () => {
     it("wraps, centered and balanced, and grows only past its size's height", () => {
       render(<Button>Save changes</Button>);
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("rst:whitespace-normal", "rst:text-center", "rst:text-balance", "rst:min-w-fit", "rst:min-h-fit", "rst:h-10");
+      expect(button).toHaveClass("rst:whitespace-normal", "rst:text-center", "rst:text-balance", "rst:min-w-fit", "rst:min-h-fit");
       expect(button).not.toHaveClass("rst:whitespace-nowrap");
       /* The size's padding is half its height less a line, less the border. */
-      expect(button.className).toContain("rst:py-[calc((--spacing(10)-var(--rst-line,1.25rem))/2-var(--roster-border-width,1px))]");
+      expect(button.className).toContain("rst:py-[calc((--spacing(10)-var(--rst-line,1.25rem))/2-var(--rst-edge,var(--roster-border-width,1px)))]");
       expect(button).not.toHaveClass("rst:py-2");
+    });
+
+    it("takes its height from its padding and a line, not a fixed one, except on a link", () => {
+      render(
+        <>
+          <Button>Solid</Button>
+          <Button variant="soft">Soft</Button>
+          <Button variant="tint">Tint</Button>
+          <Button variant="tint" size="compact">Compact</Button>
+          <Button layout="tile">Tile</Button>
+          <Button className="rst:h-8">Mine</Button>
+        </>,
+      );
+      const named = (name: string) => screen.getByRole("button", { name });
+      expect(named("Solid")).toHaveClass("rst:h-fit");
+      expect(named("Solid")).not.toHaveClass("rst:h-10");
+      expect(screen.getByText("Solid")).toHaveClass("rst:min-h-[var(--rst-line,0px)]");
+      /* The looks that draw no border leave none out of the padding. */
+      expect(named("Solid")).not.toHaveClass("rst:[--rst-edge:0px]");
+      expect(named("Soft")).toHaveClass("rst:h-fit", "rst:[--rst-edge:0px]");
+      expect(named("Compact")).toHaveClass("rst:h-fit", "rst:[--rst-edge:0px]");
+      /* The ones a size sets no height on, and a caller's own height. */
+      expect(named("Tint")).not.toHaveClass("rst:h-fit");
+      expect(named("Tile")).not.toHaveClass("rst:h-fit");
+      expect(named("Mine")).toHaveClass("rst:h-8");
+      expect(named("Mine")).not.toHaveClass("rst:h-fit");
+      /* A link has no row to keep it a line tall. */
+      expect(buttonVariants().split(" ")).toContain("rst:h-10");
+      expect(buttonVariants().split(" ")).not.toContain("rst:h-fit");
+    });
+
+    it("keeps its one-line floor, which a tile doesn't take", () => {
+      render(
+        <>
+          <Button>Inline</Button>
+          <Button className="rst:min-w-11">Mine</Button>
+          <Button layout="tile">Tile</Button>
+        </>,
+      );
+      const named = (name: string) => screen.getByRole("button", { name });
+      expect(named("Inline")).toHaveClass("rst:min-w-fit");
+      expect(named("Mine")).toHaveClass("rst:min-w-11");
+      expect(named("Mine")).not.toHaveClass("rst:min-w-fit");
+      expect(named("Tile").className).not.toContain("rst:min-w-");
+    });
+
+    it("takes no press on its row or what's in it", () => {
+      render(
+        <>
+          <Button>Inline</Button>
+          <Button layout="tile" startIcon={<span />}>Tile</Button>
+          <Button variant="plain">Plain</Button>
+          <Button size="icon" aria-label="Icon"><svg /></Button>
+          <Button isLoading>Busy</Button>
+        </>,
+      );
+      for (const button of screen.getAllByRole("button")) {
+        expect(button.children).toHaveLength(1);
+        expect(button.firstElementChild).toHaveClass("rst:pointer-events-none");
+        expect(button).not.toHaveClass("rst:pointer-events-none");
+      }
     });
 
     it("lets a caller's own padding win", () => {
@@ -368,9 +431,9 @@ describe("Button Component", () => {
           <Button variant="solid" size="xs">Solid</Button>
         </>,
       );
-      expect(screen.getByRole("button", { name: "Tint" }).className).not.toContain("rst:h-7");
+      expect(screen.getByRole("button", { name: "Tint" }).className).not.toMatch(/rst:h-/);
       expect(screen.getByRole("button", { name: "Plain" })).toHaveClass("rst:text-xs");
-      expect(screen.getByRole("button", { name: "Solid" })).toHaveClass("rst:h-7");
+      expect(screen.getByRole("button", { name: "Solid" })).toHaveClass("rst:h-fit");
     });
   });
 
@@ -457,7 +520,8 @@ describe("Button Component", () => {
   describe("compact", () => {
     it("is 30px with 12px sides and the xs text", () => {
       render(<Button size="compact">Types</Button>);
-      expect(screen.getByRole("button")).toHaveClass("rst:h-7.5", "rst:px-3", "rst:text-xs");
+      expect(screen.getByRole("button")).toHaveClass("rst:px-3", "rst:text-xs");
+      expect(screen.getByRole("button").className).toContain("rst:py-[calc((--spacing(7.5)-");
     });
   });
 

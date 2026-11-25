@@ -114,7 +114,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
             >
               <FontAwesomeIcon
                 icon={revealed ? faEyeSlash : faEye}
-                className="rst:h-4 rst:w-4"
+                className="rst:pointer-events-none rst:h-4 rst:w-4"
                 aria-hidden="true"
               />
             </button>

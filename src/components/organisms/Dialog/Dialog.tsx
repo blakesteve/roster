@@ -419,7 +419,7 @@ const Dialog = ({
                         className={cn(closeVariants())}
                         aria-label={l.close}
                       >
-                        <FontAwesomeIcon icon={faXmark} className="rst:h-5 rst:w-5" />
+                        <FontAwesomeIcon icon={faXmark} className="rst:pointer-events-none rst:h-5 rst:w-5" />
                       </button>
                     </div>
                   </div>

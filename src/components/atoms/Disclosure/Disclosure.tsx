@@ -65,6 +65,8 @@ const Disclosure = ({
         aria-controls={panelMounted ? panelId : undefined}
         className={cn(
           disclosureTriggerVariants({ variant }),
+          // A press lands on the button, as Button's does (Button.tsx).
+          "rst:*:pointer-events-none",
           // Dynamic rounding and border fix
           isOpen ? "rst:rounded-t-md rst:rounded-b-none" : "rst:rounded-md",
           // If it's the outline variant and it's open, remove the bottom border so it merges seamlessly with the content box

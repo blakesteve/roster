@@ -13,8 +13,8 @@ export interface ButtonProps
   /**
    * Shows a spinner and ignores presses while something the button started is
    * in flight. Unlike `disabled`, it keeps the button focusable: a native
-   * `disabled` drops focus to the page the moment it lands, so a keyboard or
-   * screen reader user who just pressed Save is thrown back to the top. A
+   * `disabled` drops focus to the page, so a keyboard or screen reader user
+   * who just pressed Save is thrown back to the top. A
    * loading button stays where it is, says it's busy (`aria-busy`) and
    * unavailable (`aria-disabled`), and swallows clicks, Enter and Space, which
    * also stops a submit button sending its form twice.
@@ -90,6 +90,20 @@ const SLOT_PLAIN_FIRST_LINE =
 const SLOT_PLAIN_LAST_LINE =
   "rst:inline-flex rst:h-0 rst:shrink-0 rst:items-center rst:self-end rst:mb-[calc(var(--rst-line,1rem)/2)]";
 
+/* The sizes whose height is set (`button-variants.ts`) and whose label is a
+   line of text: every one of them on the five classic looks, and `compact`
+   anywhere. `icon` is a square. */
+const setsHeight = (variant: ButtonProps["variant"], size: ButtonProps["size"]) =>
+  size === "compact" ? variant !== "plain" : size !== "icon" && variant !== "tint" && variant !== "tint-subtle" && variant !== "plain";
+
+/* The looks with no border for that padding to leave room for. */
+const borderless = (variant: ButtonProps["variant"]) => variant === "soft" || variant === "link" || variant === "tint";
+
+/* A line, rounded up to a 16th of a pixel: WebKit cuts each size to a 64th,
+   and `text-xs`'s cut line and padding came to 27.98px of 28. */
+const ROW_LINE =
+  "rst:min-h-[var(--rst-line,0px)] rst:supports-[height:round(up,1px,1px)]:min-h-[round(up,var(--rst-line,0px),0.0625px)]";
+
 /* The handlers a press runs through, capture phase included. Not enter,
    leave or move, which a tooltip needs whether the button is busy or not. */
 const PRESS = /^on(?:Click|DoubleClick|AuxClick|(?:Pointer|Mouse)(?:Down|Up)|Key(?:Down|Up|Press)|Touch(?:Start|End))(?:Capture)?$/;
@@ -142,6 +156,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const tile = layout === "tile";
     const plain = variant === "plain" && !tile;
     const byGap = tile || plain;
+    const hugs = !tile && setsHeight(variant, size);
     /* Loading, a tile with an icon draws its spinner over the icon's box, so
        nothing moves. A tile without one, and `plain`, have no icon box to
        stand in: the spinner replaces what shows, and the label stays as the
@@ -155,6 +170,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           buttonVariants({ colorScheme, variant, size, singleLine, layout, pressed }),
           tile && startIcon && "rst:py-3",
+          // The height its padding and one line make, which is the size's, in
+          // place of the fixed one. In a flex column WebKit takes a fixed
+          // height as the most `min-height: fit-content` can ask for, so a
+          // wrapped label never grew the button. Not `auto`: that would let a
+          // row stretch it.
+          hugs && "rst:h-fit",
+          hugs && borderless(variant) && "rst:[--rst-edge:0px]",
           // Roster's dark variant is `&:where(.dark, .dark *)`, so an element
           // carrying `.dark` itself satisfies it. That is all forcing the
           // dark surface requires.
@@ -174,10 +196,20 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             own `gap` and `justify-content`, so an app's `gap-1.5` or
             `justify-start` still applies. Icons an app passes as children
             stay centered on the label, as before. A tile's row is a column,
-            as its button is. */}
+            as its button is.
+
+            A press lands on the button, never on the row or what's in it: in
+            WebKit a press on an element inside a button doesn't count as the
+            mouse's, so the next thing a script focused drew a focus ring. A
+            child that needs its own events can take `pointer-events-auto`.
+
+            At least one line tall (`ROW_LINE`), for a label shorter than its
+            line: WebKit lays a 15.9996px line at 15, and an icon of 16px is
+            the whole of what some buttons hold. */}
         <span
           className={cn(
-            "rst:flex rst:grow rst:min-w-0 rst:items-center rst:[justify-content:inherit] rst:[gap:inherit]",
+            "rst:pointer-events-none rst:flex rst:grow rst:min-w-0 rst:items-center rst:[justify-content:inherit] rst:[gap:inherit]",
+            hugs && ROW_LINE,
             tile && "rst:flex-col",
           )}
         >
