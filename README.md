@@ -2033,6 +2033,38 @@ pictures stay on the rows, and a development build says so.
 albums and cloud photos; a list of exact types or an extension gets a file
 browser instead. Keep `accept` broad and narrow with `types`.
 
+**Take a photo.** That picker has no camera in it, so `camera` adds a button beside
+Choose, on a device whose main pointer is a finger (`pointer: coarse`). With a mouse it
+isn't there. Off by default.
+
+```tsx
+<FileUpload label="Photos" camera cameraDisabled={waitingOnUploads} maxFiles={10} upload={uploadPhoto} />
+```
+
+- **Two inputs.** It opens one of its own: the same `accept`, `capture="environment"`
+  (the back camera) and no `multiple`, so one shot a press. `capture` on the first
+  input would take the photo library away. A browser with no camera to open may open
+  its picker instead.
+- **Choose and Take a photo are equals,** in that order. They fill the box: side by side
+  where both fit on one line, as equal as their words allow, else one under the other.
+- **A shot goes through what a picked file does:** the rules, `maxFiles`, the
+  announcement, `upload`. So `types` has to allow what a camera makes, JPEG. In
+  `preview="dropzone"` it takes the place of the picture there.
+- **It's called by its number,** "Camera photo 1" (`strings.cameraPhoto`), wherever its
+  name shows or is said, because a phone can name every shot `image.jpg`. Numbers follow
+  the order taken and are never used again, and a shot turned away keeps its own. The
+  File keeps its own name, and the item says its number as `shot`. Reasons
+  (`tooLarge(file)` and the rest) are handed the File, so name no file in them. A picked
+  file keeps its own name, `image.jpg` included.
+- **While the list is full it's unavailable,** `aria-disabled` and dimmed but still
+  focusable, since a shot turned away may be kept nowhere else; say why in `helperText`.
+  A failed file holds its place. In `preview="dropzone"` a full list doesn't matter.
+- **`cameraDisabled`** makes it unavailable and changes nothing else: for a moment when a
+  shot would be lost, while a form waits for its uploads to send them.
+- **Canceling changes nothing,** and neither does saying no to the camera: the page can't
+  tell the two apart. While the camera is up a phone short of memory can reload the page,
+  which loses the list.
+
 What it promises:
 
 - **Disabled, it keeps focus.** Its buttons are `aria-disabled` and ignore
@@ -2072,12 +2104,13 @@ one. With `w-full` it's the column's width in every browser. The same goes for a
 wearing `buttonVariants`. A tile needs nothing: it doesn't take the one-line width.
 
 **A Button's height is its padding and a line**, and not fixed (`height: fit-content`,
-which nothing stretches). Through 5.24.0 it was fixed, and in Safari a Button in a flex
-column never grew for a label that wrapped, and in no browser under a `min-h-11` of your
-own. Your own `h-*` replaces it, `h-auto` too, and a vertical padding of your own makes
-the height with no `h-*`: a 40px Button is 46px with `py-3`, and 30px with `py-1`, where
-the fixed height held it at 40. Content shorter than a line still takes a line. A link
-wearing `buttonVariants` keeps the fixed height, so give one in a flex column `h-fit`
+which nothing stretches). Through 5.24.0 it was fixed: in Safari a Button in a flex
+column never grew for a label that wrapped, and a Button under a `min-h-11` of your own
+didn't grow in any browser. Your own `h-*` replaces it, `h-auto` too, and a vertical
+padding of your own makes the height with no `h-*`: a 40px Button is 46px with `py-3`,
+and 30px with `py-1`, where the fixed height held it at 40. Content shorter than a line
+still takes a line. A link wearing `buttonVariants` keeps the fixed height, so give one
+in a flex column `h-fit`
 (`src/components/atoms/Button/Button.layouts.checks.stories.tsx`).
 
 **`singleLine`** keeps the label on one line at the size's height and cuts it with an
@@ -3063,7 +3096,7 @@ function App() {
 | `MatchupCard`     | Head-to-head comparison card                                                |
 | `MediaPreview`    | Thumbnail that falls back to "Preview unavailable, open original" when it can't render |
 | `Menu`            | A button's menu of actions: icons, shortcuts, checkbox and radio items, links, groups, submenus; the full keyboard pattern, 44px targets (see [Menu](#menu)) |
-| `FileUpload`      | Picks files and uploads each through the app's `upload`, with per-file progress, retry and rules; one picture can fill the drop box (see [FileUpload](#fileupload)) |
+| `FileUpload`      | Picks files and uploads each through the app's `upload`, with per-file progress, retry and rules; one picture can fill the drop box, and a phone can take one (see [FileUpload](#fileupload)) |
 | `Pagination`      | Page numbers with gaps, or a compact page picker on narrow screens; buttons or real links, 44px targets |
 | `SkeletonCard`, `SkeletonTableRow`, `SkeletonAvatar`, `SkeletonStat` | Skeleton presets in the real component's box |
 | `ProgressField`   | Progress with a label and value on one baseline and a detail line: the form to reach for |
@@ -3291,7 +3324,9 @@ A synthetic wheel or pointer event never scrolls anything, so "a vertical wheel
 scrolls the page, not the row" can't be tested without them. The commands fail
 loudly when the pointer isn't over their target, rather than letting a wheel
 land on the page and a test pass for the wrong reason. Storybook's own UI has
-no such input, so those steps are skipped there.
+no such input, so those steps are skipped there. What only a finger gets is checked
+in the `storybook-touch` project, whose browsers have a touch screen: stories tagged
+`touch`, in files named `*.touch.checks.stories.tsx`.
 
 Contrast checks that read rendered elements go through `src/test/painted.ts`.
 `textOn(el)` composites the way the browser paints: every background from the

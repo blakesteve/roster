@@ -371,6 +371,8 @@ describe("FileUpload", () => {
   it("says nothing in English once every string is replaced", async () => {
     const strings = {
       choose: "Elegir fotos",
+      camera: "Hacer una foto",
+      cameraPhoto: (n: number) => `Foto de la cámara ${n}`,
       dropHint: "o arrástralas aquí",
       dropHere: "Suelta para añadir",
       queued: "En espera",
@@ -393,7 +395,7 @@ describe("FileUpload", () => {
       rejectedNotice: (n: string) => `${n} rechazada.`,
       removed: (n: string) => `${n} quitada.`,
     };
-    const { pick, calls, container } = setup({ strings, maxFiles: 3, maxSize: 4096, types: ["image/jpeg"], concurrency: 2 });
+    const { pick, calls, container } = setup({ strings, maxFiles: 4, maxSize: 4096, types: ["image/jpeg"], concurrency: 2, camera: true });
     /* Everything the live region ever says, not just the last thing. */
     const spoken: string[] = [];
     const region = container.querySelector("[data-file-live]")!;
@@ -401,6 +403,7 @@ describe("FileUpload", () => {
     observer.observe(region, { childList: true, subtree: true, characterData: true });
     pick(photo("a.jpg"), photo("b.jpg"), photo("c.jpg"), photo("d.gif", 10, "image/gif"), photo("e.jpg", 9000), photo("f.jpg"));
     pick(photo("a.jpg"));
+    fireEvent.change(container.querySelector("[data-file-camera-input]")!, { target: { files: [photo("image.jpg")] } });
     calls[0].resolve("1");
     calls[1].reject(new Error("Network error"));
     await settle();
@@ -414,10 +417,10 @@ describe("FileUpload", () => {
       ...spoken,
     ].join(" ");
     /* Every state was reached: failed, rejected for each reason, removed. */
-    for (const word of ["Reintentar b.jpg", "No se subió.", "Tipo no admitido.", "Demasiado grande.", "Demasiadas.", "Repetida.", "b.jpg falló.", "rechazada."]) {
+    for (const word of ["Reintentar b.jpg", "No se subió.", "Tipo no admitido.", "Demasiado grande.", "Demasiadas.", "Repetida.", "b.jpg falló.", "rechazada.", "Hacer una foto", "Quitar Foto de la cámara 1"]) {
       expect(said, word).toContain(word);
     }
-    for (const english of ["Choose", "photo", "drag", "Drop", "Waiting", "Uploading", "Uploaded", "Finishing", "Remove", "Try", "Didn't", "Not added", "accepted", "over", "Only", "already", "added", "uploaded", "removed", "wrong", "KB"]) {
+    for (const english of ["Choose", "photo", "drag", "Drop", "Waiting", "Uploading", "Uploaded", "Finishing", "Remove", "Try", "Didn't", "Not added", "accepted", "over", "Only", "already", "added", "uploaded", "removed", "wrong", "KB", "Take", "Camera", "image.jpg"]) {
       expect(said, english).not.toContain(english);
     }
     /* The twin: the replaced words are there. */
@@ -583,5 +586,223 @@ describe("FileUpload, with its picture in the drop box", () => {
     const { pick } = setup({ preview: "dropzone", maxFiles: 1, strings: { replace: "Cambiar foto" } });
     pick(photo("a.jpg"));
     expect(screen.getByRole("button", { name: "Cambiar foto" })).toBeInTheDocument();
+  });
+});
+
+describe("FileUpload, with the camera", () => {
+  function shooting(props: Partial<FileUploadProps<string>> = {}) {
+    const view = setup({ camera: true, ...props });
+    const cameraInput = view.container.querySelector<HTMLInputElement>("[data-file-camera-input]")!;
+    const shoot = (...files: File[]) => fireEvent.change(cameraInput, { target: { files } });
+    const take = () => screen.getByRole("button", { name: "Take a photo" });
+    const names = () => [...view.container.querySelectorAll("li")].map((li) => li.querySelector("p")!.textContent);
+    /* Everything the live region says, in order. */
+    const heard: string[] = [];
+    const region = view.container.querySelector("[data-file-live]")!;
+    new MutationObserver(() => {
+      const text = region.textContent!.trim();
+      if (text) heard.push(text);
+    }).observe(region, { childList: true, subtree: true, characterData: true });
+    return { ...view, cameraInput, shoot, take, names, heard };
+  }
+  /* What an iPhone calls every shot. */
+  const shot = (size = 2048, at = 1) => new File([new Uint8Array(size)], "image.jpg", { type: "image/jpeg", lastModified: at });
+
+  it("is off unless asked for: one input, one button, and cameraDisabled changes nothing", () => {
+    const { container } = setup({ cameraDisabled: true });
+    expect(container.querySelectorAll("input[type=file]")).toHaveLength(1);
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+    expect(screen.getByRole("button")).not.toHaveAttribute("aria-disabled");
+  });
+
+  it("opens an input of its own: the back camera, one shot, the same accept", () => {
+    const { input, cameraInput, take } = shooting({ accept: "image/png", helperText: "PNG.", errorMessage: "Add one." });
+    expect([cameraInput.getAttribute("capture"), cameraInput.accept, cameraInput.multiple, cameraInput.tabIndex, cameraInput.hidden]).toEqual(["environment", "image/png", false, -1, true]);
+    /* The first input is as it was. */
+    expect([input.hasAttribute("capture"), input.accept, input.multiple]).toEqual([false, "image/png", true]);
+    const opens = [vi.spyOn(input, "click"), vi.spyOn(cameraInput, "click")];
+    fireEvent.click(take());
+    expect(opens.map((o) => o.mock.calls.length)).toEqual([0, 1]);
+    fireEvent.click(screen.getByRole("button", { name: "Choose photos" }));
+    expect(opens.map((o) => o.mock.calls.length)).toEqual([1, 1]);
+    expect(take()).toHaveAccessibleDescription("PNG. Add one.");
+    /* Choose, then Take a photo. */
+    expect(screen.getAllByRole("button").map((b) => b.textContent)).toEqual(["Choose photos", "Take a photo"]);
+  });
+
+  it("sends a shot through as a picked file, under its own name", async () => {
+    const { shoot, calls, changes, status, live, cameraInput } = shooting();
+    const file = shot();
+    shoot(file);
+    expect(calls[0].file).toBe(file);
+    expect(calls[0].file.name).toBe("image.jpg");
+    expect(status("Camera photo 1")).toBe("2 KB · Uploading");
+    expect(cameraInput.value).toBe("");
+    await waitFor(() => expect(live()).toBe("1 photo added."));
+    calls[0].resolve("media-1");
+    await settle();
+    expect(changes.at(-1)!.map((i) => [i.file === file, i.status, i.result, i.shot])).toEqual([[true, "done", "media-1", 1]]);
+  });
+
+  it("calls a shot by its number wherever it's named, and a picked file by its own name", async () => {
+    const { shoot, pick, calls, names, row, heard, container } = shooting({ maxSize: 4096 });
+    shoot(shot(100, 1));
+    shoot(shot(200, 2));
+    pick(photo("image.jpg", 300));
+    /* Too large: turned away, and it has its number, since its row is there. */
+    shoot(shot(9000, 3));
+    shoot(shot(400, 4));
+    expect(names()).toEqual(["Camera photo 1", "Camera photo 2", "image.jpg", "Camera photo 3", "Camera photo 4"]);
+    expect([...container.querySelectorAll("li")].map((li) => [li.dataset.status === "rejected", li.querySelector("p")!.title])).toEqual([
+      [false, "Camera photo 1"],
+      [false, "Camera photo 2"],
+      [false, "image.jpg"],
+      [true, "Camera photo 3"],
+      [false, "Camera photo 4"],
+    ]);
+    await waitFor(() => expect(heard.at(-1)).toContain("Camera photo 3 wasn't added. It's over 4 KB."));
+
+    /* Failed, with Try again; turned away by upload; removed. */
+    calls[0].reject(new Error("The server is busy."));
+    await settle();
+    await waitFor(() => expect(heard.at(-1)).toBe("Camera photo 1 didn't upload. The server is busy."));
+    expect(within(row("Camera photo 1")).getByRole("button", { name: "Try Camera photo 1 again" })).toBeInTheDocument();
+    calls[1].reject(new FileUploadRejection("That isn't a photo."));
+    await settle();
+    await waitFor(() => expect(heard.at(-1)).toBe("Camera photo 2 wasn't added. That isn't a photo."));
+    calls[2].reject(new Error("No."));
+    await settle();
+    /* The twin: a picked file called what the phone calls a shot. */
+    await waitFor(() => expect(heard.at(-1)).toBe("image.jpg didn't upload. No."));
+    fireEvent.click(screen.getByRole("button", { name: "Remove Camera photo 4" }));
+    await waitFor(() => expect(heard.at(-1)).toBe("Camera photo 4 removed."));
+
+    /* Numbers are never used again: 4 is gone, and the next is 5. */
+    shoot(shot(500, 5));
+    expect(names()).toEqual(["Camera photo 1", "Camera photo 2", "image.jpg", "Camera photo 3", "Camera photo 5"]);
+  });
+
+  it("keeps two shots a phone named the same, by their time or their size", () => {
+    const { shoot, container, names } = shooting();
+    shoot(shot(2048, 1));
+    shoot(shot(2048, 2));
+    shoot(shot(4096, 2));
+    const states = () => [...container.querySelectorAll("li")].map((li) => li.dataset.status === "rejected");
+    expect(states()).toEqual([false, false, false]);
+    /* The twin: the same name, size and time is the same file, as it is when
+       picked. A browser with no camera may open its picker instead. */
+    shoot(shot(4096, 2));
+    expect([states(), names()[3]]).toEqual([[false, false, false, true], "Camera photo 4"]);
+  });
+
+  it("holds a shot to the rules a picked file meets", () => {
+    const { shoot, calls, status } = shooting({ types: ["image/png"], maxFiles: 2 });
+    shoot(shot());
+    expect(status("Camera photo 1")).toBe("2 KB · Not added. That type of file isn't accepted.");
+    expect(calls).toHaveLength(0);
+    const own = shooting({ validate: (f) => (f.size > 1000 ? "Too much." : undefined) });
+    own.shoot(shot());
+    expect(own.container.querySelector("[data-file-status]")!.textContent).toBe("2 KB · Not added. Too much.");
+  });
+
+  it("is unavailable while the list is full, and turns away a shot that comes anyway", async () => {
+    const { shoot, take, cameraInput, row, calls, status } = shooting({ maxFiles: 2 });
+    const open = vi.spyOn(cameraInput, "click");
+    shoot(shot(2048, 1));
+    expect(take()).not.toHaveAttribute("aria-disabled");
+    shoot(shot(2048, 2));
+    expect(take()).toHaveAttribute("aria-disabled", "true");
+    expect(take()).not.toBeDisabled();
+    fireEvent.click(take());
+    expect(open).not.toHaveBeenCalled();
+    /* Choose isn't: what it turns away is still on the phone. */
+    expect(screen.getByRole("button", { name: "Choose photos" })).not.toHaveAttribute("aria-disabled");
+    shoot(shot(2048, 3));
+    expect(status("Camera photo 3")).toBe("2 KB · Not added. Only 2 can be added.");
+    /* A failed one keeps its place; one turned away doesn't. */
+    calls[0].reject(new Error("No."));
+    await settle();
+    expect(take()).toHaveAttribute("aria-disabled", "true");
+    calls[1].reject(new FileUploadRejection("Not a photo."));
+    await settle();
+    expect(take()).not.toHaveAttribute("aria-disabled");
+    shoot(shot(2048, 4));
+    expect(take()).toHaveAttribute("aria-disabled", "true");
+    fireEvent.click(within(row("Camera photo 4")).getByRole("button", { name: "Remove Camera photo 4" }));
+    expect(take()).not.toHaveAttribute("aria-disabled");
+  });
+
+  it("is unavailable when there was never room, and never in the drop box it replaces", () => {
+    const none = shooting({ maxFiles: 0 });
+    expect(none.take()).toHaveAttribute("aria-disabled", "true");
+    none.unmount();
+    const { shoot, take, names, calls } = shooting({ maxFiles: 1, preview: "dropzone" });
+    shoot(shot(2048, 1));
+    expect(take()).not.toHaveAttribute("aria-disabled");
+    shoot(shot(2048, 2));
+    expect([names(), calls[0].context.signal.aborted]).toEqual([["Camera photo 2"], true]);
+    expect(screen.getByRole("button", { name: "Replace photo" })).toBeInTheDocument();
+  });
+
+  it("says which shot a new one replaced in the drop box", async () => {
+    const { shoot, live } = shooting({ maxFiles: 1, preview: "dropzone" });
+    shoot(shot(2048, 1));
+    await waitFor(() => expect(live()).toBe("1 photo added."));
+    shoot(shot(2048, 2));
+    await waitFor(() => expect(live()).toBe("Camera photo 1 removed. 1 photo added."));
+  });
+
+  it("is unavailable when the app says so, and nothing else is", async () => {
+    const { take, pick, calls, cameraInput, row } = shooting({ cameraDisabled: true });
+    const open = vi.spyOn(cameraInput, "click");
+    pick(photo("a.jpg"), photo("b.jpg"));
+    calls[0].reject(new Error("No."));
+    await settle();
+    expect(take()).toHaveAttribute("aria-disabled", "true");
+    expect(take()).not.toBeDisabled();
+    fireEvent.click(take());
+    expect(open).not.toHaveBeenCalled();
+    expect(cameraInput).not.toBeDisabled();
+    fireEvent.click(within(row("a.jpg")).getByRole("button", { name: "Try a.jpg again" }));
+    expect(calls).toHaveLength(3);
+    fireEvent.click(within(row("b.jpg")).getByRole("button", { name: "Remove b.jpg" }));
+    expect(screen.queryByText("b.jpg")).toBeNull();
+    /* A shot already being taken when the app says so is still added. */
+    fireEvent.change(cameraInput, { target: { files: [shot()] } });
+    expect(row("Camera photo 1").dataset.status).toBe("uploading");
+  });
+
+  it("goes with the field when that's disabled, its input too", () => {
+    const { take, shoot, cameraInput, calls } = shooting({ disabled: true });
+    expect(take()).toHaveAttribute("aria-disabled", "true");
+    expect(take()).not.toBeDisabled();
+    expect(cameraInput).toBeDisabled();
+    shoot(shot());
+    expect(calls).toHaveLength(0);
+  });
+
+  it("changes nothing when the camera is closed with no shot", () => {
+    const { shoot, names, take, changes } = shooting();
+    act(() => take().focus());
+    shoot();
+    expect([names(), changes.length]).toEqual([[], 0]);
+    expect(take()).toHaveFocus();
+    /* And uses no number up. */
+    shoot(shot());
+    expect(names()).toEqual(["Camera photo 1"]);
+  });
+
+  it("sends focus to Choose, not the camera, when the last file is removed", () => {
+    const { shoot } = shooting();
+    shoot(shot());
+    fireEvent.click(screen.getByRole("button", { name: "Remove Camera photo 1" }));
+    expect(screen.getByRole("button", { name: "Choose photos" })).toHaveFocus();
+  });
+
+  it("takes its words from strings", () => {
+    const { shoot, names } = shooting({ strings: { cameraPhoto: (n) => `Shot no. ${n}` } });
+    shoot(shot());
+    expect(names()).toEqual(["Shot no. 1"]);
+    expect(screen.getByRole("button", { name: "Remove Shot no. 1" })).toBeInTheDocument();
   });
 });

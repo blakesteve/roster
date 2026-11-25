@@ -198,7 +198,16 @@ export const realTouchSwipe: BrowserCommand<
   return true;
 };
 
-export const realInputCommands = { realWheel, realDrag, realClick, realHover, realSetFiles, realDropFiles, realEmulateMedia, realPress, realTouchSwipe };
+/**
+ * A finger's tap on the middle of `selector`. Needs a browser with a touch
+ * screen: the `storybook-touch` project's.
+ */
+export const realTap: BrowserCommand<[selector: string]> = async (context, selector) => {
+  const { x, y } = await centerOf(context, selector);
+  await context.page.touchscreen.tap(x, y);
+};
+
+export const realInputCommands = { realWheel, realDrag, realClick, realHover, realSetFiles, realDropFiles, realEmulateMedia, realPress, realTouchSwipe, realTap };
 
 declare module "vitest/browser" {
   interface BrowserCommands {
@@ -214,6 +223,7 @@ declare module "vitest/browser" {
     realDropFiles: (selector: string, files: RealFile[]) => Promise<void>;
     realEmulateMedia: (features: { forcedColors?: "active" | "none" | null }) => Promise<void>;
     realPress: (keys: string[]) => Promise<void>;
+    realTap: (selector: string) => Promise<void>;
     realTouchSwipe: (selector: string, dx: number, dy: number, options?: { fx?: number; fy?: number; steps?: number }) => Promise<boolean>;
   }
 }

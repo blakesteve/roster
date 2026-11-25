@@ -181,7 +181,7 @@ export default defineConfig({
         plugins: [
           storybookTest({
             configDir: path.join(dirname, '.storybook'),
-            tags: { exclude: ['real-input', 'ax-tree'] }
+            tags: { exclude: ['real-input', 'ax-tree', 'touch'] }
           })
         ],
         test: {
@@ -257,6 +257,39 @@ export default defineConfig({
             commands: { ...realInputCommands, ...axCommands },
             instances: [{
               browser: 'chromium'
+            }]
+          },
+          setupFiles: ['.storybook/vitest.setup.ts']
+        }
+      },
+      {
+        /* The stories tagged `touch`: what a finger gets, so the browser says
+           its main pointer is coarse (`hasTouch`), which no stylesheet or
+           script can pretend. Their own project because it's set for the whole
+           browser, one file at a time because they resize it. */
+        extends: true,
+        plugins: [
+          storybookTest({
+            configDir: path.join(dirname, '.storybook'),
+            tags: { include: ['touch'] }
+          })
+        ],
+        test: {
+          name: 'storybook-touch',
+          /* Only the files that hold any: loading every story file to find
+             none costs two browsers half a minute. `src/ci-workflow.test.ts`
+             fails a story tagged `touch` in a file of another name. */
+          exclude: ['**/!(*.touch.checks).stories.tsx'],
+          fileParallelism: false,
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({ contextOptions: { hasTouch: true } }),
+            commands: realInputCommands,
+            instances: [{
+              browser: 'chromium'
+            }, {
+              browser: 'webkit'
             }]
           },
           setupFiles: ['.storybook/vitest.setup.ts']

@@ -25,6 +25,8 @@ export interface RealInput {
     realEmulateMedia: (features: { forcedColors?: "active" | "none" | null }) => Promise<void>;
     /** Presses keys on the real keyboard, one after another, to the focused element. */
     realPress: (keys: string[]) => Promise<void>;
+    /** A finger's tap, in the project with a touch screen (.storybook/real-input.ts). */
+    realTap: (selector: string) => Promise<void>;
     /** A real finger's swipe, through Chromium's DevTools protocol; false where there's none (WebKit). */
     realTouchSwipe: (selector: string, dx: number, dy: number, options?: { fx?: number; fy?: number; steps?: number }) => Promise<boolean>;
     /** The accessibility tree's role, name, description and states for each element (.storybook/ax-tree.ts). */
