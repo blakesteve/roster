@@ -294,13 +294,28 @@ export const PictureInTheDropBox: Story = {
   },
 };
 
+/* Where the main pointer isn't a finger the button isn't there, so the story
+   says where it is. A style of its own, so nothing is added to the library's. */
+function OnATouchScreen(args: FileUploadProps) {
+  return (
+    <>
+      <style>{"@media (pointer: coarse) { [data-touch-note] { display: none } }"}</style>
+      <p data-touch-note="" style={{ margin: "0 0 12px", fontSize: 14, maxWidth: 520 }}>
+        Take a photo shows on a touch screen. Open this on a phone, or in your browser&apos;s device mode.
+      </p>
+      <Field {...args} />
+    </>
+  );
+}
+
 export const TakeAPhoto: Story = {
+  render: OnATouchScreen,
   args: { camera: true, maxFiles: 3, types: undefined, helperText: "Up to 3 photos." },
   parameters: {
     docs: {
       description: {
         story:
-          "On a phone or a tablet, Choose photos and Take a photo fill the box, side by side where both fit and stacked where they don't. With a mouse there's only Choose, as here on a computer; open this story on a phone, or in your browser's device mode. Take a photo opens the back camera for one shot a press. Phones name every shot the same, so each is called by its number instead, Camera photo 1 and on, in the list and in what's said. Take three and the list is full: the button is unavailable until one is removed, since a shot turned away may be kept nowhere else.",
+          "On a phone or a tablet, Choose photos and Take a photo fill the box, side by side where both fit and stacked where they don't. With a mouse there's only Choose: open this story on a phone, or in your browser's device mode. Take a photo opens the back camera for one shot a press. Phones name every shot the same, so each is called by its number instead, Camera photo 1 and on, in the list and in what's said. Take three and the list is full: the button is unavailable until one is removed, since a shot turned away may be kept nowhere else.",
       },
     },
   },
