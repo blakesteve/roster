@@ -2,7 +2,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, waitFor } from "storybook/test";
 import { Navbar } from "./Navbar";
 import { Menu, MenuButton } from "../../molecules/Menu/Menu";
-import { realInputOrSkip } from "../../../test/real-input";
+import { realInputOrSkip, type RealInput } from "../../../test/real-input";
+import { MenuButtons524 } from "../../../test/MenuButtons524";
+import { NAVBAR, TWIN, closed, ringOn, type Pair } from "../../../test/navbar-rings";
 
 /**
  * Navbar's promises, checked in Chromium: its accessibility tree and its
@@ -382,5 +384,117 @@ export const EveryControlShowsThePointer: Story = {
     await expect(phone).toEqual(["Tidewater: pointer", "Open main menu: pointer"]);
     await expect(menu).toEqual(["Close menu: pointer", "Charts: pointer", "Settings: pointer", "Pending Invitations2: pointer", "Dark Mode: pointer", "Log Out: pointer"]);
     await expect([twin("bare"), twin("disabled")]).toEqual(["default", "not-allowed"]);
+  },
+};
+
+const chromium = () => navigator.userAgent.includes("Chrome");
+
+/* The mouse, then the keys, on one pair: what each focus a press or a key
+   leaves draws. Safari's Tab skips buttons, so WebKit takes Option+Tab. */
+async function ringsOf(real: RealInput, pair: Pair) {
+  const tab = chromium() ? "Tab" : "Alt+Tab";
+  await real.commands.realClick(pair.menu);
+  const closeOnOpen = await ringOn(pair.close);
+  await real.commands.realClick(pair.close);
+  const menuOnClose = await ringOn(pair.menu);
+  await closed(pair);
+  document.querySelector<HTMLElement>(pair.before)!.focus();
+  await real.commands.realPress([tab]);
+  const menuOnTab = await ringOn(pair.menu);
+  const shadowOnTab = getComputedStyle(document.querySelector(pair.menu)!).boxShadow;
+  await real.commands.realPress(["Enter"]);
+  const closeOnEnter = await ringOn(pair.close);
+  await real.commands.realPress(["Escape"]);
+  const menuOnEscape = await ringOn(pair.menu);
+  await closed(pair);
+  await real.commands.realPress(["Enter"]);
+  await ringOn(pair.close);
+  await real.commands.realPress(["Enter"]);
+  const menuOnCloseByKey = await ringOn(pair.menu);
+  await closed(pair);
+  const ring = (r: { ring: boolean }) => r.ring;
+  return {
+    mouse: [closeOnOpen, menuOnClose].map(ring),
+    keys: [menuOnTab, closeOnEnter, menuOnEscape, menuOnCloseByKey].map(ring),
+    outlines: [closeOnOpen, menuOnClose, menuOnTab, closeOnEnter].map((r) => r.outline),
+    shadowOnTab,
+  };
+}
+
+/**
+ * The menu button and the menu's close button ring for the keyboard alone, in
+ * Chromium and WebKit: never after a press, always after Tab, Enter and Escape.
+ * The close button had no ring at all (WCAG 2.4.7), and in Chromium the menu
+ * button rang after the close button was pressed: both are Headless UI
+ * PopoverButtons, which prevent their mousedown, and focus a script moves
+ * after a prevented press matches `:focus-visible`. The twin is the pair as
+ * 5.24 drew it (`src/test/MenuButtons524.tsx`): its close button draws no ring
+ * for the keys in either engine, and its menu button rings after the mouse in
+ * Chromium. In forced colors (Chromium's), the outline follows the keys too.
+ * A tap is in `Navbar.touch.checks.stories.tsx`.
+ */
+export const TheMenuButtonsRingForTheKeyboardAlone: Story = {
+  tags: ["real-input"],
+  render: () => (
+    <div style={{ minHeight: 700 }}>
+      <Navbar logoSrc={LOGO} brandName="Tidewater" position="static" items={[{ label: "Charts", path: "/charts" }]} />
+      <div style={{ padding: 16 }}>
+        <MenuButtons524 />
+      </div>
+    </div>
+  ),
+  play: async () => {
+    const real = realInputOrSkip();
+    if (!real) return;
+    await real.page.viewport(375, 700);
+    try {
+      await waitFor(() => expect(window.innerWidth).toBe(375));
+      const navbar = await ringsOf(real, NAVBAR);
+      const twin = await ringsOf(real, TWIN);
+      /* The ring's gap is the panel's own ground, light and dark. */
+      const gap: string[][] = [];
+      for (const dark of [false, true]) {
+        document.documentElement.classList.toggle("dark", dark);
+        document.querySelector<HTMLElement>(NAVBAR.before)!.focus();
+        await real.commands.realPress([chromium() ? "Tab" : "Alt+Tab"]);
+        await ringOn(NAVBAR.menu);
+        await real.commands.realPress(["Enter"]);
+        await ringOn(NAVBAR.close);
+        const close = document.querySelector(NAVBAR.close)!;
+        const offset = getComputedStyle(close).boxShadow.match(/rgb\(\d+, \d+, \d+\) 0px 0px 0px 2px/)?.[0].replace(/ 0px.*/, "");
+        gap.push([offset ?? "none", getComputedStyle(document.querySelector("[data-roster-mobile-panel]")!).backgroundColor]);
+        await real.commands.realPress(["Escape"]);
+        await closed(NAVBAR);
+      }
+      document.documentElement.classList.remove("dark");
+      let forced: { navbar: string[]; twin: string[] } | null = null;
+      if (chromium()) {
+        await real.commands.realEmulateMedia({ forcedColors: "active" });
+        try {
+          await waitFor(() => expect(matchMedia("(forced-colors: active)").matches).toBe(true));
+          forced = { navbar: (await ringsOf(real, NAVBAR)).outlines, twin: (await ringsOf(real, TWIN)).outlines };
+        } finally {
+          await real.commands.realEmulateMedia({ forcedColors: null });
+        }
+      }
+      console.info(`NAVBAR RINGS ${chromium() ? "chromium" : "webkit"} ${JSON.stringify({ navbar, twin, forced, gap })}`);
+      await expect(navbar.mouse).toEqual([false, false]);
+      // No outline either: the browser's own would draw where the ring doesn't.
+      await expect(navbar.outlines).toEqual(["none", "none", "none", "none"]);
+      await expect(gap).toEqual([["rgb(255, 255, 255)", "rgb(255, 255, 255)"], ["rgb(41, 37, 36)", "rgb(41, 37, 36)"]]);
+      await expect(navbar.keys).toEqual([true, true, true, true]);
+      await expect(twin.mouse).toEqual([false, chromium()]);
+      await expect(twin.keys).toEqual([true, false, true, true]);
+      // The keyboard's ring on the menu button is 5.24's, to the pixel.
+      await expect(navbar.shadowOnTab).toBe(twin.shadowOnTab);
+      if (forced) {
+        // The close button after the mouse, the menu button after the mouse, the menu button after Tab, the close button after Enter.
+        await expect(forced.navbar).toEqual(["none", "none", "solid", "solid"]);
+        await expect(forced.twin).toEqual(["solid", "solid", "solid", "solid"]);
+      }
+    } finally {
+      document.documentElement.classList.remove("dark");
+      await real.page.viewport(1280, 720);
+    }
   },
 };
