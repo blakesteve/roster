@@ -94,11 +94,31 @@ const Breadcrumbs = ({
     </span>
   );
 
+  /* Each separator leads its own item, the first one's too when there's a home
+     icon, so a line never ends on one. Its slot is as tall as the item's first
+     line, up to 1.5rem, and centers the separator there: on one line exactly
+     where the item's own centering put it. */
+  const lead = (
+    <span
+      className="rst:me-2 rst:flex rst:shrink-0 rst:select-none rst:items-center rst:self-stretch rst:max-h-6"
+      aria-hidden="true"
+    >
+      {SeparatorIcon}
+    </span>
+  );
+
+  /* A crumb may shrink, and a word too long for a line breaks rather than push
+     the page: `anywhere`, since a link's words are an anonymous box that can't
+     take a minimum width of its own. */
+  const fits = "rst:min-w-0 rst:wrap-anywhere";
+
   return (
     <nav aria-label={l.nav} className={cn("rst:flex", className)} {...props}>
-      <ol className="rst:flex rst:items-center rst:space-x-2">
+      {/* The trail wraps by item onto more lines: 8px between items, 4px
+          between lines, a 24px pitch for 20px links. */}
+      <ol className="rst:flex rst:min-w-0 rst:flex-wrap rst:items-center rst:gap-x-2 rst:gap-y-1">
         {showHomeIcon && (
-          <li className="rst:flex rst:items-center">
+          <li className="rst:flex rst:min-w-0 rst:max-w-full rst:items-center">
             <Anchor
               href={homeHref}
               className={cn(
@@ -109,12 +129,6 @@ const Breadcrumbs = ({
             >
               <FontAwesomeIcon icon={faHome} className="rst:h-4 rst:w-4" />
             </Anchor>
-            <span
-              className="rst:ml-2 rst:flex rst:select-none rst:items-center"
-              aria-hidden="true"
-            >
-              {SeparatorIcon}
-            </span>
           </li>
         )}
 
@@ -124,20 +138,14 @@ const Breadcrumbs = ({
           return (
             /* Keyed by index: `href` is optional now, and a trail can legally
                repeat one. */
-            <li key={index} className="rst:flex rst:items-center">
-              {index > 0 && (
-                <span
-                  className="rst:mr-2 rst:flex rst:select-none rst:items-center"
-                  aria-hidden="true"
-                >
-                  {SeparatorIcon}
-                </span>
-              )}
+            <li key={index} className="rst:flex rst:min-w-0 rst:max-w-full rst:items-center">
+              {(index > 0 || showHomeIcon) && lead}
 
               {isLast || !item.href ? (
                 <span
                   className={cn(
                     "rst:font-semibold rst:text-sm rst:cursor-default rst:transition-colors",
+                    fits,
                     variant === "inverse"
                       ? "rst:text-white"
                       : "rst:text-gray-900 rst:dark:text-gray-100",
@@ -154,6 +162,7 @@ const Breadcrumbs = ({
                   className={cn(
                     breadcrumbVariants({ variant }),
                     "rst:hover:underline",
+                    fits,
                     item.className,
                   )}
                 >
