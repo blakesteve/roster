@@ -699,7 +699,7 @@ export const ManualActivation: Story = {
     return (
       <div className="rst:flex rst:flex-col rst:items-center rst:gap-4">
         <LiquidTabs tabs={VIEW_TABS} activeTab={active} onChange={setActive} activation="manual" aria-label="View" />
-        <button type="button">After the strip</button>
+        <button type="button" className="rst:cursor-pointer">After the strip</button>
       </div>
     );
   },
@@ -840,7 +840,7 @@ export const NothingSelected: Story = {
     return (
       <div className="rst:flex rst:flex-col rst:items-center rst:gap-4">
         <LiquidTabs tabs={VIEW_TABS} activeTab={active} onChange={setActive} aria-label="View" />
-        <button type="button" onClick={() => setActive("")}>
+        <button type="button" className="rst:cursor-pointer" onClick={() => setActive("")}>
           Clear selection
         </button>
       </div>

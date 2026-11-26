@@ -616,7 +616,7 @@ export const NavActionsSlot: Story = {
     navActions: (
       <button
         aria-label="Search"
-        className="rst:flex rst:h-8 rst:w-8 rst:items-center rst:justify-center rst:rounded-full rst:text-gray-300 rst:hover:bg-white/10 rst:hover:text-white rst:transition-colors"
+        className="rst:flex rst:h-8 rst:w-8 rst:cursor-pointer rst:items-center rst:justify-center rst:rounded-full rst:text-gray-300 rst:hover:bg-white/10 rst:hover:text-white rst:transition-colors"
         onClick={() => alert("search clicked")}
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="rst:h-4 rst:w-4" viewBox="0 0 20 20" fill="currentColor">

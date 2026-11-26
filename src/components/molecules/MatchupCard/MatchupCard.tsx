@@ -97,7 +97,7 @@ const MatchupCard = React.forwardRef<HTMLButtonElement, MatchupCardProps>(
         type="button"
         className={cn(
           // A press on a logo or a score lands on the card, as on a Button.
-          "rst:*:pointer-events-none rst:flex rst:items-center rst:gap-3 rst:rounded-lg rst:p-2 rst:text-left rst:transition rst:hover:bg-gray-100 rst:dark:hover:bg-gray-800 rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring",
+          "rst:*:pointer-events-none rst:cursor-pointer rst:disabled:cursor-not-allowed rst:flex rst:items-center rst:gap-3 rst:rounded-lg rst:p-2 rst:text-left rst:transition rst:hover:bg-gray-100 rst:dark:hover:bg-gray-800 rst:focus:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring",
           className,
         )}
         {...props}

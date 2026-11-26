@@ -276,9 +276,10 @@ function EnabledDemo() {
 
   return (
     <div className="flex flex-col gap-3">
-      <label className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+      <label className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300 rst:cursor-pointer">
         <input
           type="checkbox"
+          className="rst:cursor-pointer"
           checked={armed}
           onChange={(event) => setArmed(event.target.checked)}
         />
