@@ -424,13 +424,15 @@ async function ringsOf(real: RealInput, pair: Pair) {
 /**
  * The menu button and the menu's close button ring for the keyboard alone, in
  * Chromium and WebKit: never after a press, always after Tab, Enter and Escape.
- * The close button had no ring at all (WCAG 2.4.7), and in Chromium the menu
- * button rang after the close button was pressed: both are Headless UI
- * PopoverButtons, which prevent their mousedown, and focus a script moves
- * after a prevented press matches `:focus-visible`. The twin is the pair as
- * 5.24 drew it (`src/test/MenuButtons524.tsx`): its close button draws no ring
- * for the keys in either engine, and its menu button rings after the mouse in
- * Chromium. In forced colors (Chromium's), the outline follows the keys too.
+ * The close button had no ring at all (WCAG 2.4.7), and the menu button rang
+ * after the close button was pressed: both are Headless UI PopoverButtons,
+ * which prevent their mousedown, and focus a script moves after a prevented
+ * press matches `:focus-visible`. The twin is the pair as 5.24 drew it
+ * (`src/test/MenuButtons524.tsx`): its close button draws no ring for the keys
+ * in either engine, and its menu button rings after the mouse in Chromium. In
+ * WebKit that ring depends on the platform (Linux's draws it, macOS's doesn't),
+ * so WebKit's is logged, not pinned. In forced colors (Chromium's), the
+ * outline follows the keys too.
  * A tap is in `Navbar.touch.checks.stories.tsx`.
  */
 export const TheMenuButtonsRingForTheKeyboardAlone: Story = {
@@ -483,7 +485,8 @@ export const TheMenuButtonsRingForTheKeyboardAlone: Story = {
       await expect(navbar.outlines).toEqual(["none", "none", "none", "none"]);
       await expect(gap).toEqual([["rgb(255, 255, 255)", "rgb(255, 255, 255)"], ["rgb(41, 37, 36)", "rgb(41, 37, 36)"]]);
       await expect(navbar.keys).toEqual([true, true, true, true]);
-      await expect(twin.mouse).toEqual([false, chromium()]);
+      await expect(twin.mouse[0]).toBe(false);
+      if (chromium()) await expect(twin.mouse[1]).toBe(true);
       await expect(twin.keys).toEqual([true, false, true, true]);
       // The keyboard's ring on the menu button is 5.24's, to the pixel.
       await expect(navbar.shadowOnTab).toBe(twin.shadowOnTab);

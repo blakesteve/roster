@@ -33,7 +33,9 @@ async function tapped(real: RealInput, pair: Pair) {
   return [closeOnOpen.ring, menuOnClose.ring];
 }
 
-/* The twin, 5.24's pair, rings the menu button after a tap in Chromium. */
+/* The twin, 5.24's pair, rings the menu button after a tap in Chromium. In
+   WebKit that depends on the platform, as it does for the mouse, so WebKit's
+   is logged, not pinned. */
 export const ATapLeavesNoRing: Story = {
   tags: ["touch"],
   render: () => (
@@ -54,7 +56,8 @@ export const ATapLeavesNoRing: Story = {
       const twin = await tapped(real, TWIN);
       console.info(`NAVBAR TAP RINGS ${chromium() ? "chromium" : "webkit"} ${JSON.stringify({ navbar, twin })}`);
       await expect(navbar).toEqual([false, false]);
-      await expect(twin).toEqual([false, chromium()]);
+      await expect(twin[0]).toBe(false);
+      if (chromium()) await expect(twin[1]).toBe(true);
     } finally {
       await real.page.viewport(1280, 720);
     }
