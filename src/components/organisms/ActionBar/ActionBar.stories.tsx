@@ -318,7 +318,7 @@ const InteractiveWrapper = (args: ActionBarProps) => {
                   <button
                     key={item.id}
                     onClick={() => toggleItem(item.id)}
-                    className={`rst:flex rst:h-20 rst:w-20 rst:items-center rst:justify-center rst:rounded-2xl rst:border-2 rst:transition-all rst:active:scale-95 ${
+                    className={`rst:flex rst:h-20 rst:w-20 rst:cursor-pointer rst:items-center rst:justify-center rst:rounded-2xl rst:border-2 rst:transition-all rst:active:scale-95 ${
                       isSelected
                         ? "rst:border-primary-500 rst:bg-primary-50 rst:shadow-md rst:dark:border-primary-400 rst:dark:bg-primary-900/30"
                         : "rst:border-gray-200 rst:bg-white rst:hover:border-gray-300 rst:dark:border-gray-700 rst:dark:bg-gray-900 rst:dark:hover:border-gray-500"

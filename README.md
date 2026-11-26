@@ -3230,7 +3230,8 @@ and v4's doesn't, so a `<button>` with no cursor class shows the arrow. Until 5.
 in `Select`, `Combobox` and `MultiSelect` showed the arrow while `Menu`'s
 showed the pointer, and `PasswordInput`'s reveal button showed the arrow too.
 Until 5.24.0 so did `MenuButton plain`, with it Navbar's avatar, and Navbar's
-menu button and the menu's close button.
+menu button and the menu's close button. Through 5.24.0 so did `Alert`'s
+dismiss button and `MatchupCard`.
 
 - A disabled control shows `not-allowed`.
 - A busy one may say so: `Button`'s `loading` shows `progress`.
@@ -3246,9 +3247,15 @@ Three things keep another cursor, because they aren't click targets:
 - **A drag surface** says what it does: `Carousel`'s track and `Sheet`'s drag
   handle show `grab`, then `grabbing`.
 
-`src/internal/popups.checks.stories.tsx` reads the computed cursor on a row in
-each popup, with a disabled row as its twin, and
-`src/components/organisms/Navbar/Navbar.checks.stories.tsx` on every control in
+After every story in the docs, the test runner reads the cursor of every
+control on the page, popups included, and of every part of one a pointer can
+land on (`src/test/cursors.ts`, set up in `.storybook/vitest.setup.ts`). An
+enabled control that isn't the pointer fails that story, and so does a disabled
+one that is. Text fields and their labels are left out. What the sweep reads
+and calls wrong is pinned in `src/cursors.checks.stories.tsx`, with a twin for
+each fault. `src/internal/popups.checks.stories.tsx` reads a row in each popup,
+with a disabled row as its twin, and
+`src/components/organisms/Navbar/Navbar.checks.stories.tsx` every control in
 Navbar's bar and menu.
 
 ## Development

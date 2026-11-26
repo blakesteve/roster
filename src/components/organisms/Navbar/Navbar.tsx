@@ -47,6 +47,17 @@ function ThemeTrack({ on, size }: { on: boolean; size: "xs" | "sm" }) {
   );
 }
 
+/* The menu button's ring and the menu's close button's: the keyboard's alone.
+   Both are Headless UI PopoverButtons, which prevent their mousedown, and focus
+   a script moves after a prevented press matches `:focus-visible` in Chromium
+   and WebKit: the close button when the menu opens by mouse or tap, and in
+   Chromium the menu button when the close button closes it. Roster's keyboard
+   mark (`data-key-focus`, src/internal/key-focus.ts) is set only while keys are
+   in use, so a ring drawn on it alone isn't fooled. Forced colors draw their
+   outline on the same mark. */
+const KEY_RING =
+  "rst:focus:outline-none rst:[&:focus[data-key-focus]]:outline-hidden rst:[&[data-key-focus]]:ring-2 rst:[&[data-key-focus]]:ring-ring rst:[&[data-key-focus]]:ring-offset-2 rst:ring-offset-background";
+
 /* The user menu's rows, drawn as they were before the menu was Roster's own:
    the panel's gray text, a pale fill under focus and the pointer, and each
    icon at its own width rather than in the menu's 16px slot. */
@@ -713,7 +724,8 @@ const Navbar = ({
             <div ref={hamburger} data-roster-hamburger className="rst:flex rst:shrink-0 rst:md:hidden">
               <PopoverButton
                 className={cn(
-                  "rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:cursor-pointer rst:focus-visible:outline-hidden rst:focus-visible:ring-2 rst:focus-visible:ring-ring rst:focus-visible:ring-offset-2 rst:ring-offset-background",
+                  "rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:cursor-pointer",
+                  KEY_RING,
                   surfaceColors.hamburger,
                 )}
               >
@@ -797,7 +809,14 @@ const Navbar = ({
                           moved to the head's end. It sits 0.5rem past that
                           end in a left-to-right page, as it always has. */}
                       <div className="rst:relative rst:order-first rst:w-0 rst:start-[calc(100cqi-0.5rem-1.25em)] rst:rtl:start-[calc(100cqi-1rem-1.25em)]">
-                        <PopoverButton className="rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:cursor-pointer rst:text-gray-400 rst:hover:bg-gray-100 rst:dark:hover:bg-gray-700 rst:hover:text-gray-500 rst:dark:hover:text-white rst:focus:outline-hidden">
+                        <PopoverButton
+                          className={cn(
+                            "rst:inline-flex rst:items-center rst:justify-center rst:rounded-md rst:p-2 rst:cursor-pointer rst:text-gray-400 rst:hover:bg-gray-100 rst:dark:hover:bg-gray-700 rst:hover:text-gray-500 rst:dark:hover:text-white",
+                            KEY_RING,
+                            /* The ring's gap is the panel's own ground. */
+                            "rst:dark:[--roster-ring-offset:var(--roster-gray-800,#292524)]",
+                          )}
+                        >
                           <span className="rst:sr-only">{l.closeMainMenu}</span>
                           <FontAwesomeIcon
                             icon={faXmark}

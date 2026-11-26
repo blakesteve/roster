@@ -41,14 +41,25 @@ const Switch = ({
   ariaLabel,
 }: SwitchProps) => {
   const computedAriaLabel = !label ? ariaLabel || "Toggle setting" : undefined;
+  const hasText = Boolean(label || description);
 
   return (
     <Field
       as="div"
-      className={cn("rst:flex rst:items-center rst:justify-between rst:gap-4", className)}
+      className={cn(
+        "rst:flex rst:items-center rst:justify-between",
+        /* When the text's longest word can't sit beside the track, the track
+           drops under it, at the start, rather than the word breaking. */
+        hasText ? "rst:flex-wrap rst:gap-x-4 rst:gap-y-2" : "rst:gap-4",
+        className,
+      )}
     >
-      {(label || description) && (
-        <span className="rst:flex rst:flex-col">
+      {hasText && (
+        /* As wide as its words up to their one line, and no narrower than
+           their longest word while the track is beside it: the label's box,
+           and so what a click on it reaches, is what it was wherever it fits.
+           A word too long for the whole row breaks. */
+        <span className="rst:flex rst:min-w-0 rst:max-w-max rst:flex-col rst:wrap-break-word rst:[flex:1_1_min-content]">
           {label && (
             <Label
               /* Passive drops the label's `for` and its click handler, which

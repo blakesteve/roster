@@ -19,6 +19,8 @@ The **Switch** component is used to toggle a single setting on or off **immediat
 
 **Every size is a 44x44 target**, centered on the track, without changing the track's size. It overhangs the track, so it needs room: in a stacked list of one-line rows, 10px between rows at \`xs\` and \`md\`, 12px at \`sm\`, 8px at \`lg\`, or the target takes clicks meant for the neighbor. For every row's full 44px: 24px at \`xs\` and \`sm\`, 20px at \`md\`, 16px at \`lg\`. An ancestor with \`overflow: hidden\` clips the overhang.
 
+**On a narrow screen or at large text,** the label wraps at its spaces beside the track. When its longest word can't sit beside the track, the track drops under the words, at the start, rather than the word breaking or the row running past its edge. Where the row fits, nothing about it changes.
+
 **UX Best Practices:**
 * **Use a Switch** for "Activation" (e.g., Airplane Mode, Dark Mode). The action should take effect immediately.
 * **Use a Checkbox** for "Selection" (e.g., Picking 3 items from a list). The action usually requires a "Save" or "Submit" button.

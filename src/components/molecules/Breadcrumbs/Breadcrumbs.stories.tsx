@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "A navigation helper that indicates the user's current location within a hierarchical structure. It automatically handles accessibility attributes (`aria-current`, `aria-label`), visually emphasizes the active page, and features comprehensive dark mode resilience.",
+          "A navigation helper that indicates the user's current location within a hierarchical structure. It automatically handles accessibility attributes (`aria-current`, `aria-label`), visually emphasizes the active page, and features comprehensive dark mode resilience.\n\nA trail too long for its line wraps by crumb onto more lines, 4px apart, each separator staying on the line of the crumb it leads, the home icon's included. A word too long for a whole line breaks inside its crumb rather than push the page sideways. A trail that fits on one line is drawn as it always was.",
       },
     },
   },
