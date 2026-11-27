@@ -5,6 +5,7 @@ import { FileUpload, type FileUploadContext } from "./FileUpload";
 import { pickFiles, samplePhoto, sizedFile } from "../../../test/sample-files";
 import { realInputOrSkip } from "../../../test/real-input";
 import { as522, isRow523, styleAs522 } from "../../../test/button-522-markup";
+import { asRows524, isRowWrapper } from "../../../test/file-rows-524";
 
 /**
  * FileUpload with none of its newer options set, pinned to 5.15.0's build, in
@@ -100,13 +101,19 @@ const item = (name: Row, file: string) =>
   [...row(name).querySelectorAll<HTMLElement>("[data-file-item]")].find((li) => li.querySelector("p")?.textContent === file)!;
 
 /* Every pixel value masked (see above), the files' sizes, object URLs, and
-   React's ids. */
-const html = (name: Row) =>
-  as522(row(name).innerHTML)
+   React's ids. The rows are read as 5.24 drew them (src/test/file-rows-524.ts):
+   the next release wraps a row that can't give its name 5rem, through two
+   wrappers and three classes that move nothing where it fits, which
+   FileUpload.reflow.checks.stories.tsx pins. */
+const html = (name: Row) => {
+  const copy = row(name).cloneNode(true) as HTMLElement;
+  asRows524(copy);
+  return as522(copy.innerHTML)
     .replace(/-?\d+(\.\d+)?px/g, "#px")
     .replace(/>\d+(\.\d+)? (B|KB|MB)</g, ">size<")
     .replace(/blob:[^"]+/g, "blob")
     .replace(/_r_[0-9a-z]+_|[«:]r[0-9a-z]+[»:]/g, "ID");
+};
 
 const PROPS = [
   "display", "position", "box-sizing", "color", "background-color",
@@ -131,7 +138,7 @@ const look = (el: Element) => {
   return PROPS.map((p) => (!drawn && p.startsWith("outline-") && p !== "outline-style" ? "-" : styleAs522(el, p, s.getPropertyValue(p)))).join(";");
 };
 const styles = (name: Row) =>
-  [...row(name).querySelectorAll("*")].filter((el) => !isRow523(el)).map((el) => `${el.tagName.toLowerCase()} ${look(el)}`).join("\n");
+  [...row(name).querySelectorAll("*")].filter((el) => !isRow523(el) && !isRowWrapper(el)).map((el) => `${el.tagName.toLowerCase()} ${look(el)}`).join("\n");
 
 async function digest(text: string) {
   const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)));

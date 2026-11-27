@@ -2085,7 +2085,10 @@ What it promises:
   the browser can't draw (HEIC outside Safari) shows a plain mark.
 - **Every word is replaceable** through `strings`, on screen and spoken.
 - **Phones.** Every button is a 44px target at 375px, and a long file name
-  truncates rather than pushing Remove off its row.
+  truncates rather than pushing Remove off its row. Where the name would be
+  narrower than 5rem, as at 200% text on a phone, the row wraps in reading
+  order: the picture goes above, then the buttons go under the name, at the
+  row's end.
 
 ### Buttons that wrap
 
