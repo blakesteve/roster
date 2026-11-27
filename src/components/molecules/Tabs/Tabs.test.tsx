@@ -40,14 +40,14 @@ describe("Tabs, plain by default", () => {
     expect(screen.queryByTestId("liquid-tabs")).toBeNull();
   });
 
-  it("never measures anything: the pill's code runs only for the liquid variant", () => {
-    const measure = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect");
-    const { unmount } = render(<Tabs tabs={TABS} activeTab="beta" onChange={vi.fn()} />);
-    const plain = measure.mock.calls.length;
+  /* Every strip measures whether its tabs fit (strip-scroll.ts); only the
+     liquid one places a pill, and marks itself when it has. */
+  it("never places a pill: the pill's code runs only for the liquid variant", () => {
+    const { container, unmount } = render(<Tabs tabs={TABS} activeTab="beta" onChange={vi.fn()} />);
+    const plain = container.querySelector("[data-pill-ready]");
     unmount();
-    render(<Tabs variant="liquid" tabs={TABS} activeTab="beta" onChange={vi.fn()} />);
-    expect([plain, measure.mock.calls.length > 0]).toEqual([0, true]);
-    measure.mockRestore();
+    const liquid = render(<Tabs variant="liquid" tabs={TABS} activeTab="beta" onChange={vi.fn()} />);
+    expect([plain, liquid.container.querySelector("[data-pill-ready]") !== null]).toEqual([null, true]);
   });
 
   it("names each tab's id from the strip's, and points at its panel", () => {

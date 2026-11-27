@@ -2819,6 +2819,39 @@ settle, or not at all under reduced motion. Its colors are the
 `variant="liquid"`. In forced colors, where the pill isn't drawn, the selected
 tab carries a bar along its bottom edge, as `plain`'s does.
 
+**When it doesn't fit.** A strip that fits is as it always was, its labels
+wrapping inside their tabs before anything else happens. Once its tabs'
+longest words can't sit side by side, it scrolls inside itself rather than
+push the page, in every variant and in `LiquidNav`:
+
+- Its tabs stop shrinking and sit on one line, each at most the strip less
+  32px, where a longer label wraps. `fullWidth` and `filled` stay full width,
+  with equal shares only while it fits, and liquid tabs take the pill's 1rem
+  of side padding.
+- A chevron shows on each side with more, in a 32px zone the tabs fade into
+  (16px when the tab in view leaves no more room), in a resting tab's ink and
+  in `CanvasText` in forced colors. A press pages the strip, for a mouse. It's
+  hidden from assistive technology, takes no focus and selects nothing.
+- The selected tab, or the focused one, is kept clear of the chevrons: at once
+  on mount and when the strip's width changes, smoothly when the selection or
+  focus moves, and at once under reduced motion. Only the strip scrolls, never
+  the page, and a strip someone has scrolled stays put until one of those
+  happens.
+- A plain strip that scrolls draws its focus ring inside the tab, and its
+  underline on the rule's inner edge.
+- Right to left, it starts at the right. On a touch screen a swipe at an end
+  can't go back a page, and there's no scrollbar.
+- Before script has run, as on a server-rendered page, the strip is already a
+  scroll container, so it can't push the page.
+
+The tabs (and the pill) sit in a box of their own inside the strip, which is
+what scrolls; the strip keeps every class, style and test id it had.
+
+**A limit:** in a grid column or a flex child with an automatic minimum (`1fr`,
+or `flex: 1` alone), that box widens to the tabs' longest words instead, so the
+strip fits in it and never learns the page is narrower. Give it
+`minmax(0, 1fr)` or `min-w-0`.
+
 **Counts.** A tab takes `count`, in every variant, and so does a `LiquidNav` link, shown
 in a small mark after its label:
 

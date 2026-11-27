@@ -10,6 +10,8 @@ import {
 import { LiquidCount } from "../LiquidTabs/LiquidCount";
 import { LIQUID_COUNT_LABELS, countName, shownCount, type TabsLabels } from "../LiquidTabs/liquid-count";
 import { tabId } from "./tab-id";
+import { scrollerClassName, scrollingItemClassName, stripClassName, useStripScroll } from "./strip-scroll";
+import { StripCues } from "./StripCues";
 import { withLabels } from "../../../lib/labels";
 import { cn } from "../../../lib/utils";
 import { useKeyFocus } from "../../../internal/key-focus";
@@ -114,7 +116,7 @@ export type TabsProps = TabsBaseProps &
 /* The plain strip: a rule along the bottom, the tabs on it. A block-level
    flex row, so the rule runs the width of whatever holds it. */
 const plainListClassName = (className?: string) =>
-  cn("rst:font-ui rst:flex rst:gap-1 rst:border-b rst:border-(--roster-tabs-border)", className);
+  cn("rst:font-ui rst:flex rst:gap-1 rst:border-b rst:border-(--roster-tabs-border)", stripClassName("plain"), className);
 
 /*
  * One plain tab.
@@ -128,9 +130,11 @@ const plainListClassName = (className?: string) =>
  * forced colors.
  *
  * The weight is the same selected or not, so selecting a tab never reflows
- * the row. Focus is Roster's own ring, as on a Button: nothing here clips it.
- * The browser's own button border and background are undone, for an app
- * without a reset.
+ * the row. Focus is Roster's own ring, as on a Button: nothing clips it on a
+ * strip that fits. A strip that scrolls clips what's outside it, so there the
+ * ring is drawn inside the tab, and the underline sits on the rule's inner
+ * edge, 1px up. The browser's own button border and background are undone,
+ * for an app without a reset.
  */
 const plainTabClassName = ({ fullWidth, size, isActive }: { fullWidth: boolean; size: TabsSize; isActive: boolean }) =>
   cn(
@@ -139,6 +143,8 @@ const plainTabClassName = ({ fullWidth, size, isActive }: { fullWidth: boolean; 
     "rst:after:pointer-events-none rst:after:absolute rst:after:inset-x-0 rst:after:-bottom-px",
     size === "lg" && "rst:min-h-11",
     fullWidth && "rst:flex-1",
+    scrollingItemClassName("plain"),
+    "rst:in-data-[roster-strip=scroll]:ring-inset rst:in-data-[roster-strip=scroll]:ring-offset-0 rst:in-data-[roster-strip=scroll]:after:bottom-0",
     isActive
       ? "rst:text-(--roster-tabs-text-active) rst:after:border-b-2 rst:after:border-(--roster-tabs-indicator)"
       : "rst:text-(--roster-tabs-text) rst:hover:text-(--roster-tabs-text-hover) rst:hover:after:border-b-2 rst:hover:after:border-(--roster-tabs-indicator-hover)",
@@ -183,9 +189,13 @@ function LiquidStrip({
   children: ReactNode;
 }) {
   const pillRef = useRef<HTMLDivElement>(null);
+  /* First, so the pill measures the strip as marked. */
+  const { scrollerRef, page } = useStripScroll(stripRef, activeTab, itemsKey);
   useLiquidPill(stripRef, pillRef, activeTab, itemsKey);
-  /* Exactly what `LiquidTabs` has always rendered, test ids and inline
-     styles included: apps style its pill by `data-testid`. */
+  const kind = liquidStyle === "filled" ? "filled" : "pill";
+  /* What `LiquidTabs` has always rendered, test ids and inline styles
+     included (apps style its pill by `data-testid`), with the box that
+     scrolls around the pill and the tabs, and the chevrons. */
   return (
     <div
       ref={stripRef}
@@ -199,9 +209,58 @@ function LiquidStrip({
       onKeyDown={onKeyDown}
       onBlur={onBlur}
     >
-      {/* Starts invisible; a layout effect places and reveals it before the first paint. */}
-      <div ref={pillRef} aria-hidden data-testid="liquid-tabs-pill" className={liquidPillClassName(liquidStyle)} style={LIQUID_PILL_STYLE} />
-      {children}
+      <div ref={scrollerRef} className={scrollerClassName(kind)} data-strip-scroller="">
+        {/* Starts invisible; a layout effect places and reveals it before the first paint. */}
+        <div ref={pillRef} aria-hidden data-testid="liquid-tabs-pill" className={liquidPillClassName(liquidStyle)} style={LIQUID_PILL_STYLE} />
+        {children}
+      </div>
+      <StripCues tone="liquid" onPage={page} />
+    </div>
+  );
+}
+
+/* The plain strip, in a component of its own for the same reason as
+   `LiquidStrip`: the hook that marks it runs in the component that renders
+   it, so the strip is there on mount. */
+function PlainStrip({
+  stripRef,
+  activeTab,
+  itemsKey,
+  className,
+  id,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
+  onKeyDown,
+  onBlur,
+  children,
+}: {
+  stripRef: RefObject<HTMLDivElement | null>;
+  activeTab: string;
+  itemsKey: string;
+  className?: string;
+  id: string;
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
+  onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
+  onBlur: (event: FocusEvent<HTMLDivElement>) => void;
+  children: ReactNode;
+}) {
+  const { scrollerRef, page } = useStripScroll(stripRef, activeTab, itemsKey);
+  return (
+    <div
+      ref={stripRef}
+      id={id}
+      role="tablist"
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
+      className={plainListClassName(className)}
+      onKeyDown={onKeyDown}
+      onBlur={onBlur}
+    >
+      <div ref={scrollerRef} className={scrollerClassName("plain")} data-strip-scroller="">
+        {children}
+      </div>
+      <StripCues tone="plain" onPage={page} />
     </div>
   );
 }
@@ -230,6 +289,12 @@ function LiquidStrip({
  *
  * A tab can carry a `count`, and a panel pairs with its tab by construction
  * through `TabPanel`, in either variant.
+ *
+ * **A strip that doesn't fit** (its tabs' longest words can't sit side by
+ * side) scrolls inside itself rather than push the page: its tabs sit on one
+ * line, a chevron shows on each side with more, and the selected or focused
+ * tab is kept clear of them by the strip's own scroll (`strip-scroll.ts`). A
+ * strip that fits is unchanged.
  *
  * For navigation between routes, use `LiquidNav`, which renders links.
  */
@@ -300,7 +365,9 @@ export function Tabs(props: TabsProps) {
     else return;
 
     event.preventDefault();
-    buttons[next].focus();
+    /* The strip brings it into view by its own scroll (`strip-scroll.ts`),
+       never the page's. */
+    buttons[next].focus({ preventScroll: true });
     if (activation === "automatic") select(tabs[next].id);
   };
 
@@ -334,12 +401,13 @@ export function Tabs(props: TabsProps) {
     );
   });
 
+  const itemsKey = tabs.map((t) => t.id).join("\u0000");
   if (liquid) {
     return (
       <LiquidStrip
         stripRef={containerRef}
         activeTab={activeTab}
-        itemsKey={tabs.map((t) => t.id).join("\u0000")}
+        itemsKey={itemsKey}
         liquidStyle={liquidStyle}
         fullWidth={fullWidth}
         className={className}
@@ -354,17 +422,18 @@ export function Tabs(props: TabsProps) {
     );
   }
   return (
-    <div
-      ref={containerRef}
+    <PlainStrip
+      stripRef={containerRef}
+      activeTab={activeTab}
+      itemsKey={itemsKey}
+      className={className}
       id={listId}
-      role="tablist"
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledBy}
-      className={plainListClassName(className)}
       onKeyDown={onKeyDown}
       onBlur={onBlur}
     >
       {items}
-    </div>
+    </PlainStrip>
   );
 }
