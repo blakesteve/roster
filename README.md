@@ -2816,7 +2816,8 @@ tall.
 `activeTab`, never the click, and moves in two phases, a stretch and a
 settle, or not at all under reduced motion. Its colors are the
 `--roster-lt-*` tokens. `liquidStyle` is a type error without
-`variant="liquid"`.
+`variant="liquid"`. In forced colors, where the pill isn't drawn, the selected
+tab carries a bar along its bottom edge, as `plain`'s does.
 
 **Counts.** A tab takes `count`, in every variant, and so does a `LiquidNav` link, shown
 in a small mark after its label:

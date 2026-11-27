@@ -90,7 +90,16 @@ export function liquidItemClassName({
        the active label in the pill's ink on the strip's background, which by
        default is white on white. */
     isActive
-      ? "rst:text-(--roster-lt-text-active) rst:bg-(--roster-lt-pill) rst:in-data-[pill-ready]:bg-transparent"
+      ? cn(
+          "rst:text-(--roster-lt-text-active) rst:bg-(--roster-lt-pill) rst:in-data-[pill-ready]:bg-transparent",
+          /* Forced colors drop the pill, a background, and ink every label
+             alike, so the selected item draws `plain`'s answer: a bar along
+             its bottom edge, a border (which forced colors keep) in its own
+             text color, 3px since `filled`'s lies along the strip's 1px
+             border. On the item, so it's there before script has measured
+             the pill, whatever the label holds. */
+          "rst:forced-colors:after:pointer-events-none rst:forced-colors:after:absolute rst:forced-colors:after:inset-x-0 rst:forced-colors:after:bottom-0 rst:forced-colors:after:border-b-[3px]",
+        )
       : "rst:text-(--roster-lt-text-inactive) rst:hover:text-(--roster-lt-text-hover)",
   );
 }

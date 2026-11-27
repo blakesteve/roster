@@ -198,10 +198,13 @@ const ROWS = ["pill", "filled", "manual", "none", "nav", "pill-dark", "filled-da
 type Row = (typeof ROWS)[number];
 const row = (name: Row) => document.querySelector<HTMLElement>(`[data-pin="${name}"]`)!;
 
-/* Every pixel value masked (see above), and React's generated ids too. */
+/* Every pixel value masked (see above), and React's generated ids too. The
+   forced-colors bar is a class that applies only in forced colors
+   (LiquidTabs.forced.checks.stories.tsx), so it's read as 5.24 drew it. */
 const html = (name: Row) =>
   row(name)
-    .innerHTML.replace(/-?\d+(\.\d+)?px/g, "#px")
+    .innerHTML.replace(/ rst:forced-colors:after:[^ "]+/g, "")
+    .replace(/-?\d+(\.\d+)?px/g, "#px")
     .replace(/_r_[0-9a-z]+_|[«:]r[0-9a-z]+[»:]/g, "ID");
 
 const PROPS = [
