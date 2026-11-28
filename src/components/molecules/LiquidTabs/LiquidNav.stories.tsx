@@ -48,6 +48,8 @@ const meta = {
           "```",
           "",
           "React Router's `Link` works the same way: it reads `to`.",
+          "",
+          "**When it doesn't fit,** the strip scrolls inside itself, as `Tabs` does: its links sit on one line, a chevron shows on each side with more, and the focused link and the current one are kept clear of the chevrons by the strip's own scroll. In forced colors the current link carries a bar along its bottom edge.",
         ].join("\n"),
       },
     },

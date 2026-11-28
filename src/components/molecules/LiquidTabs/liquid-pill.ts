@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 import { cn } from "../../../lib/utils";
 import { prefersReducedMotion } from "../../../internal/motion";
+import { scrollingItemClassName, stripClassName } from "../Tabs/strip-scroll";
 
 /**
  * What `LiquidTabs` and `LiquidNav` share: the strip, the pill, and the motion.
@@ -27,6 +28,7 @@ export function liquidStripClassName(
     variant === "filled"
       ? "rst:w-full rst:overflow-hidden rst:rounded-lg"
       : cn("rst:gap-1 rst:rounded-xl rst:p-1", fullWidth ? "rst:w-full" : "rst:w-fit"),
+    stripClassName(variant),
     className,
   );
 }
@@ -85,12 +87,22 @@ export function liquidItemClassName({
     variant === "filled"
       ? "rst:flex-1 rst:py-2"
       : cn("rst:rounded-lg rst:py-1.5", fullWidth ? "rst:flex-1" : "rst:px-4"),
+    scrollingItemClassName(variant),
     /* Until the pill has been measured, which needs script, the active item
        paints the pill's color itself. Without it, server-rendered HTML shows
        the active label in the pill's ink on the strip's background, which by
        default is white on white. */
     isActive
-      ? "rst:text-(--roster-lt-text-active) rst:bg-(--roster-lt-pill) rst:in-data-[pill-ready]:bg-transparent"
+      ? cn(
+          "rst:text-(--roster-lt-text-active) rst:bg-(--roster-lt-pill) rst:in-data-[pill-ready]:bg-transparent",
+          /* Forced colors drop the pill, a background, and ink every label
+             alike, so the selected item draws `plain`'s answer: a bar along
+             its bottom edge, a border (which forced colors keep) in its own
+             text color, 3px since `filled`'s lies along the strip's 1px
+             border. On the item, so it's there before script has measured
+             the pill, whatever the label holds. */
+          "rst:forced-colors:after:pointer-events-none rst:forced-colors:after:absolute rst:forced-colors:after:inset-x-0 rst:forced-colors:after:bottom-0 rst:forced-colors:after:border-b-[3px]",
+        )
       : "rst:text-(--roster-lt-text-inactive) rst:hover:text-(--roster-lt-text-hover)",
   );
 }
@@ -122,10 +134,11 @@ export function useLiquidPill(
   const animatedTo = useRef<string | null>(null);
 
   /* The pill is absolutely positioned, so its `left` is measured from the
-     container's PADDING edge, and it scrolls with the container's content.
-     `getBoundingClientRect` measures from the BORDER edge of what is on screen
-     now. So: take the border width off, and put the scroll back on. Without
-     the first, every strip drew the pill one border-width to the right. */
+     PADDING edge of the box it sits in (the box that scrolls, inside the
+     strip), and it scrolls with that box's content. `getBoundingClientRect`
+     measures from the BORDER edge of what is on screen now. So: take the
+     border width off, and put the scroll back on. Without the first, every
+     strip drew the pill one border-width to the right. */
   const measure = useCallback(
     (id: string): PillGeom | null => {
       const container = containerRef.current;
@@ -134,14 +147,15 @@ export function useLiquidPill(
         container.querySelectorAll<HTMLElement>("[data-tab-id]"),
       ).find((el) => el.dataset.tabId === id);
       if (!item) return null;
-      const c = container.getBoundingClientRect();
+      const box = (pillRef.current?.offsetParent as HTMLElement | null) ?? container;
+      const c = box.getBoundingClientRect();
       const b = item.getBoundingClientRect();
       return {
-        left: b.left - c.left - container.clientLeft + container.scrollLeft,
+        left: b.left - c.left - box.clientLeft + box.scrollLeft,
         width: b.width,
       };
     },
-    [containerRef],
+    [containerRef, pillRef],
   );
 
   const apply = useCallback(

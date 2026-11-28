@@ -779,79 +779,95 @@ function FileUpload<R = unknown>({
                 key={item.id}
                 data-file-item={item.id}
                 data-status={item.status}
-                className="rst:flex rst:items-center rst:gap-3 rst:rounded-md rst:border rst:border-[var(--roster-card-border)] rst:p-2"
+                className="rst:flex rst:flex-wrap rst:items-center rst:gap-3 rst:rounded-md rst:border rst:border-[var(--roster-card-border)] rst:p-2"
               >
                 {!boxed && <Thumbnail file={item.file} status={item.status} />}
-                <div className="rst:min-w-0 rst:flex-1 rst:text-left">
-                  <p className="rst:truncate rst:text-sm rst:font-medium rst:text-[var(--roster-control-text)]" title={name}>
-                    {name}
-                  </p>
-                  <p
-                    className={cn(
-                      "rst:mt-0.5 rst:flex rst:items-start rst:gap-1 rst:text-xs",
-                      problem ? "rst:text-error-600 rst:dark:text-error-400" : "rst:text-gray-600 rst:dark:text-gray-400",
-                    )}
-                    data-file-status=""
-                  >
-                    {item.status === "done" && (
-                      <svg {...ICON} width={14} height={14} aria-hidden="true" className="rst:mt-px rst:shrink-0 rst:text-success-600 rst:dark:text-success-400">
-                        <path d="M20 6 9 17l-5-5" />
-                      </svg>
-                    )}
-                    <span>
-                      <span className="rst:tabular-nums">{t.size(item.file.size)}</span>
-                      <span aria-hidden="true"> · </span>
-                      {statusText(item)}
-                    </span>
-                  </p>
-                  {moving && (
-                    <div className="rst:mt-1.5" data-file-progress="">
-                      {/* No figure yet, or the server finishing: the value stands
-                          and the bar breathes, so the first figure grows it rather
-                          than shrinking a full bar. Its status is the line above,
-                          so the bar says nothing itself. */}
-                      <Progress
-                        size="sm"
-                        value={item.status === "processing" ? 100 : item.status === "uploading" ? (item.progress ?? 0) * 100 : 0}
-                        busy={item.status === "processing" || (item.status === "uploading" && item.progress === null)}
-                        announce={false}
-                      />
-                    </div>
+                {/* Where the name would get under 5rem, as at 200% text on a
+                    phone, the row wraps in reading order. This box's basis is
+                    the name's 5rem, a gap and the buttons, so it goes under
+                    the picture first; then the buttons go under the name,
+                    together, at the row's end. Where the row fits, it lays out
+                    as one line did. */}
+                <div
+                  className={cn(
+                    "rst:flex rst:min-w-0 rst:grow rst:flex-wrap rst:items-center rst:gap-3",
+                    item.status === "failed" ? "rst:basis-[12rem]" : "rst:basis-[8.5rem]",
                   )}
-                </div>
-                {item.status === "failed" && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    colorScheme="neutral"
-                    size="icon"
-                    className={cn("rst:h-11 rst:w-11", disabled && DIMMED)}
-                    aria-disabled={disabled || undefined}
-                    aria-label={t.retry(name)}
-                    onClick={() => retry(item.id)}
-                    data-file-retry={item.id}
-                  >
-                    <svg {...ICON} aria-hidden="true">
-                      <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
-                      <path d="M3 3v5h5" />
-                    </svg>
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  colorScheme="neutral"
-                  size="icon"
-                  className={cn("rst:h-11 rst:w-11", disabled && DIMMED)}
-                  aria-disabled={disabled || undefined}
-                  aria-label={t.remove(name)}
-                  onClick={() => remove(item.id)}
-                  data-file-remove={item.id}
+                  data-file-body=""
                 >
-                  <svg {...ICON} aria-hidden="true">
-                    <path d="M18 6 6 18M6 6l12 12" />
-                  </svg>
-                </Button>
+                  <div className="rst:min-w-0 rst:flex-[1_1_5rem] rst:text-left">
+                    <p className="rst:truncate rst:text-sm rst:font-medium rst:text-[var(--roster-control-text)]" title={name}>
+                      {name}
+                    </p>
+                    <p
+                      className={cn(
+                        "rst:mt-0.5 rst:flex rst:items-start rst:gap-1 rst:text-xs",
+                        problem ? "rst:text-error-600 rst:dark:text-error-400" : "rst:text-gray-600 rst:dark:text-gray-400",
+                      )}
+                      data-file-status=""
+                    >
+                      {item.status === "done" && (
+                        <svg {...ICON} width={14} height={14} aria-hidden="true" className="rst:mt-px rst:shrink-0 rst:text-success-600 rst:dark:text-success-400">
+                          <path d="M20 6 9 17l-5-5" />
+                        </svg>
+                      )}
+                      <span className="rst:wrap-anywhere">
+                        <span className="rst:tabular-nums">{t.size(item.file.size)}</span>
+                        <span aria-hidden="true"> · </span>
+                        {statusText(item)}
+                      </span>
+                    </p>
+                    {moving && (
+                      <div className="rst:mt-1.5" data-file-progress="">
+                        {/* No figure yet, or the server finishing: the value stands
+                            and the bar breathes, so the first figure grows it rather
+                            than shrinking a full bar. Its status is the line above,
+                            so the bar says nothing itself. */}
+                        <Progress
+                          size="sm"
+                          value={item.status === "processing" ? 100 : item.status === "uploading" ? (item.progress ?? 0) * 100 : 0}
+                          busy={item.status === "processing" || (item.status === "uploading" && item.progress === null)}
+                          announce={false}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="rst:ms-auto rst:flex rst:shrink-0 rst:gap-3" data-file-actions="">
+                    {item.status === "failed" && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        colorScheme="neutral"
+                        size="icon"
+                        className={cn("rst:h-11 rst:w-11", disabled && DIMMED)}
+                        aria-disabled={disabled || undefined}
+                        aria-label={t.retry(name)}
+                        onClick={() => retry(item.id)}
+                        data-file-retry={item.id}
+                      >
+                        <svg {...ICON} aria-hidden="true">
+                          <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                          <path d="M3 3v5h5" />
+                        </svg>
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      colorScheme="neutral"
+                      size="icon"
+                      className={cn("rst:h-11 rst:w-11", disabled && DIMMED)}
+                      aria-disabled={disabled || undefined}
+                      aria-label={t.remove(name)}
+                      onClick={() => remove(item.id)}
+                      data-file-remove={item.id}
+                    >
+                      <svg {...ICON} aria-hidden="true">
+                        <path d="M18 6 6 18M6 6l12 12" />
+                      </svg>
+                    </Button>
+                  </div>
+                </div>
               </li>
             );
           })}

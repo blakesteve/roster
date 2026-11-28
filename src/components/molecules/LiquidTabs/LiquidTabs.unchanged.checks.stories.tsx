@@ -6,6 +6,7 @@ import { LiquidTabPanel } from "./LiquidTabPanel";
 import { LiquidNav, type LiquidNavItem } from "./LiquidNav";
 import { Tabs } from "../Tabs/Tabs";
 import { realInputOrSkip } from "../../../test/real-input";
+import { asStrips524, isStripAddition } from "../../../test/strip-524";
 
 /**
  * LiquidTabs and LiquidNav, pinned to 5.14.0's build, in Chromium and WebKit,
@@ -198,11 +199,20 @@ const ROWS = ["pill", "filled", "manual", "none", "nav", "pill-dark", "filled-da
 type Row = (typeof ROWS)[number];
 const row = (name: Row) => document.querySelector<HTMLElement>(`[data-pin="${name}"]`)!;
 
-/* Every pixel value masked (see above), and React's generated ids too. */
-const html = (name: Row) =>
-  row(name)
-    .innerHTML.replace(/-?\d+(\.\d+)?px/g, "#px")
+/* Every pixel value masked (see above), and React's generated ids too. Read
+   as 5.24 drew the strips (src/test/strip-524.ts): the next release scrolls a
+   strip that doesn't fit, through a box inside it and classes that move
+   nothing on one that does, which Tabs.reflow.checks.stories.tsx pins. Its
+   forced-colors bar is a class that applies only in forced colors
+   (LiquidTabs.forced.checks.stories.tsx). */
+const html = (name: Row) => {
+  const copy = row(name).cloneNode(true) as HTMLElement;
+  asStrips524(copy);
+  return copy.innerHTML
+    .replace(/ rst:forced-colors:after:[^ "]+/g, "")
+    .replace(/-?\d+(\.\d+)?px/g, "#px")
     .replace(/_r_[0-9a-z]+_|[«:]r[0-9a-z]+[»:]/g, "ID");
+};
 
 const PROPS = [
   "display", "position", "box-sizing", "color", "background-color",
@@ -217,6 +227,7 @@ const PROPS = [
 ];
 const styles = (name: Row) =>
   [...row(name).querySelectorAll("*")]
+    .filter((el) => !isStripAddition(el))
     .map((el) => {
       const s = getComputedStyle(el);
       return `${el.tagName.toLowerCase()}${el.getAttribute("role") ? `[${el.getAttribute("role")}]` : ""} ${PROPS.map((p) => s.getPropertyValue(p)).join(";")}`;

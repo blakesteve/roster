@@ -12,6 +12,8 @@ import {
 import type { TabItem } from "./LiquidTabs";
 import { LiquidCount } from "./LiquidCount";
 import { LIQUID_COUNT_LABELS, countName, shownCount, type LiquidTabsLabels } from "./liquid-count";
+import { scrollerClassName, useStripScroll } from "../Tabs/strip-scroll";
+import { StripCues } from "../Tabs/StripCues";
 import { withLabels } from "../../../lib/labels";
 import { cn } from "../../../lib/utils";
 
@@ -102,7 +104,9 @@ function DefaultLink({
  * one tab stop with arrow keys between them; links go somewhere, and each is
  * its own tab stop, as in any nav.
  *
- * An item can carry a `count`, as a tab does: see `TabItem.count`.
+ * An item can carry a `count`, as a tab does: see `TabItem.count`. A strip
+ * that doesn't fit scrolls inside itself, as `Tabs` does, keeping the focused
+ * link and the current one clear of its chevrons.
  */
 export function LiquidNav({
   items,
@@ -122,7 +126,10 @@ export function LiquidNav({
   const pillRef = useRef<HTMLDivElement>(null);
   const Link = linkComponent ?? DefaultLink;
 
-  useLiquidPill(containerRef, pillRef, activeTab, items.map((i) => i.id).join("\u0000"));
+  const itemsKey = items.map((i) => i.id).join("\u0000");
+  /* First, so the pill measures the strip as marked. */
+  const { scrollerRef, page } = useStripScroll(containerRef, activeTab, itemsKey);
+  useLiquidPill(containerRef, pillRef, activeTab, itemsKey);
 
   return (
     <nav
@@ -133,51 +140,54 @@ export function LiquidNav({
       style={LIQUID_STRIP_STYLE}
       className={liquidStripClassName(variant, fullWidth, className)}
     >
-      <div
-        ref={pillRef}
-        aria-hidden
-        data-testid="liquid-tabs-pill"
-        className={liquidPillClassName(variant)}
-        style={LIQUID_PILL_STYLE}
-      />
+      <div ref={scrollerRef} className={scrollerClassName(variant)} data-strip-scroller="">
+        <div
+          ref={pillRef}
+          aria-hidden
+          data-testid="liquid-tabs-pill"
+          className={liquidPillClassName(variant)}
+          style={LIQUID_PILL_STYLE}
+        />
 
-      {items.map((item) => {
-        const isActive = item.id === activeTab;
-        const label = typeof item.label === "function" ? item.label(isActive) : item.label;
-        return (
-          <Link
-            key={item.id}
-            href={item.href}
-            to={item.href}
-            aria-current={isActive ? "page" : undefined}
-            aria-label={countName(label, item.count, l)}
-            data-tab-id={item.id}
-            onClick={(event) => {
-              if (
-                event.defaultPrevented ||
-                event.button !== 0 ||
-                event.metaKey ||
-                event.ctrlKey ||
-                event.shiftKey ||
-                event.altKey
-              ) {
-                return;
-              }
-              if (!isActive) onChange?.(item.id);
-            }}
-            className={cn(
-              liquidItemClassName({ variant, fullWidth, size, isActive }),
-              /* A button centers its label and draws no underline on its own;
-                 a link does neither, and a host stylesheet may underline it. */
-              "rst:inline-flex rst:items-center rst:justify-center rst:no-underline",
-            )}
-          >
-            {/* With no count, the label itself, as a link component has always
-                been handed it. */}
-            {shownCount(item.count) ? <LiquidCount label={label} count={item.count} labels={l} /> : label}
-          </Link>
-        );
-      })}
+        {items.map((item) => {
+          const isActive = item.id === activeTab;
+          const label = typeof item.label === "function" ? item.label(isActive) : item.label;
+          return (
+            <Link
+              key={item.id}
+              href={item.href}
+              to={item.href}
+              aria-current={isActive ? "page" : undefined}
+              aria-label={countName(label, item.count, l)}
+              data-tab-id={item.id}
+              onClick={(event) => {
+                if (
+                  event.defaultPrevented ||
+                  event.button !== 0 ||
+                  event.metaKey ||
+                  event.ctrlKey ||
+                  event.shiftKey ||
+                  event.altKey
+                ) {
+                  return;
+                }
+                if (!isActive) onChange?.(item.id);
+              }}
+              className={cn(
+                liquidItemClassName({ variant, fullWidth, size, isActive }),
+                /* A button centers its label and draws no underline on its own;
+                   a link does neither, and a host stylesheet may underline it. */
+                "rst:inline-flex rst:items-center rst:justify-center rst:no-underline",
+              )}
+            >
+              {/* With no count, the label itself, as a link component has always
+                  been handed it. */}
+              {shownCount(item.count) ? <LiquidCount label={label} count={item.count} labels={l} /> : label}
+            </Link>
+          );
+        })}
+      </div>
+      <StripCues tone="liquid" onPage={page} />
     </nav>
   );
 }

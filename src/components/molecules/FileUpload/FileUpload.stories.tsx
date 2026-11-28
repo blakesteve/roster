@@ -79,6 +79,8 @@ const meta = {
           "On phones the picker stays `accept=\"image/*\"` with no `capture`, which is what gets Android's photo picker with albums and cloud photos rather than a file browser. Narrow what's allowed with `types`, checked after picking. Dragging files onto the field works where there's a pointer, and is never the only way in. Every word it shows or says can be replaced through `strings`.",
           "",
           "That picker has no camera in it, so `camera` adds a Take a photo button beside Choose, where the main pointer is a finger. It opens an input of its own: `capture` on the first one would take the photo library away, so there are two.",
+          "",
+          "**At large text on a phone,** a row whose name would be narrower than 5rem wraps in reading order: the picture goes above, then the buttons go under the name, at the row's end.",
         ].join("\n"),
       },
     },

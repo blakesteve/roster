@@ -726,8 +726,9 @@ export const ManualActivation: Story = {
 };
 
 /**
- * A strip wider than its container scrolls, and the pill scrolls with it,
- * staying on its tab wherever the strip is scrolled to.
+ * A strip wider than its container scrolls inside itself, with a chevron on
+ * each side that has more, and the pill scrolls with it, staying on its tab
+ * wherever the strip is scrolled to.
  */
 export const ScrollingStrip: Story = {
   args: { variant: "pill" } as LiquidTabsProps,
@@ -743,7 +744,6 @@ export const ScrollingStrip: Story = {
           tabs={tabs}
           activeTab={active}
           onChange={setActive}
-          className="rst:max-w-full rst:overflow-x-auto"
           aria-label="Section"
         />
       </div>
@@ -753,7 +753,10 @@ export const ScrollingStrip: Story = {
     const canvas = within(canvasElement);
     const strip = canvas.getByRole("tablist");
     const pill = canvas.getByTestId("liquid-tabs-pill");
-    await expect(strip.scrollWidth).toBeGreaterThan(strip.clientWidth);
+    /* The box inside the strip is what scrolls. */
+    const box = strip.querySelector<HTMLElement>("[data-strip-scroller]")!;
+    await waitFor(() => expect(strip).toHaveAttribute("data-roster-strip", "scroll"));
+    await expect(box.scrollWidth).toBeGreaterThan(box.clientWidth);
 
     const onTab = async (name: string) => {
       await waitFor(() => {
@@ -763,11 +766,11 @@ export const ScrollingStrip: Story = {
         expect(Math.abs(p.width - t.width)).toBeLessThan(0.5);
       });
     };
-    strip.scrollLeft = strip.scrollWidth;
+    box.scrollLeft = box.scrollWidth;
     await userEvent.click(canvas.getByRole("tab", { name: "Pricing" }));
     await onTab("Pricing");
     // Scrolled back, the pill went with its tab.
-    strip.scrollLeft = 0;
+    box.scrollLeft = 0;
     await onTab("Pricing");
   },
   parameters: { controls: { disable: true } },

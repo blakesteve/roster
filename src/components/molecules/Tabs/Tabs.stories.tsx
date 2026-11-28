@@ -24,6 +24,9 @@ const meta = {
           "### Liquid",
           "`variant=\"liquid\"` is the pill `LiquidTabs` has always drawn: `liquidStyle=\"pill\"` (the default) or `\"filled\"`, `fullWidth`, both sizes, and its `--roster-lt-*` tokens. It renders exactly what `LiquidTabs` does, markup and styles alike.",
           "",
+          "### When it doesn't fit",
+          "A strip that fits is as it always was: its labels wrap inside their tabs before anything else happens. One whose tabs' longest words can't sit side by side scrolls inside itself instead of pushing the page: its tabs sit on one line, each at most the strip less 32px, a chevron shows on each side with more, and the selected or focused tab is kept clear of the chevrons by the strip's own scroll, never the page's. A chevron pages the strip for a mouse; it isn't a tab stop and selects nothing. In a grid or flex box with an automatic minimum, give the box `minmax(0, 1fr)` or `min-w-0`, or it widens instead.",
+          "",
           "### Counts and panels",
           "A tab takes `count`, a number in a small mark beside the label, drawn from the tab's own ink and read as part of its name (\"Open, 12 items\"). Pair a panel with `TabPanel`. Both work in every variant.",
           "",
@@ -254,6 +257,32 @@ export const FullWidthAndLarge: Story = {
     docs: {
       description: {
         story: "`fullWidth` gives every tab an equal share of the row, and `size=\"lg\"` makes each at least 44px tall, the WCAG 2.5.5 target.",
+      },
+    },
+  },
+};
+
+const MANY_TABS: TabItem[] = ["Games", "Users", "Flags", "Community", "Rewrites", "Feedback", "Action Log", "Reports", "Imports", "Homepage"].map((label, i) => ({
+  id: label.toLowerCase().replace(/ /g, "-"),
+  label,
+  count: i === 2 ? 3 : i === 4 ? 5 : undefined,
+}));
+
+export const WhenItDoesntFit: Story = {
+  args: { tabs: MANY_TABS, activeTab: "games", onChange: () => {} },
+  render: () => (
+    // A grid column's minimum of zero, so it doesn't widen to the tabs' longest words.
+    <div style={{ width: 320, display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 24 }}>
+      <Controlled tabs={MANY_TABS} aria-label="Admin" />
+      <Controlled tabs={MANY_TABS} variant="liquid" aria-label="Admin, liquid" initial="feedback" />
+      <Controlled tabs={MANY_TABS.slice(0, 5)} variant="liquid" liquidStyle="filled" aria-label="Admin, filled" />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Ten tabs in 320px. Each strip scrolls inside itself, with a chevron on each side that has more; press one to page. Arrow to a tab, or select one, and the strip brings it clear of the chevrons. The second starts on a tab in the middle, already in view.",
       },
     },
   },
